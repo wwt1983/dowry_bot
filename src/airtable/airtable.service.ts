@@ -1,23 +1,21 @@
-//import { injectable, inject } from 'inversify';
-import { IAirtableService } from './airtable.service.interface';
-import { AirtableDto } from './dto/data.dto';
-import 'reflect-metadata';
+import { Injectable } from '@nestjs/common';
 import Airtable from 'airtable';
-import { Base, DataDowray } from './types';
 
-//@injectable()
-export class AirtableService implements IAirtableService {
+import { Base, DataDowray } from './types';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class AirtableService {
   airtable: Airtable;
 
-  constructor() {}
-  // constructor(@inject(TYPES_DI.IConfigService) private config: IConfigService) {
-  // 	this.airtable = new Airtable({ apiKey: config.get('AIRTABLE_TOKEN') });
-  // }
+  constructor(private readonly configService: ConfigService) {
+    // this.airtable = new Airtable({
+    //   apiKey: configService.get('AIRTABLE_TOKEN_TEST'),
+    // });
+    console.log('test_token=', configService.get('AIRTABLE_TOKEN_TEST'));
+  }
 
   get(): void {
     this.airtable.base(Base).table(DataDowray[0].tableName);
-  }
-  getData(dto: AirtableDto): void {
-    console.log(dto);
   }
 }
