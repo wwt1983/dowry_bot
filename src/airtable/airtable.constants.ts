@@ -24,14 +24,6 @@ export const DataDowray: IData[] = [
 ];
 
 export const Base: string = 'appVMEtut0NWayq26';
-export const AIRTABLE_WEBHOOK_URL = 'workflows/v1/genericWebhook/';
+export const AIRTABLE_WEBHOOK_URL =
+  'https://hooks.airtable.com/workflows/v1/genericWebhook/';
 export const AIRTABLE_URL = 'https://hooks.airtable.com/';
-
-//https://docs.google.com/spreadsheets/d/1qajgJSF1Mfi3uN84ipHIpJNL56rgXXO3S547OJTCvUs/edit#gid=0
-
-//https://support.airtable.com/docs/airtable-webhooks-api-overview
-//https://support.airtable.com/docs/run-a-script-action
-//https://support.airtable.com/docs/getting-started-with-airtable-automations
-//https://www.airscript.dev/2021/01/31/airtable-automations-scripts
-
-//https://www.airscript.dev/

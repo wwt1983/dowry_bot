@@ -1,11 +1,16 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AxiosResponse } from 'axios';
-import { Observable } from 'rxjs';
+import { Observable, lastValueFrom, map } from 'rxjs';
+import { AIRTABLE_WEBHOOK_URL } from './airtable.constants';
 
 @Injectable()
 export class AirtableHttpService {
-  constructor(private readonly httpService: HttpService) {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
     //
   }
   get<T>(url: string): Observable<AxiosResponse<T>> {
@@ -17,5 +22,17 @@ export class AirtableHttpService {
     }
   }
 
-  getAllWebhook(): void {}
+  postWebhook(url: string, data: any): Promise<any> {
+    return lastValueFrom(
+      this.httpService
+        .post(AIRTABLE_WEBHOOK_URL + url, data, {
+          headers: {
+            Authorization: 'Bearer ' + this.configService.get('AIRTABLE_TOKEN'),
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+        .pipe(map((response) => response.data)),
+    );
+  }
 }
