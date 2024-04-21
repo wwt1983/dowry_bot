@@ -1,9 +1,6 @@
-type Data = {
-  tableName: string;
-  title: string;
-  view: string;
-};
-export const DataDowray: Data[] = [
+import { IData } from './interfaces/airtable.interfaces';
+
+export const DataDowray: IData[] = [
   {
     title: 'Заказы',
     tableName: 'tblrO51VWm55xtT4l',
@@ -27,3 +24,5 @@ export const DataDowray: Data[] = [
 ];
 
 export const Base: string = 'appVMEtut0NWayq26';
+export const AIRTABLE_WEBHOOK_URL = 'workflows/v1/genericWebhook/';
+export const AIRTABLE_URL = 'https://hooks.airtable.com/';

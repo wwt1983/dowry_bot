@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Airtable from 'airtable';
 
-import { Base, DataDowray } from './types';
+import { Base, DataDowray } from './airtable.constants';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
