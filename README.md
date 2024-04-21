@@ -30,3 +30,4 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+# test bot on web throw localtunner lt --port 3000 
