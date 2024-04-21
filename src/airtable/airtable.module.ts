@@ -1,11 +1,19 @@
 import { Module } from '@nestjs/common';
 import { AirtableService } from './airtable.service';
 import { ConfigModule } from '@nestjs/config';
-import { AirtableWebhookService } from './airtable.webhook.service';
+import { AirtableHttpService } from './airtable.http.service';
+import { HttpModule } from '@nestjs/axios';
+import { AirtableController } from './airtable.controller';
 
 @Module({
-  imports: [ConfigModule],
-  providers: [AirtableService, AirtableWebhookService],
-  exports: [AirtableService, AirtableWebhookService]
+  imports: [
+    ConfigModule,
+    HttpModule.register({
+      timeout: 6000,
+    }),
+  ],
+  providers: [AirtableService, AirtableHttpService],
+  exports: [AirtableService, AirtableHttpService],
+  controllers: [AirtableController],
 })
 export class AirtableModule {}

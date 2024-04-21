@@ -12,7 +12,7 @@ export class AirtableService {
     // this.airtable = new Airtable({
     //   apiKey: configService.get('AIRTABLE_TOKEN_TEST'),
     // });
-    console.log('test_token=', configService.get('AIRTABLE_TOKEN_TEST'));
+    console.log('token=', configService.get('AIRTABLE_TOKEN'));
   }
 
   get(): void {
