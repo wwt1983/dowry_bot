@@ -4,9 +4,11 @@ import { ConfigModule } from '@nestjs/config';
 import { AirtableHttpService } from './airtable.http.service';
 import { HttpModule } from '@nestjs/axios';
 import { AirtableController } from './airtable.controller';
+import { TelegramModule } from 'src/telegram/telegram.module';
 
 @Module({
   imports: [
+    TelegramModule,
     ConfigModule,
     HttpModule.register({
       timeout: 6000,

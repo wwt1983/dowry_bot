@@ -10,3 +10,9 @@ export interface ITelegramModuleAsyncOptions
   useFactory: (...args: any[]) => Promise<ITelegramOptions> | ITelegramOptions;
   inject?: any[];
 }
+
+export interface ITelegramAirtableHelperData {
+  Name: string;
+  Notes: string;
+  Articul: string;
+}

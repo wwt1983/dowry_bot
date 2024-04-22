@@ -33,6 +33,6 @@ import telegramConfig from './telegram/configs/telegram.config';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, AirtableService, TelegramService],
+  providers: [AppService],
 })
 export class AppModule {}

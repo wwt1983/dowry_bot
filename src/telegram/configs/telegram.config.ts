@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { ITelegramOptions } from '../telegram.interface';
+import { TELEGRAM_CHAT_ID } from '../telegram.constants';
 
 export default (configService: ConfigService): ITelegramOptions => {
   const token = configService.get('TELEGRAM_TOKEN');
@@ -7,6 +8,6 @@ export default (configService: ConfigService): ITelegramOptions => {
 
   return {
     token,
-    chatId: configService.get('TELEGRAM_CHAT_ID') ?? '',
+    chatId: TELEGRAM_CHAT_ID,
   };
 };

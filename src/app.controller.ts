@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
+  @Get('startbot')
   getHello(): string {
     console.log('test hello nest');
     return this.appService.getHello();

@@ -1,35 +1,49 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { Telegraf } from 'telegraf';
-import * as LocalSession from 'telegraf-session-local';
-
-import { ITelegramOptions } from './telegram.interface';
+import { Injectable, Inject, Scope } from '@nestjs/common';
+import {
+  ITelegramAirtableHelperData,
+  ITelegramOptions,
+} from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
+import { Bot } from 'grammy';
 
-@Injectable()
+@Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
-  bot: Telegraf;
+  bot: Bot;
   options: ITelegramOptions;
 
   constructor(@Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions) {
     this.options = options;
-    this.bot = new Telegraf(options.token);
-    this.bot
-      .use(
-        new LocalSession({
-          database: 'telegram_db.json',
-          property: 'session',
-          storage: LocalSession.storageFileAsync,
-          format: {
-            serialize: (obj) => JSON.stringify(obj, null, 2),
-            deserialize: (str) => JSON.parse(str),
-          },
-          state: { messages: [] },
-        }),
-      )
-      .middleware();
+
+    if (!this.bot) {
+      console.log('start bot');
+
+      this.bot = new Bot(this.options.token);
+    }
+
+    this.bot.command('start', (ctx) => ctx.reply('Welcome! Up and running.'));
+
+    this.bot.on('message', (ctx) => {
+      console.log(ctx.update.message.from);
+      console.log('ctx ==> ', ctx);
+      const { first_name, last_name, username } = ctx.update.message.from
+      ctx.reply('hi ' + first_name);
+    });
+
+    // Start the bot.
+    this.bot.start();
   }
 
-  async sendMessage(message: string, chatId: string = this.options.chatId) {
-    await this.bot.telegram.sendMessage(chatId, message);
+  async sendMessageToChat(message: ITelegramAirtableHelperData) {
+    const messageString =
+      'Данные из airtable = ' +
+      message.Name +
+      '  ' +
+      message.Notes +
+      ' ' +
+      `https://www.wildberries.ru/catalog/${message.Articul}/detail.aspx`;
+
+    await this.bot.api.sendMessage(this.options.chatId, messageString, {
+      parse_mode: 'HTML',
+    });
   }
 }

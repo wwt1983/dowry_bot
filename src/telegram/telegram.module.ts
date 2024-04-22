@@ -2,6 +2,7 @@ import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
+import { TelegramCommandsService } from './telegram.commands.service';
 
 @Global()
 @Module({})
@@ -11,7 +12,11 @@ export class TelegramModule {
     return {
       module: TelegramModule,
       imports: options.imports,
-      providers: [TelegramService, providerAsyncOptions],
+      providers: [
+        TelegramService,
+        providerAsyncOptions,
+        TelegramCommandsService,
+      ],
       exports: [TelegramService, providerAsyncOptions],
     };
   }
