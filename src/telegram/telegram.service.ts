@@ -2,34 +2,63 @@ import { Injectable, Inject, Scope } from '@nestjs/common';
 import {
   ITelegramAirtableHelperData,
   ITelegramOptions,
+  MyContext,
 } from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
+import { TablesName } from '../airtable/airtable.constants';
 import { Bot } from 'grammy';
+import { TelegramCommandsService } from './telegram.commands.service';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
-  bot: Bot;
+  bot: Bot<MyContext>;
   options: ITelegramOptions;
 
-  constructor(@Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions) {
+  constructor(
+    @Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
+    private readonly commandService: TelegramCommandsService,
+  ) {
     this.options = options;
 
     if (!this.bot) {
-      console.log('start bot');
+      console.log('------- START BOT --------');
 
-      this.bot = new Bot(this.options.token);
+      this.bot = new Bot<MyContext>(this.options.token);
     }
 
     this.bot.command('start', (ctx) => ctx.reply('Welcome! Up and running.'));
 
-    this.bot.on('message', (ctx) => {
-      console.log(ctx.update.message.from);
+    this.bot.on('message', async (ctx) => {
       console.log('ctx ==> ', ctx);
-      const { first_name, last_name, username } = ctx.update.message.from
-      ctx.reply('hi ' + first_name);
+
+      console.log('tsble', TablesName.Test);
+      const dataHelpers = await this.commandService.getHelperTable(
+        TablesName.Helpers,
+      );
+      const filterDataDistributions =
+        await this.commandService.getDistributionTableByFilter(
+          TablesName.Distributions,
+          '2024-04-20',
+        );
+      console.log('distributions ==> ', filterDataDistributions);
+      const { first_name, last_name, username } = ctx.update.message.from;
+
+      ctx.reply(
+        'Привет, ' +
+          first_name +
+          ' сейчас предложений ' +
+          filterDataDistributions.length +
+          ' id distribution =  ' +
+          filterDataDistributions[0].fields.Артикул +
+          ' Артикул WB = ' +
+          filterDataDistributions[0].fields['Артикул WB'] +
+          ' Артикул = ' +
+          JSON.stringify(filterDataDistributions[0].fields.Артикул) +
+          ' helper = ' +
+          dataHelpers.records[0].fields.Name,
+      );
     });
 
-    // Start the bot.
     this.bot.start();
   }
 

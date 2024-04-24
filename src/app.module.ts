@@ -5,12 +5,11 @@ import { ConfigService } from '@nestjs/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AirtableService } from './airtable/airtable.service';
 import { AirtableModule } from './airtable/airtable.module';
-import { TelegramService } from './telegram/telegram.service';
 import { TelegramModule } from './telegram/telegram.module';
 import appConfig from './configs/app.config';
 import telegramConfig from './telegram/configs/telegram.config';
+import { AirtableService } from './airtable/airtable.service';
 
 @Module({
   imports: [

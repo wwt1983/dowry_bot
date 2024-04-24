@@ -17,7 +17,7 @@ export class TelegramModule {
         providerAsyncOptions,
         TelegramCommandsService,
       ],
-      exports: [TelegramService, providerAsyncOptions],
+      exports: [TelegramService, providerAsyncOptions, TelegramCommandsService],
     };
   }
 

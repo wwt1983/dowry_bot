@@ -1,9 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AxiosResponse } from 'axios';
-import { Observable, lastValueFrom, map } from 'rxjs';
+import { lastValueFrom, map } from 'rxjs';
+
 import { AIRTABLE_WEBHOOK_URL } from './airtable.constants';
+import { Base, TablesDowray, AIRTABLE_URL } from './airtable.constants';
 
 @Injectable()
 export class AirtableHttpService {
@@ -13,13 +14,22 @@ export class AirtableHttpService {
   ) {
     //
   }
-  get<T>(url: string): Observable<AxiosResponse<T>> {
-    try {
-      const response = this.httpService.get(url);
-      return response;
-    } catch (error) {
-      console.log(error);
-    }
+
+  getTable(url: string) {
+    const table = TablesDowray.find((x) => x.title === url).tableName;
+
+    console.log(`${AIRTABLE_URL}${Base}/${table}?cellFormat=json`);
+    return lastValueFrom(
+      this.httpService
+        .get(`${AIRTABLE_URL}${Base}/${table}?cellFormat=json`, {
+          headers: {
+            Authorization: 'Bearer ' + this.configService.get('AIRTABLE_TOKEN'),
+            'Content-Type': 'application/json',
+          },
+          method: 'GET',
+        })
+        .pipe(map((response) => response.data)),
+    );
   }
 
   postWebhook(url: string, data: any): Promise<any> {
