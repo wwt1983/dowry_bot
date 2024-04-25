@@ -32,18 +32,18 @@ export interface IDistribution {
     'Кэш выплачен': boolean;
     'Дата выкупа': Date;
     'Деньги от клиента': boolean;
-    'Фото товар': PhotoDataType[];
-    'Фото бирка': PhotoDataType[];
-    'Скрин отзыв': PhotoDataType[];
+    'Фото товар'?: PhotoDataType[];
+    'Фото бирка'?: PhotoDataType[];
+    'Скрин отзыв'?: PhotoDataType[];
     'Дней до кэшбэка': string;
-    Покупатели: string[];
-    'Скрин чека': PhotoDataType[];
+    Покупатели?: string[];
+    'Скрин чека'?: PhotoDataType[];
     Кэшбек: string;
     'Артикул WB': number[];
     'Цена услуги': string[];
-    'Дата выплаты': Date;
+    'Дата выплаты'?: Date;
     'Ник ТГ': string[];
-    'Выплаченный кешбек': string;
+    'Выплаченный кешбек'?: string;
   };
 }
 

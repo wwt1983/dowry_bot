@@ -9,6 +9,7 @@ export enum TablesName {
   Orders = 'Заказы',
   Articuls = 'Артикулы',
   Helpers = 'Хэлперы',
+  Buyer = 'Покупатели',
   Distributions = 'Раздачи',
   Test = 'test_api',
 }
@@ -34,6 +35,12 @@ export const TablesDowray: IData[] = [
     tableName: 'tbl1U4a3Tl2W4qbk3',
     view: 'viwZ3ao7eTO3Ljeu5',
   },
+  {
+    title: TablesName.Buyer,
+    tableName: 'tblMr3awrotkLiHFw',
+    view: 'viwFZfxcGEIhZwgoY',
+  },
+
   {
     title: TablesName.Test,
     tableName: 'tbl0ibSir3z7hhdsW',

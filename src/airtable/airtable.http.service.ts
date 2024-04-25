@@ -8,11 +8,15 @@ import { Base, TablesDowray, AIRTABLE_URL } from './airtable.constants';
 
 @Injectable()
 export class AirtableHttpService {
+  authHeader = null;
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    //
+    this.authHeader = {
+      Authorization: 'Bearer ' + this.configService.get('AIRTABLE_TOKEN'),
+      'Content-Type': 'application/json',
+    };
   }
 
   getTable(url: string) {
@@ -22,11 +26,22 @@ export class AirtableHttpService {
     return lastValueFrom(
       this.httpService
         .get(`${AIRTABLE_URL}${Base}/${table}?cellFormat=json`, {
-          headers: {
-            Authorization: 'Bearer ' + this.configService.get('AIRTABLE_TOKEN'),
-            'Content-Type': 'application/json',
-          },
+          headers: this.authHeader,
           method: 'GET',
+        })
+        .pipe(map((response) => response.data)),
+    );
+  }
+
+  updateTable(url: string, id: string, data: any) {
+    const table = TablesDowray.find((x) => x.title === url).tableName;
+
+    console.log(`${AIRTABLE_URL}${Base}/${table}/${id}`);
+    return lastValueFrom(
+      this.httpService
+        .patch(`${AIRTABLE_URL}${Base}/${table}/${id}`, {
+          headers: this.authHeader,
+          method: 'PUT',
         })
         .pipe(map((response) => response.data)),
     );
@@ -36,10 +51,7 @@ export class AirtableHttpService {
     return lastValueFrom(
       this.httpService
         .post(AIRTABLE_WEBHOOK_URL + url, data, {
-          headers: {
-            Authorization: 'Bearer ' + this.configService.get('AIRTABLE_TOKEN'),
-            'Content-Type': 'application/json',
-          },
+          headers: this.authHeader,
           method: 'POST',
         })
         .pipe(map((response) => response.data)),

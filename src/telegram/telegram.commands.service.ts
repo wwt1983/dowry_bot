@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { compareAsc, format } from 'date-fns';
 import { AirtableHttpService } from '../airtable/airtable.http.service';
-import { IDistributions, IDistribution } from '../airtable/types/IDisturbation';
-import { IHelpers } from 'src/airtable/types/IHelper';
+import {
+  IDistributions,
+  IDistribution,
+} from '../airtable/types/IDisturbation.interface';
+import { IHelpers } from 'src/airtable/types/IHelper.interface';
+import { IArticle } from 'src/airtable/types/IArticle.interface';
+import { AIRTABLE_URL, Base, TablesName } from 'src/airtable/airtable.constants';
 
 @Injectable()
 export class TelegramCommandsService {
@@ -20,6 +24,14 @@ export class TelegramCommandsService {
     const data = await this.airtableHttpService.getTable(url);
     if (!data) return null;
     return data as IDistributions;
+  }
+
+  async getArticleTable(id: string): Promise<IArticle | null> {
+    const data = await this.airtableHttpService.getTable(
+      `${AIRTABLE_URL}${Base}/${TablesName.Articuls}/${id}`,
+    );
+    if (!data) return null;
+    return data as IArticle;
   }
 
   async getDistributionTableByFilter(
