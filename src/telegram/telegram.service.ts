@@ -1,62 +1,142 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
+import { Bot, session, GrammyError, HttpError } from 'grammy';
+
 import {
   ITelegramAirtableHelperData,
   ITelegramOptions,
   MyContext,
+  ISessionData,
 } from './telegram.interface';
-import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
-import { TablesName } from '../airtable/airtable.constants';
-import { Bot } from 'grammy';
+import {
+  TELEGRAM_MODULE_OPTIONS,
+  HELP_TEXT,
+  FIRST_STEP,
+  FIRST_STEP_A,
+  SECOND_STEP,
+  THREE_STEP,
+  FOUR_STEP,
+  FOUR_STEP_A,
+  FOUR_STEP_B,
+  FOOTER,
+  HEADER,
+  TELEGRAM_CHAT_ID,
+  TELEGRAM_SECRET_CHAT_ID,
+  COMMANDS_TELEGRAM,
+  TELEGRAM_BOT_URL,
+  COMMAND_NAMES,
+  FILE_FROM_BOT_URL,
+} from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
+import { sendMsgToSecretChat } from './telegram.custom.functions';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
   bot: Bot<MyContext>;
   options: ITelegramOptions;
+  user: string | null;
+
+  TEST_USER = '@Julia_bogdanova88';
 
   constructor(
     @Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
     private readonly commandService: TelegramCommandsService,
+    private readonly firebaseService: FirebaseService,
   ) {
     this.options = options;
 
-    if (!this.bot) {
-      console.log('------- START BOT --------');
+    console.log('------- START BOT --------');
 
-      this.bot = new Bot<MyContext>(this.options.token);
-    }
+    this.bot = new Bot<MyContext>(this.options.token);
+    this.bot.use(
+      session({
+        initial(): ISessionData {
+          return { messages: '' };
+        },
+      }),
+    );
+    this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
 
-    this.bot.command('start', (ctx) => ctx.reply('Welcome! Up and running.'));
+    this.bot.command(COMMAND_NAMES.start, async (ctx) => {
+      const { first_name, last_name, username } = ctx.from;
+      console.log(ctx.from);
+      this.user = username || `${first_name} ${last_name}`;
 
-    this.bot.on('message', async (ctx) => {
-      console.log('ctx ==> ', ctx);
-
-      console.log('tsble', TablesName.Test);
-      const dataHelpers = await this.commandService.getHelperTable(
-        TablesName.Helpers,
-      );
-      const filterDataDistributions =
-        await this.commandService.getDistributionTableByFilter(
-          TablesName.Distributions,
-          '2024-04-20',
-        );
-      console.log('distributions ==> ', filterDataDistributions);
-      const { first_name, last_name, username } = ctx.update.message.from;
-
+      const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
+      const dataBuyer = await this.commandService.findBuyer(this.user);
+      const dataArticlesInWork = await this.commandService.getArticlesInWork();
+      const sticker = dataBuyer ? '🤟' : '👶';
       ctx.reply(
         'Привет, ' +
           first_name +
-          ' сейчас предложений ' +
-          filterDataDistributions.length +
-          ' id distribution =  ' +
-          filterDataDistributions[0].fields.Артикул +
+          ' ' +
+          sticker +
+          '\n' +
+          HEADER +
+          FIRST_STEP +
+          dataArticlesInWork[0].fields.Name +
+          '\n' +
+          ' сейчас предложений (таблица Артикулы) = ' +
+          dataArticlesInWork?.length +
+          '\n' +
           ' Артикул WB = ' +
-          filterDataDistributions[0].fields['Артикул WB'] +
-          ' Артикул = ' +
-          JSON.stringify(filterDataDistributions[0].fields.Артикул) +
-          ' helper = ' +
-          dataHelpers.records[0].fields.Name,
+          dataArticlesInWork[0].fields['Артикул WB'] +
+          '\n' +
+          ' таблица Артикулы пример = ' +
+          JSON.stringify(dataArticlesInWork[0]) +
+          '\n' +
+          ' buyer real test = ' +
+          JSON.stringify(dataBuyerTest) +
+          '\n' +
+          ' no in base = ' +
+          JSON.stringify(dataBuyer),
       );
+    });
+
+    this.bot.command(COMMAND_NAMES.history, (ctx) => ctx.reply('Меню'));
+
+    this.bot.command(COMMAND_NAMES.help, (ctx) => {
+      ctx.reply(HELP_TEXT);
+    });
+    this.bot.command(COMMAND_NAMES.support, async (ctx) => {
+      const result = await this.bot.api.sendMessage(
+        TELEGRAM_SECRET_CHAT_ID,
+        sendMsgToSecretChat(ctx),
+      );
+      console.log(TELEGRAM_SECRET_CHAT_ID, result);
+    });
+
+    this.bot.command(COMMAND_NAMES.chatmessages, async (ctx) => {
+      ctx.reply('chat');
+    });
+
+    this.bot.on('message:photo', async (ctx) => {
+      console.log('PHOTO!!!!!', ctx);
+      const path = await ctx.getFile();
+      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+      console.log('photo url', url);
+      const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
+      await ctx.reply(firebaseUrl);
+    });
+
+    this.bot.on('message', async (ctx) => {
+      console.log('===== message from chat  === ', ctx.update);
+      ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
+    });
+
+    this.bot.catch((err) => {
+      const ctx = err.ctx;
+      console.log(`Error while handling update ${ctx.update.update_id}`);
+
+      const e = err.error;
+
+      if (e instanceof GrammyError) {
+        console.error('Error in request: ', e.description);
+      } else if (e instanceof HttpError) {
+        console.error('Could not contact Telegram', e);
+      } else {
+        console.error('Unknow error: ', e);
+      }
     });
 
     this.bot.start();
@@ -71,7 +151,7 @@ export class TelegramService {
       ' ' +
       `https://www.wildberries.ru/catalog/${message.Articul}/detail.aspx`;
 
-    await this.bot.api.sendMessage(this.options.chatId, messageString, {
+    await this.bot.api.sendMessage(TELEGRAM_CHAT_ID, messageString, {
       parse_mode: 'HTML',
     });
   }

@@ -3,7 +3,8 @@ import { IData } from './types/airtable.interfaces';
 export const Base: string = 'appVMEtut0NWayq26';
 export const AIRTABLE_WEBHOOK_URL =
   'https://hooks.airtable.com/workflows/v1/genericWebhook/';
-export const AIRTABLE_URL = 'https://api.airtable.com/v0/';
+export const AIRTABLE_URL = 'https://api.airtable.com/v0/' + Base;
+export const FILTER_BY_FORMULA = 'filterByFormula';
 
 export enum TablesName {
   Orders = 'Заказы',

@@ -1,3 +1,9 @@
+//https://airtable.com/appVMEtut0NWayq26/api/docs#curl/table:test_api
+
+//https://support.airtable.com/docs/formula-field-reference 
+//https://airtable.com/appCHsByjT6czDeJu/shrHgArBZ61sNOtKl/tblkwFqAgvq4M5tp6/viwAD5P14cSxKntDm?blocks=bipdCFHjZaYzAsFzd
+
+
 //https://docs.google.com/spreadsheets/d/1qajgJSF1Mfi3uN84ipHIpJNL56rgXXO3S547OJTCvUs/edit#gid=0
 
 //https://blogorithm.hashnode.dev/airtable-webhooks-with-express-and-ngrok
@@ -44,5 +50,6 @@ let response = await fetch('https://shy-boxes-try.loca.lt/airtable/signal', {
     },
 });
 console.log(await response.text());
+
 
 

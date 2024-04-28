@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { lastValueFrom, map } from 'rxjs';
 
 import { AIRTABLE_WEBHOOK_URL } from './airtable.constants';
-import { Base, TablesDowray, AIRTABLE_URL } from './airtable.constants';
+import { TablesDowray, AIRTABLE_URL } from './airtable.constants';
 
 @Injectable()
 export class AirtableHttpService {
@@ -19,13 +19,12 @@ export class AirtableHttpService {
     };
   }
 
-  getTable(url: string) {
+  get(url: string, filter?: string) {
     const table = TablesDowray.find((x) => x.title === url).tableName;
 
-    console.log(`${AIRTABLE_URL}${Base}/${table}?cellFormat=json`);
     return lastValueFrom(
       this.httpService
-        .get(`${AIRTABLE_URL}${Base}/${table}?cellFormat=json`, {
+        .get(`${AIRTABLE_URL}/${table}?cellFormat=json${filter || ''}`, {
           headers: this.authHeader,
           method: 'GET',
         })
@@ -33,13 +32,13 @@ export class AirtableHttpService {
     );
   }
 
-  updateTable(url: string, id: string, data: any) {
+  update(url: string, id: string, data: any) {
     const table = TablesDowray.find((x) => x.title === url).tableName;
 
-    console.log(`${AIRTABLE_URL}${Base}/${table}/${id}`);
+    console.log(`${AIRTABLE_URL}/${table}/${id}`);
     return lastValueFrom(
       this.httpService
-        .patch(`${AIRTABLE_URL}${Base}/${table}/${id}`, {
+        .patch(`${AIRTABLE_URL}/${table}/${id}`, {
           headers: this.authHeader,
           method: 'PUT',
         })

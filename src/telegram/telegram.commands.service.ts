@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from '../airtable/airtable.http.service';
-import {
-  IDistributions,
-  IDistribution,
-} from '../airtable/types/IDisturbation.interface';
+import { IDistributions } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
-import { IArticle } from 'src/airtable/types/IArticle.interface';
-import { AIRTABLE_URL, Base, TablesName } from 'src/airtable/airtable.constants';
+import { IArticle, IArticles } from 'src/airtable/types/IArticle.interface';
+import {
+  AIRTABLE_URL,
+  TablesName,
+  FILTER_BY_FORMULA,
+} from 'src/airtable/airtable.constants';
+import { IBuyer } from 'src/airtable/types/IBuyer.interface';
 
 @Injectable()
 export class TelegramCommandsService {
@@ -14,46 +16,45 @@ export class TelegramCommandsService {
     //
   }
 
-  async getHelperTable(url: string): Promise<IHelpers | null> {
-    const data = await this.airtableHttpService.getTable(url);
+  async getHelperTable(): Promise<IHelpers | null> {
+    const data = await this.airtableHttpService.get(TablesName.Helpers);
     if (!data) return null;
     return data as IHelpers;
   }
-
-  async getDistributionTable(url: string): Promise<IDistributions | null> {
-    const data = await this.airtableHttpService.getTable(url);
-    if (!data) return null;
-    return data as IDistributions;
+  async findBuyer(nick: string): Promise<IBuyer | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Buyer,
+      `&${FILTER_BY_FORMULA}=Find("${nick}",{Ник ТГ})`,
+    );
+    if (!data || data.records.length === 0) return null;
+    return data as IBuyer;
   }
 
-  async getArticleTable(id: string): Promise<IArticle | null> {
-    const data = await this.airtableHttpService.getTable(
-      `${AIRTABLE_URL}${Base}/${TablesName.Articuls}/${id}`,
+  async getArticleById(id: string): Promise<IArticle | null> {
+    const data = await this.airtableHttpService.get(
+      `${AIRTABLE_URL}/${TablesName.Articuls}/${id}`,
     );
     if (!data) return null;
     return data as IArticle;
   }
-
-  async getDistributionTableByFilter(
-    url: string,
-    dateCompare,
-  ): Promise<IDistribution[] | null> {
-    const data = await this.airtableHttpService.getTable(url);
-    if (!data) return null;
-    const filterData = (data as IDistributions).records.filter(
-      (item) => new Date(item.fields['Дата выкупа']) > new Date(dateCompare),
+  async getArticlesInWork(): Promise<IArticle[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Articuls,
+      `&${FILTER_BY_FORMULA}=NOT({Раздачи} ='')`,
     );
-    return filterData;
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records as IArticle[];
   }
-
-  // async deleteAllMessages(ctx: CommandContext<Context>): Promise<void> {
-  //   const res = await ctx.reply('Удаление прошло.');
-  //   for (let i = res.message_id; i >= 0; i--) {
-  //     try {
-  //       await ctx.api.deleteMessage(ctx.chat.id, i);
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   }
-  // }
+  async getDistributionTableByFilter(
+    nick: string,
+  ): Promise<IDistributions | null> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${nick}",{Покупатели})`;
+    const data = await this.airtableHttpService.get(
+      TablesName.Distributions,
+      filter,
+    );
+    if (!data || (data.records && data.records.length === 0)) return null;
+    console.log('data ===>>> ', data);
+    return data.records;
+  }
 }

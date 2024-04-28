@@ -14,3 +14,7 @@ export interface IArticle {
     };
   };
 }
+
+export interface IArticles {
+  records: IArticle[];
+}

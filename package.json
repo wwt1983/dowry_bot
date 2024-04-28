@@ -20,6 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@grammyjs/conversations": "^1.2.0",
+    "@grammyjs/menu": "^1.2.1",
+    "@grammyjs/types": "^3.6.2",
     "@nestjs/axios": "^3.0.2",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.2",
@@ -29,8 +32,12 @@
     "bluebird": "^3.7.2",
     "class-validator": "^0.14.1",
     "date-fns": "^3.6.0",
+    "firebase": "^10.11.1",
+    "firebase-admin": "^12.1.0",
     "grammy": "^1.22.4",
+    "image-to-base64": "^2.2.0",
     "nestjs-rollbar": "^3.0.0",
+    "node-fetch": "^3.3.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

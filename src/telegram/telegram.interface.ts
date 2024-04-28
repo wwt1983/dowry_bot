@@ -2,7 +2,6 @@ import { ModuleMetadata } from '@nestjs/common';
 import { SessionFlavor, Context } from 'grammy';
 
 export interface ITelegramOptions {
-  chatId: string;
   token: string;
 }
 
@@ -19,7 +18,7 @@ export interface ITelegramAirtableHelperData {
 }
 
 export interface ISessionData {
-  messages: string;
+  messages?: string;
 }
 
 export type MyContext = Context & SessionFlavor<ISessionData>;
