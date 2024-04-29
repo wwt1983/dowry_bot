@@ -8,7 +8,7 @@ export class AppController {
   //метод нужен для запуска туннеля как входная точка
   @Get('test')
   test(): string {
-    console.log('test hello nest');
+    console.log('test hello nest hello http');
     return this.appService.getHello();
   }
   
