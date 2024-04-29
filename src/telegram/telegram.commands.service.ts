@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from '../airtable/airtable.http.service';
 import { IDistributions } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
-import { IArticle, IArticles } from 'src/airtable/types/IArticle.interface';
+import { IArticle } from 'src/airtable/types/IArticle.interface';
 import {
   AIRTABLE_URL,
   TablesName,

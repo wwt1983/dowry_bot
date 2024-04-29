@@ -25,6 +25,7 @@ import {
   TELEGRAM_BOT_URL,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
+  WEB_APP
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
 import { sendMsgToSecretChat } from './telegram.custom.functions';
@@ -58,39 +59,51 @@ export class TelegramService {
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      const { first_name, last_name, username } = ctx.from;
-      console.log(ctx.from);
-      this.user = username || `${first_name} ${last_name}`;
+      ctx.reply('hi', {
+        reply_markup: {
+          keyboard: [
+            [
+              {
+                text: 'web app',
+                web_app: { url: WEB_APP },
+              },
+            ],
+          ],
+        },
+      });
+      //const { first_name, last_name, username } = ctx.from;
+      // console.log(ctx.from);
+      // this.user = username || `${first_name} ${last_name}`;
 
-      const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
-      const dataBuyer = await this.commandService.findBuyer(this.user);
-      const dataArticlesInWork = await this.commandService.getArticlesInWork();
-      const sticker = dataBuyer ? '🤟' : '👶';
-      ctx.reply(
-        'Привет, ' +
-          first_name +
-          ' ' +
-          sticker +
-          '\n' +
-          HEADER +
-          FIRST_STEP +
-          dataArticlesInWork[0].fields.Name +
-          '\n' +
-          ' сейчас предложений (таблица Артикулы) = ' +
-          dataArticlesInWork?.length +
-          '\n' +
-          ' Артикул WB = ' +
-          dataArticlesInWork[0].fields['Артикул WB'] +
-          '\n' +
-          ' таблица Артикулы пример = ' +
-          JSON.stringify(dataArticlesInWork[0]) +
-          '\n' +
-          ' buyer real test = ' +
-          JSON.stringify(dataBuyerTest) +
-          '\n' +
-          ' no in base = ' +
-          JSON.stringify(dataBuyer),
-      );
+      // const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
+      // const dataBuyer = await this.commandService.findBuyer(this.user);
+      // const dataArticlesInWork = await this.commandService.getArticlesInWork();
+      // const sticker = dataBuyer ? '🤟' : '👶';
+      // ctx.reply(
+      //   'Привет, ' +
+      //     first_name +
+      //     ' ' +
+      //     sticker +
+      //     '\n' +
+      //     HEADER +
+      //     FIRST_STEP +
+      //     dataArticlesInWork[0].fields.Name +
+      //     '\n' +
+      //     ' сейчас предложений (таблица Артикулы) = ' +
+      //     dataArticlesInWork?.length +
+      //     '\n' +
+      //     ' Артикул WB = ' +
+      //     dataArticlesInWork[0].fields['Артикул WB'] +
+      //     '\n' +
+      //     ' таблица Артикулы пример = ' +
+      //     JSON.stringify(dataArticlesInWork[0]) +
+      //     '\n' +
+      //     ' buyer real test = ' +
+      //     JSON.stringify(dataBuyerTest) +
+      //     '\n' +
+      //     ' no in base = ' +
+      //     JSON.stringify(dataBuyer),
+      // );
     });
 
     this.bot.command(COMMAND_NAMES.history, (ctx) => ctx.reply('Меню'));
@@ -111,12 +124,15 @@ export class TelegramService {
     });
 
     this.bot.on('message:photo', async (ctx) => {
-      console.log('PHOTO!!!!!', ctx);
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-      console.log('photo url', url);
       const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
       await ctx.reply(firebaseUrl);
+    });
+
+    this.bot.on('::url', (ctx) => {
+      console.log('LINKS');
+      ctx.reply('links');
     });
 
     this.bot.on('message', async (ctx) => {

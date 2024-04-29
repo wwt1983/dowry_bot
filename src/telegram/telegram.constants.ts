@@ -5,6 +5,7 @@ export const TELEGRAM_SECRET_CHAT_ID = '-1002140115397';
 export const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';
 export const FILE_FROM_BOT_URL = 'https://api.telegram.org/file/bot';
+export const WEB_APP = 'https://dowry-bot.netlify.app/';
 
 export enum COMMAND_NAMES {
   start = 'start',
@@ -12,6 +13,7 @@ export enum COMMAND_NAMES {
   history = 'history',
   chatmessages = 'chatmessages',
   support = 'support',
+  web = 'web',
 }
 
 export const COMMANDS_TELEGRAM = [
@@ -23,6 +25,7 @@ export const COMMANDS_TELEGRAM = [
     description: 'Получить все сообщения чата',
   },
   { command: COMMAND_NAMES.support, description: 'Помощь онлайн' },
+  { command: COMMAND_NAMES.web, description: 'WEB' },
 ];
 
 export const HEADER = ' Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
