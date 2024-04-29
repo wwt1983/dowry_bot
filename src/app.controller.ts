@@ -11,7 +11,11 @@ export class AppController {
     console.log('test hello nest hello http');
     return this.appService.getHello();
   }
-  
+  @Get('test2')
+  test(): string {
+    console.log('test hello nest hello http');
+    return 'test';
+  }
   @Get('startbot')
   getHello(): string {
     console.log('test hello bot');
