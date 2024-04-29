@@ -1,6 +1,9 @@
 ctrl + с = выйти в терминал
 pm2 start dist/main.js --name dowry_bot
 
+git pull
+pm2 restart 1
+
 There are some PM2 commands to make your application auto restart after system reboot also
 
 $ pm2 startup systemd

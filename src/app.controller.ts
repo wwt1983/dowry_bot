@@ -14,7 +14,7 @@ export class AppController {
   
   @Get('startbot')
   getHello(): string {
-    console.log('test hello nest');
+    console.log('test hello bot');
     return this.appService.getHello();
   }
 }
