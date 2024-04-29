@@ -6,6 +6,7 @@ export const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';
 export const FILE_FROM_BOT_URL = 'https://api.telegram.org/file/bot';
 export const WEB_APP = 'https://dowry-bot.netlify.app/';
+export const WEB_APP_TEST = 'http://localhost:5173';
 
 export enum COMMAND_NAMES {
   start = 'start',

@@ -6,8 +6,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   //метод нужен для запуска туннеля как входная точка
-  @Get()
-  sayHi(): string {
+  @Get('test')
+  test(): string {
     console.log('test hello nest');
     return this.appService.getHello();
   }

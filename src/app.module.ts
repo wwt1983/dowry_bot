@@ -11,6 +11,7 @@ import appConfig from './configs/app.config';
 import telegramConfig from './telegram/configs/telegram.config';
 import { AirtableService } from './airtable/airtable.service';
 import { FirebaseModule } from './firebase/firebase.module';
+import { TelegramController } from './telegram/telegram.controller';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     }),
     FirebaseModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TelegramController],
   providers: [AppService],
 })
 export class AppModule {}

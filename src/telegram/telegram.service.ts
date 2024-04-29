@@ -25,7 +25,8 @@ import {
   TELEGRAM_BOT_URL,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
-  WEB_APP
+  WEB_APP,
+  WEB_APP_TEST,
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
 import { sendMsgToSecretChat } from './telegram.custom.functions';
@@ -57,8 +58,12 @@ export class TelegramService {
       }),
     );
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
-
+    this.bot.on('message', (ctx) => {
+      console.log('!!!!!!!!!!!!!!!');
+    });
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
+      console.log('!!!!!!!!!!!!!!!');
+
       ctx.reply('hi', {
         reply_markup: {
           keyboard: [
@@ -136,8 +141,21 @@ export class TelegramService {
     });
 
     this.bot.on('message', async (ctx) => {
-      console.log('===== message from chat  === ', ctx.update);
-      ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
+      try {
+        console.log('!!!!!!!!!!!!!!!');
+
+        const { web_app_data } = ctx.update.message;
+        if (web_app_data) {
+          const data = JSON.parse(web_app_data?.data);
+          console.log(data);
+          ctx.reply('WEB!!!');
+        } else {
+          console.log('===== message from chat  === ', ctx.update);
+          ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
+        }
+      } catch (e) {
+        console.log(e);
+      }
     });
 
     this.bot.catch((err) => {
