@@ -8,7 +8,6 @@ export class TelegramController {
   @Post('bot')
   bot(@Body() data: any): void {
     console.log('WEB DATA POST', data);
-    return data;
     try {
       this.telegramService.bot.api.answerWebAppQuery(data.queryId, {
         type: 'article',
