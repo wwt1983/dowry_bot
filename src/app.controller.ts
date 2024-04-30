@@ -12,7 +12,7 @@ export class AppController {
     return this.appService.getHello();
   }
   @Get('test2')
-  test(): string {
+  test2(): string {
     console.log('test hello nest hello http');
     return 'test';
   }
