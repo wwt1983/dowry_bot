@@ -14,7 +14,7 @@ async function bootstrap() {
       'Accept',
       'Authorization',
     ],
-    credentials: true,
+    credentials: false,
   });
 
   app.useGlobalFilters(new HttpExceptionFilter());
