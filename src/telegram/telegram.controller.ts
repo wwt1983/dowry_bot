@@ -7,11 +7,13 @@ export class TelegramController {
 
   @Post('bot')
   bot(@Body() data: any): void {
-    console.log('WEB DATA POST', data);
+    console.log('WEB DATA=', data);
+    return
     try {
       this.telegramService.bot.api.answerWebAppQuery(data.queryId, {
         type: 'article',
-        id: data.queryId,
+        id: data.id,
+
         title: 'Успешная заявка на раздачу',
         input_message_content: {
           message_text: ` Поздравляю `,
