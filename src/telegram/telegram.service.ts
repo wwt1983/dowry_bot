@@ -59,10 +59,10 @@ export class TelegramService {
     );
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
     this.bot.on('message', (ctx) => {
-      console.log('!!!!!!!!!!!!!!!');
+      console.log('!!!!!!!!!!!!!!! MESSAGEs');
     });
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      console.log('!!!!!!!!!!!!!!!');
+      console.log('!!!!!!!!!!!!!!! START');
 
       ctx.reply('hi', {
         reply_markup: {
@@ -142,7 +142,7 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
-        console.log('!!!!!!!!!!!!!!!');
+        console.log('!!!!!!!!!!!!!!! msg');
 
         const { web_app_data } = ctx.update.message;
         if (web_app_data) {
