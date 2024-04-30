@@ -5,14 +5,15 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  //метод нужен для запуска туннеля как входная точка
   @Get('test')
   test(): string {
     console.log('test hello nest hello http');
     return this.appService.getHello();
-  }
-  @Get('test2')
-  test2(): string {
+  }  
+  
+  //метод нужен для запуска туннеля как входная точка
+  @Get('')
+  start(): string {
     console.log('test hello nest hello http');
     return 'test';
   }
