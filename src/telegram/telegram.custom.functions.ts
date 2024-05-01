@@ -23,6 +23,22 @@ export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   https://web.telegram.org/a/#${id}`;
 }
 
+export function createInitialSessionData() {
+  return {
+    id: null,
+    startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
+    stopTime: null,
+    articul: null,
+    isLoadImageSearch: null,
+    isLoadImageGiveGood: null,
+    step: 0,
+    comment: '',
+    isLoadImageOnComment: false,
+    isLoadImageBrokeCode: false,
+    isLoadImageCheck: false,
+  };
+}
+
 export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
@@ -35,4 +51,8 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
     FIRST_STEP_A +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
   );
+}
+
+export function getTextForSecondStep(imageUrl: string): string {
+  return FIRST_STEP_C + imageUrl;
 }

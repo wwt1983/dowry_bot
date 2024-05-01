@@ -18,12 +18,13 @@ export interface ITelegramAirtableHelperData {
 }
 
 export interface ISessionData {
-  id?: string;
-  articul?: number;
+  data?: ITelegramWebApp;
+  startTime?: string;
+  stopTime?: string;
   isLoadImageSearch?: boolean;
   isLoadImageGiveGood?: boolean;
   step?: number;
-  comment?:string;
+  comment?: string;
   isLoadImageOnComment?: boolean;
   isLoadImageBrokeCode?: boolean;
   isLoadImageCheck?: boolean;
@@ -32,6 +33,7 @@ export interface ISessionData {
 export type MyContext = Context & SessionFlavor<ISessionData>;
 
 export interface ITelegramWebApp {
+  id: number;
   title: string;
   cash: number;
   keys: string;

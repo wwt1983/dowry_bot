@@ -6,6 +6,7 @@ import {
   ITelegramOptions,
   MyContext,
   ISessionData,
+  ITelegramWebApp,
 } from './telegram.interface';
 import {
   TELEGRAM_MODULE_OPTIONS,
@@ -20,7 +21,9 @@ import {
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
 import {
+  createInitialSessionData,
   getTextForFirstStep,
+  getTextForSecondStep,
   sendMsgToSecretChat,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
@@ -46,17 +49,7 @@ export class TelegramService {
     this.bot.use(
       session({
         initial(): ISessionData {
-          return {
-            id: null,
-            articul: null,
-            isLoadImageSearch: null,
-            isLoadImageGiveGood: null,
-            step: 0,
-            comment: '',
-            isLoadImageOnComment: false,
-            isLoadImageBrokeCode: false,
-            isLoadImageCheck: false,
-          };
+          return createInitialSessionData();
         },
       }),
     );
@@ -125,10 +118,15 @@ export class TelegramService {
     });
 
     this.bot.on('message:photo', async (ctx) => {
-      const path = await ctx.getFile();
-      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-      const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
-      await ctx.reply(firebaseUrl);
+      const { step } = ctx.session;
+      if (step === 0) {
+        const path = await ctx.getFile();
+        const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+        const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
+
+        ctx.reply(getTextForSecondStep(firebaseUrl));
+      }
+      ctx.session.step++;
     });
 
     this.bot.on('::url', (ctx) => {
@@ -141,9 +139,9 @@ export class TelegramService {
         const { via_bot, text } = ctx.update.message;
         if (via_bot?.is_bot) {
           console.log('WEB API');
-          const data = JSON.parse(text);
+          const data = JSON.parse(text) as ITelegramWebApp;
           console.log(data);
-
+          ctx.session.data = data;
           return ctx.reply(getTextForFirstStep(data));
         } else {
           console.log('===== message from chat  === ', ctx.update);
