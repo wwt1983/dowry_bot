@@ -125,8 +125,7 @@ export class TelegramService {
       const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
 
       console.log('session =', ctx.session);
-      ctx.session.step++;
-      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
+
       let replayString;
       switch (step) {
         case 0:
@@ -140,7 +139,8 @@ export class TelegramService {
         default:
           replayString = 'full';
       }
-
+      ctx.session.step++;
+      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       return ctx.reply(replayString);
     });
 
