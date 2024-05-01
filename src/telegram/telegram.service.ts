@@ -30,7 +30,10 @@ import {
   WEB_APP_TEST,
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
-import { getTextForFirstStep, sendMsgToSecretChat } from './telegram.custom.functions';
+import {
+  getTextForFirstStep,
+  sendMsgToSecretChat,
+} from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -136,8 +139,9 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
-        const { web_app_data } = ctx.update.message;
+        const { web_app_data } = ctx.message;
         if (web_app_data) {
+          console.log('WEB API');
           const data = JSON.parse(web_app_data?.data);
           console.log(data);
 
