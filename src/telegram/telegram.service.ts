@@ -132,24 +132,22 @@ export class TelegramService {
       ctx.reply('links');
     });
 
-    this.bot.on('message:web_app_data', (ctx) => {
-      console.log('WEB_APP get !!!', ctx.message);
+    this.bot.on(':web_app_data', (ctx) => {
+      console.log('WEB_APP get !!!');
+      const { web_app_data } = ctx.update.message;
+      if (web_app_data) {
+        const data = JSON.parse(web_app_data?.data);
+        console.log(data);
+        ctx.reply('WEB!!!');
+      }
       return ctx.reply(ctx.message.text);
     });
 
     this.bot.on('message', async (ctx) => {
       try {
         console.log('!!!!!!!!!!!!!!! msg');
-
-        const { web_app_data } = ctx.update.message;
-        if (web_app_data) {
-          const data = JSON.parse(web_app_data?.data);
-          console.log(data);
-          ctx.reply('WEB!!!');
-        } else {
-          console.log('===== message from chat  === ', ctx.update);
-          ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
-        }
+        console.log('===== message from chat  === ', ctx.update);
+        ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
       } catch (e) {
         console.log(e);
       }
