@@ -21,7 +21,6 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
   { command: COMMAND_NAMES.support, description: 'Помощь онлайн' },
-  { command: COMMAND_NAMES.web, description: 'WEB' },
 ];
 
 export const HEADER = ' Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
