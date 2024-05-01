@@ -7,7 +7,7 @@ export class TelegramController {
 
   @Post('bot')
   bot(@Body() data: any): void {
-    console.log(`WEB DATA time=${Date.now()}=`, data);
+    console.log(`WEB DATA time= ${Date.now()}=`, data);
 
     try {
       if (data.queryId) {
@@ -21,7 +21,7 @@ export class TelegramController {
           },
         });
       } else {
-        console.log('empty query_id');
+        console.log('empty query_id time=' + Date.now());
       }
     } catch (e) {
       console.log(e);
