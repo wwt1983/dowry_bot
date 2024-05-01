@@ -56,3 +56,7 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
 export function getTextForSecondStep(imageUrl: string): string {
   return FIRST_STEP_C + imageUrl;
 }
+
+export function getTextForThreeStep(imageUrl: string): string {
+  return SECOND_STEP + imageUrl;
+}
