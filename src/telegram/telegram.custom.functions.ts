@@ -22,6 +22,7 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
     HEADER +
     FIRST_STEP +
     keys +
+    '\n' +
     FIRST_STEP_A +
     FIRST_STEP_B
   );
