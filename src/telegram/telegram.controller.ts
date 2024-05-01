@@ -7,18 +7,22 @@ export class TelegramController {
 
   @Post('bot')
   bot(@Body() data: any): void {
-    console.log('WEB DATA=', data);
-    return
-    try {
-      this.telegramService.bot.api.answerWebAppQuery(data.queryId, {
-        type: 'article',
-        id: data.id,
+    console.log(`WEB DATA time=${Date.now()}=`, data);
 
-        title: 'Успешная заявка на раздачу',
-        input_message_content: {
-          message_text: ` Поздравляю `,
-        },
-      });
+    try {
+      if (data.queryId) {
+        this.telegramService.bot.api.answerWebAppQuery(data.queryId, {
+          type: 'article',
+          id: data.id,
+
+          title: 'Успешная заявка на раздачу',
+          input_message_content: {
+            message_text: ` Поздравляю `,
+          },
+        });
+      } else {
+        console.log('empty query_id');
+      }
     } catch (e) {
       console.log(e);
     }
