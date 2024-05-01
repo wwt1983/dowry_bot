@@ -14,10 +14,9 @@ export class TelegramController {
         this.telegramService.bot.api.answerWebAppQuery(data.query_id, {
           type: 'article',
           id: data.id,
-
-          title: 'Успешная заявка на раздачу',
+          title: data.title,
           input_message_content: {
-            message_text: ` Поздравляю `,
+            message_text: JSON.stringify(data),
           },
         });
       } else {
