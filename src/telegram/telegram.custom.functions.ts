@@ -22,7 +22,7 @@ export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp): string {
-  const { title, keys, cash } = data;
+  const { title, keys, cash, articul } = data;
   return (
     `Раздача: ${title} с кешбеком ${cash} рублей\n` +
     HEADER +
@@ -30,6 +30,8 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
     keys +
     '\n' +
     FIRST_STEP_A +
-    FIRST_STEP_B
+    FIRST_STEP_B +
+    '\n' +
+    `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
   );
 }

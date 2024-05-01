@@ -27,4 +27,5 @@ export interface ITelegramWebApp {
   title: string;
   cash: number;
   keys: string;
+  articul: number;
 }
