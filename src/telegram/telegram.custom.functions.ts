@@ -15,6 +15,8 @@ import {
   FOOTER,
 } from './telegram.constants';
 
+export const COUNT_STEPS = 7;
+
 export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   const { first_name, last_name, username, id } = ctx.from;
 
@@ -34,6 +36,7 @@ export function createInitialSessionData(): ISessionData {
     isLoadImageOnComment: false,
     isLoadImageBrokeCode: false,
     isLoadImageCheck: false,
+    isLoadImageOrderWithPVZ: false,
     Images: [],
   };
 }
@@ -52,21 +55,21 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   );
 }
 
-function getTextForSecondStep(imageUrl: string): string {
-  return FIRST_STEP_C + imageUrl;
-}
-
-function getTextForThreeStep(imageUrl: string): string {
-  return SECOND_STEP + imageUrl;
-}
-
-export function getTextByStep(step: number, firebaseUrl: string): string {
+export function getTextByStep(step: number): string {
   switch (step) {
     case 0:
-      return getTextForSecondStep(firebaseUrl);
+      return FIRST_STEP_C;
     case 1:
-      return getTextForThreeStep(firebaseUrl);
+      return SECOND_STEP;
+    case 2:
+      return THREE_STEP;
+    case 3:
+      return FOUR_STEP;
+    case 4:
+      return FOUR_STEP_A;
+    case 5:
+      return FOUR_STEP_B;
     default:
-      return 'full';
+      return FOOTER;
   }
 }

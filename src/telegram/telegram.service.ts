@@ -57,7 +57,10 @@ export class TelegramService {
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!! START!!!!!!!');
+
+      ctx.session = createInitialSessionData();
       const { first_name, username } = ctx.from;
+      
       ctx.reply(`Привет, ${first_name || username}`, {
         reply_markup: {
           inline_keyboard: [
@@ -129,6 +132,8 @@ export class TelegramService {
         case 1:
           ctx.session.isLoadImageGiveGood = true;
           break;
+          case 2:
+           // ctx.session.is
         default:
       }
 
@@ -136,16 +141,15 @@ export class TelegramService {
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       console.log('session =', ctx.session);
 
-      return ctx.reply(getTextByStep(step, firebaseUrl));
+      return ctx.reply(getTextByStep(step));
     });
 
     this.bot.on('message', async (ctx) => {
       try {
         const { via_bot, text } = ctx.update.message;
         if (via_bot?.is_bot) {
-          console.log('WEB API');
           const data = JSON.parse(text) as ITelegramWebApp;
-          console.log(data);
+          console.log('==== WEB API ====', data);
           ctx.session.data = data;
           return ctx.reply(getTextForFirstStep(data));
         } else {

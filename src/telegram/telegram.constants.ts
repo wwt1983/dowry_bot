@@ -56,6 +56,7 @@ export const HELP_TEXT =
   FIRST_STEP +
   FIRST_STEP_A +
   FIRST_STEP_B +
+  FIRST_STEP_C +
   SECOND_STEP +
   THREE_STEP +
   FOUR_STEP +

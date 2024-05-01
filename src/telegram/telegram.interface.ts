@@ -21,13 +21,14 @@ export interface ISessionData {
   data?: ITelegramWebApp;
   startTime?: string;
   stopTime?: string;
-  isLoadImageSearch?: boolean;
-  isLoadImageGiveGood?: boolean;
+  isLoadImageSearch?: boolean; // поиск товара
+  isLoadImageOrderWithPVZ?: boolean; // пожвтерждения факта заказа
+  isLoadImageGiveGood?: boolean; // получен товар
+  isLoadImageOnComment?: boolean; // отзыв
+  isLoadImageBrokeCode?: boolean; // фото порванного штрихкода
+  isLoadImageCheck?: boolean; // чек
   step?: number;
   comment?: string;
-  isLoadImageOnComment?: boolean;
-  isLoadImageBrokeCode?: boolean;
-  isLoadImageCheck?: boolean;
   Images?: string[];
 }
 
