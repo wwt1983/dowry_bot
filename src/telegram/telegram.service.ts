@@ -139,8 +139,8 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
-        console.log(ctx)
-        const { web_app_data } = ctx.message;
+        console.log('msg ---> ', ctx.update.message)
+        const { web_app_data } = ctx.update.message;
         if (web_app_data) {
           console.log('WEB API');
           const data = JSON.parse(web_app_data?.data);
