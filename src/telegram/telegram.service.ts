@@ -125,21 +125,23 @@ export class TelegramService {
       const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
 
       console.log('session =', ctx.session);
-
+      ctx.session.step++;
+      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
+      let replayString;
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
-          return ctx.reply(getTextForSecondStep(firebaseUrl));
+          replayString = getTextForSecondStep(firebaseUrl);
+          return;
         case 1:
           ctx.session.isLoadImageGiveGood = true;
-          return ctx.reply(getTextForThreeStep(firebaseUrl));
-        case 2:
-          return ctx.reply(' ');
+          replayString = getTextForThreeStep(firebaseUrl);
+          return;
         default:
-          ctx.reply('');
+          replayString = 'full';
       }
-      ctx.session.step++;
-      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
+
+      return ctx.reply(replayString);
     });
 
     this.bot.on('message', async (ctx) => {
