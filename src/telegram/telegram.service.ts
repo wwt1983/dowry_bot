@@ -134,7 +134,7 @@ export class TelegramService {
 
     this.bot.on('message:web_app_data', (ctx) => {
       console.log('WEB_APP get !!!', ctx.message);
-      ctx.reply(ctx.message.text);
+      return ctx.reply(ctx.message.text);
     });
 
     this.bot.on('message', async (ctx) => {
