@@ -10,20 +10,9 @@ import {
 import {
   TELEGRAM_MODULE_OPTIONS,
   HELP_TEXT,
-  FIRST_STEP,
-  FIRST_STEP_A,
-  FIRST_STEP_B,
-  SECOND_STEP,
-  THREE_STEP,
-  FOUR_STEP,
-  FOUR_STEP_A,
-  FOUR_STEP_B,
-  FOOTER,
-  HEADER,
   TELEGRAM_CHAT_ID,
   TELEGRAM_SECRET_CHAT_ID,
   COMMANDS_TELEGRAM,
-  TELEGRAM_BOT_URL,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
   WEB_APP,
@@ -64,7 +53,7 @@ export class TelegramService {
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      console.log('!!!!!!!!!!!!!!! START');
+      console.log('!!!!!!!! START!!!!!!!');
       const { first_name, username } = ctx.from;
       ctx.reply(`Привет, ${first_name || username}`, {
         reply_markup: {

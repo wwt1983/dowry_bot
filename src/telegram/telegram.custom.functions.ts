@@ -6,6 +6,12 @@ import {
   HEADER,
   FIRST_STEP_A,
   FIRST_STEP_B,
+  SECOND_STEP,
+  THREE_STEP,
+  FOUR_STEP,
+  FOUR_STEP_A,
+  FOUR_STEP_B,
+  FOOTER,
 } from './telegram.constants';
 export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   const { first_name, last_name, username, id } = ctx.from;
