@@ -137,9 +137,17 @@ export class TelegramService {
       ctx.reply('links');
     });
 
+    this.bot.on('channel_post:web_app_data', (ctx) => {
+      console.log('webbbbb');
+      ctx.reply('----- web post');
+    });
+    this.bot.on(':new_chat_members:is_bot', (ctx) => {
+      console.log('webbbbb 2');
+      ctx.reply('----- web post2');
+    });
+
     this.bot.on('message', async (ctx) => {
       try {
-        console.log('msg ---> ', ctx.update.message);
         const { web_app_data, from } = ctx.update.message;
         if (from.is_bot) {
           console.log('WEB API');
