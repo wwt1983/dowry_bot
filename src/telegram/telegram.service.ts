@@ -61,8 +61,8 @@ export class TelegramService {
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!!!!!!!!! START');
-
-      ctx.reply('hi', {
+      const { first_name, last_name, username } = ctx.from;
+      ctx.reply(`Привет, ${first_name || username}'`, {
         reply_markup: {
           inline_keyboard: [
             [
