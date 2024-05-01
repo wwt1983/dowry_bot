@@ -14,6 +14,7 @@ import {
   FOUR_STEP_B,
   FOOTER,
 } from './telegram.constants';
+
 export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   const { first_name, last_name, username, id } = ctx.from;
 

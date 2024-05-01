@@ -18,7 +18,15 @@ export interface ITelegramAirtableHelperData {
 }
 
 export interface ISessionData {
-  messages?: string;
+  id?: string;
+  articul?: number;
+  isLoadImageSearch?: boolean;
+  isLoadImageGiveGood?: boolean;
+  step?: number;
+  comment?:string;
+  isLoadImageOnComment?: boolean;
+  isLoadImageBrokeCode?: boolean;
+  isLoadImageCheck?: boolean;
 }
 
 export type MyContext = Context & SessionFlavor<ISessionData>;

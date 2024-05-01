@@ -46,7 +46,17 @@ export class TelegramService {
     this.bot.use(
       session({
         initial(): ISessionData {
-          return { messages: '' };
+          return {
+            id: null,
+            articul: null,
+            isLoadImageSearch: null,
+            isLoadImageGiveGood: null,
+            step: 0,
+            comment: '',
+            isLoadImageOnComment: false,
+            isLoadImageBrokeCode: false,
+            isLoadImageCheck: false,
+          };
         },
       }),
     );
