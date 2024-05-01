@@ -22,9 +22,8 @@ import {
 import { TelegramCommandsService } from './telegram.commands.service';
 import {
   createInitialSessionData,
+  getTextByStep,
   getTextForFirstStep,
-  getTextForSecondStep,
-  getTextForThreeStep,
   sendMsgToSecretChat,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
@@ -123,25 +122,19 @@ export class TelegramService {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
       const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
-
-      let replayString;
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
-          replayString = getTextForSecondStep(firebaseUrl);
-          return;
         case 1:
           ctx.session.isLoadImageGiveGood = true;
-          replayString = getTextForThreeStep(firebaseUrl);
-          return;
         default:
-          replayString = 'full';
       }
+
       ctx.session.step++;
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       console.log('session =', ctx.session);
 
-      return ctx.reply(replayString);
+      return ctx.reply(getTextByStep(step, firebaseUrl));
     });
 
     this.bot.on('message', async (ctx) => {

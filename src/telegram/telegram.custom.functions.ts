@@ -52,10 +52,21 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   );
 }
 
-export function getTextForSecondStep(imageUrl: string): string {
+function getTextForSecondStep(imageUrl: string): string {
   return FIRST_STEP_C + imageUrl;
 }
 
-export function getTextForThreeStep(imageUrl: string): string {
+function getTextForThreeStep(imageUrl: string): string {
   return SECOND_STEP + imageUrl;
+}
+
+export function getTextByStep(step: number, firebaseUrl: string): string {
+  switch (step) {
+    case 0:
+      return getTextForSecondStep(firebaseUrl);
+    case 1:
+      return getTextForThreeStep(firebaseUrl);
+    default:
+      return 'full';
+  }
 }
