@@ -31,7 +31,7 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
     keys +
     '\n' +
     FIRST_STEP_B +
-    FIRST_STEP_C +
+    FIRST_STEP_A +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
   );
 }
