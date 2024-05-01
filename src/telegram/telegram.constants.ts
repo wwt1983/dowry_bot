@@ -12,7 +12,6 @@ export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
   history = 'history',
-  chatmessages = 'chatmessages',
   support = 'support',
   web = 'web',
 }
@@ -21,10 +20,6 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
-  {
-    command: COMMAND_NAMES.chatmessages,
-    description: 'Получить все сообщения чата',
-  },
   { command: COMMAND_NAMES.support, description: 'Помощь онлайн' },
   { command: COMMAND_NAMES.web, description: 'WEB' },
 ];

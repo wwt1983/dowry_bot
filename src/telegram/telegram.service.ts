@@ -58,9 +58,7 @@ export class TelegramService {
       }),
     );
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
-    this.bot.on('message', (ctx) => {
-      console.log('!!!!!!!!!!!!!!! MESSAGEs');
-    });
+
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!!!!!!!!! START');
 
@@ -112,7 +110,6 @@ export class TelegramService {
     });
 
     this.bot.command(COMMAND_NAMES.history, (ctx) => ctx.reply('Меню'));
-
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
       ctx.reply(HELP_TEXT);
     });
@@ -123,11 +120,6 @@ export class TelegramService {
       );
       console.log(TELEGRAM_SECRET_CHAT_ID, result);
     });
-
-    this.bot.command(COMMAND_NAMES.chatmessages, async (ctx) => {
-      ctx.reply('chat');
-    });
-
     this.bot.on('message:photo', async (ctx) => {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
@@ -138,6 +130,11 @@ export class TelegramService {
     this.bot.on('::url', (ctx) => {
       console.log('LINKS');
       ctx.reply('links');
+    });
+
+    this.bot.on('message:web_app_data', (ctx) => {
+      console.log('WEB_APP get !!!', ctx.message);
+      ctx.reply(ctx.message.text);
     });
 
     this.bot.on('message', async (ctx) => {
