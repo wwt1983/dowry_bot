@@ -67,7 +67,7 @@ export class TelegramService {
           inline_keyboard: [
             [
               {
-                text: 'web app',
+                text: 'Dowray раздачи',
                 web_app: { url: WEB_APP },
               },
             ],
