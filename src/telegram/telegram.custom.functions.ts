@@ -16,11 +16,12 @@ export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp): string {
+  const { title, keys, cash } = data;
   return (
-    `Раздача: ${data.title} с кешбеком ${data.cash} рублей\n` +
+    `Раздача: ${title} с кешбеком ${cash} рублей\n` +
     HEADER +
     FIRST_STEP +
-    data.keys +
+    keys +
     FIRST_STEP_A +
     FIRST_STEP_B
   );
