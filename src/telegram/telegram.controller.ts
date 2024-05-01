@@ -10,8 +10,8 @@ export class TelegramController {
     console.log(`WEB DATA time= ${Date.now()}=`, data);
 
     try {
-      if (data.queryId) {
-        this.telegramService.bot.api.answerWebAppQuery(data.queryId, {
+      if (data.query_id) {
+        this.telegramService.bot.api.answerWebAppQuery(data.query_id, {
           type: 'article',
           id: data.id,
 
@@ -21,7 +21,7 @@ export class TelegramController {
           },
         });
       } else {
-        console.log('empty query_id time=' + Date.now());
+        console.log(`empty${data.query_id} query_id time=` + Date.now());
       }
     } catch (e) {
       console.log(e);
