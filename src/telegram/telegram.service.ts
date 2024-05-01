@@ -124,6 +124,8 @@ export class TelegramService {
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
       const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
 
+      console.log('session =', ctx.session);
+
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
@@ -131,6 +133,8 @@ export class TelegramService {
         case 1:
           ctx.session.isLoadImageGiveGood = true;
           return ctx.reply(getTextForThreeStep(firebaseUrl));
+        case 2:
+          return ctx.reply(' ');
         default:
           ctx.reply('');
       }
