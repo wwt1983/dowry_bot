@@ -137,13 +137,12 @@ export class TelegramService {
       ctx.reply('links');
     });
 
-
     this.bot.on('message', async (ctx) => {
       try {
-        const { web_app_data, via_bot } = ctx.update.message;
+        const { via_bot, text } = ctx.update.message;
         if (via_bot.is_bot) {
           console.log('WEB API');
-          const data = JSON.parse(web_app_data?.data);
+          const data = JSON.parse(text);
           console.log(data);
 
           return ctx.reply(getTextForFirstStep(data));
