@@ -125,8 +125,10 @@ export class TelegramService {
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
+          break;
         case 1:
           ctx.session.isLoadImageGiveGood = true;
+          break;
         default:
       }
 
