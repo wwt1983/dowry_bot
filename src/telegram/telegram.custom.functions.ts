@@ -6,6 +6,7 @@ import {
   HEADER,
   FIRST_STEP_A,
   FIRST_STEP_B,
+  FIRST_STEP_C,
   SECOND_STEP,
   THREE_STEP,
   FOUR_STEP,
@@ -26,10 +27,11 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   return (
     `Раздача: ${title} с кешбеком ${cash} рублей\n` +
     HEADER +
-    FIRST_STEP +
     keys +
     '\n' +
-    FIRST_STEP_A +
+    FIRST_STEP +
+    FIRST_STEP_B +
+    FIRST_STEP_C +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
   );
 }
