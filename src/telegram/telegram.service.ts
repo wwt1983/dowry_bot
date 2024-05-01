@@ -64,7 +64,7 @@ export class TelegramService {
 
       ctx.reply('hi', {
         reply_markup: {
-          keyboard: [
+          inline_keyboard: [
             [
               {
                 text: 'web app',
@@ -120,6 +120,7 @@ export class TelegramService {
       );
       console.log(TELEGRAM_SECRET_CHAT_ID, result);
     });
+    
     this.bot.on('message:photo', async (ctx) => {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
@@ -138,7 +139,7 @@ export class TelegramService {
         if (web_app_data) {
           const data = JSON.parse(web_app_data?.data);
           console.log(data);
-          ctx.reply(data);
+          return ctx.reply(data);
         } else {
           console.log('===== message from chat  === ', ctx.update);
           ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
