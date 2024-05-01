@@ -61,7 +61,7 @@ export class TelegramService {
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!!!!!!!!! START');
-      const { first_name, last_name, username } = ctx.from;
+      const { first_name, username } = ctx.from;
       ctx.reply(`Привет, ${first_name || username}'`, {
         reply_markup: {
           inline_keyboard: [
@@ -142,7 +142,7 @@ export class TelegramService {
           return ctx.reply(data);
         } else {
           console.log('===== message from chat  === ', ctx.update);
-          ctx.reply(`🤝 ${TELEGRAM_BOT_URL}`);
+          ctx.reply(`🤝`);
         }
       } catch (e) {
         console.log(e);
