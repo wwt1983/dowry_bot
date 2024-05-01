@@ -25,13 +25,13 @@ export const COMMANDS_TELEGRAM = [
 ];
 
 export const HEADER = ' Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
-export const FIRST_STEP =
-  '1️⃣ НАЙТИ наш товар по ключевому запросу:\n' +
+export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';
+export const FIRST_STEP_A =
   '✔️Положите в корзину несколько товаров от других продавцов.\n ' +
   '✔️Пришлите скриншот поиска для подтверждения \n\n' +
   '❗️Внимание, заказ нужно сделать в течение 20 минут после подтверждения или повторно запросить его.\n' +
   '❗️Без подтверждения заказа менеджером, кэшбек выплачен не будет\n\n';
-export const FIRST_STEP_A =
+export const FIRST_STEP_B =
   '✔️Отправьте скриншот с подтверждением факта заказа(на скриншоте должен быть указан адрес ПВЗ)\n\n';
 export const SECOND_STEP =
   '2️⃣ ЗАБРАТЬ ТОВАР\n' +
@@ -55,6 +55,7 @@ export const FOOTER =
 export const HELP_TEXT =
   FIRST_STEP +
   FIRST_STEP_A +
+  FIRST_STEP_B +
   SECOND_STEP +
   THREE_STEP +
   FOUR_STEP +

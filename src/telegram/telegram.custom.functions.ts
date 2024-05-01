@@ -1,11 +1,20 @@
 import { CommandContext } from 'grammy';
-import { MyContext } from './telegram.interface';
+import { ITelegramWebApp, MyContext } from './telegram.interface';
 import { format } from 'date-fns';
-
+import { FIRST_STEP, HEADER } from './telegram.constants';
 export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   const { first_name, last_name, username, id } = ctx.from;
 
   return `Старт: ${format(new Date(), 'dd.MM.yyyy H:mm')} ${first_name} 
   ${last_name || ''} username=${username || ''} 
   https://web.telegram.org/a/#${id}`;
+}
+
+export function getTextForFirstStep(data: ITelegramWebApp): string {
+  return (
+    `Раздача: ${data.title} с кешбеком ${data.cash} рублей\n` +
+    HEADER +
+    FIRST_STEP +
+    data.keys
+  );
 }

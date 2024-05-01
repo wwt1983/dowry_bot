@@ -22,3 +22,9 @@ export interface ISessionData {
 }
 
 export type MyContext = Context & SessionFlavor<ISessionData>;
+
+export interface ITelegramWebApp {
+  title: string;
+  cash: number;
+  keys: string;
+}

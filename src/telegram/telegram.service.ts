@@ -12,6 +12,7 @@ import {
   HELP_TEXT,
   FIRST_STEP,
   FIRST_STEP_A,
+  FIRST_STEP_B,
   SECOND_STEP,
   THREE_STEP,
   FOUR_STEP,
@@ -29,7 +30,7 @@ import {
   WEB_APP_TEST,
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
-import { sendMsgToSecretChat } from './telegram.custom.functions';
+import { getTextForFirstStep, sendMsgToSecretChat } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -62,7 +63,7 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!!!!!!!!! START');
       const { first_name, username } = ctx.from;
-      ctx.reply(`Привет, ${first_name || username}'`, {
+      ctx.reply(`Привет, ${first_name || username}`, {
         reply_markup: {
           inline_keyboard: [
             [
@@ -120,7 +121,7 @@ export class TelegramService {
       );
       console.log(TELEGRAM_SECRET_CHAT_ID, result);
     });
-    
+
     this.bot.on('message:photo', async (ctx) => {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
@@ -139,7 +140,8 @@ export class TelegramService {
         if (web_app_data) {
           const data = JSON.parse(web_app_data?.data);
           console.log(data);
-          return ctx.reply(data);
+
+          return ctx.reply(getTextForFirstStep(data));
         } else {
           console.log('===== message from chat  === ', ctx.update);
           ctx.reply(`🤝`);
