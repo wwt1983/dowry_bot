@@ -1,5 +1,5 @@
 import { CommandContext } from 'grammy';
-import { ITelegramWebApp, MyContext } from './telegram.interface';
+import { ISessionData, ITelegramWebApp, MyContext } from './telegram.interface';
 import { format } from 'date-fns';
 import {
   FIRST_STEP,
@@ -23,12 +23,10 @@ export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
   https://web.telegram.org/a/#${id}`;
 }
 
-export function createInitialSessionData() {
+export function createInitialSessionData(): ISessionData {
   return {
-    id: null,
     startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
     stopTime: null,
-    articul: null,
     isLoadImageSearch: null,
     isLoadImageGiveGood: null,
     step: 0,
@@ -36,6 +34,7 @@ export function createInitialSessionData() {
     isLoadImageOnComment: false,
     isLoadImageBrokeCode: false,
     isLoadImageCheck: false,
+    Images: [],
   };
 }
 

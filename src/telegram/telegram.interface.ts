@@ -28,6 +28,7 @@ export interface ISessionData {
   isLoadImageOnComment?: boolean;
   isLoadImageBrokeCode?: boolean;
   isLoadImageCheck?: boolean;
+  Images?: string[];
 }
 
 export type MyContext = Context & SessionFlavor<ISessionData>;

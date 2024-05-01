@@ -126,13 +126,16 @@ export class TelegramService {
 
       switch (step) {
         case 0:
+          ctx.session.isLoadImageSearch = true;
           return ctx.reply(getTextForSecondStep(firebaseUrl));
         case 1:
+          ctx.session.isLoadImageGiveGood = true;
           return ctx.reply(getTextForThreeStep(firebaseUrl));
         default:
           ctx.reply('');
       }
       ctx.session.step++;
+      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
     });
 
     this.bot.on('message', async (ctx) => {
