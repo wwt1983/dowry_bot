@@ -25,7 +25,7 @@ export function createMsgToSecretChat(
 ) {
   const { first_name, last_name, username, id } = from;
 
-  const userComment = comment ? `Раздача:${order}: Отзыв:n\ ${comment}` : '';
+  const userComment = comment ? `Раздача:${order}: Отзыв:\n ${comment}` : '';
   return `Старт: ${format(new Date(), 'dd.MM.yyyy H:mm')} ${first_name} 
   ${last_name || ''} username=${username || ''} 
   https://web.telegram.org/a/#${id} ${userComment}`;
