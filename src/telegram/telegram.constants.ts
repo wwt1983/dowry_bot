@@ -31,7 +31,12 @@ export enum STEP_COMMANDS {
   back = 'Назад',
 }
 
-export const HEADER = ' Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
+export const STEPS_TYPES = {
+  image: [0, 1, 2, 4, 5, 6, 7, 8],
+  text: [3],
+};
+
+export const HEADER = 'Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';
 export const FIRST_STEP_A =
   '✔️Положите в корзину несколько товаров от других продавцов.\n ' +

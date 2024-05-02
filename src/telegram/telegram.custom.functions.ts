@@ -14,15 +14,21 @@ import {
   FOUR_STEP_B,
   FOOTER,
 } from './telegram.constants';
+import { User } from '@grammyjs/types';
 
 export const COUNT_STEPS = 7;
 
-export function createMsgToSecretChat(ctx: CommandContext<MyContext>) {
-  const { first_name, last_name, username, id } = ctx.from;
+export function createMsgToSecretChat(
+  from: User,
+  comment?: string,
+  order?: string,
+) {
+  const { first_name, last_name, username, id } = from;
 
+  const userComment = comment ? `Раздача:${order}: Отзыв:n\ ${comment}` : '';
   return `Старт: ${format(new Date(), 'dd.MM.yyyy H:mm')} ${first_name} 
   ${last_name || ''} username=${username || ''} 
-  https://web.telegram.org/a/#${id}`;
+  https://web.telegram.org/a/#${id} ${userComment}`;
 }
 
 export function createInitialSessionData(): ISessionData {
@@ -39,19 +45,18 @@ export function createInitialSessionData(): ISessionData {
     isLoadImageOrderWithPVZ: false,
     Images: [],
     lastLoadImage: '',
-    lastMessage: null
+    lastMessage: null,
   };
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
-    `Раздача: ${title} с кешбеком ${cash} рублей\n` +
+    FIRST_STEP_B +
+    `Раздача: ${title} с кешбеком ${cash} рублей\n\n` +
     HEADER +
     FIRST_STEP +
     keys +
-    '\n' +
-    FIRST_STEP_B +
     FIRST_STEP_A +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
   );
@@ -59,19 +64,19 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
 
 export function getTextByNextStep(step: number): string {
   switch (step) {
-    case 0:
-      return FIRST_STEP_C;
     case 1:
-      return SECOND_STEP;
+      return FIRST_STEP_C;
     case 2:
-      return THREE_STEP;
+      return SECOND_STEP;
     case 3:
-      return FOUR_STEP;
+      return THREE_STEP;
     case 4:
-      return FOUR_STEP_A;
+      return FOUR_STEP;
     case 5:
-      return FOUR_STEP_B;
+      return FOUR_STEP_A;
     case 6:
+      return FOUR_STEP_B;
+    case 7:
       return FOOTER;
   }
 }

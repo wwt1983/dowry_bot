@@ -1,12 +1,5 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
-import {
-  Bot,
-  session,
-  GrammyError,
-  HttpError,
-  InlineKeyboard,
-  Api,
-} from 'grammy';
+import { Bot, session, GrammyError, HttpError, InlineKeyboard } from 'grammy';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
@@ -28,7 +21,7 @@ import {
   WEB_APP,
   WEB_APP_TEST,
   STEP_COMMANDS,
-  TELEGRAM_BOT_ID,
+  STEPS_TYPES,
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
 import {
@@ -38,12 +31,14 @@ import {
   createMsgToSecretChat,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
+import { User } from '@grammyjs/types';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
   bot: Bot<MyContext>;
   options: ITelegramOptions;
   user: string | null;
+  nextStep = (session: ISessionData) => (session.step = session.step + 1);
 
   TEST_USER = '@Julia_bogdanova88';
 
@@ -73,14 +68,11 @@ export class TelegramService {
       .text(STEP_COMMANDS.del, 'del')
       .text(STEP_COMMANDS.next, 'next');
 
-    const commentKeyboard = new InlineKeyboard()
-      .text(STEP_COMMANDS.comment, 'comment')
-      .text(STEP_COMMANDS.cancel, 'cancel');
-
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!! START!!!!!!!');
 
       ctx.session = createInitialSessionData();
+
       const { first_name, username } = ctx.from;
 
       ctx.reply(`Привет, ${first_name || username}`, {
@@ -137,7 +129,7 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.support, async (ctx) => {
       const result = await this.bot.api.sendMessage(
         TELEGRAM_SECRET_CHAT_ID,
-        createMsgToSecretChat(ctx),
+        createMsgToSecretChat(ctx.from as User),
       );
       console.log(TELEGRAM_SECRET_CHAT_ID, result);
     });
@@ -149,6 +141,7 @@ export class TelegramService {
       ctx.session.lastMessage = ctx.message;
 
       const { step } = ctx.session;
+
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
@@ -191,8 +184,8 @@ export class TelegramService {
       );
 
       await statusMessage.editText('Фото успешно отправлено на проверку!');
-      setTimeout(() => statusMessage.delete().catch(() => {}), 3000);
-      ctx.session.step = ctx.session.step + 1;
+      setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
+      ctx.session.step = this.nextStep(ctx.session);
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       ctx.session.lastLoadImage = firebaseUrl;
 
@@ -216,13 +209,26 @@ export class TelegramService {
           ctx.session.data = data;
           return ctx.reply(getTextForFirstStep(data));
         } else {
-          if (ctx.session.step === 2) {
-            return ctx.reply('Отзыв', { reply_markup: commentKeyboard });
-
-            //createMsgToSecretChat(ctx, ctx.message.text);
+          const { step } = ctx.session;
+          if (step === 3) {
+            await this.bot.api.sendMessage(
+              TELEGRAM_SECRET_CHAT_ID,
+              createMsgToSecretChat(
+                ctx.from as User,
+                ctx.message.text,
+                ctx.session.data.title,
+              ),
+            );
+            ctx.session.step = this.nextStep(ctx.session);
+            return await ctx.reply(getTextByNextStep(ctx.session.step));
+          } else {
+            console.log('===== message from chat === ', ctx.update);
+            if (!STEPS_TYPES.text.includes(ctx.session.step)) {
+              return await ctx.reply('Это точно фото? :))))');
+            } else {
+              return await ctx.reply(`msg`);
+            }
           }
-          console.log('===== message from chat  === ', ctx.update);
-          ctx.reply(`🤝`);
         }
       } catch (e) {
         console.log(e);
