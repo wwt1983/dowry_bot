@@ -1,10 +1,19 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
-import { Bot, session, GrammyError, HttpError } from 'grammy';
+import {
+  Bot,
+  session,
+  GrammyError,
+  HttpError,
+  InlineKeyboard,
+  Api,
+} from 'grammy';
+import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
   ITelegramAirtableHelperData,
   ITelegramOptions,
   MyContext,
+  MyApi,
   ISessionData,
   ITelegramWebApp,
 } from './telegram.interface';
@@ -18,13 +27,15 @@ import {
   FILE_FROM_BOT_URL,
   WEB_APP,
   WEB_APP_TEST,
+  STEP_COMMANDS,
+  TELEGRAM_BOT_ID,
 } from './telegram.constants';
 import { TelegramCommandsService } from './telegram.commands.service';
 import {
   createInitialSessionData,
-  getTextByStep,
+  getTextByNextStep,
   getTextForFirstStep,
-  sendMsgToSecretChat,
+  createMsgToSecretChat,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
@@ -45,7 +56,10 @@ export class TelegramService {
 
     console.log('------- START BOT --------');
 
-    this.bot = new Bot<MyContext>(this.options.token);
+    this.bot = new Bot<MyContext, MyApi>(this.options.token);
+    this.bot.use(hydrateContext());
+    this.bot.api.config.use(hydrateApi());
+
     this.bot.use(
       session({
         initial(): ISessionData {
@@ -55,12 +69,20 @@ export class TelegramService {
     );
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
 
+    const stepKeyboard = new InlineKeyboard()
+      .text(STEP_COMMANDS.del, 'del')
+      .text(STEP_COMMANDS.next, 'next');
+
+    const commentKeyboard = new InlineKeyboard()
+      .text(STEP_COMMANDS.comment, 'comment')
+      .text(STEP_COMMANDS.cancel, 'cancel');
+
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       console.log('!!!!!!!! START!!!!!!!');
 
       ctx.session = createInitialSessionData();
       const { first_name, username } = ctx.from;
-      
+
       ctx.reply(`Привет, ${first_name || username}`, {
         reply_markup: {
           inline_keyboard: [
@@ -115,33 +137,74 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.support, async (ctx) => {
       const result = await this.bot.api.sendMessage(
         TELEGRAM_SECRET_CHAT_ID,
-        sendMsgToSecretChat(ctx),
+        createMsgToSecretChat(ctx),
       );
       console.log(TELEGRAM_SECRET_CHAT_ID, result);
     });
 
     this.bot.on('message:photo', async (ctx) => {
-      const { step } = ctx.session;
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-      const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
+      ctx.session.lastLoadImage = url;
+      ctx.session.lastMessage = ctx.message;
+
+      const { step } = ctx.session;
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
           break;
         case 1:
+          ctx.session.isLoadImageOrderWithPVZ = true;
+          break;
+        case 2:
           ctx.session.isLoadImageGiveGood = true;
           break;
-          case 2:
-           // ctx.session.is
-        default:
+        case 3:
+          //comment user send secret chat text???
+          break;
+        case 4:
+          ctx.session.isLoadImageOnComment = true;
+          break;
+        case 5:
+          ctx.session.isLoadImageBrokeCode = true;
+        case 6:
+          ctx.session.isLoadImageCheck = true;
       }
+      return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
+    });
 
-      ctx.session.step++;
+    this.bot.callbackQuery('del', async (ctx) => {
+      ctx.session.Images = ctx.session.Images.filter(
+        (item) => item !== ctx.session.lastLoadImage,
+      );
+      ctx.session.lastMessage.delete().catch(() => {});
+
+      await ctx.callbackQuery.message.editText('Загрузите новое фото');
+    });
+
+    this.bot.callbackQuery('next', async (ctx) => {
+      ctx.session.lastMessage = null;
+      const statusMessage = await ctx.reply('Загрузка...');
+
+      const firebaseUrl = await this.firebaseService.uploadImageAsync(
+        ctx.session.lastLoadImage,
+      );
+
+      await statusMessage.editText('Фото успешно отправлено на проверку!');
+      setTimeout(() => statusMessage.delete().catch(() => {}), 3000);
+      ctx.session.step = ctx.session.step + 1;
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
+      ctx.session.lastLoadImage = firebaseUrl;
+
       console.log('session =', ctx.session);
 
-      return ctx.reply(getTextByStep(step));
+      await ctx.callbackQuery.message.editText(
+        getTextByNextStep(ctx.session.step),
+      );
+    });
+
+    this.bot.on('callback_query', async (ctx) => {
+      await ctx.answerCallbackQuery();
     });
 
     this.bot.on('message', async (ctx) => {
@@ -153,6 +216,11 @@ export class TelegramService {
           ctx.session.data = data;
           return ctx.reply(getTextForFirstStep(data));
         } else {
+          if (ctx.session.step === 2) {
+            return ctx.reply('Отзыв', { reply_markup: commentKeyboard });
+
+            //createMsgToSecretChat(ctx, ctx.message.text);
+          }
           console.log('===== message from chat  === ', ctx.update);
           ctx.reply(`🤝`);
         }

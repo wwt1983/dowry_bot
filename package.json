@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@grammyjs/conversations": "^1.2.0",
+    "@grammyjs/hydrate": "^1.4.1",
     "@grammyjs/menu": "^1.2.1",
     "@grammyjs/types": "^3.6.2",
     "@nestjs/axios": "^3.0.2",

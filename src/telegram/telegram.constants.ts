@@ -23,6 +23,14 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.support, description: 'Помощь онлайн' },
 ];
 
+export enum STEP_COMMANDS {
+  del = 'Удалить',
+  next = 'Продолжить',
+  comment = 'Отправить отзыв на соглосование?',
+  cancel = 'Отменить',
+  back = 'Назад',
+}
+
 export const HEADER = ' Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';
 export const FIRST_STEP_A =

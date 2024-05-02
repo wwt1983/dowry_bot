@@ -17,7 +17,7 @@ import {
 
 export const COUNT_STEPS = 7;
 
-export function sendMsgToSecretChat(ctx: CommandContext<MyContext>) {
+export function createMsgToSecretChat(ctx: CommandContext<MyContext>) {
   const { first_name, last_name, username, id } = ctx.from;
 
   return `Старт: ${format(new Date(), 'dd.MM.yyyy H:mm')} ${first_name} 
@@ -38,6 +38,8 @@ export function createInitialSessionData(): ISessionData {
     isLoadImageCheck: false,
     isLoadImageOrderWithPVZ: false,
     Images: [],
+    lastLoadImage: '',
+    lastMessage: null
   };
 }
 
@@ -55,7 +57,7 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   );
 }
 
-export function getTextByStep(step: number): string {
+export function getTextByNextStep(step: number): string {
   switch (step) {
     case 0:
       return FIRST_STEP_C;
@@ -69,7 +71,7 @@ export function getTextByStep(step: number): string {
       return FOUR_STEP_A;
     case 5:
       return FOUR_STEP_B;
-    default:
+    case 6:
       return FOOTER;
   }
 }

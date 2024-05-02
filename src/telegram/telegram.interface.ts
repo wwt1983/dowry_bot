@@ -1,5 +1,7 @@
 import { ModuleMetadata } from '@nestjs/common';
 import { SessionFlavor, Context } from 'grammy';
+import { Api } from 'grammy';
+import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
 
 export interface ITelegramOptions {
   token: string;
@@ -30,9 +32,12 @@ export interface ISessionData {
   step?: number;
   comment?: string;
   Images?: string[];
+  lastLoadImage?: string;
+  lastMessage?: any;
 }
 
-export type MyContext = Context & SessionFlavor<ISessionData>;
+export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;
+export type MyApi = HydrateApiFlavor<Api>;
 
 export interface ITelegramWebApp {
   id: number;
