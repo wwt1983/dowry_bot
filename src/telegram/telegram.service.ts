@@ -90,7 +90,21 @@ export class TelegramService {
       });
     });
 
-    this.bot.command(COMMAND_NAMES.history, (ctx) => ctx.reply('Меню'));
+    const userMenu = new InlineKeyboard().text('История раздач', 'showOrders');
+    this.bot.command(COMMAND_NAMES.history, (ctx) =>
+      ctx.reply('🛍️', {
+        reply_markup: userMenu,
+      }),
+    );
+    this.bot.callbackQuery('deshowOrdersl', async (ctx) => {
+      ctx.session.Images = ctx.session.Images.filter(
+        (item) => item !== ctx.session.lastLoadImage,
+      );
+      ctx.session.lastMessage.delete().catch(() => {});
+
+      await ctx.callbackQuery.message.editText('Загрузите новое фото');
+    });
+
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
       ctx.reply(HELP_TEXT);
     });
