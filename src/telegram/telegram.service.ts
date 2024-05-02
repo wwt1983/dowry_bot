@@ -142,10 +142,7 @@ export class TelegramService {
           break;
         case 6:
           ctx.session.isLoadImageCheck = true;
-          break;
-        case 7:
           ctx.session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
-          await this.sendDataToAirtable(ctx.session, ctx.from.username);
           break;
         default:
           break;
@@ -176,6 +173,10 @@ export class TelegramService {
       ctx.session.step = this.nextStep(ctx.session);
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       ctx.session.lastLoadImage = firebaseUrl;
+
+      if (ctx.session.step === 7) {
+        await this.sendDataToAirtable(ctx.session, ctx.from.username);
+      }
 
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),

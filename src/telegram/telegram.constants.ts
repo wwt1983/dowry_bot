@@ -29,7 +29,7 @@ export enum STEP_COMMANDS {
 }
 
 export const STEPS_TYPES = {
-  image: [0, 1, 2, 4, 5, 6, 7, 8],
+  image: [1, 2, 4, 5, 6, 7],
   text: [3],
 };
 
