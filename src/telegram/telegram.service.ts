@@ -95,6 +95,7 @@ export class TelegramService {
       ctx.reply(HELP_TEXT);
     });
     this.bot.command(COMMAND_NAMES.support, async (ctx) => {
+      if(ctx.message.)
       const result = await this.bot.api.sendMessage(
         TELEGRAM_SECRET_CHAT_ID,
         createMsgToSecretChat(ctx.from as User),
