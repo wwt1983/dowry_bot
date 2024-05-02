@@ -24,8 +24,8 @@ export const COMMANDS_TELEGRAM = [
 ];
 
 export enum STEP_COMMANDS {
-  del = 'Удалить',
-  next = 'Продолжить',
+  del = 'Изменить',
+  next = 'Да',
   comment = 'Отправить отзыв на соглосование?',
   cancel = 'Отменить',
   back = 'Назад',

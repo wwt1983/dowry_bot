@@ -35,16 +35,16 @@ export function createInitialSessionData(): ISessionData {
   return {
     startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
     stopTime: null,
-    isLoadImageSearch: null,
-    isLoadImageGiveGood: null,
-    step: 0,
-    comment: '',
+    isLoadImageSearch: false,
+    isLoadImageGiveGood: false,
     isLoadImageOnComment: false,
     isLoadImageBrokeCode: false,
     isLoadImageCheck: false,
     isLoadImageOrderWithPVZ: false,
+    step: 0,
+    comment: '',
     Images: [],
-    lastLoadImage: '',
+    lastLoadImage: null,
     lastMessage: null,
   };
 }

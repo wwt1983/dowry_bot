@@ -4,12 +4,17 @@ pm2 start dist/main.js --name dowry_bot
 git pull
 pm2 restart 1
 
+Ctrl + c 
+Pm2 stop 1
+ Git pull
+Npm run build
+Nom tun start:prod
 There are some PM2 commands to make your application auto restart after system reboot also
 
 $ pm2 startup systemd
 $ pm2 save
 
-
+//https://www.reg.ru/ - dowray.ru 
 
 //https://airtable.com/appVMEtut0NWayq26/api/docs#curl/table:test_api
 

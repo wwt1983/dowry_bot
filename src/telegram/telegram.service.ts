@@ -32,6 +32,7 @@ import {
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
+import { format } from 'date-fns';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -87,39 +88,6 @@ export class TelegramService {
           ],
         },
       });
-      //const { first_name, last_name, username } = ctx.from;
-      // console.log(ctx.from);
-      // this.user = username || `${first_name} ${last_name}`;
-
-      // const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
-      // const dataBuyer = await this.commandService.findBuyer(this.user);
-      // const dataArticlesInWork = await this.commandService.getArticlesInWork();
-      // const sticker = dataBuyer ? '🤟' : '👶';
-      // ctx.reply(
-      //   'Привет, ' +
-      //     first_name +
-      //     ' ' +
-      //     sticker +
-      //     '\n' +
-      //     HEADER +
-      //     FIRST_STEP +
-      //     dataArticlesInWork[0].fields.Name +
-      //     '\n' +
-      //     ' сейчас предложений (таблица Артикулы) = ' +
-      //     dataArticlesInWork?.length +
-      //     '\n' +
-      //     ' Артикул WB = ' +
-      //     dataArticlesInWork[0].fields['Артикул WB'] +
-      //     '\n' +
-      //     ' таблица Артикулы пример = ' +
-      //     JSON.stringify(dataArticlesInWork[0]) +
-      //     '\n' +
-      //     ' buyer real test = ' +
-      //     JSON.stringify(dataBuyerTest) +
-      //     '\n' +
-      //     ' no in base = ' +
-      //     JSON.stringify(dataBuyer),
-      // );
     });
 
     this.bot.command(COMMAND_NAMES.history, (ctx) => ctx.reply('Меню'));
@@ -142,6 +110,10 @@ export class TelegramService {
 
       const { step } = ctx.session;
 
+      if (!STEPS_TYPES.image.includes(step)) {
+        return ctx.reply('На этом шаге должно быть текстовое сообщение');
+      }
+
       switch (step) {
         case 0:
           ctx.session.isLoadImageSearch = true;
@@ -153,7 +125,7 @@ export class TelegramService {
           ctx.session.isLoadImageGiveGood = true;
           break;
         case 3:
-          //comment user send secret chat text???
+          //comment user send secret chat text
           break;
         case 4:
           ctx.session.isLoadImageOnComment = true;
@@ -162,6 +134,7 @@ export class TelegramService {
           ctx.session.isLoadImageBrokeCode = true;
         case 6:
           ctx.session.isLoadImageCheck = true;
+          ctx.session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
       }
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
@@ -209,20 +182,21 @@ export class TelegramService {
           ctx.session.data = data;
           return ctx.reply(getTextForFirstStep(data));
         } else {
-          const { step } = ctx.session;
+          const { step, data } = ctx.session;
           if (step === 3) {
+            ctx.session.comment = ctx.message.text;
             await this.bot.api.sendMessage(
               TELEGRAM_SECRET_CHAT_ID,
               createMsgToSecretChat(
                 ctx.from as User,
                 ctx.message.text,
-                ctx.session.data.title,
+                data.title,
               ),
             );
             ctx.session.step = this.nextStep(ctx.session);
             return await ctx.reply(getTextByNextStep(ctx.session.step));
           } else {
-            console.log('===== message from chat === ', ctx.update);
+            console.log('===== message from chat === ');
             if (!STEPS_TYPES.text.includes(ctx.session.step)) {
               return await ctx.reply('Это точно фото? :))))');
             } else {
@@ -267,3 +241,37 @@ export class TelegramService {
     });
   }
 }
+
+//const { first_name, last_name, username } = ctx.from;
+// console.log(ctx.from);
+// this.user = username || `${first_name} ${last_name}`;
+
+// const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
+// const dataBuyer = await this.commandService.findBuyer(this.user);
+// const dataArticlesInWork = await this.commandService.getArticlesInWork();
+// const sticker = dataBuyer ? '🤟' : '👶';
+// ctx.reply(
+//   'Привет, ' +
+//     first_name +
+//     ' ' +
+//     sticker +
+//     '\n' +
+//     HEADER +
+//     FIRST_STEP +
+//     dataArticlesInWork[0].fields.Name +
+//     '\n' +
+//     ' сейчас предложений (таблица Артикулы) = ' +
+//     dataArticlesInWork?.length +
+//     '\n' +
+//     ' Артикул WB = ' +
+//     dataArticlesInWork[0].fields['Артикул WB'] +
+//     '\n' +
+//     ' таблица Артикулы пример = ' +
+//     JSON.stringify(dataArticlesInWork[0]) +
+//     '\n' +
+//     ' buyer real test = ' +
+//     JSON.stringify(dataBuyerTest) +
+//     '\n' +
+//     ' no in base = ' +
+//     JSON.stringify(dataBuyer),
+// );
