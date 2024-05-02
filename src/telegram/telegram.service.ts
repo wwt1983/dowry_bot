@@ -94,15 +94,6 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
       ctx.reply(HELP_TEXT);
     });
-    this.bot.command(COMMAND_NAMES.support, async (ctx) => {
-      if(ctx.message.)
-      const result = await this.bot.api.sendMessage(
-        TELEGRAM_SECRET_CHAT_ID,
-        createMsgToSecretChat(ctx.from as User),
-      );
-      console.log(TELEGRAM_SECRET_CHAT_ID, result);
-    });
-
     this.bot.on('message:photo', async (ctx) => {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;

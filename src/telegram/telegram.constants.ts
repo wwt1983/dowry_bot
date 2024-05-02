@@ -20,7 +20,6 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
-  { command: COMMAND_NAMES.support, description: 'Помощь онлайн' },
 ];
 
 export enum STEP_COMMANDS {
