@@ -11,9 +11,7 @@ export const WEB_APP_TEST = 'http://localhost:5173';
 export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
-  history = 'history',
-  support = 'support',
-  web = 'web',
+  history = 'history'
 }
 
 export const COMMANDS_TELEGRAM = [
