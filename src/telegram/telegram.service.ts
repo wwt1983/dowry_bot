@@ -3,7 +3,7 @@ import { Bot, session, GrammyError, HttpError, InlineKeyboard } from 'grammy';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
-  ITelegramAirtableHelperData,
+  ITelegramAirtableData,
   ITelegramOptions,
   MyContext,
   MyApi,
@@ -19,7 +19,6 @@ import {
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
   WEB_APP,
-  WEB_APP_TEST,
   STEP_COMMANDS,
   STEPS_TYPES,
 } from './telegram.constants';
@@ -33,6 +32,7 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { format } from 'date-fns';
+import { AirtableService } from 'src/airtable/airtable.service';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -47,6 +47,7 @@ export class TelegramService {
     @Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
     private readonly commandService: TelegramCommandsService,
     private readonly firebaseService: FirebaseService,
+    private readonly airtableService: AirtableService,
   ) {
     this.options = options;
 
@@ -76,7 +77,7 @@ export class TelegramService {
 
       const { first_name, username } = ctx.from;
 
-      ctx.reply(`Привет, ${first_name || username}`, {
+      ctx.reply(`Привет, ${first_name || username}!`, {
         reply_markup: {
           inline_keyboard: [
             [
@@ -96,13 +97,13 @@ export class TelegramService {
         reply_markup: userMenu,
       }),
     );
-    this.bot.callbackQuery('deshowOrdersl', async (ctx) => {
-      ctx.session.Images = ctx.session.Images.filter(
-        (item) => item !== ctx.session.lastLoadImage,
+    this.bot.callbackQuery('showOrders', async (ctx) => {
+      const { first_name, last_name, username } = ctx.from;
+      const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
+      //const dataBuyer = await this.commandService.findBuyer(this.user);
+      return ctx.reply(
+        JSON.stringify(dataBuyerTest[0].fields['Раздачи'].join(',')),
       );
-      ctx.session.lastMessage.delete().catch(() => {});
-
-      await ctx.callbackQuery.message.editText('Загрузите новое фото');
     });
 
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
@@ -138,9 +139,16 @@ export class TelegramService {
           break;
         case 5:
           ctx.session.isLoadImageBrokeCode = true;
+          break;
         case 6:
           ctx.session.isLoadImageCheck = true;
+          break;
+        case 7:
           ctx.session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
+          await this.sendDataToAirtable(ctx.session, ctx.from.username);
+          break;
+        default:
+          break;
       }
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
@@ -164,11 +172,10 @@ export class TelegramService {
 
       await statusMessage.editText('Фото успешно отправлено на проверку!');
       setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
+
       ctx.session.step = this.nextStep(ctx.session);
       ctx.session.Images = [...ctx.session.Images, firebaseUrl];
       ctx.session.lastLoadImage = firebaseUrl;
-
-      console.log('session =', ctx.session);
 
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
@@ -196,7 +203,7 @@ export class TelegramService {
               createMsgToSecretChat(
                 ctx.from as User,
                 ctx.message.text,
-                data.title,
+                data?.title,
               ),
             );
             ctx.session.step = this.nextStep(ctx.session);
@@ -233,37 +240,24 @@ export class TelegramService {
     this.bot.start();
   }
 
-  async sendMessageToChat(message: ITelegramAirtableHelperData) {
-    const messageString =
-      'Данные из airtable = ' +
-      message.Name +
-      '  ' +
-      message.Notes +
-      ' ' +
-      `https://www.wildberries.ru/catalog/${message.Articul}/detail.aspx`;
-
-    await this.bot.api.sendMessage(TELEGRAM_CHAT_ID, messageString, {
-      parse_mode: 'HTML',
+  async sendDataToAirtable(session: ISessionData, user: string) {
+    await this.airtableService.sendDataToWebhookAirtable({
+      User: user,
+      Артикул: session.data.articul.toString(),
+      Images: session.Images,
+      Раздача: session.data.title,
+      StartTime: session.startTime,
+      StopTime: session.stopTime,
+      Bot: true,
+      Отзыв: session.comment,
     });
   }
 }
 
-//const { first_name, last_name, username } = ctx.from;
-// console.log(ctx.from);
 // this.user = username || `${first_name} ${last_name}`;
 
-// const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
-// const dataBuyer = await this.commandService.findBuyer(this.user);
 // const dataArticlesInWork = await this.commandService.getArticlesInWork();
-// const sticker = dataBuyer ? '🤟' : '👶';
 // ctx.reply(
-//   'Привет, ' +
-//     first_name +
-//     ' ' +
-//     sticker +
-//     '\n' +
-//     HEADER +
-//     FIRST_STEP +
 //     dataArticlesInWork[0].fields.Name +
 //     '\n' +
 //     ' сейчас предложений (таблица Артикулы) = ' +

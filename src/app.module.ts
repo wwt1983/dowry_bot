@@ -9,7 +9,6 @@ import { AirtableModule } from './airtable/airtable.module';
 import { TelegramModule } from './telegram/telegram.module';
 import appConfig from './configs/app.config';
 import telegramConfig from './telegram/configs/telegram.config';
-import { AirtableService } from './airtable/airtable.service';
 import { FirebaseModule } from './firebase/firebase.module';
 import { TelegramController } from './telegram/telegram.controller';
 
@@ -28,7 +27,7 @@ import { TelegramController } from './telegram/telegram.controller';
     }),
     AirtableModule,
     TelegramModule.forRootAsync({
-      imports: [ConfigModule, FirebaseModule],
+      imports: [ConfigModule, FirebaseModule, AirtableModule],
       inject: [ConfigService],
       useFactory: telegramConfig,
     }),

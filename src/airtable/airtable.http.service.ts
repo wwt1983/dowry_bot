@@ -32,7 +32,7 @@ export class AirtableHttpService {
     );
   }
 
-  update(url: string, id: string, data: any) {
+  update(url: string, id: string) {
     const table = TablesDowray.find((x) => x.title === url).tableName;
 
     console.log(`${AIRTABLE_URL}/${table}/${id}`);

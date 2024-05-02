@@ -21,13 +21,13 @@ export class TelegramCommandsService {
     if (!data) return null;
     return data as IHelpers;
   }
-  async findBuyer(nick: string): Promise<IBuyer | null> {
+  async findBuyer(nick: string): Promise<IBuyer[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Buyer,
       `&${FILTER_BY_FORMULA}=Find("${nick}",{Ник ТГ})`,
     );
     if (!data || data.records.length === 0) return null;
-    return data as IBuyer;
+    return data.records as IBuyer[];
   }
 
   async getArticleById(id: string): Promise<IArticle | null> {

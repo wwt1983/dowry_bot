@@ -13,10 +13,14 @@ export interface ITelegramModuleAsyncOptions
   inject?: any[];
 }
 
-export interface ITelegramAirtableHelperData {
-  Name: string;
-  Notes: string;
-  Articul: string;
+export interface ITelegramAirtableData {
+  User: string;
+  Images: string[];
+  Раздача: string;
+  Артикул: string;
+  StartTime: string;
+  StopTime: string;
+  Отзыв: string;
 }
 
 export interface ISessionData {
