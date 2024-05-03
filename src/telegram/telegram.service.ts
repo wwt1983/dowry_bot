@@ -3,7 +3,6 @@ import { Bot, session, GrammyError, HttpError, InlineKeyboard } from 'grammy';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
-  ITelegramAirtableData,
   ITelegramOptions,
   MyContext,
   MyApi,
@@ -71,7 +70,7 @@ export class TelegramService {
       .text(STEP_COMMANDS.next, 'next');
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      console.log('!!!!!!!! START!!!!!!!');
+      console.log('-----START-----');
 
       ctx.session = createInitialSessionData();
 
@@ -98,7 +97,7 @@ export class TelegramService {
       }),
     );
     this.bot.callbackQuery('showOrders', async (ctx) => {
-      const { first_name, last_name, username } = ctx.from;
+      //const { first_name, last_name, username } = ctx.from;
       const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
       //const dataBuyer = await this.commandService.findBuyer(this.user);
       return ctx.reply(
@@ -130,9 +129,6 @@ export class TelegramService {
           break;
         case 2:
           ctx.session.isLoadImageGiveGood = true;
-          break;
-        case 3:
-          //comment user send secret chat text
           break;
         case 4:
           ctx.session.isLoadImageOnComment = true;
@@ -241,8 +237,8 @@ export class TelegramService {
     this.bot.start();
   }
 
-  async sendDataToAirtable(session: ISessionData, user: string) {
-    await this.airtableService.sendDataToWebhookAirtable({
+  async sendDataToAirtable(session: ISessionData, user: string): Promise<any> {
+    return await this.airtableService.sendDataToWebhookAirtable({
       User: user,
       Артикул: session.data.articul.toString(),
       Images: session.Images,
