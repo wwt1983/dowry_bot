@@ -53,12 +53,13 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
     FIRST_STEP_B +
-    `Раздача: ${title} с кешбеком ${cash} рублей\n\n` +
+    `Раздача: ${title} с кешбэком ${cash} рублей\n\n` +
+    `https://www.wildberries.ru/catalog/${articul}/detail.aspx` +
+    '\n' +
     HEADER +
     FIRST_STEP +
     keys +
-    FIRST_STEP_A +
-    `https://www.wildberries.ru/catalog/${articul}/detail.aspx`
+    FIRST_STEP_A
   );
 }
 

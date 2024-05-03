@@ -33,7 +33,7 @@ export const STEPS_TYPES = {
   text: [3],
 };
 
-export const HEADER = 'Чтобы получить кешбек Вам необходимо ⬇️ \n\n';
+export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';
 export const FIRST_STEP_A =
   '✔️Положите в корзину несколько товаров от других продавцов.\n ' +
