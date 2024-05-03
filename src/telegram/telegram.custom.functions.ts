@@ -109,12 +109,14 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
     FIRST_STEP_B +
-    `Раздача: ${title} с кешбэком ${cash} <b>рублей</b>\n` +
+    `Раздача: ${title} с кешбэком <b>${cash} рублей</b>\n` +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx` +
     '\n\n' +
     HEADER +
     FIRST_STEP +
+    '<b>' +
     keys +
+    '</b>' +
     '\n\n' +
     FIRST_STEP_A
   );
@@ -123,18 +125,43 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
 export function getTextByNextStep(step: number): string {
   switch (step) {
     case 1:
-      return FIRST_STEP_C;
+      return FIRST_STEP_C + getNumberText(step);
     case 2:
-      return SECOND_STEP;
+      return SECOND_STEP + getNumberText(step);
     case 3:
-      return THREE_STEP;
+      return THREE_STEP + getNumberText(step);
     case 4:
-      return FOUR_STEP;
+      return FOUR_STEP + getNumberText(step);
     case 5:
-      return FOUR_STEP_A;
+      return FOUR_STEP_A + getNumberText(step);
     case 6:
-      return FOUR_STEP_B;
+      return FOUR_STEP_B + getNumberText(step);
     case 7:
       return FOOTER;
+  }
+}
+
+function getNumberText(step: number) {
+  const finish_txt = `До финиша `;
+
+  switch (COUNT_STEPS - step) {
+    case 8:
+      return finish_txt + '8️⃣ шагов\n';
+    case 7:
+      return finish_txt + '7️⃣ шагов\n';
+    case 6:
+      return finish_txt + '6️⃣ шагов\n';
+    case 5:
+      return finish_txt + '5️⃣ шагов\n';
+    case 4:
+      return finish_txt + '4️⃣ шага\n';
+    case 3:
+      return finish_txt + '3️⃣ шага\n';
+    case 2:
+      return finish_txt + '2️⃣ шага\n';
+    case 1:
+      return finish_txt + '1️⃣ шаг\n';
+    case 0:
+      return '';
   }
 }

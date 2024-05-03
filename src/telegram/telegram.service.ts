@@ -109,7 +109,6 @@ export class TelegramService {
       ctx.reply(HELP_TEXT);
     });
     this.bot.on('message:photo', async (ctx) => {
-      console.log(ctx.update.message.from);
       const { step } = ctx.session;
       if (!STEPS_TYPES.image.includes(step)) {
         return ctx.reply('На этом шаге должно быть текстовое сообщение');
@@ -171,9 +170,13 @@ export class TelegramService {
             'chat_id',
             ctx.message.from.id.toString(),
           );
-          return ctx.reply(getTextForFirstStep(data), {
-            
-          });
+          return ctx.api.sendMessage(
+            ctx.message.from.id,
+            getTextForFirstStep(data),
+            {
+              parse_mode: 'HTML',
+            },
+          );
         } else {
           const { step, data } = ctx.session;
           if (step === 3) {
@@ -225,9 +228,10 @@ export class TelegramService {
 отправляем заполенные данные пользоваетля через веб-хук в airtable
 */
   async sendDataToAirtable(session: ISessionData, user: string): Promise<any> {
+    console.log(session);
     return await this.airtableService.sendDataToWebhookAirtable({
       User: user,
-      Артикул: session.data.articul.toString(),
+      Артикул: session.data.articul,
       Images: session.Images,
       Раздача: session.data.title,
       StartTime: session.startTime,
