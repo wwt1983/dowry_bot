@@ -1,5 +1,4 @@
-import { CommandContext } from 'grammy';
-import { ISessionData, ITelegramWebApp, MyContext } from './telegram.interface';
+import { ISessionData, ITelegramWebApp } from './telegram.interface';
 import { format } from 'date-fns';
 import {
   FIRST_STEP,
@@ -33,6 +32,7 @@ export function createMsgToSecretChat(
 
 export function createInitialSessionData(): ISessionData {
   return {
+    chat_id: null,
     startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
     stopTime: null,
     isLoadImageSearch: false,
@@ -49,16 +49,73 @@ export function createInitialSessionData(): ISessionData {
   };
 }
 
+export function UpdateSessionByField(
+  session: ISessionData,
+  field: string,
+  data: string | ITelegramWebApp,
+): ISessionData {
+  session[field] = data;
+  return session;
+}
+
+export function UpdateSessionByStep(
+  session: ISessionData,
+  data?: string,
+  isPhotoMsg?: boolean,
+): ISessionData {
+  const { step } = session;
+
+  switch (step) {
+    case 0:
+      session.isLoadImageSearch = true;
+      break;
+    case 1:
+      session.isLoadImageOrderWithPVZ = true;
+      break;
+    case 2:
+      session.isLoadImageGiveGood = true;
+      break;
+    case 3:
+      session.comment = data;
+      break;
+    case 4:
+      session.isLoadImageOnComment = true;
+      break;
+    case 5:
+      session.isLoadImageBrokeCode = true;
+      break;
+    case 6:
+      session.isLoadImageCheck = true;
+      session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
+      break;
+    default:
+      break;
+  }
+  session = nextStep(session);
+
+  if (isPhotoMsg) {
+    session.Images = [...session.Images, data];
+    session.lastLoadImage = data;
+  }
+
+  return session;
+}
+export function nextStep(session: ISessionData): ISessionData {
+  session.step = session.step + 1;
+  return session;
+}
+
 export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
     FIRST_STEP_B +
-    `Раздача: ${title} с кешбэком ${cash} рублей\n\n` +
+    `Раздача: ${title} с кешбэком ${cash} <b>рублей</b>\n` +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx` +
-    '\n' +
+    '\n\n' +
     HEADER +
     FIRST_STEP +
     keys +
+    '\n\n' +
     FIRST_STEP_A
   );
 }

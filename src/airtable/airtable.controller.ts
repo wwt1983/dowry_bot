@@ -7,7 +7,7 @@ export class AirtableController {
 
   @Post('signal')
   signal(@Body() data: any): string {
-    this.airtableService.sendDataToWebhookAirtable(data);
+
     return data;
   }
 }

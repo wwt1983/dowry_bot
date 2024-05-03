@@ -24,6 +24,7 @@ export interface ITelegramAirtableData {
 }
 
 export interface ISessionData {
+  chat_id: string;
   data?: ITelegramWebApp;
   startTime?: string;
   stopTime?: string;

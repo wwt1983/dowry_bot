@@ -27,10 +27,11 @@ import {
   getTextByNextStep,
   getTextForFirstStep,
   createMsgToSecretChat,
+  UpdateSessionByStep,
+  UpdateSessionByField,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
-import { format } from 'date-fns';
 import { AirtableService } from 'src/airtable/airtable.service';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -38,7 +39,6 @@ export class TelegramService {
   bot: Bot<MyContext>;
   options: ITelegramOptions;
   user: string | null;
-  nextStep = (session: ISessionData) => (session.step = session.step + 1);
 
   TEST_USER = '@Julia_bogdanova88';
 
@@ -81,7 +81,7 @@ export class TelegramService {
           inline_keyboard: [
             [
               {
-                text: 'Dowray раздачи',
+                text: 'Dowry раздачи',
                 web_app: { url: WEB_APP },
               },
             ],
@@ -109,40 +109,18 @@ export class TelegramService {
       ctx.reply(HELP_TEXT);
     });
     this.bot.on('message:photo', async (ctx) => {
-      const path = await ctx.getFile();
-      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-      ctx.session.lastLoadImage = url;
-      ctx.session.lastMessage = ctx.message;
-
+      console.log(ctx.update.message.from);
       const { step } = ctx.session;
-
       if (!STEPS_TYPES.image.includes(step)) {
         return ctx.reply('На этом шаге должно быть текстовое сообщение');
       }
 
-      switch (step) {
-        case 0:
-          ctx.session.isLoadImageSearch = true;
-          break;
-        case 1:
-          ctx.session.isLoadImageOrderWithPVZ = true;
-          break;
-        case 2:
-          ctx.session.isLoadImageGiveGood = true;
-          break;
-        case 4:
-          ctx.session.isLoadImageOnComment = true;
-          break;
-        case 5:
-          ctx.session.isLoadImageBrokeCode = true;
-          break;
-        case 6:
-          ctx.session.isLoadImageCheck = true;
-          ctx.session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
-          break;
-        default:
-          break;
-      }
+      const path = await ctx.getFile();
+      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+
+      ctx.session.lastMessage = ctx.message;
+      ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
+
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
 
@@ -166,12 +144,10 @@ export class TelegramService {
       await statusMessage.editText('Фото успешно отправлено на проверку!');
       setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
 
-      ctx.session.step = this.nextStep(ctx.session);
-      ctx.session.Images = [...ctx.session.Images, firebaseUrl];
-      ctx.session.lastLoadImage = firebaseUrl;
-
+      ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       if (ctx.session.step === 7) {
         await this.sendDataToAirtable(ctx.session, ctx.from.username);
+        await ctx.react('🎉');
       }
 
       await ctx.callbackQuery.message.editText(
@@ -189,12 +165,20 @@ export class TelegramService {
         if (via_bot?.is_bot) {
           const data = JSON.parse(text) as ITelegramWebApp;
           console.log('==== WEB API ====', data);
-          ctx.session.data = data;
-          return ctx.reply(getTextForFirstStep(data));
+          ctx.session = UpdateSessionByField(ctx.session, 'data', data);
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'chat_id',
+            ctx.message.from.id.toString(),
+          );
+          return ctx.reply(getTextForFirstStep(data), {
+            
+          });
         } else {
           const { step, data } = ctx.session;
           if (step === 3) {
-            ctx.session.comment = ctx.message.text;
+            ctx.session = UpdateSessionByStep(ctx.session, ctx.message.text);
+
             await this.bot.api.sendMessage(
               TELEGRAM_SECRET_CHAT_ID,
               createMsgToSecretChat(
@@ -203,12 +187,13 @@ export class TelegramService {
                 data?.title,
               ),
             );
-            ctx.session.step = this.nextStep(ctx.session);
             return await ctx.reply(getTextByNextStep(ctx.session.step));
           } else {
             console.log('===== message from chat === ');
             if (!STEPS_TYPES.text.includes(ctx.session.step)) {
-              return await ctx.reply('Это точно фото? :))))');
+              return await ctx.reply(
+                'На этом шаге должно быть отправлено фото',
+              );
             } else {
               return await ctx.reply(`msg`);
             }
@@ -236,7 +221,9 @@ export class TelegramService {
 
     this.bot.start();
   }
-
+  /*
+отправляем заполенные данные пользоваетля через веб-хук в airtable
+*/
   async sendDataToAirtable(session: ISessionData, user: string): Promise<any> {
     return await this.airtableService.sendDataToWebhookAirtable({
       User: user,
@@ -247,6 +234,7 @@ export class TelegramService {
       StopTime: session.stopTime,
       Bot: true,
       Отзыв: session.comment,
+      chat_id: session.chat_id,
     });
   }
 }

@@ -1,5 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
+import { SubscribeDto } from './dto/SubscribeDto';
 
 @Controller('telegram')
 export class TelegramController {
@@ -25,5 +26,14 @@ export class TelegramController {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  @Post('subscriber')
+  subscriber(@Body() subscribeDto: SubscribeDto): void {
+    console.log(`airtable time= ${Date.now()}=`, subscribeDto.text);
+    this.telegramService.bot.api.sendMessage(
+      subscribeDto.chat_id,
+      JSON.stringify(subscribeDto.text),
+    );
   }
 }
