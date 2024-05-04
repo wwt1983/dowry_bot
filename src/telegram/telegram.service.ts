@@ -12,7 +12,6 @@ import {
 import {
   TELEGRAM_MODULE_OPTIONS,
   HELP_TEXT,
-  TELEGRAM_CHAT_ID,
   TELEGRAM_SECRET_CHAT_ID,
   COMMANDS_TELEGRAM,
   COMMAND_NAMES,
@@ -51,6 +50,7 @@ export class TelegramService {
     this.options = options;
 
     console.log('------- START BOT --------');
+    console.log('process.env.NODE_ENV=', process.env.NODE_ENV);
 
     this.bot = new Bot<MyContext, MyApi>(this.options.token);
     this.bot.use(hydrateContext());
