@@ -76,7 +76,7 @@ export class TelegramService {
       const { first_name, last_name, username } = ctx.from;
       this.user = username || `${first_name} ${last_name}`;
 
-      ctx.reply(`Привет, ${first_name || username}!`, {
+      ctx.reply(`Привет, ${first_name || username}! В путь ⤵`, {
         reply_markup: {
           inline_keyboard: [
             [
