@@ -108,7 +108,6 @@ export function nextStep(session: ISessionData): ISessionData {
 export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
-    FIRST_STEP_B +
     `Раздача: ${title} с кешбэком <b>${cash} рублей</b>\n` +
     `https://www.wildberries.ru/catalog/${articul}/detail.aspx` +
     '\n\n' +
