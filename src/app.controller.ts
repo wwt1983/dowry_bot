@@ -7,15 +7,15 @@ export class AppController {
 
   @Get('test')
   test(): string {
-    console.log('test hello nest hello http');
+    console.log('test hello nest hello https');
     return this.appService.getHello();
   }  
   
   //метод нужен для запуска туннеля как входная точка
   @Get('')
   start(): string {
-    console.log('test hello nest hello http');
-    return 'test';
+    console.log('test hello nest hello https');
+    return 'test https';
   }
   @Get('startbot')
   getHello(): string {
