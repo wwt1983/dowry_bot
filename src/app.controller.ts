@@ -14,7 +14,7 @@ export class AppController {
   //метод нужен для запуска туннеля как входная точка
   @Get('')
   start(): string {
-    console.log('test hello nest hello https');
+    console.log('test hello https - 1');
     return 'test https';
   }
   @Get('startbot')
