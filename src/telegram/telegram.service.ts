@@ -21,7 +21,7 @@ import {
   STEP_COMMANDS,
   STEPS_TYPES,
 } from './telegram.constants';
-import { TelegramCommandsService } from './telegram.commands.service';
+import { TelegramHttpService } from './telegram.http.service';
 import {
   createInitialSessionData,
   getTextByNextStep,
@@ -44,7 +44,7 @@ export class TelegramService {
 
   constructor(
     @Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
-    private readonly commandService: TelegramCommandsService,
+    private readonly commandService: TelegramHttpService,
     private readonly firebaseService: FirebaseService,
     private readonly airtableService: AirtableService,
   ) {
@@ -73,8 +73,8 @@ export class TelegramService {
       console.log('-----START-----');
 
       ctx.session = createInitialSessionData();
-
-      const { first_name, username } = ctx.from;
+      const { first_name, last_name, username } = ctx.from;
+      this.user = username || `${first_name} ${last_name}`;
 
       ctx.reply(`Привет, ${first_name || username}!`, {
         reply_markup: {
@@ -243,7 +243,7 @@ export class TelegramService {
   }
 }
 
-// this.user = username || `${first_name} ${last_name}`;
+//
 
 // const dataArticlesInWork = await this.commandService.getArticlesInWork();
 // ctx.reply(

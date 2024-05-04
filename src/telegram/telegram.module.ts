@@ -2,12 +2,12 @@ import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
-import { TelegramCommandsService } from './telegram.commands.service';
+import { TelegramHttpService } from './telegram.http.service';
 import { TelegramController } from './telegram.controller';
 
 @Global()
 @Module({
-  controllers: [TelegramController]
+  controllers: [TelegramController],
 })
 export class TelegramModule {
   static forRootAsync(options: ITelegramModuleAsyncOptions): DynamicModule {
@@ -15,12 +15,8 @@ export class TelegramModule {
     return {
       module: TelegramModule,
       imports: options.imports,
-      providers: [
-        TelegramService,
-        providerAsyncOptions,
-        TelegramCommandsService,
-      ],
-      exports: [TelegramService, providerAsyncOptions, TelegramCommandsService],
+      providers: [TelegramService, providerAsyncOptions, TelegramHttpService],
+      exports: [TelegramService, providerAsyncOptions, TelegramHttpService],
     };
   }
 

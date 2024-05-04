@@ -11,7 +11,7 @@ import {
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
 
 @Injectable()
-export class TelegramCommandsService {
+export class TelegramHttpService {
   constructor(private readonly airtableHttpService: AirtableHttpService) {
     //
   }

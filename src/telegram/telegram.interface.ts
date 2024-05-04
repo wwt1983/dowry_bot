@@ -29,10 +29,10 @@ export interface ISessionData {
   startTime?: string;
   stopTime?: string;
   isLoadImageSearch?: boolean; // поиск товара
-  isLoadImageOrderWithPVZ?: boolean; // пожвтерждения факта заказа
+  isLoadImageOrderWithPVZ?: boolean; // подвтверждение факта заказа
   isLoadImageGiveGood?: boolean; // получен товар
   isLoadImageOnComment?: boolean; // отзыв
-  isLoadImageBrokeCode?: boolean; // фото порванного штрихкода
+  isLoadImageBrokeCode?: boolean; // фото порванного штрих-кода
   isLoadImageCheck?: boolean; // чек
   step?: number;
   comment?: string;

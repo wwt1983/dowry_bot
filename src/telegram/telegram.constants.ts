@@ -32,6 +32,7 @@ export const STEPS_TYPES = {
   image: [0, 1, 2, 4, 5, 6, 7],
   text: [3],
 };
+export const COUNT_STEPS = 7;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';

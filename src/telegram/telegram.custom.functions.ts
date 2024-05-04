@@ -12,10 +12,10 @@ import {
   FOUR_STEP_A,
   FOUR_STEP_B,
   FOOTER,
+  COUNT_STEPS,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 
-export const COUNT_STEPS = 7;
 
 export function createMsgToSecretChat(
   from: User,
@@ -143,7 +143,6 @@ export function getTextByNextStep(step: number): string {
 
 function getNumberText(step: number) {
   const finish_txt = `До финиша `;
-
   switch (COUNT_STEPS - step) {
     case 8:
       return finish_txt + '8️⃣ шагов\n';
