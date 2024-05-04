@@ -19,6 +19,7 @@ import {
   WEB_APP,
   STEP_COMMANDS,
   STEPS_TYPES,
+  FIRST_STEP_B,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -76,18 +77,23 @@ export class TelegramService {
       const { first_name, last_name, username } = ctx.from;
       this.user = username || `${first_name} ${last_name}`;
 
-      ctx.reply(`Привет, ${first_name || username}! В путь ⤵`, {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: 'Dowry раздачи',
-                web_app: { url: WEB_APP },
-              },
+      ctx.reply(
+        `Привет, ${first_name || username}! \n\n` +
+          FIRST_STEP_B +
+          'В путь ⤵\n', 
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Dowry раздачи',
+                  web_app: { url: WEB_APP },
+                },
+              ],
             ],
-          ],
+          },
         },
-      });
+      );
     });
 
     const userMenu = new InlineKeyboard().text('История раздач', 'showOrders');
