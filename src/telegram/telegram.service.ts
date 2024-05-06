@@ -20,6 +20,7 @@ import {
   STEP_COMMANDS,
   STEPS_TYPES,
   FIRST_STEP_B,
+  WEB_APP_TEST,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -33,6 +34,7 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
+import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -71,8 +73,6 @@ export class TelegramService {
       .text(STEP_COMMANDS.next, 'next');
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      console.log('-----START-----');
-
       ctx.session = createInitialSessionData();
       const { first_name, last_name, username } = ctx.from;
       this.user = username || `${first_name} ${last_name}`;
@@ -80,14 +80,19 @@ export class TelegramService {
       ctx.reply(
         `Привет, ${first_name || username}! \n\n` +
           FIRST_STEP_B +
-          'В путь ⤵\n', 
+          'В путь ⤵\n',
         {
           reply_markup: {
             inline_keyboard: [
               [
                 {
                   text: 'Dowry раздачи',
-                  web_app: { url: WEB_APP },
+                  web_app: {
+                    url:
+                      process.env.NODE_ENV === 'development'
+                        ? WEB_APP_TEST
+                        : WEB_APP,
+                  },
                 },
               ],
             ],
@@ -123,6 +128,8 @@ export class TelegramService {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
 
+      const qrCodeData = parseQrCode(url);
+      console.log('qrcode = ' + qrCodeData);
       ctx.session.lastMessage = ctx.message;
       ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
 
@@ -146,7 +153,7 @@ export class TelegramService {
         ctx.session.lastLoadImage,
       );
 
-      await statusMessage.editText('Фото успешно отправлено на проверку!');
+      await statusMessage.editText('Фото успешно загружено!');
       setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
 
       ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
@@ -166,6 +173,8 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
+        console.log('==== msg ====', ctx.message);
+        
         const { via_bot, text } = ctx.update.message;
         if (via_bot?.is_bot) {
           const data = JSON.parse(text) as ITelegramWebApp;
