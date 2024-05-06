@@ -19,7 +19,6 @@ import {
   WEB_APP,
   STEP_COMMANDS,
   STEPS_TYPES,
-  FIRST_STEP_B,
   WEB_APP_TEST,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
@@ -30,11 +29,12 @@ import {
   createMsgToSecretChat,
   UpdateSessionByStep,
   UpdateSessionByField,
+  sayHi,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
-import { parseQrCode } from './qrcode/grcode.parse';
+//import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -77,28 +77,23 @@ export class TelegramService {
       const { first_name, last_name, username } = ctx.from;
       this.user = username || `${first_name} ${last_name}`;
 
-      ctx.reply(
-        `Привет, ${first_name || username}! \n\n` +
-          FIRST_STEP_B +
-          'В путь ⤵\n',
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: 'Dowry раздачи',
-                  web_app: {
-                    url:
-                      process.env.NODE_ENV === 'development'
-                        ? WEB_APP_TEST
-                        : WEB_APP,
-                  },
+      ctx.reply(sayHi(first_name, username), {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Dowry раздачи',
+                web_app: {
+                  url:
+                    process.env.NODE_ENV === 'development'
+                      ? WEB_APP_TEST
+                      : WEB_APP,
                 },
-              ],
+              },
             ],
-          },
+          ],
         },
-      );
+      });
     });
 
     const userMenu = new InlineKeyboard().text('История раздач', 'showOrders');
@@ -128,8 +123,6 @@ export class TelegramService {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
 
-      const qrCodeData = parseQrCode(url);
-      console.log('qrcode = ' + qrCodeData);
       ctx.session.lastMessage = ctx.message;
       ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
 
@@ -173,8 +166,6 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
-        console.log('==== msg ====', ctx.message);
-        
         const { via_bot, text } = ctx.update.message;
         if (via_bot?.is_bot) {
           const data = JSON.parse(text) as ITelegramWebApp;
@@ -185,13 +176,21 @@ export class TelegramService {
             'chat_id',
             ctx.message.from.id.toString(),
           );
-          return ctx.api.sendMessage(
+
+          /*Удаляем первый ответ от сайта он формате объекта*/
+          if (ctx.msg.text.includes('query_id')) {
+            ctx.message.delete().catch(() => {});
+          }
+
+          await ctx.api.sendMessage(
             ctx.message.from.id,
             getTextForFirstStep(data),
             {
               parse_mode: 'HTML',
             },
           );
+
+          return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
         } else {
           const { step, data } = ctx.session;
           if (step === 3) {

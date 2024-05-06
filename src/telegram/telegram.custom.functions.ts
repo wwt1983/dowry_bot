@@ -16,6 +16,11 @@ import {
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 
+export function sayHi(first_name: string, username: string): string {
+  return (
+    `Привет, ${first_name || username}! \n\n` + FIRST_STEP_B + 'В путь ⤵\n'
+  );
+}
 
 export function createMsgToSecretChat(
   from: User,
