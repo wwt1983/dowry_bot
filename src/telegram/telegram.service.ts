@@ -169,9 +169,20 @@ export class TelegramService {
 
       ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
 
-      if (STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step)) {
-        console.log('SEND DATA TO DB');
-        await this.sendDataToAirtable(ctx.session, ctx.from.username);
+      if (
+        STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
+        !ctx.session.isFinish
+      ) {
+        console.log('Save DATA TO DB');
+        await this.saveToAirtable(ctx.session, ctx.from.username);
+      }
+
+      if (
+        STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
+        ctx.session.isFinish
+      ) {
+        console.log('Update DATA TO DB');
+        await this.updateToAirtable(ctx.session);
       }
 
       if (ctx.session.step === COUNT_STEPS) {
@@ -269,9 +280,9 @@ export class TelegramService {
   /*
 отправляем заполненные данные пользоваетля через веб-хук в airtable
 */
-  async sendDataToAirtable(session: ISessionData, user: string): Promise<any> {
+  async saveToAirtable(session: ISessionData, user: string): Promise<any> {
     console.log(session);
-    return await this.airtableService.sendDataToWebhookAirtable({
+    return await this.airtableService.saveToAirtable({
       SessionId: session.sessionId,
       User: user,
       Артикул: session.data.articul,
@@ -279,10 +290,18 @@ export class TelegramService {
       Раздача: session.data.title,
       StartTime: session.startTime,
       StopBuyTime: session.stopBuyTime,
-      StopTime: session.stopTime,
       Bot: true,
       Отзыв: session.comment,
       chat_id: session.chat_id,
+    });
+  }
+  async updateToAirtable(session: ISessionData): Promise<any> {
+    console.log(session);
+    return await this.airtableService.updateToAirtable({
+      SessionId: session.sessionId,
+      Images: session.Images,
+      StopTime: session.stopTime,
+      Отзыв: session.comment,
       IsFinishUser: session.isFinish,
     });
   }

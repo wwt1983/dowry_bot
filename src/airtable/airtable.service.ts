@@ -12,9 +12,17 @@ export class AirtableService {
     private readonly configService: ConfigService,
   ) {}
 
-  async sendDataToWebhookAirtable(data: any): Promise<any> {
+  async saveToAirtable(data: any): Promise<any> {
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_TEST_API',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
+    console.log('postWebhook ===>', response);
+    return response;
+  }
+  async updateToAirtable(data: any): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_TEST_AP_UPDATE',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
     console.log('postWebhook ===>', response);
