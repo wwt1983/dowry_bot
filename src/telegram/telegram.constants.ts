@@ -22,7 +22,7 @@ export const COMMANDS_TELEGRAM = [
 
 export enum STEP_COMMANDS {
   del = 'Изменить',
-  next = 'Да',
+  next = 'Продолжить',
   comment = 'Отправить отзыв на соглосование?',
   cancel = 'Отменить',
   back = 'Назад',
@@ -52,10 +52,9 @@ export const SECOND_STEP =
   '‼️ ВОЗВРАТ ТОВАРА СДЕЛАТЬ НЕВОЗМОЖНО ‼️ \n\n';
 export const THREE_STEP =
   '3️⃣ НАПИСАТЬ ОТЗЫВ НА 5 ⭐️ \n' +
-  '✔️После получения товара пришлите нам отзыв на согласование. \n' +
-  'Напишите положительный отзыв с фотографией (уточнить у менеджера)\n' +
-  'и поставьте 5 звезд ⭐️\n\n';
-
+  '✔️После получения товара пришлите нам отзыв на согласование. \n';
+export const THREE_STEP_A =
+  'Напишите отзыв с фотографией и поставьте 5 звезд ⭐️\n';
 export const FOUR_STEP = '4️⃣ ЗАГРУЗИТЕ\n' + '✅ скриншот отзыва;\n';
 export const FOUR_STEP_A =
   '✅ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих кода УПАКОВКИ И БИРКИ \n';
@@ -72,6 +71,8 @@ export const HELP_TEXT =
   FIRST_STEP_C +
   SECOND_STEP +
   THREE_STEP +
+  THREE_STEP_A +
+  '\n' +
   FOUR_STEP +
   FOUR_STEP_A +
   FOUR_STEP_B +

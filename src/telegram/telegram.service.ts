@@ -32,6 +32,7 @@ import {
   UpdateSessionByStep,
   UpdateSessionByField,
   sayHi,
+  nextStep,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
@@ -73,6 +74,11 @@ export class TelegramService {
     const stepKeyboard = new InlineKeyboard()
       .text(STEP_COMMANDS.del, 'del')
       .text(STEP_COMMANDS.next, 'next');
+
+    const commentKeyboard = new InlineKeyboard().text(
+      STEP_COMMANDS.next,
+      'next',
+    );
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       ctx.session = createInitialSessionData();
@@ -157,17 +163,21 @@ export class TelegramService {
     });
 
     this.bot.callbackQuery('next', async (ctx) => {
-      ctx.session.lastMessage = null;
-      const statusMessage = await ctx.reply('Загрузка...');
+      if (ctx.session.step !== 3) {
+        ctx.session.lastMessage = null;
+        const statusMessage = await ctx.reply('Загрузка...');
 
-      const firebaseUrl = await this.firebaseService.uploadImageAsync(
-        ctx.session.lastLoadImage,
-      );
+        const firebaseUrl = await this.firebaseService.uploadImageAsync(
+          ctx.session.lastLoadImage,
+        );
 
-      await statusMessage.editText('Фото успешно загружено!');
-      setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
+        await statusMessage.editText('Фото успешно загружено!');
+        setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
 
-      ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
+        ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
+      } else {
+        ctx.session = nextStep(ctx.session);
+      }
 
       if (
         STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
@@ -227,9 +237,9 @@ export class TelegramService {
           return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
         } else {
           const { step, data } = ctx.session;
+          //отзыв пользователя
           if (step === 3) {
-            ctx.session = UpdateSessionByStep(ctx.session, ctx.message.text);
-
+            console.log('COMMENT STEP 3');
             await this.bot.api
               .sendMessage(
                 TELEGRAM_SECRET_CHAT_ID,
@@ -243,7 +253,17 @@ export class TelegramService {
                 console.log('secret chat bad ---', e.message),
               );
 
-            return await ctx.reply(getTextByNextStep(ctx.session.step));
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'comment',
+              ctx.message.text,
+            );
+
+            await this.updateToAirtable(ctx.session);
+
+            return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
+              reply_markup: commentKeyboard,
+            });
           } else {
             console.log('===== message from chat === ');
             if (!STEPS_TYPES.text.includes(ctx.session.step)) {
@@ -291,10 +311,10 @@ export class TelegramService {
       StartTime: session.startTime,
       StopBuyTime: session.stopBuyTime,
       Bot: true,
-      Отзыв: session.comment,
       chat_id: session.chat_id,
     });
   }
+
   async updateToAirtable(session: ISessionData): Promise<any> {
     console.log(session);
     return await this.airtableService.updateToAirtable({

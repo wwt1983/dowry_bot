@@ -15,6 +15,7 @@ import {
   FOUR_STEP_B,
   FOOTER,
   COUNT_STEPS,
+  THREE_STEP_A,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 
@@ -67,6 +68,14 @@ export function UpdateSessionByField(
   session[field] = data;
   return session;
 }
+
+// export enum STEPS {
+//   searchScreen = 'Поиск товара',
+//   pvzScreen = 'Скриншот ПВЗ',
+//   getGoodScreen = 'Скриншот о получении',
+//   comment = 'Отзыв',
+//   commentScreen = 'Скриншот отзыва',
+// }
 
 export function UpdateSessionByStep(
   session: ISessionData,
@@ -143,7 +152,7 @@ export function getTextByNextStep(step: number): string {
     case 3:
       return THREE_STEP + getNumberText(step);
     case 4:
-      return FOUR_STEP + getNumberText(step);
+      return FOUR_STEP + THREE_STEP_A + getNumberText(step);
     case 5:
       return FOUR_STEP_A + getNumberText(step);
     case 6:
