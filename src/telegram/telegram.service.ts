@@ -125,9 +125,9 @@ export class TelegramService {
       ctx.reply(HELP_TEXT);
     });
 
-    this.bot.on('message:file', async (ctx) => {
-      return ctx.reply('В бот нужно отправлять только картинки');
-    });
+    // this.bot.on('', async (ctx) => {
+    //   return ctx.reply('В бот нужно отправлять только картинки');
+    // });
 
     this.bot.on('message:photo', async (ctx) => {
       const { step, data } = ctx.session;
