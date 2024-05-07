@@ -20,6 +20,8 @@ import {
   STEP_COMMANDS,
   STEPS_TYPES,
   WEB_APP_TEST,
+  STEPS_FOR_SEND_DATA_TO_DB,
+  COUNT_STEPS,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -103,19 +105,35 @@ export class TelegramService {
       }),
     );
     this.bot.callbackQuery('showOrders', async (ctx) => {
-      //const { first_name, last_name, username } = ctx.from;
-      const dataBuyerTest = await this.commandService.findBuyer(this.TEST_USER);
-      //const dataBuyer = await this.commandService.findBuyer(this.user);
-      return ctx.reply(
-        JSON.stringify(dataBuyerTest[0].fields['Раздачи'].join(',')),
-      );
+      const { first_name, last_name, username, id } = ctx.from;
+      const dataBuyerTest =
+        await this.commandService.getDistributionTableByFilter(this.TEST_USER);
+      const allCash = dataBuyerTest.reduce(function (newArr, record) {
+        if (record.fields['Кэш выплачен']) {
+          newArr.push(
+            `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
+          );
+        }
+        return newArr;
+      }, []);
+      await ctx.api.sendMessage(id, allCash.join('\n'), {
+        parse_mode: 'HTML',
+      });
     });
 
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
       ctx.reply(HELP_TEXT);
     });
+
+    this.bot.on('message:file', async (ctx) => {
+      return ctx.reply('В бот нужно отправлять только картинки');
+    });
+
     this.bot.on('message:photo', async (ctx) => {
-      const { step } = ctx.session;
+      const { step, data } = ctx.session;
+      if (!data)
+        return ctx.reply('Вам нужно нажать на кнопку ⬆️ "Dowry раздачи"');
+
       if (!STEPS_TYPES.image.includes(step)) {
         return ctx.reply('На этом шаге должно быть текстовое сообщение');
       }
@@ -150,8 +168,13 @@ export class TelegramService {
       setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
 
       ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
-      if (ctx.session.step === 7) {
+
+      if (STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step)) {
+        console.log('SEND DATA TO DB');
         await this.sendDataToAirtable(ctx.session, ctx.from.username);
+      }
+
+      if (ctx.session.step === COUNT_STEPS) {
         await ctx.react('🎉');
       }
 
@@ -196,14 +219,19 @@ export class TelegramService {
           if (step === 3) {
             ctx.session = UpdateSessionByStep(ctx.session, ctx.message.text);
 
-            await this.bot.api.sendMessage(
-              TELEGRAM_SECRET_CHAT_ID,
-              createMsgToSecretChat(
-                ctx.from as User,
-                ctx.message.text,
-                data?.title,
-              ),
-            );
+            await this.bot.api
+              .sendMessage(
+                TELEGRAM_SECRET_CHAT_ID,
+                createMsgToSecretChat(
+                  ctx.from as User,
+                  ctx.message.text,
+                  data?.title,
+                ),
+              )
+              .catch((e: GrammyError) =>
+                console.log('secret chat bad ---', e.message),
+              );
+
             return await ctx.reply(getTextByNextStep(ctx.session.step));
           } else {
             console.log('===== message from chat === ');
@@ -212,7 +240,7 @@ export class TelegramService {
                 'На этом шаге должно быть отправлено фото',
               );
             } else {
-              return await ctx.reply(`msg`);
+              return await ctx.reply(`✌️`);
             }
           }
         }
@@ -239,20 +267,23 @@ export class TelegramService {
     this.bot.start();
   }
   /*
-отправляем заполенные данные пользоваетля через веб-хук в airtable
+отправляем заполненные данные пользоваетля через веб-хук в airtable
 */
   async sendDataToAirtable(session: ISessionData, user: string): Promise<any> {
     console.log(session);
     return await this.airtableService.sendDataToWebhookAirtable({
+      SessionId: session.sessionId,
       User: user,
       Артикул: session.data.articul,
       Images: session.Images,
       Раздача: session.data.title,
       StartTime: session.startTime,
+      StopBuyTime: session.stopBuyTime,
       StopTime: session.stopTime,
       Bot: true,
       Отзыв: session.comment,
       chat_id: session.chat_id,
+      IsFinishUser: session.isFinish,
     });
   }
 }

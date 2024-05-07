@@ -32,6 +32,8 @@ export const STEPS_TYPES = {
   image: [0, 1, 2, 4, 5, 6, 7],
   text: [3],
 };
+export const STEPS_FOR_SEND_DATA_TO_DB = [2, 7];
+
 export const COUNT_STEPS = 7;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';

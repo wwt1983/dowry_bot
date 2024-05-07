@@ -1,5 +1,7 @@
 import { ISessionData, ITelegramWebApp } from './telegram.interface';
 import { format } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+
 import {
   FIRST_STEP,
   HEADER,
@@ -37,8 +39,10 @@ export function createMsgToSecretChat(
 
 export function createInitialSessionData(): ISessionData {
   return {
+    sessionId: uuidv4(),
     chat_id: null,
     startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
+    stopBuyTime: null,
     stopTime: null,
     isLoadImageSearch: false,
     isLoadImageGiveGood: false,
@@ -51,6 +55,7 @@ export function createInitialSessionData(): ISessionData {
     Images: [],
     lastLoadImage: null,
     lastMessage: null,
+    isFinish: false,
   };
 }
 
@@ -76,6 +81,7 @@ export function UpdateSessionByStep(
       break;
     case 1:
       session.isLoadImageOrderWithPVZ = true;
+      session.stopBuyTime = format(new Date(), 'dd.MM.yyyy H:mm');
       break;
     case 2:
       session.isLoadImageGiveGood = true;
@@ -92,16 +98,18 @@ export function UpdateSessionByStep(
     case 6:
       session.isLoadImageCheck = true;
       session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
+      session.isFinish = true;
       break;
     default:
       break;
   }
-  session = nextStep(session);
 
   if (isPhotoMsg) {
     session.Images = [...session.Images, data];
     session.lastLoadImage = data;
   }
+
+  session = nextStep(session);
 
   return session;
 }
@@ -114,7 +122,7 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
   const { title, keys, cash, articul } = data;
   return (
     `Раздача: ${title} с кешбэком <b>${cash} рублей</b>\n` +
-    `https://www.wildberries.ru/catalog/${articul}/detail.aspx` +
+    `https://www.wildberries.ru/catalog/${articul}/detail.aspx ` +
     '\n\n' +
     HEADER +
     FIRST_STEP +

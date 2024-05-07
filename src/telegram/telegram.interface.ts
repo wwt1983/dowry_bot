@@ -19,15 +19,18 @@ export interface ITelegramAirtableData {
   Раздача: string;
   Артикул: string;
   StartTime: string;
+  StopBuyTime: string;
   StopTime: string;
   Отзыв: string;
 }
 
 export interface ISessionData {
+  sessionId: null;
   chat_id: string;
   data?: ITelegramWebApp;
   startTime?: string;
   stopTime?: string;
+  stopBuyTime?: string; //время выкупа товра после начала сессии
   isLoadImageSearch?: boolean; // поиск товара
   isLoadImageOrderWithPVZ?: boolean; // подвтверждение факта заказа
   isLoadImageGiveGood?: boolean; // получен товар
@@ -39,6 +42,7 @@ export interface ISessionData {
   Images?: string[];
   lastLoadImage?: string;
   lastMessage?: any;
+  isFinish: boolean;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;

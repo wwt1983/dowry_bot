@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from '../airtable/airtable.http.service';
-import { IDistributions } from '../airtable/types/IDisturbation.interface';
+import { IDistribution, IDistributions } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 import {
@@ -47,14 +47,14 @@ export class TelegramHttpService {
   }
   async getDistributionTableByFilter(
     nick: string,
-  ): Promise<IDistributions | null> {
+  ): Promise<IDistribution[] | null> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("${nick}",{Покупатели})`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
     );
     if (!data || (data.records && data.records.length === 0)) return null;
-    console.log('data ===>>> ', data);
+    //console.log('data ===>>> ', data);
     return data.records;
   }
 }
