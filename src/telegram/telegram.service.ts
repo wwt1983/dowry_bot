@@ -183,15 +183,17 @@ export class TelegramService {
         STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
         !ctx.session.isFinish
       ) {
-        console.log('Save DATA TO DB');
-        await this.saveToAirtable(ctx.session, ctx.from.username);
+        await this.saveToAirtable(
+          ctx.session,
+          ctx.from.username ||
+            `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`,
+        );
       }
 
       if (
         STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
         ctx.session.isFinish
       ) {
-        console.log('Update DATA TO DB');
         await this.updateToAirtable(ctx.session);
       }
 
@@ -239,7 +241,6 @@ export class TelegramService {
           const { step, data } = ctx.session;
           //отзыв пользователя
           if (step === 3) {
-            console.log('COMMENT STEP 3');
             await this.bot.api
               .sendMessage(
                 TELEGRAM_SECRET_CHAT_ID,
