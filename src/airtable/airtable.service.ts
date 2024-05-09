@@ -35,4 +35,8 @@ export class AirtableService {
       filter,
     );
   }
+  async getOffers(): Promise<ITest> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
+    return await this.airtableHttpService.get(TablesName.Offers);
+  }
 }
