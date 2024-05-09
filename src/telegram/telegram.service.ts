@@ -332,17 +332,7 @@ export class TelegramService {
   async sendOfferToChat(id: string) {
     try {
       const offerAirtable = await this.airtableService.getOffer(id);
-      const offer = getOffer(offerAirtable);
-
-      const medias = [];
-      const countPhotos = offerAirtable.fields['Фото'].length;
-      for (let i = 0; i < offerAirtable.fields['Фото'].length; i++) {
-        medias.push({
-          type: 'photo',
-          media: offerAirtable.fields['Фото'][i].url,
-          caption: countPhotos - 1 === i ? offer : '',
-        });
-      }
+      const medias = getOffer(offerAirtable);
 
       this.bot.api.sendMediaGroup(TELEGRAM_CHAT_ID, medias);
     } catch (e) {

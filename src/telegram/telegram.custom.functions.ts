@@ -16,6 +16,7 @@ import {
   FOOTER,
   COUNT_STEPS,
   THREE_STEP_A,
+  TELEGRAM_BOT_NAME,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IBot } from 'src/airtable/types/IBot.interface';
@@ -187,7 +188,7 @@ function getNumberText(step: number) {
 }
 
 export function getOffer(data: IBot) {
-  const result =
+  const offer =
     data.fields['Name'] +
     '\n' +
     data.fields['Описание'] +
@@ -197,7 +198,17 @@ export function getOffer(data: IBot) {
     '\n' +
     `❗️ Кешбэк ~ ${data.fields['Кешбэк']}❗️ \n` +
     `⭐️ Ваша цена ~ ${data.fields['Ваша цена']} 🫶 \n` +
-    `✅ Для заказа присылайте скрин или ссылку на это объявление в @DowryWorkBot!\n 
+    `✅ Для заказа присылайте скрин или ссылку на это объявление в ${TELEGRAM_BOT_NAME}?start=${data.id} !\n 
     Будем рады познакомиться🥰🥰🥰`;
-  return result;
+
+  const medias = [];
+  const countPhotos = data.fields['Фото'].length;
+  for (let i = 0; i < data.fields['Фото'].length; i++) {
+    medias.push({
+      type: 'photo',
+      media: data.fields['Фото'][i].url,
+      caption: countPhotos - 1 === i ? offer : '',
+    });
+  }
+  return medias;
 }
