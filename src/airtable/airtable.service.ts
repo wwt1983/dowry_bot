@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
 import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
-import { IBots } from './types/IBot.interface';
+import { IBot, IBots } from './types/IBot.interface';
 
 @Injectable()
 export class AirtableService {
@@ -38,5 +38,9 @@ export class AirtableService {
   async getOffers(): Promise<IBots> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
     return await this.airtableHttpService.get(TablesName.Offers);
+  }
+  async getOffer(id: string): Promise<IBot> {
+    const filter = `?id=${id}`;
+    return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
 }

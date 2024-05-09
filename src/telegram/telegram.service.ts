@@ -22,6 +22,7 @@ import {
   WEB_APP_TEST,
   STEPS_FOR_SEND_DATA_TO_DB,
   COUNT_STEPS,
+  TELEGRAM_CHAT_ID,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -33,10 +34,12 @@ import {
   UpdateSessionByField,
   sayHi,
   nextStep,
+  getOffer,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
+import { IBot } from 'src/airtable/types/IBot.interface';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -326,26 +329,10 @@ export class TelegramService {
       IsFinishUser: session.isFinish,
     });
   }
+
+  async sendOfferToChat(id: string) {
+    const offerAirtable = await this.airtableService.getOffer(id);
+    const offer = getOffer(offerAirtable);
+    this.bot.api.sendMessage(TELEGRAM_CHAT_ID, offer);
+  }
 }
-
-//
-
-// const dataArticlesInWork = await this.commandService.getArticlesInWork();
-// ctx.reply(
-//     dataArticlesInWork[0].fields.Name +
-//     '\n' +
-//     ' сейчас предложений (таблица Артикулы) = ' +
-//     dataArticlesInWork?.length +
-//     '\n' +
-//     ' Артикул WB = ' +
-//     dataArticlesInWork[0].fields['Артикул WB'] +
-//     '\n' +
-//     ' таблица Артикулы пример = ' +
-//     JSON.stringify(dataArticlesInWork[0]) +
-//     '\n' +
-//     ' buyer real test = ' +
-//     JSON.stringify(dataBuyerTest) +
-//     '\n' +
-//     ' no in base = ' +
-//     JSON.stringify(dataBuyer),
-// );

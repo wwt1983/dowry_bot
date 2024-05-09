@@ -18,6 +18,7 @@ import {
   THREE_STEP_A,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
+import { IBot } from 'src/airtable/types/IBot.interface';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -184,4 +185,20 @@ function getNumberText(step: number) {
     case 0:
       return '';
   }
+}
+
+export function getOffer(data: IBot) {
+  const result =
+    data.fields['Name'] +
+    '\n' +
+    data.fields['Описание'] +
+    '\n' +
+    '❌Цена на WB~' +
+    data.fields['Цена WB'] +
+    '\n' +
+    `❗️ Кешбэк ~ ${data.fields['Кешбэк']}❗️ \n` +
+    `⭐️ Ваша цена ~ ${data.fields['Ваша цена']} 🫶 \n` +
+    `✅ Для заказа присылайте скрин или ссылку на это объявление в @Dowry_wb!\n 
+    Будем рады познакомиться🥰🥰🥰`;
+  return result;
 }
