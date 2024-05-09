@@ -14,7 +14,7 @@ export class AirtableService {
 
   async saveToAirtable(data: any): Promise<any> {
     const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_TEST_API',
+      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
     console.log('postWebhook ===>', response);
@@ -22,7 +22,7 @@ export class AirtableService {
   }
   async updateToAirtable(data: any): Promise<any> {
     const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_TEST_AP_UPDATE',
+      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
     console.log('postWebhook ===>', response);
@@ -30,6 +30,9 @@ export class AirtableService {
   }
   async getDistribution(): Promise<ITest> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
-    return await this.airtableHttpService.get(TablesName.Test, filter);
+    return await this.airtableHttpService.get(
+      TablesName.Bot_Distributions,
+      filter,
+    );
   }
 }

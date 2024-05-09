@@ -12,7 +12,7 @@ export enum TablesName {
   Helpers = 'Хэлперы',
   Buyer = 'Покупатели',
   Distributions = 'Раздачи',
-  Test = 'test_api',
+  Bot_Distributions = 'Бот',
 }
 
 export const TablesDowray: IData[] = [
@@ -43,7 +43,7 @@ export const TablesDowray: IData[] = [
   },
 
   {
-    title: TablesName.Test,
+    title: TablesName.Bot_Distributions,
     tableName: 'tbl0ibSir3z7hhdsW',
     view: 'viwF04g0zSkrK5c3Y',
   },
