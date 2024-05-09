@@ -36,4 +36,9 @@ export class TelegramController {
       JSON.stringify(subscribeDto.text),
     );
   }
+
+  @Post('publicOffer')
+  publicOffer(@Body() id: string): void {
+    console.log(`publicOffer}=`, id);
+  }
 }
