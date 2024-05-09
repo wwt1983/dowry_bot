@@ -38,7 +38,8 @@ export class TelegramController {
   }
 
   @Post('publicOffer')
-  publicOffer(@Body() id: string): void {
+  publicOffer(@Body() id: string): string {
     console.log(`publicOffer}=`, id);
+    return 'Ok';
   }
 }
