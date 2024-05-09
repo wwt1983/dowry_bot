@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { SubscribeDto } from './dto/SubscribeDto';
+import { TELEGRAM_CHAT_ID } from './telegram.constants';
 
 @Controller('telegram')
 export class TelegramController {
@@ -39,7 +40,8 @@ export class TelegramController {
 
   @Post('publicOffer')
   publicOffer(@Body() id: string): string {
-    console.log(`publicOffer}=`, id);
+    console.log(`publicOffer=`, id);
+    this.telegramService.bot.api.sendMessage(TELEGRAM_CHAT_ID, id);
     return 'Ok';
   }
 }
