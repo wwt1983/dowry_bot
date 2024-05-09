@@ -341,7 +341,7 @@ export class TelegramService {
       for (let i = 0; i < offerAirtable.fields['Фото'].length; i++) {
         medias.push({
           type: 'photo',
-          media: offerAirtable.fields['Фото'][0].url,
+          media: offerAirtable.fields['Фото'][i].url,
           caption: countPhotos - 1 === i ? offer : '',
         });
       }
