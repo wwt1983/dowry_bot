@@ -193,7 +193,7 @@ export function getOffer(data: IBot) {
     '\n' +
     data.fields['Описание'] +
     '\n' +
-    '❌Цена на WB~' +
+    '❌Цена на WB ~' +
     data.fields['Цена WB'] +
     '\n' +
     `❗️ Кешбэк ~ ${data.fields['Кешбэк']}❗️ \n` +

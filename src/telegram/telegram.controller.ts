@@ -38,9 +38,9 @@ export class TelegramController {
   }
 
   @Post('publicOffer')
-  publicOffer(@Body() id: string): string {
-    console.log(`publicOffer=`, id);
-    this.telegramService.sendOfferToChat(id);
+  publicOffer(@Body() data: { id: string }): string {
+    console.log(`publicOffer=`, data);
+    this.telegramService.sendOfferToChat(data.id);
     return 'Ok';
   }
 }

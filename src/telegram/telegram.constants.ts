@@ -1,6 +1,6 @@
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
-export const TELEGRAM_CHAT_ID = '-1002101395017';
+export const TELEGRAM_CHAT_ID = '-1002002256034';
 export const TELEGRAM_SECRET_CHAT_ID = '-1002140115397';
 export const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';

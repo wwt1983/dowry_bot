@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { lastValueFrom, map } from 'rxjs';
+import { firstValueFrom, lastValueFrom, map } from 'rxjs';
 
 import { AIRTABLE_WEBHOOK_URL } from './airtable.constants';
 import { TablesDowray, AIRTABLE_URL } from './airtable.constants';
@@ -31,7 +31,18 @@ export class AirtableHttpService {
         .pipe(map((response) => response.data)),
     );
   }
+  getById(url: string, id: string) {
+    const table = TablesDowray.find((x) => x.title === url).tableName;
 
+    return firstValueFrom(
+      this.httpService
+        .get(`${AIRTABLE_URL}/${table}/${id}`, {
+          headers: this.authHeader,
+          method: 'GET',
+        })
+        .pipe(map((response) => response.data)),
+    );
+  }
   update(url: string, id: string) {
     const table = TablesDowray.find((x) => x.title === url).tableName;
 

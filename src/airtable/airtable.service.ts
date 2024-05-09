@@ -40,7 +40,6 @@ export class AirtableService {
     return await this.airtableHttpService.get(TablesName.Offers);
   }
   async getOffer(id: string): Promise<IBot> {
-    const filter = `?id=${id}`;
-    return await this.airtableHttpService.get(TablesName.Offers, filter);
+    return await this.airtableHttpService.getById(TablesName.Offers, id);
   }
 }

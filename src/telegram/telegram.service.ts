@@ -40,6 +40,7 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
 import { IBot } from 'src/airtable/types/IBot.interface';
+import { InputMedia } from 'node-telegram-bot-api';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -331,8 +332,23 @@ export class TelegramService {
   }
 
   async sendOfferToChat(id: string) {
-    const offerAirtable = await this.airtableService.getOffer(id);
-    const offer = getOffer(offerAirtable);
-    this.bot.api.sendMessage(TELEGRAM_CHAT_ID, offer);
+    try {
+      const offerAirtable = await this.airtableService.getOffer(id);
+      const offer = getOffer(offerAirtable);
+
+      const medias = [];
+      const countPhotos = offerAirtable.fields['Фото'].length;
+      for (let i = 0; i < offerAirtable.fields['Фото'].length; i++) {
+        medias.push({
+          type: 'photo',
+          media: offerAirtable.fields['Фото'][0].url,
+          caption: countPhotos - 1 === i ? offer : '',
+        });
+      }
+
+      this.bot.api.sendMediaGroup(TELEGRAM_CHAT_ID, medias);
+    } catch (e) {
+      console.log('sendOfferToChat', e);
+    }
   }
 }
