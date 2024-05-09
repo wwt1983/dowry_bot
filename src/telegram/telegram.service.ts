@@ -39,8 +39,6 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
-import { IBot } from 'src/airtable/types/IBot.interface';
-import { InputMedia } from 'node-telegram-bot-api';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
