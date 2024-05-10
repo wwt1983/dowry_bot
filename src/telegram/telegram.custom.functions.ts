@@ -189,7 +189,7 @@ function getNumberText(step: number) {
 
 export function getOffer(data: IBot) {
   const offer =
-    data.fields['Name'] +
+    `🔥${data.fields['Name']}🔥` +
     '\n' +
     data.fields['Описание'] +
     '\n' +
