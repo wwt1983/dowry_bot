@@ -18,6 +18,7 @@ export interface IBot {
     'Цена WB': string;
     Кешбэк: string;
     'Ваша цена': string;
+    Id: string;
   };
 }
 

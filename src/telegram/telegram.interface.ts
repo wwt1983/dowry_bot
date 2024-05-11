@@ -43,15 +43,20 @@ export interface ISessionData {
   lastLoadImage?: string;
   lastMessage?: any;
   isFinish: boolean;
+  OfferId: string;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;
 export type MyApi = HydrateApiFlavor<Api>;
 
 export interface ITelegramWebApp {
-  id: number;
   title: string;
-  cash: number;
+  cash: string;
+  priceForYou: string;
+  priceWb: string;
+  image: string;
+  id: string;
+  offerId: string;
+  articul: string;
   keys: string;
-  articul: number;
 }

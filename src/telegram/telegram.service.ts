@@ -225,6 +225,11 @@ export class TelegramService {
             'chat_id',
             ctx.message.from.id.toString(),
           );
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'OfferId',
+            data.offerId,
+          );
 
           /*Удаляем первый ответ от сайта он формате объекта*/
           if (ctx.msg.text.includes('query_id')) {
@@ -305,7 +310,6 @@ export class TelegramService {
 отправляем заполненные данные пользоваетля через веб-хук в airtable
 */
   async saveToAirtable(session: ISessionData, user: string): Promise<any> {
-    console.log(session);
     return await this.airtableService.saveToAirtable({
       SessionId: session.sessionId,
       User: user,
@@ -320,7 +324,6 @@ export class TelegramService {
   }
 
   async updateToAirtable(session: ISessionData): Promise<any> {
-    console.log(session);
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
       Images: session.Images,
