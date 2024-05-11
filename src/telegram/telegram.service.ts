@@ -250,7 +250,7 @@ export class TelegramService {
               'comment',
               ctx.message.text,
             );
-            
+
             await this.updateToAirtable(ctx.session);
 
             await this.bot.api
