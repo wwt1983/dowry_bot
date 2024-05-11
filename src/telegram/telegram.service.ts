@@ -148,8 +148,7 @@ export class TelegramService {
 
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-
-      ctx.session.lastMessage = ctx.message;
+      ctx.session.lastMessage = ctx.message.message_id;
       ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
 
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
@@ -159,7 +158,9 @@ export class TelegramService {
       ctx.session.Images = ctx.session.Images.filter(
         (item) => item !== ctx.session.lastLoadImage,
       );
-      ctx.session.lastMessage.delete().catch(() => {});
+      this.bot.api
+        .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
+        .catch(() => {});
 
       await ctx.callbackQuery.message.editText('Загрузите новое фото');
     });
