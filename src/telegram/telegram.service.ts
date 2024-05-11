@@ -245,6 +245,14 @@ export class TelegramService {
           const { step, data } = ctx.session;
           //отзыв пользователя
           if (step === 3) {
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'comment',
+              ctx.message.text,
+            );
+            
+            await this.updateToAirtable(ctx.session);
+
             await this.bot.api
               .sendMessage(
                 TELEGRAM_SECRET_CHAT_ID,
@@ -257,14 +265,6 @@ export class TelegramService {
               .catch((e: GrammyError) =>
                 console.log('secret chat bad ---', e.message),
               );
-
-            ctx.session = UpdateSessionByField(
-              ctx.session,
-              'comment',
-              ctx.message.text,
-            );
-
-            await this.updateToAirtable(ctx.session);
 
             return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
               reply_markup: commentKeyboard,
