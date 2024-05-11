@@ -59,7 +59,7 @@ export function createInitialSessionData(): ISessionData {
     lastLoadImage: null,
     lastMessage: null,
     isFinish: false,
-    OfferId: null,
+    offerId: null,
   };
 }
 
