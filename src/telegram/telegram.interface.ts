@@ -43,7 +43,7 @@ export interface ISessionData {
   lastLoadImage?: string;
   lastMessage?: any;
   isFinish: boolean;
-  OfferId: string;
+  offerId: string;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;

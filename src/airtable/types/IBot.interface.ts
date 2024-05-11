@@ -12,7 +12,7 @@ export interface IBot {
     Status: 'Done' | 'In progress' | 'Todo' | 'Stop';
     Старт: Date;
     Стоп: Date;
-    Количество: 4;
+    Количество: number;
     Артикул: number;
     'Ключевые слова': string;
     'Цена WB': string;

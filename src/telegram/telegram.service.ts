@@ -227,7 +227,7 @@ export class TelegramService {
           );
           ctx.session = UpdateSessionByField(
             ctx.session,
-            'OfferId',
+            'offerId',
             data.offerId,
           );
 
@@ -320,7 +320,7 @@ export class TelegramService {
       StopBuyTime: session.stopBuyTime,
       Bot: true,
       chat_id: session.chat_id,
-      OfferId: session.OfferId,
+      OfferId: session.offerId,
     });
   }
 
