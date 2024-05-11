@@ -320,6 +320,7 @@ export class TelegramService {
       StopBuyTime: session.stopBuyTime,
       Bot: true,
       chat_id: session.chat_id,
+      OfferId: session.OfferId,
     });
   }
 
