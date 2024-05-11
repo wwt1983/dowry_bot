@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-rollbar';
 import { ConfigService } from '@nestjs/config';
 
 import { AppController } from './app.controller';
@@ -16,14 +15,6 @@ import { TelegramController } from './telegram/telegram.controller';
   imports: [
     ConfigModule.forRoot({
       load: [appConfig],
-    }),
-    LoggerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        accessToken: configService.get('ROLLBAR_TOKEN'),
-        environment: configService.get('ENVIRONMENT'),
-      }),
     }),
     AirtableModule,
     TelegramModule.forRootAsync({

@@ -40,7 +40,6 @@
     "image-to-base64": "^2.2.0",
     "jimp": "^0.22.12",
     "jsqr": "^1.4.0",
-    "nestjs-rollbar": "^3.0.0",
     "node-fetch": "^3.3.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
