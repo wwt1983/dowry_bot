@@ -225,7 +225,11 @@ export class TelegramService {
             'chat_id',
             ctx.message.from.id.toString(),
           );
-          ctx.session = UpdateSessionByField(ctx.session, 'offerId', data.offerId);
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'offerId',
+            data.offerId,
+          );
 
           /*Удаляем первый ответ от сайта он формате объекта*/
           if (ctx.msg.text.includes('query_id')) {

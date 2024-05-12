@@ -131,9 +131,17 @@ export function nextStep(session: ISessionData): ISessionData {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp): string {
-  const { title, keys, cash } = data;
+  const { title, keys, cash, priceWb, description, priceForYou } = data;
   return (
-    `Раздача: ${title} с кешбэком <b>${cash} рублей</b>\n` +
+    `🔥${title}🔥` +
+    '\n' +
+    description +
+    '\n' +
+    '❌Цена на WB ~' +
+    priceWb +
+    '\n' +
+    `❗️ Кешбэк ~ ${cash}❗️ \n` +
+    `⭐️ Ваша цена ~ ${priceForYou} 🫶 \n` +
     '\n\n' +
     HEADER +
     FIRST_STEP +
