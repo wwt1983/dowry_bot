@@ -130,9 +130,10 @@ export function nextStep(session: ISessionData): ISessionData {
   return session;
 }
 
-export function getTextForFirstStep(data: ITelegramWebApp): string {
+export function getTextForFirstStep(data: ITelegramWebApp) {
   const { title, keys, cash, priceWb, description, priceForYou } = data;
-  return (
+
+  const caption =
     `🔥${title}🔥` +
     '\n' +
     description +
@@ -145,12 +146,17 @@ export function getTextForFirstStep(data: ITelegramWebApp): string {
     '\n\n' +
     HEADER +
     FIRST_STEP +
-    '<b>' +
     keys +
-    '</b>' +
     '\n\n' +
-    FIRST_STEP_A
-  );
+    FIRST_STEP_A;
+
+  return [
+    {
+      type: 'photo',
+      media: data.image,
+      caption: caption,
+    },
+  ];
 }
 
 export function getTextByNextStep(step: number): string {

@@ -236,12 +236,9 @@ export class TelegramService {
             ctx.message.delete().catch(() => {});
           }
 
-          await ctx.api.sendMessage(
+          await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
-            getTextForFirstStep(data),
-            {
-              parse_mode: 'HTML',
-            },
+            getTextForFirstStep(data) as any[],
           );
 
           return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
