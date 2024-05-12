@@ -58,4 +58,5 @@ export interface ITelegramWebApp {
   id: string;
   articul: string;
   keys: string;
+  offerId: string;
 }
