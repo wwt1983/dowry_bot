@@ -9,7 +9,7 @@ export interface IBot {
     Name: string;
     Описание: string;
     Фото: IPhoto[];
-    Status: 'Done' | 'In progress' | 'Todo' | 'Stop';
+    Status: 'Done' | 'In progress' | 'Stop' | 'Public in chat';
     Старт: Date;
     Стоп: Date;
     Количество: number;
