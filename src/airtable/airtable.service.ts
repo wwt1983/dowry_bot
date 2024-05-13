@@ -36,8 +36,8 @@ export class AirtableService {
     );
   }
   async getOffers(): Promise<IBots> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
-    return await this.airtableHttpService.get(TablesName.Offers);
+    const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
+    return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
   async getOffer(id: string): Promise<IBot> {
     return await this.airtableHttpService.getById(TablesName.Offers, id);
