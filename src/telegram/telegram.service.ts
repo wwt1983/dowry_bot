@@ -144,6 +144,10 @@ export class TelegramService {
     //   return ctx.reply('В бот нужно отправлять только картинки');
     // });
 
+    this.bot.on(':location', async (ctx) => {
+      await ctx.reply('Спасибо за геолокацию!');
+    });
+
     this.bot.on('message:photo', async (ctx) => {
       const { step, data } = ctx.session;
       if (!data)
@@ -242,7 +246,7 @@ export class TelegramService {
 
           await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
 
-          await ctx.reply('Какими данными хочешь поделиться?', {
+          return await ctx.reply('Поделиться локацией?', {
             reply_markup: shareKeyboard,
           });
         } else {
