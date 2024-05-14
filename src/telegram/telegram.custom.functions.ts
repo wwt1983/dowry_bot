@@ -21,7 +21,7 @@ import {
 import { User } from '@grammyjs/types';
 import { IBot } from 'src/airtable/types/IBot.interface';
 
-const FORMAT_DATE = 'yyyy-mm-dd hh:mm';
+const FORMAT_DATE = 'yyyy-MM-dd H:mm';
 
 export function sayHi(first_name: string, username: string): string {
   return (
