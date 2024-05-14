@@ -109,7 +109,6 @@ export function UpdateSessionByStep(
       break;
     case 3:
       session.comment = data;
-      session.status = 'Отзыв на проверке';
       break;
     case 4:
       session.isLoadImageOnComment = true;

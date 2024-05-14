@@ -12,7 +12,6 @@ import {
 import {
   TELEGRAM_MODULE_OPTIONS,
   HELP_TEXT,
-  TELEGRAM_SECRET_CHAT_ID,
   COMMANDS_TELEGRAM,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
@@ -28,7 +27,6 @@ import {
   createInitialSessionData,
   getTextByNextStep,
   getTextForFirstStep,
-  createMsgToSecretChat,
   UpdateSessionByStep,
   UpdateSessionByField,
   sayHi,
@@ -36,7 +34,6 @@ import {
   getOffer,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import { User } from '@grammyjs/types';
 import { AirtableService } from 'src/airtable/airtable.service';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
@@ -242,21 +239,13 @@ export class TelegramService {
               'comment',
               ctx.message.text,
             );
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'status',
+              'Отзыв на проверке',
+            );
 
             await this.updateToAirtable(ctx.session);
-
-            await this.bot.api
-              .sendMessage(
-                TELEGRAM_SECRET_CHAT_ID,
-                createMsgToSecretChat(
-                  ctx.from as User,
-                  ctx.message.text,
-                  data?.title,
-                ),
-              )
-              .catch((e: GrammyError) =>
-                console.log('secret chat bad ---', e.message),
-              );
 
             return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
               reply_markup: commentKeyboard,
