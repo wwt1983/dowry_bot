@@ -146,7 +146,7 @@ export class TelegramService {
 
     this.bot.on(':location', async (ctx) => {
       return await ctx.reply(
-        'Спасибо за геолокацию!' + ctx.message.location.toLocaleString(),
+        'Спасибо за геолокацию!' + JSON.stringify(ctx.message.location),
         {
           reply_markup: { remove_keyboard: true },
         },
@@ -251,9 +251,12 @@ export class TelegramService {
 
           await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
 
-          return await ctx.reply('Поделиться локацией?', {
-            reply_markup: shareKeyboard,
-          });
+          return await ctx.reply(
+            'Эта раздача требует геолокации. Поделиться?',
+            {
+              reply_markup: shareKeyboard,
+            },
+          );
         } else {
           const { step } = ctx.session;
           //отзыв пользователя
