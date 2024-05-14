@@ -181,7 +181,7 @@ export class TelegramService {
         ctx.session = nextStep(ctx.session);
       }
 
-      if (ctx.session.step === 2) {
+      if (ctx.session.step === 1) {
         await this.saveToAirtable(
           ctx.session,
           ctx.from.username ||
