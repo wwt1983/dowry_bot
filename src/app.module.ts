@@ -10,6 +10,7 @@ import appConfig from './configs/app.config';
 import telegramConfig from './telegram/configs/telegram.config';
 import { FirebaseModule } from './firebase/firebase.module';
 import { TelegramController } from './telegram/telegram.controller';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { TelegramController } from './telegram/telegram.controller';
     }),
     AirtableModule,
     TelegramModule.forRootAsync({
-      imports: [ConfigModule, FirebaseModule, AirtableModule],
+      imports: [ConfigModule, FirebaseModule, AirtableModule, HttpModule],
       inject: [ConfigService],
       useFactory: telegramConfig,
     }),
