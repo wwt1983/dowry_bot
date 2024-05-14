@@ -145,7 +145,12 @@ export class TelegramService {
     // });
 
     this.bot.on(':location', async (ctx) => {
-      await ctx.reply('Спасибо за геолокацию!');
+      return await ctx.reply(
+        'Спасибо за геолокацию!' + ctx.message.location.toLocaleString(),
+        {
+          reply_markup: { remove_keyboard: true },
+        },
+      );
     });
 
     this.bot.on('message:photo', async (ctx) => {
