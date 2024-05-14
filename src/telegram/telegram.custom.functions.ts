@@ -21,6 +21,8 @@ import {
 import { User } from '@grammyjs/types';
 import { IBot } from 'src/airtable/types/IBot.interface';
 
+const FORMAT_DATE = 'dd.mm.yyyy hh:mm';
+
 export function sayHi(first_name: string, username: string): string {
   return (
     `Привет, ${first_name || username}! \n\n` + FIRST_STEP_B + 'В путь ⤵\n'
@@ -44,7 +46,7 @@ export function createInitialSessionData(): ISessionData {
   return {
     sessionId: uuidv4(),
     chat_id: null,
-    startTime: format(new Date(), 'dd.MM.yyyy H:mm'),
+    startTime: format(new Date(), FORMAT_DATE),
     stopBuyTime: null,
     stopTime: null,
     isLoadImageSearch: false,
@@ -93,7 +95,7 @@ export function UpdateSessionByStep(
       break;
     case 1:
       session.isLoadImageOrderWithPVZ = true;
-      session.stopBuyTime = format(new Date(), 'dd.MM.yyyy H:mm');
+      session.stopBuyTime = format(new Date(), FORMAT_DATE);
       break;
     case 2:
       session.isLoadImageGiveGood = true;
@@ -109,7 +111,7 @@ export function UpdateSessionByStep(
       break;
     case 6:
       session.isLoadImageCheck = true;
-      session.stopTime = format(new Date(), 'dd.MM.yyyy H:mm');
+      session.stopTime = format(new Date(), FORMAT_DATE);
       session.isFinish = true;
       break;
     default:
