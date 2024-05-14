@@ -42,6 +42,7 @@ import {
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
+import { getGeoUrl, parseGeoResponse } from './telegram.geo';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -145,8 +146,14 @@ export class TelegramService {
     // });
 
     this.bot.on(':location', async (ctx) => {
+      const data = await commandService.get(
+        getGeoUrl(
+          ctx.message.location.longitude,
+          ctx.message.location.latitude,
+        ),
+      );
       return await ctx.reply(
-        'Спасибо за геолокацию!' + JSON.stringify(ctx.message.location),
+        'Спасибо за геолокацию! ' + parseGeoResponse(data),
         {
           reply_markup: { remove_keyboard: true },
         },

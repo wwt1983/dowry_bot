@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+
 import { AirtableHttpService } from '../airtable/airtable.http.service';
-import { IDistribution, IDistributions } from '../airtable/types/IDisturbation.interface';
+import { IDistribution } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 import {
@@ -9,10 +11,14 @@ import {
   FILTER_BY_FORMULA,
 } from 'src/airtable/airtable.constants';
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
+import { firstValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class TelegramHttpService {
-  constructor(private readonly airtableHttpService: AirtableHttpService) {
+  constructor(
+    private readonly airtableHttpService: AirtableHttpService,
+    private readonly httpService: HttpService,
+  ) {
     //
   }
 
@@ -56,5 +62,14 @@ export class TelegramHttpService {
     if (!data || (data.records && data.records.length === 0)) return null;
     //console.log('data ===>>> ', data);
     return data.records;
+  }
+  get(url: string) {
+    return firstValueFrom(
+      this.httpService
+        .get(url, {
+          method: 'GET',
+        })
+        .pipe(map((response) => response.data)),
+    );
   }
 }
