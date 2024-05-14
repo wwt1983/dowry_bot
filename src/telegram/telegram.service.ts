@@ -318,6 +318,7 @@ export class TelegramService {
       Bot: true,
       chat_id: session.chat_id,
       OfferId: session.offerId,
+      Статус: session.status,
     });
   }
 
@@ -327,6 +328,7 @@ export class TelegramService {
       Images: session.images,
       StopTime: session.stopTime,
       Отзыв: session.comment,
+      Статус: session.status,
       IsFinishUser: session.isFinish,
     });
   }

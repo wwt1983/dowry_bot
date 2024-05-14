@@ -96,26 +96,32 @@ export function UpdateSessionByStep(
   switch (step) {
     case 0:
       session.isLoadImageSearch = true;
+      session.status = 'Поиск';
       break;
     case 1:
       session.isLoadImageOrderWithPVZ = true;
       session.stopBuyTime = getTimeWithTz();
+      session.status = 'Заказ';
       break;
     case 2:
       session.isLoadImageGiveGood = true;
+      session.status = 'Получен';
       break;
     case 3:
       session.comment = data;
       break;
     case 4:
       session.isLoadImageOnComment = true;
+      session.status = 'Отзыв';
       break;
     case 5:
       session.isLoadImageBrokeCode = true;
+      session.status = 'Штрих-код';
       break;
     case 6:
       session.isLoadImageCheck = true;
       session.stopTime = getTimeWithTz();
+      session.status = 'Чек';
       session.isFinish = true;
       break;
     default:
