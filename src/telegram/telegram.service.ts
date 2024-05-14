@@ -20,7 +20,6 @@ import {
   STEP_COMMANDS,
   STEPS_TYPES,
   WEB_APP_TEST,
-  STEPS_FOR_SEND_DATA_TO_DB,
   COUNT_STEPS,
   TELEGRAM_CHAT_ID,
 } from './telegram.constants';
@@ -182,21 +181,13 @@ export class TelegramService {
         ctx.session = nextStep(ctx.session);
       }
 
-      if (
-        STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
-        !ctx.session.isFinish
-      ) {
+      if (ctx.session.step === 2) {
         await this.saveToAirtable(
           ctx.session,
           ctx.from.username ||
             `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`,
         );
-      }
-
-      if (
-        STEPS_FOR_SEND_DATA_TO_DB.includes(ctx.session.step) &&
-        ctx.session.isFinish
-      ) {
+      } else {
         await this.updateToAirtable(ctx.session);
       }
 
