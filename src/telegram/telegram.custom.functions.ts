@@ -1,5 +1,6 @@
 import { ISessionData, ITelegramWebApp } from './telegram.interface';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -21,7 +22,7 @@ import {
 import { User } from '@grammyjs/types';
 import { IBot } from 'src/airtable/types/IBot.interface';
 
-const FORMAT_DATE = 'yyyy-MM-dd H:mm';
+const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -42,15 +43,11 @@ export function createMsgToSecretChat(
   https://web.telegram.org/a/#${id} ${userComment}`;
 }
 
-function getTimeWithTz() {
-  return new Date().toLocaleString('ru-Ru', { timeZone: 'Europe/Moscow' });
-}
-
 export function createInitialSessionData(): ISessionData {
   return {
     sessionId: uuidv4(),
     chat_id: null,
-    startTime: format(getTimeWithTz(), FORMAT_DATE),
+    startTime: formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE),
     stopBuyTime: null,
     stopTime: null,
     isLoadImageSearch: false,
@@ -99,7 +96,11 @@ export function UpdateSessionByStep(
       break;
     case 1:
       session.isLoadImageOrderWithPVZ = true;
-      session.stopBuyTime = format(getTimeWithTz(), FORMAT_DATE);
+      session.stopBuyTime = formatInTimeZone(
+        new Date(),
+        'Europe/Moscow',
+        FORMAT_DATE,
+      );
       break;
     case 2:
       session.isLoadImageGiveGood = true;
@@ -115,7 +116,11 @@ export function UpdateSessionByStep(
       break;
     case 6:
       session.isLoadImageCheck = true;
-      session.stopTime = format(getTimeWithTz(), FORMAT_DATE);
+      session.stopTime = formatInTimeZone(
+        new Date(),
+        'Europe/Moscow',
+        FORMAT_DATE,
+      );
       session.isFinish = true;
       break;
     default:
