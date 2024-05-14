@@ -42,11 +42,15 @@ export function createMsgToSecretChat(
   https://web.telegram.org/a/#${id} ${userComment}`;
 }
 
+function getTimeWithTz() {
+  return new Date().toLocaleString('ru-Ru', { timeZone: 'Europe/Moscow' });
+}
+
 export function createInitialSessionData(): ISessionData {
   return {
     sessionId: uuidv4(),
     chat_id: null,
-    startTime: format(new Date(), FORMAT_DATE),
+    startTime: format(getTimeWithTz(), FORMAT_DATE),
     stopBuyTime: null,
     stopTime: null,
     isLoadImageSearch: false,
@@ -95,7 +99,7 @@ export function UpdateSessionByStep(
       break;
     case 1:
       session.isLoadImageOrderWithPVZ = true;
-      session.stopBuyTime = format(new Date(), FORMAT_DATE);
+      session.stopBuyTime = format(getTimeWithTz(), FORMAT_DATE);
       break;
     case 2:
       session.isLoadImageGiveGood = true;
@@ -111,7 +115,7 @@ export function UpdateSessionByStep(
       break;
     case 6:
       session.isLoadImageCheck = true;
-      session.stopTime = format(new Date(), FORMAT_DATE);
+      session.stopTime = format(getTimeWithTz(), FORMAT_DATE);
       session.isFinish = true;
       break;
     default:
