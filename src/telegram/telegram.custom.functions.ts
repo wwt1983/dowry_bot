@@ -20,8 +20,7 @@ import {
   TELEGRAM_BOT_NAME,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
-import { IBot } from 'src/airtable/types/IBot.interface';
-
+import { IOffer } from 'src/airtable/types/IOffer.interface';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -61,11 +60,12 @@ export function createInitialSessionData(): ISessionData {
     isLoadImageOrderWithPVZ: false,
     step: 0,
     comment: '',
-    Images: [],
+    images: [],
     lastLoadImage: null,
     lastMessage: null,
     isFinish: false,
     offerId: null,
+    status: null,
   };
 }
 
@@ -123,7 +123,7 @@ export function UpdateSessionByStep(
   }
 
   if (isPhotoMsg) {
-    session.Images = [...session.Images, data];
+    session.images = [...session.images, data];
     session.lastLoadImage = data;
   }
 
@@ -208,7 +208,7 @@ function getNumberText(step: number) {
   }
 }
 
-export function getOffer(data: IBot) {
+export function getOffer(data: IOffer) {
   const offer =
     `🔥${data.fields['Name']}🔥` +
     '\n' +

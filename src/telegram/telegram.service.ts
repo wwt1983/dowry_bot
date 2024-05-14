@@ -155,7 +155,7 @@ export class TelegramService {
     });
 
     this.bot.callbackQuery('del', async (ctx) => {
-      ctx.session.Images = ctx.session.Images.filter(
+      ctx.session.images = ctx.session.images.filter(
         (item) => item !== ctx.session.lastLoadImage,
       );
       this.bot.api
@@ -311,7 +311,7 @@ export class TelegramService {
       SessionId: session.sessionId,
       User: user,
       Артикул: session.data.articul,
-      Images: session.Images,
+      Images: session.images,
       Раздача: session.data.title,
       StartTime: session.startTime,
       StopBuyTime: session.stopBuyTime,
@@ -324,7 +324,7 @@ export class TelegramService {
   async updateToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
-      Images: session.Images,
+      Images: session.images,
       StopTime: session.stopTime,
       Отзыв: session.comment,
       IsFinishUser: session.isFinish,

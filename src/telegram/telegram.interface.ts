@@ -2,6 +2,7 @@ import { ModuleMetadata } from '@nestjs/common';
 import { SessionFlavor, Context } from 'grammy';
 import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
+import { BotStatus } from 'src/airtable/types/IBot.interface';
 
 export interface ITelegramOptions {
   token: string;
@@ -12,18 +13,6 @@ export interface ITelegramModuleAsyncOptions
   useFactory: (...args: any[]) => Promise<ITelegramOptions> | ITelegramOptions;
   inject?: any[];
 }
-
-export interface ITelegramAirtableData {
-  User: string;
-  Images: string[];
-  Раздача: string;
-  Артикул: string;
-  StartTime: string;
-  StopBuyTime: string;
-  StopTime: string;
-  Отзыв: string;
-}
-
 export interface ISessionData {
   sessionId: null;
   chat_id: string;
@@ -39,11 +28,12 @@ export interface ISessionData {
   isLoadImageCheck?: boolean; // чек
   step?: number;
   comment?: string;
-  Images?: string[];
+  images?: string[];
   lastLoadImage?: string;
   lastMessage?: any;
-  isFinish: boolean;
-  offerId: string;
+  isFinish?: boolean;
+  offerId?: string;
+  status?: BotStatus;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;

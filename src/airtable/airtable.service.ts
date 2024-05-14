@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
 import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
-import { IBot, IBots } from './types/IBot.interface';
+import { IOffer, IOffers } from './types/IOffer.interface';
 
 @Injectable()
 export class AirtableService {
@@ -30,16 +30,13 @@ export class AirtableService {
   }
   async getDistribution(): Promise<any> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
-    return await this.airtableHttpService.get(
-      TablesName.Bot_Distributions,
-      filter,
-    );
+    return await this.airtableHttpService.get(TablesName.Distributions, filter);
   }
-  async getOffers(): Promise<IBots> {
+  async getOffers(): Promise<IOffers> {
     const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
-  async getOffer(id: string): Promise<IBot> {
+  async getOffer(id: string): Promise<IOffer> {
     return await this.airtableHttpService.getById(TablesName.Offers, id);
   }
 }
