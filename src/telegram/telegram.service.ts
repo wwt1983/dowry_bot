@@ -1,5 +1,12 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
-import { Bot, session, GrammyError, HttpError, InlineKeyboard } from 'grammy';
+import {
+  Bot,
+  session,
+  GrammyError,
+  HttpError,
+  InlineKeyboard,
+  Keyboard,
+} from 'grammy';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
@@ -77,6 +84,10 @@ export class TelegramService {
       STEP_COMMANDS.next,
       'next',
     );
+    const shareKeyboard = new Keyboard()
+      .requestLocation('Геолокация')
+      .placeholder('Я хочу поделиться...')
+      .resized();
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       ctx.session = createInitialSessionData();
@@ -229,9 +240,13 @@ export class TelegramService {
             getTextForFirstStep(data) as any[],
           );
 
-          return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
+          await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
+
+          await ctx.reply('Какими данными хочешь поделиться?', {
+            reply_markup: shareKeyboard,
+          });
         } else {
-          const { step, data } = ctx.session;
+          const { step } = ctx.session;
           //отзыв пользователя
           if (step === 3) {
             ctx.session = UpdateSessionByField(
