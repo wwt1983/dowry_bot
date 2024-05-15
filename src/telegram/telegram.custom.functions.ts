@@ -152,9 +152,10 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '\n' +
     '❌Цена на WB ~' +
     priceWb +
+    ' ₽' +
     '\n' +
     `❗️ Кешбэк ~ ${cash}❗️ \n` +
-    `⭐️ Ваша цена ~ ${priceForYou} 🫶 \n` +
+    `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
     '\n\n' +
     HEADER +
     FIRST_STEP +
@@ -162,7 +163,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '\n\n' +
     FIRST_STEP_A +
     (data.location
-      ? `❗️❗️❗️ Раздача только для ${data.location} ❗️❗️❗️\n`
+      ? `❗️❗️❗️ Раздача только для региона: ${data.location} ❗️❗️❗️\n`
       : '');
 
   return [
