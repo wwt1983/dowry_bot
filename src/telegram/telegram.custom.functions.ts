@@ -66,6 +66,7 @@ export function createInitialSessionData(): ISessionData {
     isFinish: false,
     offerId: null,
     status: null,
+    location: null,
   };
 }
 

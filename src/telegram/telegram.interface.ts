@@ -34,6 +34,7 @@ export interface ISessionData {
   isFinish?: boolean;
   offerId?: string;
   status?: BotStatus;
+  location?: string;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;

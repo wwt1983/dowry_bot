@@ -1,3 +1,5 @@
+//limit 1000 on free
+
 const TOKEN = '472c7572-704e-4189-bad4-257774d83457';
 
 export const getGeoUrl = (longitude: number, latitude: number) => {
@@ -6,11 +8,15 @@ export const getGeoUrl = (longitude: number, latitude: number) => {
 
 export const parseGeoResponse = (data: any): string => {
   try {
-    return data?.GeoObjectCollection?.featureMember?.GeoObject.metaDataProperty
-      .GeocoderMetaData.text;
+    const value =
+      data?.response?.GeoObjectCollection?.featureMember[0].GeoObject;
+    if (value) {
+      return value.name + ', ' + value.description;
+    } else {
+      return null;
+    }
   } catch (e) {
     console.log('parseGeoResponse', e);
-  } finally {
-    return 'Локация не определена';
+    return null;
   }
 };

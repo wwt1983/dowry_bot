@@ -152,8 +152,13 @@ export class TelegramService {
           ctx.message.location.latitude,
         ),
       );
+      const location = parseGeoResponse(data);
+      if (location) {
+        ctx.session = UpdateSessionByField(ctx.session, 'location', location);
+      }
+
       return await ctx.reply(
-        'Спасибо за геолокацию! ' + parseGeoResponse(data),
+        location ? 'Спасибо за геолокацию!' : 'Локация не определена',
         {
           reply_markup: { remove_keyboard: true },
         },
@@ -333,6 +338,7 @@ export class TelegramService {
       chat_id: session.chat_id,
       OfferId: session.offerId,
       Статус: session.status,
+      Location: session.location,
     });
   }
 
