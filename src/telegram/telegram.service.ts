@@ -355,12 +355,17 @@ export class TelegramService {
     });
   }
 
-  async sendOfferToChat(id: string) {
+  async sendOfferToChat(id: string): Promise<number> {
     try {
       const offerAirtable = await this.airtableService.getOffer(id);
       const medias = getOffer(offerAirtable);
 
-      this.bot.api.sendMediaGroup(TELEGRAM_CHAT_ID, medias);
+      const result = await this.bot.api.sendMediaGroup(
+        TELEGRAM_CHAT_ID,
+        medias,
+      );
+      console.log('<===> result <===>', result.at(-1).message_id);
+      return result.at(-1).message_id;
     } catch (e) {
       console.log('sendOfferToChat', e);
     }

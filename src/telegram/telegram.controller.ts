@@ -38,8 +38,8 @@ export class TelegramController {
   }
 
   @Post('publicOffer')
-  publicOffer(@Body() data: { id: string }): string {
-    this.telegramService.sendOfferToChat(data.id);
-    return 'Ok';
+  async publicOffer(@Body() data: { id: string }): Promise<number> {
+    const messageId = await this.telegramService.sendOfferToChat(data.id);
+    return messageId;
   }
 }
