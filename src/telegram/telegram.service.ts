@@ -366,8 +366,6 @@ export class TelegramService {
         medias,
       );
 
-      console.log(result);
-
       console.log('<===> result <===>', result.at(-1).message_id);
       return result.at(-1).message_id;
     } catch (e) {
