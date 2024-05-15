@@ -263,12 +263,14 @@ export class TelegramService {
 
           await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
 
-          return await ctx.reply(
-            'Эта раздача требует геолокации. Поделиться?',
-            {
-              reply_markup: shareKeyboard,
-            },
-          );
+          if (data.location) {
+            return await ctx.reply(
+              'Эта раздача требует геолокации. Поделиться?',
+              {
+                reply_markup: shareKeyboard,
+              },
+            );
+          }
         } else {
           const { step } = ctx.session;
           //отзыв пользователя

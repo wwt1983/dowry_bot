@@ -145,7 +145,6 @@ export function nextStep(session: ISessionData): ISessionData {
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
   const { title, keys, cash, priceWb, description, priceForYou } = data;
-
   const caption =
     `🔥${title}🔥` +
     '\n' +
@@ -161,7 +160,10 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     FIRST_STEP +
     keys +
     '\n\n' +
-    FIRST_STEP_A;
+    FIRST_STEP_A +
+    (data.location
+      ? `❗️❗️❗️ Раздача только для ${data.location} ❗️❗️❗️\n`
+      : '');
 
   return [
     {
