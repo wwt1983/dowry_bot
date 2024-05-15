@@ -157,9 +157,10 @@ export class TelegramService {
       if (location) {
         ctx.session = UpdateSessionByField(ctx.session, 'location', location);
       }
-
-      return await ctx.reply(
-        location ? 'Спасибо за геолокацию!' : 'Локация не определена',
+      await ctx.reply(
+        location
+          ? 'Спасибо за геолокацию! Продолжайте шаг 1️⃣'
+          : 'Локация не определена',
         {
           reply_markup: { remove_keyboard: true },
         },
@@ -236,10 +237,11 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
-        const { via_bot, text } = ctx.update.message;
-        if (via_bot?.is_bot) {
-          const data = JSON.parse(text) as ITelegramWebApp;
-          console.log('==== WEB API ====', data);
+        const { text } = ctx.update.message;
+        let data = null;
+        if (!ctx.session.data) {
+          data = JSON.parse(text) as ITelegramWebApp;
+          console.log('==== WEB API ====');
           ctx.session = UpdateSessionByField(ctx.session, 'data', data);
           ctx.session = UpdateSessionByField(
             ctx.session,
@@ -256,52 +258,47 @@ export class TelegramService {
           if (ctx.msg.text.includes('query_id')) {
             ctx.message.delete().catch(() => {});
           }
+          if (data.location && data.location !== 'undefined') {
+            await ctx.reply(`Поделиться локацией`, {
+              reply_markup: shareKeyboard.oneTime(),
+            });
+          }
+        }
 
-          await this.bot.api.sendMediaGroup(
+        const { step } = ctx.session;
+        //старт
+        if (step <= 1) {
+          return await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
           );
+          //return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
+        }
+        //отзыв пользователя
+        if (step === 3) {
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'comment',
+            ctx.message.text,
+          );
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'status',
+            'Отзыв на проверке',
+          );
 
-          await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
+          await this.updateToAirtable(ctx.session);
 
-          if (data.location) {
-            return await ctx.reply(
-              'Эта раздача требует геолокации. Поделиться?',
-              {
-                reply_markup: shareKeyboard,
-              },
-            );
-          }
+          return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
+            reply_markup: commentKeyboard,
+          });
+        }
+
+        console.log('===== message from chat === ');
+        if (!STEPS_TYPES.text.includes(ctx.session.step)) {
+          return await ctx.reply('На этом шаге должно быть отправлено фото');
         } else {
-          const { step } = ctx.session;
-          //отзыв пользователя
-          if (step === 3) {
-            ctx.session = UpdateSessionByField(
-              ctx.session,
-              'comment',
-              ctx.message.text,
-            );
-            ctx.session = UpdateSessionByField(
-              ctx.session,
-              'status',
-              'Отзыв на проверке',
-            );
-
-            await this.updateToAirtable(ctx.session);
-
-            return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
-              reply_markup: commentKeyboard,
-            });
-          } else {
-            console.log('===== message from chat === ');
-            if (!STEPS_TYPES.text.includes(ctx.session.step)) {
-              return await ctx.reply(
-                'На этом шаге должно быть отправлено фото',
-              );
-            } else {
-              return await ctx.reply(`✌️`);
-            }
-          }
+          return await ctx.reply(`✌️`);
         }
       } catch (e) {
         console.log(e);

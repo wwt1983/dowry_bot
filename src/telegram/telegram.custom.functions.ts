@@ -162,10 +162,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     keys +
     '\n\n' +
     FIRST_STEP_A +
-    (data.location
-      ? `❗️❗️❗️ Раздача только для региона: ${data.location} ❗️❗️❗️\n`
-      : '');
-
+    (data.location ? `❗️Раздача только для региона: ${data.location}❗️\n` : '');
   return [
     {
       type: 'photo',
