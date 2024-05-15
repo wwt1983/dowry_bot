@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { SubscribeDto } from './dto/SubscribeDto';
+import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 
 @Controller('telegram')
 export class TelegramController {
@@ -41,5 +42,11 @@ export class TelegramController {
   async publicOffer(@Body() data: { id: string }): Promise<number> {
     const messageId = await this.telegramService.sendOfferToChat(data.id);
     return messageId;
+  }
+  @Post('closeOffer')
+  async closeOffer(
+    @Body() data: { messageId: number; status: OfferStatus },
+  ): Promise<void> {
+    await this.telegramService.closeOfferInChat(data.messageId, data.status);
   }
 }

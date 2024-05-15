@@ -43,6 +43,7 @@ import {
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
 import { getGeoUrl, parseGeoResponse } from './telegram.geo';
+import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -364,8 +365,29 @@ export class TelegramService {
         TELEGRAM_CHAT_ID,
         medias,
       );
+
+      console.log(result);
+
       console.log('<===> result <===>', result.at(-1).message_id);
       return result.at(-1).message_id;
+    } catch (e) {
+      console.log('sendOfferToChat', e);
+    }
+  }
+  async closeOfferInChat(
+    messageId: number,
+    status: OfferStatus,
+  ): Promise<string> {
+    try {
+      const text =
+        status === 'Done'
+          ? `❗️❗️❗️ Раздача закрыта ❗️❗️❗️`
+          : `❗️❗️❗️ Раздача временно остановлена ❗️❗️❗️`;
+      await this.bot.api.editMessageCaption(TELEGRAM_CHAT_ID, messageId, {
+        caption: text,
+      });
+
+      return 'Ok';
     } catch (e) {
       console.log('sendOfferToChat', e);
     }

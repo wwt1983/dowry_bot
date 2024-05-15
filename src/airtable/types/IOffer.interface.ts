@@ -1,7 +1,7 @@
 export interface IOffers {
   records: IOffer[];
 }
-
+export type OfferStatus = 'Done' | 'In progress' | 'Stop' | 'Public in chat';
 export interface IOffer {
   id: string;
   createdTime: Date;
@@ -9,7 +9,7 @@ export interface IOffer {
     Name: string;
     Описание: string;
     Фото: IPhoto[];
-    Status: 'Done' | 'In progress' | 'Stop' | 'Public in chat';
+    Status: OfferStatus;
     Старт: Date;
     Стоп: Date;
     Количество: number;
