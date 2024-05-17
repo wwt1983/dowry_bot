@@ -265,6 +265,8 @@ export class TelegramService {
           }
         }
 
+        console.log('===== message from chat === ');
+
         const { step } = ctx.session;
         //старт
         if (step <= 1) {
@@ -294,7 +296,6 @@ export class TelegramService {
           });
         }
 
-        console.log('===== message from chat === ');
         if (!STEPS_TYPES.text.includes(ctx.session.step)) {
           return await ctx.reply('На этом шаге должно быть отправлено фото');
         } else {

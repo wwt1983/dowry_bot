@@ -1,17 +1,12 @@
-//limit 1000 on free
-
-const TOKEN = '472c7572-704e-4189-bad4-257774d83457';
-
 export const getGeoUrl = (longitude: number, latitude: number) => {
-  return `https://geocode-maps.yandex.ru/1.x?format=json&lang=ru_RU&result=1&kind=locality&geocode=${longitude},${latitude}&apikey=${TOKEN}`;
+  return `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`;
 };
 
 export const parseGeoResponse = (data: any): string => {
   try {
-    const value =
-      data?.response?.GeoObjectCollection?.featureMember[0].GeoObject;
+    const value = data?.address;
     if (value) {
-      return value.name + ', ' + value.description;
+      return value.city + ', ' + value.country;
     } else {
       return null;
     }
