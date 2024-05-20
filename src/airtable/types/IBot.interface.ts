@@ -4,7 +4,7 @@ export interface IBot {
   Раздача: string;
   Артикул: string;
   StartTime: string;
-  StopBuyTime: string;
+  ['Время выкупа']: string;
   StopTime: string;
   Отзыв: string;
 }

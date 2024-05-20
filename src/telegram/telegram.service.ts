@@ -334,7 +334,7 @@ export class TelegramService {
       Images: session.images,
       Раздача: session.data.title,
       StartTime: session.startTime,
-      StopBuyTime: session.stopBuyTime,
+      ['Время выкупа']: session.stopBuyTime,
       Bot: true,
       chat_id: session.chat_id,
       OfferId: session.offerId,
@@ -350,7 +350,7 @@ export class TelegramService {
       StopTime: session.stopTime,
       Отзыв: session.comment,
       Статус: session.status,
-      IsFinishUser: session.isFinish,
+      Финиш: session.isFinish,
     });
   }
 
