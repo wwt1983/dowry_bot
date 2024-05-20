@@ -50,9 +50,6 @@ import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 export class TelegramService {
   bot: Bot<MyContext>;
   options: ITelegramOptions;
-  user: string | null;
-
-  TEST_USER = '@Julia_bogdanova88';
 
   constructor(
     @Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
@@ -92,9 +89,13 @@ export class TelegramService {
       .resized();
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      ctx.session = createInitialSessionData();
-      const { first_name, last_name, username } = ctx.from;
-      this.user = username || `${first_name} ${last_name}`;
+      const { first_name, last_name, username, id } = ctx.from;
+      ctx.session = createInitialSessionData(
+        id?.toString(),
+        username || `${first_name} ${last_name}`,
+      );
+
+      await this.saveToAirtable(ctx.session);
 
       ctx.reply(sayHi(first_name, username), {
         reply_markup: {
@@ -123,9 +124,15 @@ export class TelegramService {
     );
     this.bot.callbackQuery('showOrders', async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
-      const dataBuyerTest =
-        await this.commandService.getDistributionTableByFilter(this.TEST_USER);
-      const allCash = dataBuyerTest.reduce(function (newArr, record) {
+
+      const dataBuyer = await this.commandService.getDistributionTableByFilter(
+        ctx.session.user,
+      );
+      if (!dataBuyer)
+        return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
+          parse_mode: 'HTML',
+        });
+      const allCash = dataBuyer.reduce(function (newArr, record) {
         if (record.fields['Кэш выплачен']) {
           newArr.push(
             `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
@@ -212,15 +219,7 @@ export class TelegramService {
         ctx.session = nextStep(ctx.session);
       }
 
-      if (ctx.session.step === 1) {
-        await this.saveToAirtable(
-          ctx.session,
-          ctx.from.username ||
-            `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`,
-        );
-      } else {
-        await this.updateToAirtable(ctx.session);
-      }
+      await this.updateToAirtable(ctx.session);
 
       if (ctx.session.step === COUNT_STEPS) {
         await ctx.react('🎉');
@@ -239,21 +238,25 @@ export class TelegramService {
       try {
         const { text } = ctx.update.message;
         let data = null;
+
+        if (!ctx.session.data && !text.includes('query_id')) {
+          return await ctx.reply(`✌️`);
+        }
+
         if (!ctx.session.data) {
           data = JSON.parse(text) as ITelegramWebApp;
           console.log('==== WEB API ====');
           ctx.session = UpdateSessionByField(ctx.session, 'data', data);
           ctx.session = UpdateSessionByField(
             ctx.session,
-            'chat_id',
-            ctx.message.from.id.toString(),
-          );
-          ctx.session = UpdateSessionByField(
-            ctx.session,
             'offerId',
             data.offerId,
           );
-
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'status',
+            'Выбор раздачи',
+          );
           /*Удаляем первый ответ от сайта он формате объекта*/
           if (ctx.msg.text.includes('query_id')) {
             ctx.message.delete().catch(() => {});
@@ -270,6 +273,8 @@ export class TelegramService {
         const { step } = ctx.session;
         //старт
         if (step <= 1) {
+          await this.updateToAirtable(ctx.session);
+
           return await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
@@ -298,8 +303,6 @@ export class TelegramService {
 
         if (!STEPS_TYPES.text.includes(ctx.session.step)) {
           return await ctx.reply('На этом шаге должно быть отправлено фото');
-        } else {
-          return await ctx.reply(`✌️`);
         }
       } catch (e) {
         console.log(e);
@@ -326,30 +329,29 @@ export class TelegramService {
   /*
 отправляем заполненные данные пользоваетля через веб-хук в airtable
 */
-  async saveToAirtable(session: ISessionData, user: string): Promise<any> {
+  async saveToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.saveToAirtable({
       SessionId: session.sessionId,
-      User: user,
-      Артикул: session.data.articul,
-      Images: session.images,
-      Раздача: session.data.title,
-      StartTime: session.startTime,
-      ['Время выкупа']: session.stopBuyTime,
+      User: session.user,
       Bot: true,
       chat_id: session.chat_id,
-      OfferId: session.offerId,
       Статус: session.status,
-      Location: session.location,
     });
   }
 
   async updateToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
+      Артикул: session.data.articul,
+      StartTime: session.startTime,
+      ['Время выкупа']: session.stopBuyTime,
+      OfferId: session.offerId,
+      Статус: session.status,
+      Location: session.location,
+      Раздача: session.data.title,
       Images: session.images,
       StopTime: session.stopTime,
       Отзыв: session.comment,
-      Статус: session.status,
       Финиш: session.isFinish,
     });
   }

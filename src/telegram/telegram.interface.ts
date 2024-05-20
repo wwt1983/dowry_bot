@@ -14,7 +14,8 @@ export interface ITelegramModuleAsyncOptions
   inject?: any[];
 }
 export interface ISessionData {
-  sessionId: null;
+  sessionId: string;
+  user: string;
   chat_id: string;
   data?: ITelegramWebApp;
   startTime?: string;

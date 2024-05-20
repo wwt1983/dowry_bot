@@ -29,6 +29,17 @@ export enum STEP_COMMANDS {
   back = 'Назад',
 }
 
+export const STEPS = {
+  INBOT: 'INBOT',
+  CHOOSE_OFFER: 'CHOOSE_OFFER',
+  SEARCH: 'SEARCH',
+  ORDER: 'ORDER',
+  RECEIVED: 'RECEIVED',
+  COMMENT: 'COMMENT',
+  SHTRIH_CODE: 'SHTRIH_CODE',
+  CHECK: 'CHECK',
+  BROKE_ARTICUL: 'BROKE_ARTICUL',
+};
 export const STEPS_TYPES = {
   image: [0, 1, 2, 4, 5, 6, 7],
   text: [3],
@@ -38,6 +49,8 @@ export const COUNT_STEPS = 7;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';
+export const FIRST_STEP_LINK =
+  'Загрузите сюда ссылку с артикулом товара (например, https://www.wildberries.ru/catalog/168217638/detail.aspx)\n';
 export const FIRST_STEP_A =
   '✔️Положите в корзину несколько товаров от других продавцов.\n ' +
   '✔️Загрузите скриншот поиска \n\n';

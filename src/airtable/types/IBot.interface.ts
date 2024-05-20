@@ -10,6 +10,8 @@ export interface IBot {
 }
 
 export type BotStatus =
+  | 'В боте'
+  | 'Выбор раздачи'
   | 'Поиск'
   | 'Заказ'
   | 'Получен'

@@ -18,6 +18,7 @@ import {
   COUNT_STEPS,
   THREE_STEP_A,
   TELEGRAM_BOT_NAME,
+  FIRST_STEP_LINK,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -45,10 +46,14 @@ const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const getTimeWithTz = () =>
   formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE);
 
-export function createInitialSessionData(): ISessionData {
+export function createInitialSessionData(
+  id?: string,
+  user?: string,
+): ISessionData {
   return {
     sessionId: uuidv4(),
-    chat_id: null,
+    user: user,
+    chat_id: id || null,
     startTime: getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
@@ -65,7 +70,7 @@ export function createInitialSessionData(): ISessionData {
     lastMessage: null,
     isFinish: false,
     offerId: null,
-    status: null,
+    status: 'В боте',
     location: null,
   };
 }
@@ -161,7 +166,8 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     FIRST_STEP +
     keys +
     '\n\n' +
-    FIRST_STEP_A +
+    FIRST_STEP_LINK +
+    //FIRST_STEP_A +
     (data.location ? `❗️Раздача только для региона: ${data.location}❗️\n` : '');
   return [
     {
