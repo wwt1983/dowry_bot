@@ -28,6 +28,7 @@ import {
   WEB_APP_TEST,
   COUNT_STEPS,
   TELEGRAM_CHAT_ID,
+  STEPS,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -39,6 +40,7 @@ import {
   sayHi,
   nextStep,
   getOffer,
+  parseUrl,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -203,7 +205,7 @@ export class TelegramService {
     });
 
     this.bot.callbackQuery('next', async (ctx) => {
-      if (ctx.session.step !== 3) {
+      if (!STEPS_TYPES.text.includes(ctx.session.step)) {
         ctx.session.lastMessage = null;
         const statusMessage = await ctx.reply('Загрузка...');
 
@@ -221,13 +223,13 @@ export class TelegramService {
 
       await this.updateToAirtable(ctx.session);
 
-      if (ctx.session.step === COUNT_STEPS) {
-        await ctx.react('🎉');
-      }
-
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
       );
+
+      if (ctx.session.step === STEPS.FINISH) {
+        await ctx.react('🎉');
+      }
     });
 
     this.bot.on('callback_query', async (ctx) => {
@@ -252,11 +254,7 @@ export class TelegramService {
             'offerId',
             data.offerId,
           );
-          ctx.session = UpdateSessionByField(
-            ctx.session,
-            'status',
-            'Выбор раздачи',
-          );
+          ctx.session = UpdateSessionByStep(ctx.session);
           /*Удаляем первый ответ от сайта он формате объекта*/
           if (ctx.msg.text.includes('query_id')) {
             ctx.message.delete().catch(() => {});
@@ -271,9 +269,18 @@ export class TelegramService {
         console.log('===== message from chat === ');
 
         const { step } = ctx.session;
+
+        if (!STEPS_TYPES.text.find((x) => x === step)) {
+          return await ctx.reply(
+            'На этом шаге должно быть отправлено фото' + step,
+          );
+        }
+
         //старт
-        if (step <= 1) {
+        if (STEPS.CHOOSE_OFFER === step && data) {
           await this.updateToAirtable(ctx.session);
+
+          ctx.session = nextStep(ctx.session);
 
           return await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
@@ -281,8 +288,21 @@ export class TelegramService {
           );
           //return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
         }
+
+        //проверка артикула
+        if (STEPS.CHECK_ARTICUL === step) {
+          if (!parseUrl(text, ctx.session.data.articul)) {
+            return ctx.reply(
+              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.',
+            );
+          }
+          ctx.session = nextStep(ctx.session);
+          return await ctx.reply(getTextByNextStep(ctx.session.step));
+        }
+
+        console.log('STEPS =', step);
         //отзыв пользователя
-        if (step === 3) {
+        if (step === STEPS.COMMENT_ON_CHECK) {
           ctx.session = UpdateSessionByField(
             ctx.session,
             'comment',
@@ -299,10 +319,6 @@ export class TelegramService {
           return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
             reply_markup: commentKeyboard,
           });
-        }
-
-        if (!STEPS_TYPES.text.includes(ctx.session.step)) {
-          return await ctx.reply('На этом шаге должно быть отправлено фото');
         }
       } catch (e) {
         console.log(e);

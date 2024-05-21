@@ -30,22 +30,36 @@ export enum STEP_COMMANDS {
 }
 
 export const STEPS = {
-  INBOT: 'INBOT',
-  CHOOSE_OFFER: 'CHOOSE_OFFER',
-  SEARCH: 'SEARCH',
-  ORDER: 'ORDER',
-  RECEIVED: 'RECEIVED',
-  COMMENT: 'COMMENT',
-  SHTRIH_CODE: 'SHTRIH_CODE',
-  CHECK: 'CHECK',
-  BROKE_ARTICUL: 'BROKE_ARTICUL',
+  INBOT: 1, //в боте
+  CHOOSE_OFFER: 2, // выбор раздачи (web)
+  CHECK_ARTICUL: 3, // сломанный артикул (text)
+  SEARCH: 4, //поиск (photo)
+  ORDER: 5, //заказ (photo)
+  RECEIVED: 6, // получен (photo)
+  COMMENT_ON_CHECK: 7, // отзыв на проверке (text)
+  COMMENT: 8, //отзыв (photo)
+  SHTRIH_CODE: 9, // штрих-код (photo)
+  CHECK: 10, //чек
+  FINISH: 11, // finish
 };
 export const STEPS_TYPES = {
-  image: [0, 1, 2, 4, 5, 6, 7],
-  text: [3],
+  image: [
+    STEPS.SEARCH,
+    STEPS.ORDER,
+    STEPS.RECEIVED,
+    STEPS.COMMENT,
+    STEPS.SHTRIH_CODE,
+    STEPS.CHECK,
+  ],
+  text: [
+    STEPS.INBOT,
+    STEPS.CHOOSE_OFFER,
+    STEPS.CHECK_ARTICUL,
+    STEPS.COMMENT_ON_CHECK,
+  ],
 };
 
-export const COUNT_STEPS = 7;
+export const COUNT_STEPS = 10;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';

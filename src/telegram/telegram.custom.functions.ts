@@ -19,6 +19,7 @@ import {
   THREE_STEP_A,
   TELEGRAM_BOT_NAME,
   FIRST_STEP_LINK,
+  STEPS,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -63,7 +64,7 @@ export function createInitialSessionData(
     isLoadImageBrokeCode: false,
     isLoadImageCheck: false,
     isLoadImageOrderWithPVZ: false,
-    step: 0,
+    step: STEPS.INBOT,
     comment: '',
     images: [],
     lastLoadImage: null,
@@ -84,14 +85,6 @@ export function UpdateSessionByField(
   return session;
 }
 
-// export enum STEPS {
-//   searchScreen = 'Поиск товара',
-//   pvzScreen = 'Скриншот ПВЗ',
-//   getGoodScreen = 'Скриншот о получении',
-//   comment = 'Отзыв',
-//   commentScreen = 'Скриншот отзыва',
-// }
-
 export function UpdateSessionByStep(
   session: ISessionData,
   data?: string,
@@ -99,32 +92,38 @@ export function UpdateSessionByStep(
 ): ISessionData {
   const { step } = session;
 
+  console.log('UPDATE SESSION STEP=', step);
+
   switch (step) {
-    case 0:
+    case STEPS.INBOT:
+    case STEPS.CHOOSE_OFFER:
+    case STEPS.CHECK_ARTICUL:
+      break;
+    case STEPS.SEARCH:
       session.isLoadImageSearch = true;
       session.status = 'Поиск';
       break;
-    case 1:
+    case STEPS.ORDER:
       session.isLoadImageOrderWithPVZ = true;
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
       break;
-    case 2:
+    case STEPS.RECEIVED:
       session.isLoadImageGiveGood = true;
       session.status = 'Получен';
       break;
-    case 3:
+    case STEPS.COMMENT_ON_CHECK:
       session.comment = data;
       break;
-    case 4:
+    case STEPS.COMMENT:
       session.isLoadImageOnComment = true;
       session.status = 'Отзыв';
       break;
-    case 5:
+    case STEPS.SHTRIH_CODE:
       session.isLoadImageBrokeCode = true;
       session.status = 'Штрих-код';
       break;
-    case 6:
+    case STEPS.CHECK:
       session.isLoadImageCheck = true;
       session.stopTime = getTimeWithTz();
       session.status = 'Чек';
@@ -180,43 +179,48 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
 
 export function getTextByNextStep(step: number): string {
   switch (step) {
-    case 1:
+    case STEPS.CHOOSE_OFFER:
+      return FIRST_STEP_LINK;
+    case STEPS.SEARCH:
+    case STEPS.CHECK_ARTICUL:
+      return FIRST_STEP_A + FIRST_STEP_B + getNumberText(step);
+    case STEPS.ORDER:
       return FIRST_STEP_C + getNumberText(step);
-    case 2:
+    case STEPS.RECEIVED:
       return SECOND_STEP + getNumberText(step);
-    case 3:
+    case STEPS.COMMENT_ON_CHECK:
       return THREE_STEP + getNumberText(step);
-    case 4:
+    case STEPS.COMMENT:
       return FOUR_STEP + THREE_STEP_A + getNumberText(step);
-    case 5:
+    case STEPS.SHTRIH_CODE:
       return FOUR_STEP_A + getNumberText(step);
-    case 6:
+    case STEPS.CHECK:
       return FOUR_STEP_B + getNumberText(step);
-    case 7:
+    default:
       return FOOTER;
   }
 }
 
 function getNumberText(step: number) {
   const finish_txt = `До финиша `;
-  switch (COUNT_STEPS - step) {
-    case 8:
+  switch (step) {
+    case STEPS.CHOOSE_OFFER:
       return finish_txt + '8️⃣ шагов\n';
-    case 7:
+    case STEPS.SEARCH:
       return finish_txt + '7️⃣ шагов\n';
-    case 6:
+    case STEPS.ORDER:
       return finish_txt + '6️⃣ шагов\n';
-    case 5:
+    case STEPS.RECEIVED:
       return finish_txt + '5️⃣ шагов\n';
-    case 4:
+    case STEPS.COMMENT_ON_CHECK:
       return finish_txt + '4️⃣ шага\n';
-    case 3:
+    case STEPS.COMMENT:
       return finish_txt + '3️⃣ шага\n';
-    case 2:
+    case STEPS.SHTRIH_CODE:
       return finish_txt + '2️⃣ шага\n';
-    case 1:
+    case STEPS.CHECK:
       return finish_txt + '1️⃣ шаг\n';
-    case 0:
+    case STEPS.INBOT:
       return '';
   }
 }
@@ -246,3 +250,13 @@ export function getOffer(data: IOffer) {
   }
   return medias;
 }
+
+export const parseUrl = (url: string, articul: string): boolean => {
+  if (!url) return false;
+  try {
+    const articulOnCheck = url.trim().replace(/\D/g, '');
+    return articul == articulOnCheck;
+  } catch (e) {
+    return false;
+  }
+};
