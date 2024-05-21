@@ -254,7 +254,13 @@ export class TelegramService {
             'offerId',
             data.offerId,
           );
+          ctx.session = UpdateSessionByField(
+            ctx.session,
+            'status',
+            'Выбор раздачи',
+          );
           ctx.session = UpdateSessionByStep(ctx.session);
+
           /*Удаляем первый ответ от сайта он формате объекта*/
           if (ctx.msg.text.includes('query_id')) {
             ctx.message.delete().catch(() => {});
@@ -271,16 +277,14 @@ export class TelegramService {
         const { step } = ctx.session;
 
         if (!STEPS_TYPES.text.find((x) => x === step)) {
-          return await ctx.reply(
-            'На этом шаге должно быть отправлено фото' + step,
-          );
+          return await ctx.reply('На этом шаге должно быть отправлено фото');
         }
 
         //старт
         if (STEPS.CHOOSE_OFFER === step && data) {
-          await this.updateToAirtable(ctx.session);
-
           ctx.session = nextStep(ctx.session);
+
+          await this.updateToAirtable(ctx.session);
 
           return await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
@@ -291,17 +295,32 @@ export class TelegramService {
 
         //проверка артикула
         if (STEPS.CHECK_ARTICUL === step) {
+          let responseText = '';
           if (!parseUrl(text, ctx.session.data.articul)) {
             const helpText = ctx.session.data.positionOnWB
-              ? `Эта позиция находится примерно на ${ctx.session.data.positionOnWB} странице`
+              ? `\nЭта позиция находится примерно на ${ctx.session.data.positionOnWB} странице.`
               : '';
-            return ctx.reply(
-              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
-                helpText,
+
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'status',
+              'Проблема с артикулом',
             );
+            responseText =
+              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
+              helpText;
+          } else {
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'status',
+              'Артикул правильный',
+            );
+            ctx.session = nextStep(ctx.session);
+            responseText = getTextByNextStep(ctx.session.step);
           }
-          ctx.session = nextStep(ctx.session);
-          return await ctx.reply(getTextByNextStep(ctx.session.step));
+          await this.updateToAirtable(ctx.session);
+
+          return await ctx.reply(responseText);
         }
 
         console.log('STEPS =', step);

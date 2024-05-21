@@ -92,8 +92,7 @@ export function UpdateSessionByStep(
 ): ISessionData {
   const { step } = session;
 
-  console.log('UPDATE SESSION STEP=', step);
-
+  //console.log('UPDATE SESSION STEP=', step);
   switch (step) {
     case STEPS.INBOT:
     case STEPS.CHOOSE_OFFER:
@@ -254,7 +253,8 @@ export function getOffer(data: IOffer) {
 export const parseUrl = (url: string, articul: string): boolean => {
   if (!url) return false;
   try {
-    const articulOnCheck = url.trim().replace(/\D/g, '');
+    const splitUrl = url.trim().split('?')[0];
+    const articulOnCheck = splitUrl.replace(/\D/g, '');
     return articul == articulOnCheck;
   } catch (e) {
     return false;
