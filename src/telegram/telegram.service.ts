@@ -292,8 +292,12 @@ export class TelegramService {
         //проверка артикула
         if (STEPS.CHECK_ARTICUL === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
+            const helpText = ctx.session.data.positionOnWB
+              ? `Эта позиция находится примерно на ${ctx.session.data.positionOnWB} странице`
+              : '';
             return ctx.reply(
-              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.',
+              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
+                helpText,
             );
           }
           ctx.session = nextStep(ctx.session);
