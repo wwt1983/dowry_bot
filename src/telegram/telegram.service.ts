@@ -242,15 +242,14 @@ export class TelegramService {
     this.bot.callbackQuery('next', async (ctx) => {
       if (!STEPS_TYPES.text.includes(ctx.session.step)) {
         ctx.session.lastMessage = null;
-
-        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
-
         const statusMessage = await ctx.reply('Загрузка...');
 
         const firebaseUrl = await this.firebaseService.uploadImageAsync(
           ctx.session.lastLoadImage,
         );
+
         await statusMessage.editText('Фото загружено!');
+        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
