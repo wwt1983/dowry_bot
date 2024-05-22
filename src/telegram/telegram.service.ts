@@ -248,7 +248,7 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        await statusMessage.editText('Фото успешно загружено!');
+        await statusMessage.editText('Фото загружено!');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
