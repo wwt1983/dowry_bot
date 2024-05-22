@@ -2,7 +2,7 @@ import { ModuleMetadata } from '@nestjs/common';
 import { SessionFlavor, Context } from 'grammy';
 import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
-import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 
 export interface ITelegramOptions {
   token: string;
@@ -36,6 +36,8 @@ export interface ISessionData {
   offerId?: string;
   status?: BotStatus;
   location?: string;
+  countTryError: number; //количество попыток сделать какое-то действие
+  errorStatus: BrokeBotStatus;
 }
 
 export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;

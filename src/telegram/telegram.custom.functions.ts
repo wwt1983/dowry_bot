@@ -73,6 +73,8 @@ export function createInitialSessionData(
     offerId: null,
     status: 'В боте',
     location: null,
+    errorStatus: null,
+    countTryError: 0,
   };
 }
 
@@ -259,4 +261,18 @@ export const parseUrl = (url: string, articul: string): boolean => {
   } catch (e) {
     return false;
   }
+};
+
+export const LocationCheck = (
+  locationOffer: string,
+  locationUser: string,
+): { status: boolean; text: string } => {
+  if (!locationUser) return { status: false, text: 'Локация не определена' };
+
+  return locationUser.toLowerCase().includes(locationOffer.toLowerCase())
+    ? { status: true, text: 'Спасибо за геолокацию! Продолжайте шаг 1️⃣' }
+    : {
+        status: false,
+        text: `Ваше местоположение (${locationUser}) не позволяет участвовать в раздаче`,
+      };
 };

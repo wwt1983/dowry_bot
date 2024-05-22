@@ -8,6 +8,7 @@ export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';
 export const FILE_FROM_BOT_URL = 'https://api.telegram.org/file/bot';
 export const WEB_APP = 'https://dowrybot-front.vercel.app';
 export const WEB_APP_TEST = 'https://dowry-bot.netlify.app/';
+export const STOP_TEXT = 'Раздачу продолжать нельзя';
 
 export enum COMMAND_NAMES {
   start = 'start',
@@ -27,12 +28,13 @@ export enum STEP_COMMANDS {
   comment = 'Отправить отзыв на соглосование?',
   cancel = 'Отменить',
   back = 'Назад',
+  operator = 'Нужна помощь оператора?',
 }
 
 export const STEPS = {
   INBOT: 1, //в боте
   CHOOSE_OFFER: 2, // выбор раздачи (web)
-  CHECK_ARTICUL: 3, // сломанный артикул (text)
+  CHECK_ARTICUL: 3, // проверка артикул (text)
   SEARCH: 4, //поиск (photo)
   ORDER: 5, //заказ (photo)
   RECEIVED: 6, // получен (photo)
@@ -41,7 +43,11 @@ export const STEPS = {
   SHTRIH_CODE: 9, // штрих-код (photo)
   CHECK: 10, //чек
   FINISH: 11, // finish
+  BROKE_LOCATION: -1, //геолокация не совпадает с раздачей
+  BROKE_ARTICUL: -2, // артикул не совпадает с раздачей
+  HELP: -3,
 };
+
 export const STEPS_TYPES = {
   image: [
     STEPS.SEARCH,
@@ -56,10 +62,13 @@ export const STEPS_TYPES = {
     STEPS.CHOOSE_OFFER,
     STEPS.CHECK_ARTICUL,
     STEPS.COMMENT_ON_CHECK,
+    STEPS.HELP,
+    STEPS.CHECK_ARTICUL,
   ],
 };
 
 export const COUNT_STEPS = 10;
+export const COUNT_TRY_ERROR = 3;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ наш товар по ключевому запросу:\n';

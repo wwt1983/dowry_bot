@@ -6,7 +6,7 @@ export interface IBot {
   StartTime: string;
   ['Время выкупа']: string;
   StopTime: string;
-  Отзыв: string;
+  ['Сообщения от пользователя']: string;
 }
 
 export type BotStatus =
@@ -20,4 +20,8 @@ export type BotStatus =
   | 'Штрих-код'
   | 'Чек'
   | 'Артикул правильный'
-  | 'Проблема с артикулом';
+  | 'Проблема с артикулом'
+  | 'Проблема с локацией'
+  | 'Вызов';
+
+export type BrokeBotStatus = 'locationError' | 'articulError' | 'operatorCall';

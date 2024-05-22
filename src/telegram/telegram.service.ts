@@ -29,6 +29,8 @@ import {
   COUNT_STEPS,
   TELEGRAM_CHAT_ID,
   STEPS,
+  STOP_TEXT,
+  COUNT_TRY_ERROR,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -41,6 +43,7 @@ import {
   nextStep,
   getOffer,
   parseUrl,
+  LocationCheck,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -85,6 +88,12 @@ export class TelegramService {
       STEP_COMMANDS.next,
       'next',
     );
+    const helpKeyboard = new InlineKeyboard().text(
+      STEP_COMMANDS.operator,
+      'operator',
+    );
+    //.text(STEP_COMMANDS.next, 'cancel');
+
     const shareKeyboard = new Keyboard()
       .requestLocation('Геолокация')
       .placeholder('Я хочу поделиться...')
@@ -124,6 +133,7 @@ export class TelegramService {
         reply_markup: userMenu,
       }),
     );
+
     this.bot.callbackQuery('showOrders', async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
 
@@ -166,20 +176,30 @@ export class TelegramService {
       if (location) {
         ctx.session = UpdateSessionByField(ctx.session, 'location', location);
       }
-      await ctx.reply(
-        location
-          ? 'Спасибо за геолокацию! Продолжайте шаг 1️⃣'
-          : 'Локация не определена',
-        {
-          reply_markup: { remove_keyboard: true },
-        },
-      );
+      const locationResult = LocationCheck(ctx.session.data.location, location);
+
+      if (!locationResult.status) {
+        ctx.session = UpdateSessionByField(
+          ctx.session,
+          'status',
+          'Проблема с локацией',
+        );
+        ctx.session.errorStatus = 'locationError';
+      }
+
+      await this.updateToAirtable(ctx.session);
+
+      await ctx.reply(locationResult.text, {
+        reply_markup: { remove_keyboard: true },
+      });
     });
 
     this.bot.on('message:photo', async (ctx) => {
       const { step, data } = ctx.session;
       if (!data)
         return ctx.reply('Вам нужно нажать на кнопку ⬆️ "Dowry раздачи"');
+
+      if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
 
       if (!STEPS_TYPES.image.includes(step)) {
         return ctx.reply('На этом шаге должно быть текстовое сообщение');
@@ -191,6 +211,21 @@ export class TelegramService {
       ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
 
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
+    });
+
+    this.bot.callbackQuery('cancel', async (ctx) => {
+      this.bot.api
+        .editMessageReplyMarkup(ctx.session.chat_id, ctx.session.lastMessage)
+        .catch(() => {});
+    });
+
+    this.bot.callbackQuery('operator', async (ctx) => {
+      ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
+      await this.updateToAirtable(ctx.session);
+      this.bot.api
+        .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
+        .catch(() => {});
+      return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
     });
 
     this.bot.callbackQuery('del', async (ctx) => {
@@ -238,13 +273,37 @@ export class TelegramService {
 
     this.bot.on('message', async (ctx) => {
       try {
+        if (ctx.session.errorStatus === 'locationError')
+          return ctx.reply(STOP_TEXT);
+
+        console.log('===== message from chat === ');
+
         const { text } = ctx.update.message;
-        let data = null;
+        const { errorStatus, countTryError } = ctx.session;
+        if (errorStatus === 'articulError') {
+          if (countTryError === COUNT_TRY_ERROR) {
+            ctx.session = UpdateSessionByField(
+              ctx.session,
+              'comment',
+              ctx.message.text,
+            );
+            await this.updateToAirtable(ctx.session);
+          } else {
+            if (countTryError > COUNT_TRY_ERROR) {
+              return await ctx.reply(
+                'Для продолжения необходимо ввести правильный артикул.',
+              );
+            }
+          }
+        }
 
         if (!ctx.session.data && !text.includes('query_id')) {
           return await ctx.reply(`✌️`);
         }
 
+        let data = null;
+
+        //ответ от веб-интерфейса с выбором раздачи
         if (!ctx.session.data) {
           data = JSON.parse(text) as ITelegramWebApp;
           console.log('==== WEB API ====');
@@ -272,15 +331,13 @@ export class TelegramService {
           }
         }
 
-        console.log('===== message from chat === ');
-
         const { step } = ctx.session;
 
         if (!STEPS_TYPES.text.find((x) => x === step)) {
           return await ctx.reply('На этом шаге должно быть отправлено фото');
         }
 
-        //старт
+        //первый шаг
         if (STEPS.CHOOSE_OFFER === step && data) {
           ctx.session = nextStep(ctx.session);
 
@@ -295,35 +352,61 @@ export class TelegramService {
 
         //проверка артикула
         if (STEPS.CHECK_ARTICUL === step) {
-          let responseText = '';
           if (!parseUrl(text, ctx.session.data.articul)) {
+            ctx.session.errorStatus = 'articulError';
+
+            if (errorStatus === 'operatorCall') {
+              ctx.session.errorStatus = 'articulError';
+              return ctx.reply('Ждите ответа оператора');
+            }
+
             const helpText = ctx.session.data.positionOnWB
               ? `\nЭта позиция находится примерно на ${ctx.session.data.positionOnWB} странице.`
               : '';
 
-            ctx.session = UpdateSessionByField(
-              ctx.session,
-              'status',
-              'Проблема с артикулом',
-            );
-            responseText =
-              'Артикулы не совпадат. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
-              helpText;
+            if (ctx.session.countTryError < COUNT_TRY_ERROR) {
+              ctx.session = UpdateSessionByField(
+                ctx.session,
+                'status',
+                'Проблема с артикулом',
+              );
+              ctx.session.lastMessage = ctx.message.message_id;
+              ++ctx.session.countTryError;
+
+              const articulResponse = await ctx.reply(
+                'Артикулы не совпадают. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
+                  helpText,
+                ctx.session.countTryError === COUNT_TRY_ERROR
+                  ? {
+                      reply_markup: helpKeyboard,
+                    }
+                  : null,
+              );
+              if (ctx.session.countTryError <= 1) {
+                await this.updateToAirtable(ctx.session);
+              }
+              return articulResponse;
+            } else {
+              ctx.session.lastMessage = ctx.message.message_id;
+              ++ctx.session.countTryError;
+              ctx.session.errorStatus = 'operatorCall';
+              return ctx.reply('Ждите ответа оператора');
+            }
           } else {
+            ctx.session.errorStatus = null;
+            ctx.session.countTryError = 0;
             ctx.session = UpdateSessionByField(
               ctx.session,
               'status',
               'Артикул правильный',
             );
-            ctx.session = nextStep(ctx.session);
-            responseText = getTextByNextStep(ctx.session.step);
-          }
-          await this.updateToAirtable(ctx.session);
 
-          return await ctx.reply(responseText);
+            ctx.session = nextStep(ctx.session);
+            await this.updateToAirtable(ctx.session);
+            return await ctx.reply(getTextByNextStep(ctx.session.step));
+          }
         }
 
-        console.log('STEPS =', step);
         //отзыв пользователя
         if (step === STEPS.COMMENT_ON_CHECK) {
           ctx.session = UpdateSessionByField(
@@ -390,7 +473,7 @@ export class TelegramService {
       Раздача: session.data.title,
       Images: session.images,
       StopTime: session.stopTime,
-      Отзыв: session.comment,
+      ['Сообщения от пользователя']: session.comment,
       Финиш: session.isFinish,
     });
   }
