@@ -249,7 +249,7 @@ export class TelegramService {
         );
 
         await statusMessage.editText('Фото успешно загружено!');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
+        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
