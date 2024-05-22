@@ -279,23 +279,6 @@ export class TelegramService {
         console.log('===== message from chat === ');
 
         const { text } = ctx.update.message;
-        const { errorStatus, countTryError } = ctx.session;
-        if (errorStatus === 'articulError') {
-          if (countTryError === COUNT_TRY_ERROR) {
-            ctx.session = UpdateSessionByField(
-              ctx.session,
-              'comment',
-              ctx.message.text,
-            );
-            await this.updateToAirtable(ctx.session);
-          } else {
-            if (countTryError > COUNT_TRY_ERROR) {
-              return await ctx.reply(
-                'Для продолжения необходимо ввести правильный артикул.',
-              );
-            }
-          }
-        }
 
         if (!ctx.session.data && !text.includes('query_id')) {
           return await ctx.reply(`✌️`);
@@ -353,6 +336,24 @@ export class TelegramService {
         //проверка артикула
         if (STEPS.CHECK_ARTICUL === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
+            const { errorStatus, countTryError } = ctx.session;
+            if (errorStatus === 'articulError') {
+              if (countTryError === COUNT_TRY_ERROR) {
+                ctx.session = UpdateSessionByField(
+                  ctx.session,
+                  'comment',
+                  ctx.message.text,
+                );
+                await this.updateToAirtable(ctx.session);
+              } else {
+                if (countTryError > COUNT_TRY_ERROR) {
+                  return await ctx.reply(
+                    'Для продолжения необходимо ввести правильный артикул.',
+                  );
+                }
+              }
+            }
+
             ctx.session.errorStatus = 'articulError';
 
             if (errorStatus === 'operatorCall') {
@@ -390,7 +391,9 @@ export class TelegramService {
               ctx.session.lastMessage = ctx.message.message_id;
               ++ctx.session.countTryError;
               ctx.session.errorStatus = 'operatorCall';
-              return ctx.reply('Ждите ответа оператора');
+              return ctx.reply(
+                'Попробуйте снова или подождите ответа оператора',
+              );
             }
           } else {
             ctx.session.errorStatus = null;
