@@ -241,10 +241,10 @@ export class TelegramService {
     });
 
     this.bot.callbackQuery('next', async (ctx) => {
-      if (!ctx.session.lastMessage) {
-        return;
-      }
       if (STEPS_TYPES.image.includes(ctx.session.step)) {
+        if (!ctx.session.lastMessage) {
+          return;
+        }
         ctx.session.lastMessage = null;
         const statusMessage = await ctx.reply('Загрузка...');
 
