@@ -26,11 +26,11 @@ import {
   STEP_COMMANDS,
   STEPS_TYPES,
   WEB_APP_TEST,
-  COUNT_STEPS,
   TELEGRAM_CHAT_ID,
   STEPS,
   STOP_TEXT,
   COUNT_TRY_ERROR,
+  TELEGRAM_SECRET_CHAT_ID,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -44,6 +44,7 @@ import {
   getOffer,
   parseUrl,
   LocationCheck,
+  createMsgToSecretChat,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -345,6 +346,15 @@ export class TelegramService {
                   ctx.message.text,
                 );
                 await this.updateToAirtable(ctx.session);
+                const msgToSecretChat = createMsgToSecretChat(
+                  ctx.from,
+                  ctx.message.text,
+                  ctx.session.data.articul,
+                );
+                await ctx.api.sendMessage(
+                  TELEGRAM_SECRET_CHAT_ID,
+                  msgToSecretChat,
+                );
               } else {
                 if (countTryError > COUNT_TRY_ERROR) {
                   return await ctx.reply(
@@ -424,6 +434,13 @@ export class TelegramService {
           );
 
           await this.updateToAirtable(ctx.session);
+
+          const msgToSecretChat = createMsgToSecretChat(
+            ctx.from,
+            ctx.message.text,
+            ctx.session.data.articul,
+          );
+          await ctx.api.sendMessage(TELEGRAM_SECRET_CHAT_ID, msgToSecretChat);
 
           return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
             reply_markup: commentKeyboard,
