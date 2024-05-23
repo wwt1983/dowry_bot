@@ -240,7 +240,10 @@ export class TelegramService {
     });
 
     this.bot.callbackQuery('next', async (ctx) => {
-      if (!STEPS_TYPES.text.includes(ctx.session.step)) {
+      if (!ctx.session.lastMessage) {
+        return;
+      }
+      if (STEPS_TYPES.image.includes(ctx.session.step)) {
         ctx.session.lastMessage = null;
         const statusMessage = await ctx.reply('Загрузка...');
 
@@ -250,17 +253,14 @@ export class TelegramService {
 
         await statusMessage.editText('Фото загружено!');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
-
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
         ctx.session = nextStep(ctx.session);
       }
-
-      await this.updateToAirtable(ctx.session);
-
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
       );
+      await this.updateToAirtable(ctx.session);
 
       if (ctx.session.step === STEPS.FINISH) {
         await ctx.react('🎉');
