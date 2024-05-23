@@ -277,8 +277,6 @@ export class TelegramService {
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(STOP_TEXT);
 
-        console.log('===== message from chat === ');
-
         const { text } = ctx.update.message;
 
         if (!ctx.session.data && !text.includes('query_id')) {
