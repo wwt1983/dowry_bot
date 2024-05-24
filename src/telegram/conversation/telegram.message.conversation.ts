@@ -3,7 +3,7 @@ import { MyContext, MyConversation } from '../telegram.interface';
 export async function message(conversation: MyConversation, ctx: MyContext) {
   try {
     let chatId = null;
-    if (ctx.message.text && ctx.message.text.includes('=')) {
+    if (ctx.message?.text && ctx.message?.text.includes('=')) {
       chatId = ctx.message.text.replace(/\D/g, '');
     }
     if (!chatId) {
