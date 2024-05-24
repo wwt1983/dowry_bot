@@ -124,14 +124,17 @@ export function UpdateSessionByStep(
       break;
     case STEPS.COMMENT_ON_CHECK:
       session.comment = data;
+      session.stopTime = getTimeWithTz();
       break;
     case STEPS.COMMENT:
       session.isLoadImageOnComment = true;
       session.status = 'Отзыв';
+      session.stopTime = getTimeWithTz();
       break;
     case STEPS.SHTRIH_CODE:
       session.isLoadImageBrokeCode = true;
       session.status = 'Штрих-код';
+      session.stopTime = getTimeWithTz();
       break;
     case STEPS.CHECK:
       session.isLoadImageCheck = true;
