@@ -85,11 +85,12 @@ export class TelegramService {
     this.bot.use(conversations());
     this.bot.use(createConversation(message, 'message'));
 
-    //!!!! ==== здесь надо проверку на админские права сделать
-    this.bot.api.setMyCommands([
-      ...COMMANDS_TELEGRAM,
-      ...ADMIN_COMMANDS_TELEGRAM,
-    ]);
+    this.bot.api.setMyCommands(COMMANDS_TELEGRAM, {
+      scope: { type: 'all_private_chats' },
+    });
+    this.bot.api.setMyCommands(ADMIN_COMMANDS_TELEGRAM, {
+      scope: { type: 'default' },
+    });
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
