@@ -1,5 +1,4 @@
 import { ISessionData, ITelegramWebApp } from './telegram.interface';
-import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,7 +14,6 @@ import {
   FOUR_STEP_A,
   FOUR_STEP_B,
   FOOTER,
-  COUNT_STEPS,
   THREE_STEP_A,
   TELEGRAM_BOT_NAME,
   FIRST_STEP_LINK,
@@ -32,17 +30,23 @@ export function sayHi(first_name: string, username: string): string {
 
 export function createMsgToSecretChat(
   from: User,
-  comment?: string,
-  order?: string,
+  comment: string,
+  order: string,
+  chatId: string,
 ) {
-  const { first_name, last_name, username, id } = from;
+  const { first_name, last_name, username } = from;
+  // const commandForBot =
+  //   botType === 'development'
+  //     ? `/message=${chatId}@test_dowry_bot`
+  //     : `/message=${chatId}@DowryWorkBot`;
 
+  const instruction =
+    '\nСкопируйте chat_id, затем зайдите в бот, выбирите комманду /message и следуйте дальше по инструкции бота';
   const userComment = comment
-    ? `Раздача:${order}: Сообщение:\n ${comment}`
+    ? `\nРаздача:${order}\nchat_id=${chatId}\nСообщение:${comment}`
     : '';
-  return `Старт: ${format(new Date(), 'dd.MM.yyyy H:mm')} ${first_name} 
-  ${last_name || ''} username=${username || ''} 
-  https://web.telegram.org/a/#${id} ${userComment}`;
+  return `Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
+  ${userComment}${instruction}`;
 }
 
 const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
@@ -77,6 +81,7 @@ export function createInitialSessionData(
     location: null,
     errorStatus: null,
     countTryError: 0,
+    conversation: null,
   };
 }
 

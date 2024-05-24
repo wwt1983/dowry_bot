@@ -14,12 +14,20 @@ export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
   history = 'history',
+  messageSend = 'message_send',
 }
 
 export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
+];
+
+export const ADMIN_COMMANDS_TELEGRAM = [
+  {
+    command: COMMAND_NAMES.messageSend,
+    description: 'Отправить сообщение пользователю',
+  },
 ];
 
 export enum STEP_COMMANDS {

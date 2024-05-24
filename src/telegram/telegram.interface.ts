@@ -1,5 +1,9 @@
 import { ModuleMetadata } from '@nestjs/common';
 import { SessionFlavor, Context } from 'grammy';
+import {
+  type Conversation,
+  type ConversationFlavor,
+} from '@grammyjs/conversations';
 import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
 import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
@@ -38,9 +42,13 @@ export interface ISessionData {
   location?: string;
   countTryError: number; //количество попыток сделать какое-то действие
   errorStatus: BrokeBotStatus;
+  conversation: any;
 }
 
-export type MyContext = HydrateFlavor<Context & SessionFlavor<ISessionData>>;
+export type MyContext = HydrateFlavor<
+  Context & SessionFlavor<ISessionData> & ConversationFlavor
+>;
+export type MyConversation = Conversation<MyContext>;
 export type MyApi = HydrateApiFlavor<Api>;
 
 export interface ITelegramWebApp {

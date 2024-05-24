@@ -1,12 +1,6 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
-import {
-  Bot,
-  session,
-  GrammyError,
-  HttpError,
-  InlineKeyboard,
-  Keyboard,
-} from 'grammy';
+import { Bot, session, GrammyError, HttpError } from 'grammy';
+import { conversations, createConversation } from '@grammyjs/conversations';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 
 import {
@@ -15,6 +9,7 @@ import {
   MyApi,
   ISessionData,
   ITelegramWebApp,
+  MyConversation,
 } from './telegram.interface';
 import {
   TELEGRAM_MODULE_OPTIONS,
@@ -23,7 +18,6 @@ import {
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
   WEB_APP,
-  STEP_COMMANDS,
   STEPS_TYPES,
   WEB_APP_TEST,
   TELEGRAM_CHAT_ID,
@@ -31,6 +25,7 @@ import {
   STOP_TEXT,
   COUNT_TRY_ERROR,
   TELEGRAM_SECRET_CHAT_ID,
+  ADMIN_COMMANDS_TELEGRAM,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -50,6 +45,14 @@ import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
 import { getGeoUrl, parseGeoResponse } from './telegram.geo';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
+import {
+  commentKeyboard,
+  helpKeyboard,
+  shareKeyboard,
+  stepKeyboard,
+  userMenu,
+} from './telegram.command';
+import { message } from './conversation/telegram.message.conversation';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -79,26 +82,15 @@ export class TelegramService {
         },
       }),
     );
-    this.bot.api.setMyCommands(COMMANDS_TELEGRAM);
 
-    const stepKeyboard = new InlineKeyboard()
-      .text(STEP_COMMANDS.del, 'del')
-      .text(STEP_COMMANDS.next, 'next');
+    this.bot.use(conversations());
+    this.bot.use(createConversation(message, 'message'));
 
-    const commentKeyboard = new InlineKeyboard().text(
-      STEP_COMMANDS.next,
-      'next',
-    );
-    const helpKeyboard = new InlineKeyboard().text(
-      STEP_COMMANDS.operator,
-      'operator',
-    );
-    //.text(STEP_COMMANDS.next, 'cancel');
-
-    const shareKeyboard = new Keyboard()
-      .requestLocation('Геолокация')
-      .placeholder('Я хочу поделиться...')
-      .resized();
+    //!!!! ==== здесь надо проверку на админские права сделать
+    this.bot.api.setMyCommands([
+      ...COMMANDS_TELEGRAM,
+      ...ADMIN_COMMANDS_TELEGRAM,
+    ]);
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
@@ -128,38 +120,12 @@ export class TelegramService {
       });
     });
 
-    const userMenu = new InlineKeyboard().text('История раздач', 'showOrders');
-    this.bot.command(COMMAND_NAMES.history, (ctx) =>
-      ctx.reply('🛍️', {
-        reply_markup: userMenu,
-      }),
-    );
-
-    this.bot.callbackQuery('showOrders', async (ctx) => {
-      const { first_name, last_name, username, id } = ctx.from;
-
-      const dataBuyer = await this.commandService.getDistributionTableByFilter(
-        ctx.session.user,
-      );
-      if (!dataBuyer)
-        return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
-          parse_mode: 'HTML',
-        });
-      const allCash = dataBuyer.reduce(function (newArr, record) {
-        if (record.fields['Кэш выплачен']) {
-          newArr.push(
-            `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
-          );
-        }
-        return newArr;
-      }, []);
-      await ctx.api.sendMessage(id, allCash.join('\n'), {
-        parse_mode: 'HTML',
-      });
-    });
-
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
       ctx.reply(HELP_TEXT);
+    });
+
+    this.bot.command(COMMAND_NAMES.messageSend, async (ctx) => {
+      await ctx.conversation.enter('message');
     });
 
     // this.bot.on('', async (ctx) => {
@@ -279,7 +245,7 @@ export class TelegramService {
 
         const { text } = ctx.update.message;
 
-        if (!ctx.session.data && !text.includes('query_id')) {
+        if (!ctx.session.data && !text?.includes('query_id')) {
           return await ctx.reply(`✌️`);
         }
 
@@ -348,6 +314,7 @@ export class TelegramService {
                   ctx.from,
                   ctx.message.text,
                   ctx.session.data.articul,
+                  ctx.session.chat_id,
                 );
                 await ctx.api.sendMessage(
                   TELEGRAM_SECRET_CHAT_ID,
@@ -437,6 +404,7 @@ export class TelegramService {
             ctx.from,
             ctx.message.text,
             ctx.session.data.articul,
+            ctx.session.chat_id,
           );
           await ctx.api.sendMessage(TELEGRAM_SECRET_CHAT_ID, msgToSecretChat);
 
@@ -447,6 +415,35 @@ export class TelegramService {
       } catch (e) {
         console.log(e);
       }
+    });
+
+    this.bot.command(COMMAND_NAMES.history, (ctx) =>
+      ctx.reply('🛍️', {
+        reply_markup: userMenu,
+      }),
+    );
+
+    this.bot.callbackQuery('showOrders', async (ctx) => {
+      const { first_name, last_name, username, id } = ctx.from;
+
+      const dataBuyer = await this.commandService.getDistributionTableByFilter(
+        ctx.session.user,
+      );
+      if (!dataBuyer)
+        return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
+          parse_mode: 'HTML',
+        });
+      const allCash = dataBuyer.reduce(function (newArr, record) {
+        if (record.fields['Кэш выплачен']) {
+          newArr.push(
+            `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
+          );
+        }
+        return newArr;
+      }, []);
+      await ctx.api.sendMessage(id, allCash.join('\n'), {
+        parse_mode: 'HTML',
+      });
     });
 
     this.bot.catch((err) => {
