@@ -6,7 +6,6 @@ export async function message(conversation: MyConversation, ctx: MyContext) {
     if (ctx.message.text && ctx.message.text.includes('=')) {
       chatId = ctx.message.text.replace(/\D/g, '');
     }
-    console.log('chat==', chatId);
     if (!chatId) {
       await ctx.reply('Введите номер пользователя (поле chat_id)');
       chatId = await conversation.form.number();
