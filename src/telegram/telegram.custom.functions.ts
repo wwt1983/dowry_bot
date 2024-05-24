@@ -18,6 +18,8 @@ import {
   TELEGRAM_BOT_NAME,
   FIRST_STEP_LINK,
   STEPS,
+  TELEGRAM_MESSAGE_CHAT_PROD,
+  TELEGRAM_MESSAGE_CHAT_TEST,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -41,7 +43,7 @@ export function createMsgToSecretChat(
   //     : `/message=${chatId}@DowryWorkBot`;
 
   const instruction =
-    '\nСкопируйте chat_id, затем зайдите в бот, выбирите комманду /message и следуйте дальше по инструкции бота';
+    '\nВыбирите комманду /message_send,cкопируйте chat_id и следуйте дальше по инструкции бота';
   const userComment = comment
     ? `\nРаздача:${order}\nchat_id=${chatId}\nСообщение:${comment}`
     : '';
@@ -282,4 +284,11 @@ export const LocationCheck = (
         status: false,
         text: `Ваше местоположение (${locationUser}) не позволяет участвовать в раздаче`,
       };
+};
+
+export const getSecretChatId = () => {
+  console.log('process == ', process.env.NODE_ENV)
+  return process.env.NODE_ENV === 'development'
+    ? TELEGRAM_MESSAGE_CHAT_TEST
+    : TELEGRAM_MESSAGE_CHAT_PROD;
 };
