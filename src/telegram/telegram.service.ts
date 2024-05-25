@@ -128,10 +128,17 @@ export class TelegramService {
       await ctx.conversation.enter('message');
     });
 
+    /*======== HIST =======*/
+    this.bot.command(COMMAND_NAMES.history, (ctx) => {
+      return ctx.reply('🛍️', {
+        reply_markup: userMenu,
+      });
+    });
     // this.bot.on('', async (ctx) => {
     //   return ctx.reply('В бот нужно отправлять только картинки');
     // });
 
+    /*======== LOCATION =======*/
     this.bot.on(':location', async (ctx) => {
       const data = await commandService.get(
         getGeoUrl(
@@ -161,6 +168,7 @@ export class TelegramService {
       });
     });
 
+    /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       const { step, data } = ctx.session;
       if (!data)
@@ -180,12 +188,14 @@ export class TelegramService {
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
 
+    /*======== CANCEL =======*/
     this.bot.callbackQuery('cancel', async (ctx) => {
       this.bot.api
         .editMessageReplyMarkup(ctx.session.chat_id, ctx.session.lastMessage)
         .catch(() => {});
     });
 
+    /*======== OPERATOR =======*/
     this.bot.callbackQuery('operator', async (ctx) => {
       ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
       await this.updateToAirtable(ctx.session);
@@ -195,6 +205,7 @@ export class TelegramService {
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
     });
 
+    /*======== DEL =======*/
     this.bot.callbackQuery('del', async (ctx) => {
       ctx.session.images = ctx.session.images.filter(
         (item) => item !== ctx.session.lastLoadImage,
@@ -206,6 +217,7 @@ export class TelegramService {
       await ctx.callbackQuery.message.editText('Загрузите новое фото');
     });
 
+    /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
       if (STEPS_TYPES.image.includes(ctx.session.step)) {
         if (!ctx.session.lastMessage) {
@@ -234,10 +246,12 @@ export class TelegramService {
       }
     });
 
+    /*======== CALBACK_QUERY =======*/
     this.bot.on('callback_query', async (ctx) => {
       await ctx.answerCallbackQuery();
     });
 
+    /*======== MESSAGE =======*/
     this.bot.on('message', async (ctx) => {
       try {
         if (ctx.session.errorStatus === 'locationError')
@@ -413,12 +427,6 @@ export class TelegramService {
         console.log(e);
       }
     });
-
-    this.bot.command(COMMAND_NAMES.history, (ctx) =>
-      ctx.reply('🛍️', {
-        reply_markup: userMenu,
-      }),
-    );
 
     this.bot.callbackQuery('showOrders', async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
