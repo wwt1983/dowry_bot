@@ -128,7 +128,7 @@ export class TelegramService {
       await ctx.conversation.enter('message');
     });
 
-    /*======== HIST =======*/
+    /*======== HISTORY =======*/
     this.bot.command(COMMAND_NAMES.history, (ctx) => {
       return ctx.reply('🛍️', {
         reply_markup: userMenu,
@@ -243,6 +243,38 @@ export class TelegramService {
 
       if (ctx.session.step === STEPS.FINISH) {
         await ctx.react('🎉');
+      }
+    });
+
+    /*======== SHOW ORDERS =======*/
+    this.bot.callbackQuery('showOrders', async (ctx) => {
+      try {
+        const { first_name, last_name, username, id } = ctx.from;
+
+        const dataBuyer =
+          await this.commandService.getDistributionTableByFilter(
+            ctx.session.user,
+          );
+        if (!dataBuyer) {
+          return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
+            parse_mode: 'HTML',
+          });
+        }
+
+        const allCash = dataBuyer.reduce(function (newArr, record) {
+          if (record.fields['Кэш выплачен']) {
+            newArr.push(
+              `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
+            );
+          }
+          return newArr;
+        }, []);
+        return await ctx.api.sendMessage(id, allCash.join('\n'), {
+          parse_mode: 'HTML',
+        });
+      } catch (e) {
+        console.log('orders show', e);
+        return await ctx.reply('Раздел обновляется');
       }
     });
 
@@ -426,29 +458,6 @@ export class TelegramService {
       } catch (e) {
         console.log(e);
       }
-    });
-
-    this.bot.callbackQuery('showOrders', async (ctx) => {
-      const { first_name, last_name, username, id } = ctx.from;
-
-      const dataBuyer = await this.commandService.getDistributionTableByFilter(
-        ctx.session.user,
-      );
-      if (!dataBuyer)
-        return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
-          parse_mode: 'HTML',
-        });
-      const allCash = dataBuyer.reduce(function (newArr, record) {
-        if (record.fields['Кэш выплачен']) {
-          newArr.push(
-            `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
-          );
-        }
-        return newArr;
-      }, []);
-      await ctx.api.sendMessage(id, allCash.join('\n'), {
-        parse_mode: 'HTML',
-      });
     });
 
     this.bot.catch((err) => {
