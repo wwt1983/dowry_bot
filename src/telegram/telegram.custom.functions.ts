@@ -319,6 +319,12 @@ export const getNotificationValue = (
         statisticNotifications,
         'Снять с раздачи',
       );
+    case 'Заказ':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Заказ',
+      );
     case 'Получен':
       return filterNotificationValue(
         notifications,
@@ -370,4 +376,22 @@ const filterNotificationValue = (
   } finally {
     return { notification, statistic };
   }
+};
+
+export const convertDataFromBotTable = (data: any, status: BotStatus) => {
+  return {
+    SessionId: data.sessionId,
+    Артикул: data.data.articul,
+    StartTime: data.startTime,
+    ['Время выкупа']: data.stopBuyTime,
+    OfferId: data.offerId,
+    Статус: status,
+    Location: data.location,
+    Раздача: data.data.title,
+    Images: data.images,
+    StopTime: status === 'Бот удален' ? getTimeWithTz() : '',
+    ['Сообщения от пользователя']: data.comment,
+    ['Снять с раздачи']: status === 'Бот удален',
+    Финиш: data.isFinish,
+  };
 };

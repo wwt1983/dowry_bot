@@ -50,6 +50,10 @@ export class AirtableService {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
     return await this.airtableHttpService.get(TablesName.Distributions, filter);
   }
+  async getUserFromBot(sessionId: string): Promise<any> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${sessionId}",{SessionId})`;
+    return await this.airtableHttpService.get(TablesName.Bot, filter);
+  }
   async getOffers(): Promise<IOffers> {
     const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);

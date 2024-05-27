@@ -54,7 +54,6 @@ export class TelegramController {
     @Body()
     data: {
       chat_id: string;
-      message: string;
       sessionId: string;
       botId: string;
       status: BotStatus;
@@ -64,7 +63,6 @@ export class TelegramController {
   ): Promise<void> {
     await this.telegramService.sendNotificationToUser(
       data.chat_id,
-      data.message,
       data.sessionId,
       data.botId,
       data.status,

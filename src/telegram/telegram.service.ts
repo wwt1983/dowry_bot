@@ -39,8 +39,8 @@ import {
   LocationCheck,
   createMsgToSecretChat,
   getSecretChatId,
-  getTimeWithTz,
   getNotificationValue,
+  convertDataFromBotTable,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -549,19 +549,6 @@ export class TelegramService {
   }
 
   /*
-обновляем данные в airtable таблица Бот
-*/
-  async updateBotTable(sessionId: string, status: BotStatus): Promise<any> {
-    return await this.airtableService.updateToAirtable({
-      SessionId: sessionId,
-      ['Снять с раздачи']: status === 'Бот удален',
-      StartTime: getTimeWithTz(),
-      Статус: status,
-      StopTime: status === 'Бот удален' ? getTimeWithTz() : '',
-      Финиш: status === 'Бот удален',
-    });
-  }
-  /*
 обновляем данные в airtable from notification user таблица Оповещения статистика
 */
   async updateNotificationStatistic(
@@ -597,7 +584,6 @@ export class TelegramService {
   /*NOTIFICATION*/
   async sendNotificationToUser(
     chat_id: number | string,
-    message: string,
     sessionId: string,
     botId: string,
     status: BotStatus,
@@ -605,9 +591,8 @@ export class TelegramService {
     stopTime: string,
   ): Promise<string> {
     try {
-      console.log(chat_id, message, sessionId, botId, status);
+      console.log(chat_id, sessionId, botId, status);
       if (status === 'Бот удален' || status === 'Ошибка') return;
-
       const notifications = await this.airtableService.getNotifications();
       const statisticNotifications =
         await this.airtableService.getNotificationStatistics(sessionId);
@@ -618,6 +603,14 @@ export class TelegramService {
         status,
         startTime,
       );
+
+      if (
+        value &&
+        value.statistic &&
+        value.statistic.fields &&
+        value.statistic.fields.Статус === 'Остановлено'
+      )
+        return 'false';
 
       if (value && value.statistic && value.statistic.fields) {
         await this.updateNotificationStatistic(
@@ -631,7 +624,10 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       } else {
-        await this.bot.api.sendMessage(chat_id, message);
+        await this.bot.api.sendMessage(
+          chat_id,
+          value.notification.fields.Сообщение,
+        );
         await this.addNotificationStatistic(
           sessionId,
           'Доставлено',
@@ -640,15 +636,15 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       }
-      await this.updateBotTable(sessionId, status);
       return 'ok';
     } catch (error: any) {
       if (error instanceof Error) {
         console.log('sendNotificationToUser error=', error);
         if (error.message.includes('403')) {
-          await this.updateBotTable(sessionId, 'Бот удален');
-        } else {
-          await this.updateBotTable(sessionId, status);
+          const currentUserInfo =
+            await this.airtableService.getUserFromBot(sessionId);
+          const data = convertDataFromBotTable(currentUserInfo, 'Бот удален');
+          await this.airtableService.updateToAirtable(data);
         }
         return 'false';
       }
