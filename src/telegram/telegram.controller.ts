@@ -2,6 +2,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { TelegramService } from './telegram.service';
 import { SubscribeDto } from './dto/SubscribeDto';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
+import { BotStatus } from 'src/airtable/types/IBot.interface';
 
 @Controller('telegram')
 export class TelegramController {
@@ -47,5 +48,28 @@ export class TelegramController {
     @Body() data: { messageId: number; status: OfferStatus },
   ): Promise<void> {
     await this.telegramService.closeOfferInChat(data.messageId, data.status);
+  }
+  @Post('notification')
+  async notification(
+    @Body()
+    data: {
+      chat_id: string;
+      message: string;
+      sessionId: string;
+      botId: string;
+      status: BotStatus;
+      startTime: string;
+      stopTime: string;
+    },
+  ): Promise<void> {
+    await this.telegramService.sendNotificationToUser(
+      data.chat_id,
+      data.message,
+      data.sessionId,
+      data.botId,
+      data.status,
+      data.startTime,
+      data.stopTime,
+    );
   }
 }

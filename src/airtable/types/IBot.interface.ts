@@ -23,6 +23,8 @@ export type BotStatus =
   | 'Проблема с артикулом'
   | 'Проблема с локацией'
   | 'Вызов'
-  | 'Бот не установлен';
+  | 'Бот удален'
+  | 'Ошибка'
+  | 'Снять с раздачи';
 
 export type BrokeBotStatus = 'locationError' | 'articulError' | 'operatorCall';

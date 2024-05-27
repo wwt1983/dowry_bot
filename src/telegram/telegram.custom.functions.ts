@@ -23,6 +23,9 @@ import {
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
+import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { INotifications } from 'src/airtable/types/INotification.interface';
+import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -290,8 +293,81 @@ export const LocationCheck = (
 };
 
 export const getSecretChatId = () => {
-  console.log('process == ', process.env.NODE_ENV)
   return process.env.NODE_ENV === 'development'
     ? TELEGRAM_MESSAGE_CHAT_TEST
     : TELEGRAM_MESSAGE_CHAT_PROD;
+};
+
+export const getNotificationValue = (
+  notifications: INotifications,
+  statisticNotifications: INotificationStatistics,
+  status: BotStatus,
+  startTime: string,
+) => {
+  switch (status) {
+    case 'Выбор раздачи':
+    case 'Поиск':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Поиск',
+      );
+
+    case 'Снять с раздачи':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Снять с раздачи',
+      );
+    case 'Получен':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Получен',
+      );
+    case 'Отзыв':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Отзыв',
+      );
+    case 'Штрих-код':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Штрих-код',
+      );
+    case 'Чек':
+      return filterNotificationValue(
+        notifications,
+        statisticNotifications,
+        'Чек',
+      );
+  }
+};
+
+const filterNotificationValue = (
+  notifications: INotifications,
+  statisticNotifications: INotificationStatistics,
+  status: string,
+) => {
+  let notification = null;
+  let statistic = null;
+
+  try {
+    notification = notifications.records.find(
+      (x) => x.fields.Название === status,
+    );
+    statistic =
+      statisticNotifications.records.length === 0
+        ? null
+        : statisticNotifications.records.find(
+            (x) => x.fields.Шаблон[0] === notification.fields.Id,
+          );
+    return { notification, statistic: statistic };
+  } catch (e) {
+    console.log('filterNotificationValue', e);
+  } finally {
+    return { notification, statistic };
+  }
 };

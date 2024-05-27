@@ -39,6 +39,8 @@ import {
   LocationCheck,
   createMsgToSecretChat,
   getSecretChatId,
+  getTimeWithTz,
+  getNotificationValue,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -52,6 +54,8 @@ import {
   userMenu,
 } from './telegram.command';
 import { message } from './conversation/telegram.message.conversation';
+import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -489,7 +493,9 @@ export class TelegramService {
       Статус: session.status,
     });
   }
-
+  /*
+обновляем данные в airtable
+*/
   async updateToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
@@ -507,6 +513,7 @@ export class TelegramService {
     });
   }
 
+  /*public offer in work chat*/
   async sendOfferToChat(id: string): Promise<number> {
     try {
       const offerAirtable = await this.airtableService.getOffer(id);
@@ -521,6 +528,7 @@ export class TelegramService {
       console.log('sendOfferToChat', e);
     }
   }
+  /*work chat close*/
   async closeOfferInChat(
     messageId: number,
     status: OfferStatus,
@@ -537,6 +545,113 @@ export class TelegramService {
       return 'Ok';
     } catch (e) {
       console.log('sendOfferToChat', e);
+    }
+  }
+
+  /*
+обновляем данные в airtable таблица Бот
+*/
+  async updateBotTable(sessionId: string, status: BotStatus): Promise<any> {
+    return await this.airtableService.updateToAirtable({
+      SessionId: sessionId,
+      ['Снять с раздачи']: status === 'Бот удален',
+      StartTime: getTimeWithTz(),
+      Статус: status,
+      StopTime: status === 'Бот удален' ? getTimeWithTz() : '',
+      Финиш: status === 'Бот удален',
+    });
+  }
+  /*
+обновляем данные в airtable from notification user таблица Оповещения статистика
+*/
+  async updateNotificationStatistic(
+    sessionId: string,
+    status: NotificationStatisticStatuses,
+    count: number,
+    BotId: string,
+    PatternId: string,
+  ): Promise<any> {
+    return await this.airtableService.updateToAirtableNotificationStatistic({
+      SessionId: sessionId,
+      ['Количество отправок']: count,
+      Статус: status,
+      Бот: BotId,
+      Шаблон: PatternId,
+    });
+  }
+  async addNotificationStatistic(
+    sessionId: string,
+    status: NotificationStatisticStatuses,
+    count: number,
+    BotId: string,
+    PatternId: string,
+  ): Promise<any> {
+    return await this.airtableService.addToAirtableNotificationStatistic({
+      SessionId: sessionId,
+      ['Количество отправок']: count,
+      Статус: status,
+      Бот: BotId,
+      Шаблон: PatternId,
+    });
+  }
+  /*NOTIFICATION*/
+  async sendNotificationToUser(
+    chat_id: number | string,
+    message: string,
+    sessionId: string,
+    botId: string,
+    status: BotStatus,
+    startTime: string,
+    stopTime: string,
+  ): Promise<string> {
+    try {
+      console.log(chat_id, message, sessionId, botId, status);
+      if (status === 'Бот удален' || status === 'Ошибка') return;
+
+      const notifications = await this.airtableService.getNotifications();
+      const statisticNotifications =
+        await this.airtableService.getNotificationStatistics(sessionId);
+
+      const value = getNotificationValue(
+        notifications,
+        statisticNotifications,
+        status,
+        startTime,
+      );
+
+      if (value && value.statistic && value.statistic.fields) {
+        await this.updateNotificationStatistic(
+          sessionId,
+          value.statistic.fields['Количество отправок'] + 1 <
+            value.notification.fields['Количество попыток']
+            ? 'Доставлено'
+            : 'Остановлено',
+          value.statistic.fields['Количество отправок'] + 1,
+          botId,
+          value.notification.fields.Id,
+        );
+      } else {
+        await this.bot.api.sendMessage(chat_id, message);
+        await this.addNotificationStatistic(
+          sessionId,
+          'Доставлено',
+          1,
+          botId,
+          value.notification.fields.Id,
+        );
+      }
+      await this.updateBotTable(sessionId, status);
+      return 'ok';
+    } catch (error: any) {
+      if (error instanceof Error) {
+        console.log('sendNotificationToUser error=', error);
+        if (error.message.includes('403')) {
+          await this.updateBotTable(sessionId, 'Бот удален');
+        } else {
+          await this.updateBotTable(sessionId, status);
+        }
+        return 'false';
+      }
     }
   }
 }
