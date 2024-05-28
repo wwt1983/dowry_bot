@@ -549,7 +549,7 @@ export class TelegramService {
   }
 
   /*
-обновляем данные в airtable from notification user таблица Оповещения статистика
+обновляем данные в airtable from notification user таблица "Оповещения статистика"
 */
   async updateNotificationStatistic(
     sessionId: string,
@@ -557,8 +557,8 @@ export class TelegramService {
     count: number,
     BotId: string,
     PatternId: string,
-  ): Promise<any> {
-    return await this.airtableService.updateToAirtableNotificationStatistic({
+  ): Promise<void> {
+    await this.airtableService.updateToAirtableNotificationStatistic({
       SessionId: sessionId,
       ['Количество отправок']: count,
       Статус: status,
@@ -566,14 +566,17 @@ export class TelegramService {
       Шаблон: PatternId,
     });
   }
+  /*
+добавляем данные в airtable from notification user таблица "Оповещения статистика"
+*/
   async addNotificationStatistic(
     sessionId: string,
     status: NotificationStatisticStatuses,
     count: number,
     BotId: string,
     PatternId: string,
-  ): Promise<any> {
-    return await this.airtableService.addToAirtableNotificationStatistic({
+  ): Promise<void> {
+    await this.airtableService.addToAirtableNotificationStatistic({
       SessionId: sessionId,
       ['Количество отправок']: count,
       Статус: status,
@@ -589,7 +592,7 @@ export class TelegramService {
     status: BotStatus,
     startTime: string,
     stopTime: string,
-  ): Promise<string> {
+  ): Promise<void> {
     try {
       console.log(chat_id, sessionId, botId, status);
       if (
@@ -610,14 +613,14 @@ export class TelegramService {
         stopTime,
       );
 
-      if (!value) return 'false';
+      if (!value) return;
 
       if (
         value.statistic &&
         value.statistic.fields &&
         value.statistic.fields.Статус === 'Остановлено'
       )
-        return 'false';
+        return;
 
       if (value.status === 'Время истекло') {
         await this.airtableService.updateStatusInBotTableAirtable(
@@ -635,18 +638,17 @@ export class TelegramService {
         );
       }
 
-      if (value.statistic && value.statistic.fields) {
-        if (
-          !ScheduleNotification(
-            status,
-            stopTime || startTime,
-            value.statistic.fields['Количество отправок'],
-          )
-        ) {
-          console.log('schedule notification not send');
-          return 'false';
-        }
+      if (
+        !ScheduleNotification(
+          status,
+          stopTime || startTime,
+          value?.statistic?.fields['Количество отправок'] || 1,
+        )
+      ) {
+        return;
+      }
 
+      if (value.statistic && value.statistic.fields) {
         await this.updateNotificationStatistic(
           sessionId,
           value.statistic.fields['Количество отправок'] + 1 <
@@ -658,11 +660,6 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       } else {
-        if (!ScheduleNotification(status, stopTime || startTime, 1)) {
-          console.log('schedule notification not send');
-          return 'false';
-        }
-
         await this.addNotificationStatistic(
           sessionId,
           'Доставлено',
@@ -680,8 +677,6 @@ export class TelegramService {
         chat_id,
         value.notification.fields.Сообщение,
       );
-
-      return 'ok';
     } catch (error: any) {
       if (error instanceof Error) {
         console.log('sendNotificationToUser error=', error);
@@ -691,7 +686,6 @@ export class TelegramService {
             'Бот удален',
           );
         }
-        return 'false';
       }
     }
   }
