@@ -19,13 +19,17 @@ import {
   STEPS,
   TELEGRAM_MESSAGE_CHAT_PROD,
   TELEGRAM_MESSAGE_CHAT_TEST,
+  LIMIT_TIME_IN_MINUTES_FOR_ORDER,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
-import { getTimeWithTz } from 'src/common/date/date.methods';
+import {
+  getDifferenceInMinutes,
+  getTimeWithTz,
+} from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -304,14 +308,19 @@ export const getNotificationValue = (
   startTime: string,
   stopTime: string,
 ) => {
-  let statusNotification = '';
+  let statusNotification: BotStatus;
   switch (status) {
     case 'Выбор раздачи':
     case 'Поиск':
-      statusNotification = 'Поиск';
-      break;
-    case 'Время истекло':
-      statusNotification = 'Время истекло';
+      let minutes = 0;
+      if (!stopTime) {
+        minutes = getDifferenceInMinutes(startTime);
+      } else {
+        minutes = getDifferenceInMinutes(stopTime);
+      }
+      statusNotification =
+        minutes < LIMIT_TIME_IN_MINUTES_FOR_ORDER ? 'Поиск' : 'Время истекло';
+      console.log('minutes', minutes);
       break;
     case 'Заказ':
       statusNotification = 'Заказ';
@@ -339,7 +348,7 @@ export const getNotificationValue = (
 const filterNotificationValue = (
   notifications: INotifications,
   statisticNotifications: INotificationStatistics,
-  status: string,
+  status: BotStatus,
 ) => {
   let notification = null;
   let statistic = null;
@@ -354,28 +363,10 @@ const filterNotificationValue = (
         : statisticNotifications.records.find(
             (x) => x.fields.Шаблон[0] === notification.fields.Id,
           );
-    return { notification, statistic: statistic };
+    return { notification, statistic };
   } catch (e) {
     console.log('filterNotificationValue', e);
   } finally {
-    return { notification, statistic };
+    return { notification, statistic, status };
   }
-};
-
-export const convertDataFromBotTable = (data: any, status: BotStatus) => {
-  return {
-    SessionId: data.sessionId,
-    Артикул: data.data.articul,
-    StartTime: data.startTime,
-    ['Время выкупа']: data.stopBuyTime,
-    OfferId: data.offerId,
-    Статус: status,
-    Location: data.location,
-    Раздача: data.data.title,
-    Images: data.images,
-    StopTime: status === 'Бот удален' ? getTimeWithTz() : '',
-    ['Сообщения от пользователя']: data.comment,
-    ['Снять с раздачи']: status === 'Бот удален',
-    Финиш: data.isFinish,
-  };
 };

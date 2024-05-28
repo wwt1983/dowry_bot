@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Session } from '@nestjs/common';
 
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
@@ -6,6 +6,7 @@ import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
+import { BotStatus } from './types/IBot.interface';
 
 @Injectable()
 export class AirtableService {
@@ -30,6 +31,20 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
+  async updateStatusInBotTableAirtable(
+    sessionId: string,
+    status: BotStatus,
+  ): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
+      SessionId: sessionId,
+      Статус: status,
+    });
+    console.log('postWebhook ===>', response);
+    return response;
+  }
   async addToAirtableNotificationStatistic(data: any): Promise<any> {
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_ADD',
@@ -51,7 +66,7 @@ export class AirtableService {
     return await this.airtableHttpService.get(TablesName.Distributions, filter);
   }
   async getUserFromBot(sessionId: string): Promise<any> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${sessionId}",{SessionId})`;
+    const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
     return await this.airtableHttpService.get(TablesName.Bot, filter);
   }
   async getOffers(): Promise<IOffers> {

@@ -40,7 +40,6 @@ import {
   createMsgToSecretChat,
   getSecretChatId,
   getNotificationValue,
-  convertDataFromBotTable,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -592,7 +591,12 @@ export class TelegramService {
   ): Promise<string> {
     try {
       console.log(chat_id, sessionId, botId, status);
-      if (status === 'Бот удален' || status === 'Ошибка') return;
+      if (
+        status === 'Бот удален' ||
+        status === 'Ошибка' ||
+        status === 'Время истекло'
+      )
+        return;
       const notifications = await this.airtableService.getNotifications();
       const statisticNotifications =
         await this.airtableService.getNotificationStatistics(sessionId);
@@ -605,15 +609,23 @@ export class TelegramService {
         stopTime,
       );
 
+      if (!value) return 'false';
+
       if (
-        value &&
         value.statistic &&
         value.statistic.fields &&
         value.statistic.fields.Статус === 'Остановлено'
       )
         return 'false';
 
-      if (value && value.statistic && value.statistic.fields) {
+      if (value.status === 'Время истекло') {
+        await this.airtableService.updateStatusInBotTableAirtable(
+          sessionId,
+          value.status,
+        );
+      }
+
+      if (value.statistic && value.statistic.fields) {
         await this.updateNotificationStatistic(
           sessionId,
           value.statistic.fields['Количество отправок'] + 1 <
@@ -642,10 +654,10 @@ export class TelegramService {
       if (error instanceof Error) {
         console.log('sendNotificationToUser error=', error);
         if (error.message.includes('403')) {
-          const currentUserInfo =
-            await this.airtableService.getUserFromBot(sessionId);
-          const data = convertDataFromBotTable(currentUserInfo, 'Бот удален');
-          await this.airtableService.updateToAirtable(data);
+          await this.airtableService.updateStatusInBotTableAirtable(
+            sessionId,
+            'Бот удален',
+          );
         }
         return 'false';
       }
