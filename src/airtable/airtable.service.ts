@@ -7,6 +7,7 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus } from './types/IBot.interface';
+import { getTimeWithTz } from 'src/common/date/date.methods';
 
 @Injectable()
 export class AirtableService {
@@ -41,6 +42,7 @@ export class AirtableService {
     const response = await this.airtableHttpService.postWebhook(tableUrl, {
       SessionId: sessionId,
       Статус: status,
+      StopTime: getTimeWithTz(),
     });
     console.log('postWebhook ===>', response);
     return response;

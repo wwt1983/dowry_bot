@@ -27,6 +27,7 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 import {
+  getDifferenceInDays,
   getDifferenceInMinutes,
   getTimeWithTz,
 } from 'src/common/date/date.methods';
@@ -312,15 +313,11 @@ export const getNotificationValue = (
   switch (status) {
     case 'Выбор раздачи':
     case 'Поиск':
-      let minutes = 0;
-      if (!stopTime) {
-        minutes = getDifferenceInMinutes(startTime);
-      } else {
-        minutes = getDifferenceInMinutes(stopTime);
-      }
+      const minutes = getDifferenceInMinutes(stopTime || startTime);
+      console.log('min-=', minutes);
+
       statusNotification =
         minutes < LIMIT_TIME_IN_MINUTES_FOR_ORDER ? 'Поиск' : 'Время истекло';
-      console.log('minutes', minutes);
       break;
     case 'Заказ':
       statusNotification = 'Заказ';
@@ -352,7 +349,6 @@ const filterNotificationValue = (
 ) => {
   let notification = null;
   let statistic = null;
-
   try {
     notification = notifications.records.find(
       (x) => x.fields.Название === status,
@@ -363,10 +359,38 @@ const filterNotificationValue = (
         : statisticNotifications.records.find(
             (x) => x.fields.Шаблон[0] === notification.fields.Id,
           );
-    return { notification, statistic };
   } catch (e) {
     console.log('filterNotificationValue', e);
   } finally {
     return { notification, statistic, status };
+  }
+};
+
+export const ScheduleNotification = (
+  status: BotStatus,
+  date: string,
+  countSendNotification: number,
+) => {
+  const days = getDifferenceInDays(date);
+  switch (status) {
+    case 'Выбор раздачи':
+    case 'Поиск':
+      const minutes = getDifferenceInMinutes(date);
+      console.log(
+        '----',
+        minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10,
+      );
+      return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
+    case 'Заказ':
+      if (countSendNotification === 1) {
+        return days > 6;
+      } else {
+        return days >= 1;
+      }
+    case 'Получен':
+    case 'Отзыв':
+    case 'Штрих-код':
+    case 'Чек':
+      return days >= 1;
   }
 };

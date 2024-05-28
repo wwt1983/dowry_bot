@@ -40,6 +40,7 @@ import {
   createMsgToSecretChat,
   getSecretChatId,
   getNotificationValue,
+  ScheduleNotification,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -623,9 +624,29 @@ export class TelegramService {
           sessionId,
           value.status,
         );
+        await this.updateNotificationStatistic(
+          sessionId,
+          'Остановлено',
+          value?.statistic?.fields
+            ? value.statistic.fields['Количество отправок']
+            : 1,
+          botId,
+          value.notification.fields.Id,
+        );
       }
 
       if (value.statistic && value.statistic.fields) {
+        if (
+          !ScheduleNotification(
+            status,
+            stopTime || startTime,
+            value.statistic.fields['Количество отправок'],
+          )
+        ) {
+          console.log('schedule notification not send');
+          return 'false';
+        }
+
         await this.updateNotificationStatistic(
           sessionId,
           value.statistic.fields['Количество отправок'] + 1 <
@@ -637,6 +658,11 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       } else {
+        if (!ScheduleNotification(status, stopTime || startTime, 1)) {
+          console.log('schedule notification not send');
+          return 'false';
+        }
+
         await this.addNotificationStatistic(
           sessionId,
           'Доставлено',
@@ -645,6 +671,11 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       }
+      await this.airtableService.updateStatusInBotTableAirtable(
+        sessionId,
+        value.status,
+      );
+
       await this.bot.api.sendMessage(
         chat_id,
         value.notification.fields.Сообщение,
