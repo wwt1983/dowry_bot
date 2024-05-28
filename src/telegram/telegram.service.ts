@@ -612,14 +612,7 @@ export class TelegramService {
         stopTime,
       );
 
-      if (!value) return;
-
-      if (
-        value.statistic &&
-        value.statistic.fields &&
-        value.statistic.fields.Статус === 'Остановлено'
-      )
-        return;
+      if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
 
       if (value.status === 'Время истекло') {
         await this.airtableService.updateStatusInBotTableAirtable(
@@ -666,7 +659,9 @@ export class TelegramService {
       } else {
         await this.addNotificationStatistic(
           sessionId,
-          'Доставлено',
+          value.notification.fields['Количество попыток'] === 1
+            ? 'Остановлено'
+            : 'Доставлено',
           1,
           botId,
           value.notification.fields.Id,
