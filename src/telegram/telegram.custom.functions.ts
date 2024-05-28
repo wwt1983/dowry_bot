@@ -53,10 +53,10 @@ export function createMsgToSecretChat(
   const instruction =
     '\nВыбирите комманду /message_send,cкопируйте chat_id и следуйте дальше по инструкции бота';
   const userComment = comment
-    ? `\nРаздача:${order}\nchat_id=${chatId}\nСообщение:${comment}`
+    ? `\nРаздача:${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
     : '';
-  return `Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
-  ${userComment}${instruction}`;
+  return `❓Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
+  ${userComment}${instruction}❓`;
 }
 
 export function createInitialSessionData(
