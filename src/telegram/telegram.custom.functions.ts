@@ -311,9 +311,11 @@ export const getNotificationValue = (
   let statusNotification: BotStatus;
   switch (status) {
     case 'Выбор раздачи':
+    case 'Артикул правильный':
+    case 'Проблема с артикулом':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(stopTime || startTime);
-      console.log('min-=', minutes);
+      console.log('minutes=', minutes);
 
       statusNotification =
         minutes < LIMIT_TIME_IN_MINUTES_FOR_ORDER ? 'Поиск' : 'Время истекло';
@@ -373,6 +375,8 @@ export const scheduleNotification = (
   const days = getDifferenceInDays(date);
   switch (status) {
     case 'Выбор раздачи':
+    case 'Артикул правильный':
+    case 'Проблема с артикулом':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(date);
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
@@ -384,7 +388,7 @@ export const scheduleNotification = (
     case 'Отзыв':
     case 'Штрих-код':
     case 'Чек':
-      return 1 === days;
+      return days === 1;
     default:
       return false;
   }
