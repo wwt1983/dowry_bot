@@ -637,10 +637,6 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       } else {
-        await this.bot.api.sendMessage(
-          chat_id,
-          value.notification.fields.Сообщение,
-        );
         await this.addNotificationStatistic(
           sessionId,
           'Доставлено',
@@ -649,6 +645,11 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       }
+      await this.bot.api.sendMessage(
+        chat_id,
+        value.notification.fields.Сообщение,
+      );
+
       return 'ok';
     } catch (error: any) {
       if (error instanceof Error) {
