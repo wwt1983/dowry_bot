@@ -635,6 +635,11 @@ export class TelegramService {
           botId,
           value.notification.fields.Id,
         );
+        await this.bot.api.sendMessage(
+          chat_id,
+          value.notification.fields.Сообщение,
+        );
+        return;
       }
 
       if (
