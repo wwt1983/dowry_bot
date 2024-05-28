@@ -2,7 +2,6 @@ import { Injectable, Inject, Scope } from '@nestjs/common';
 import { Bot, session, GrammyError, HttpError } from 'grammy';
 import { conversations, createConversation } from '@grammyjs/conversations';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
-
 import {
   ITelegramOptions,
   MyContext,
@@ -100,7 +99,7 @@ export class TelegramService {
       const { first_name, last_name, username, id } = ctx.from;
       ctx.session = createInitialSessionData(
         id?.toString(),
-        username || `${first_name} ${last_name}`,
+        username || `${first_name} ${last_name || ''}`,
       );
 
       await this.saveToAirtable(ctx.session);
