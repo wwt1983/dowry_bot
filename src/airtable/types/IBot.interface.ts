@@ -25,6 +25,6 @@ export type BotStatus =
   | 'Вызов'
   | 'Бот удален'
   | 'Ошибка'
-  | 'Снять с раздачи';
+  | 'Время истекло';
 
 export type BrokeBotStatus = 'locationError' | 'articulError' | 'operatorCall';

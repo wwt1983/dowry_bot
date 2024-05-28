@@ -1,5 +1,4 @@
 import { ISessionData, ITelegramWebApp } from './telegram.interface';
-import { formatInTimeZone } from 'date-fns-tz';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -26,6 +25,7 @@ import { IOffer } from 'src/airtable/types/IOffer.interface';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
+import { getTimeWithTz } from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -53,10 +53,6 @@ export function createMsgToSecretChat(
   return `Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
   ${userComment}${instruction}`;
 }
-
-const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
-export const getTimeWithTz = () =>
-  formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE);
 
 export function createInitialSessionData(
   id?: string,
@@ -109,12 +105,15 @@ export function UpdateSessionByStep(
   //console.log('UPDATE SESSION STEP=', step);
   switch (step) {
     case STEPS.INBOT:
-    case STEPS.CHOOSE_OFFER:
     case STEPS.CHECK_ARTICUL:
+      break;
+    case STEPS.CHOOSE_OFFER:
+      session.stopTime = getTimeWithTz();
       break;
     case STEPS.SEARCH:
       session.isLoadImageSearch = true;
       session.status = 'Поиск';
+      session.stopTime = getTimeWithTz();
       break;
     case STEPS.ORDER:
       session.isLoadImageOrderWithPVZ = true;
@@ -303,53 +302,38 @@ export const getNotificationValue = (
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
   startTime: string,
+  stopTime: string,
 ) => {
+  let statusNotification = '';
   switch (status) {
     case 'Выбор раздачи':
     case 'Поиск':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Поиск',
-      );
-
-    case 'Снять с раздачи':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Снять с раздачи',
-      );
+      statusNotification = 'Поиск';
+      break;
+    case 'Время истекло':
+      statusNotification = 'Время истекло';
+      break;
     case 'Заказ':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Заказ',
-      );
+      statusNotification = 'Заказ';
+      break;
     case 'Получен':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Получен',
-      );
+      statusNotification = 'Получен';
+      break;
     case 'Отзыв':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Отзыв',
-      );
+      statusNotification = 'Отзыв';
+      break;
     case 'Штрих-код':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Штрих-код',
-      );
+      statusNotification = 'Штрих-код';
+      break;
     case 'Чек':
-      return filterNotificationValue(
-        notifications,
-        statisticNotifications,
-        'Чек',
-      );
+      statusNotification = 'Чек';
+      break;
   }
+  return filterNotificationValue(
+    notifications,
+    statisticNotifications,
+    statusNotification,
+  );
 };
 
 const filterNotificationValue = (

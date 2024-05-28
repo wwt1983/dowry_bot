@@ -602,6 +602,7 @@ export class TelegramService {
         statisticNotifications,
         status,
         startTime,
+        stopTime,
       );
 
       if (
