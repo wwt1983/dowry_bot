@@ -375,13 +375,9 @@ export const scheduleNotification = (
     case 'Выбор раздачи':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(date);
-      console.log(
-        '----',
-        minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10,
-      );
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
     case 'Заказ':
-      if (countSendNotification === 1) {
+      if (countSendNotification === 0) {
         return days > 6;
       }
     case 'Получен':
@@ -389,5 +385,7 @@ export const scheduleNotification = (
     case 'Штрих-код':
     case 'Чек':
       return 1 === days;
+    default:
+      return false;
   }
 };
