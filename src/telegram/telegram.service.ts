@@ -39,7 +39,7 @@ import {
   createMsgToSecretChat,
   getSecretChatId,
   getNotificationValue,
-  ScheduleNotification,
+  scheduleNotification,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -643,7 +643,7 @@ export class TelegramService {
       }
 
       if (
-        !ScheduleNotification(
+        !scheduleNotification(
           status,
           stopTime || startTime,
           value?.statistic?.fields['Количество отправок'] || 1,

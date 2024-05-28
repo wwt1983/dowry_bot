@@ -107,7 +107,6 @@ export function UpdateSessionByStep(
 ): ISessionData {
   const { step } = session;
 
-  //console.log('UPDATE SESSION STEP=', step);
   switch (step) {
     case STEPS.INBOT:
     case STEPS.CHECK_ARTICUL:
@@ -366,7 +365,7 @@ const filterNotificationValue = (
   }
 };
 
-export const ScheduleNotification = (
+export const scheduleNotification = (
   status: BotStatus,
   date: string,
   countSendNotification: number,
@@ -384,13 +383,11 @@ export const ScheduleNotification = (
     case 'Заказ':
       if (countSendNotification === 1) {
         return days > 6;
-      } else {
-        return days >= 1;
       }
     case 'Получен':
     case 'Отзыв':
     case 'Штрих-код':
     case 'Чек':
-      return days >= 1;
+      return 1 === days;
   }
 };
