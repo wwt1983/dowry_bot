@@ -309,16 +309,18 @@ export const getNotificationValue = (
   stopTime: string,
 ) => {
   let statusNotification: BotStatus;
+  console.log('====>', status);
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(stopTime || startTime);
-      console.log('minutes=', minutes);
-
-      statusNotification =
-        minutes < LIMIT_TIME_IN_MINUTES_FOR_ORDER ? 'Поиск' : 'Время истекло';
+      if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
+        statusNotification = 'Время истекло';
+      } else {
+        statusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
+      }
       break;
     case 'Заказ':
       statusNotification = 'Получен';
