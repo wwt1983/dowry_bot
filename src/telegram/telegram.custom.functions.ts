@@ -321,19 +321,16 @@ export const getNotificationValue = (
         minutes < LIMIT_TIME_IN_MINUTES_FOR_ORDER ? 'Поиск' : 'Время истекло';
       break;
     case 'Заказ':
-      statusNotification = 'Заказ';
+      statusNotification = 'Получен';
       break;
     case 'Получен':
-      statusNotification = 'Получен';
+      statusNotification = 'Отзыв';
       break;
     case 'Отзыв':
     case 'Отзыв на проверке':
-      statusNotification = 'Отзыв';
-      break;
-    case 'Штрих-код':
       statusNotification = 'Штрих-код';
       break;
-    case 'Чек':
+    case 'Штрих-код':
       statusNotification = 'Чек';
       break;
   }
