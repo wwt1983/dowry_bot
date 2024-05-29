@@ -591,6 +591,7 @@ export class TelegramService {
     status: BotStatus,
     startTime: string,
     stopTime: string,
+    offerName: string,
   ): Promise<void> {
     try {
       console.log(chat_id, sessionId, botId, status);
@@ -630,7 +631,7 @@ export class TelegramService {
         );
         await this.bot.api.sendMessage(
           chat_id,
-          value.notification.fields.Сообщение,
+          value.notification.fields.Сообщение + `\n${offerName}`,
         );
         return;
       }
@@ -674,7 +675,7 @@ export class TelegramService {
 
       await this.bot.api.sendMessage(
         chat_id,
-        value.notification.fields.Сообщение,
+        value.notification.fields.Сообщение + `\n${offerName}`,
       );
     } catch (error: any) {
       if (error instanceof Error) {
