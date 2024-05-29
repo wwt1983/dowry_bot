@@ -59,6 +59,7 @@ export class TelegramController {
       status: BotStatus;
       startTime: string;
       stopTime: string;
+      offerName: string;
     },
   ): Promise<void> {
     await this.telegramService.sendNotificationToUser(
@@ -68,6 +69,7 @@ export class TelegramController {
       data.status,
       data.startTime,
       data.stopTime,
+      data.offerName,
     );
   }
 }
