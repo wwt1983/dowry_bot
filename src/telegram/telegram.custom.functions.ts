@@ -327,6 +327,7 @@ export const getNotificationValue = (
       statusNotification = 'Получен';
       break;
     case 'Отзыв':
+    case 'Отзыв на проверке':
       statusNotification = 'Отзыв';
       break;
     case 'Штрих-код':
@@ -386,6 +387,7 @@ export const scheduleNotification = (
       }
     case 'Получен':
     case 'Отзыв':
+    case 'Отзыв на проверке':
     case 'Штрих-код':
     case 'Чек':
       return days === 1;
