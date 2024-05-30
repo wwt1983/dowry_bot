@@ -307,38 +307,37 @@ export const getNotificationValue = (
   status: BotStatus,
   startTime: string,
 ) => {
-  let statusNotification: BotStatus;
+  let nextStatusNotification: BotStatus;
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(startTime);
-      console.log('minutes', minutes)
       if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
-        statusNotification = 'Время истекло';
+        nextStatusNotification = 'Время истекло';
       } else {
-        statusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
+        nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
       }
       break;
     case 'Заказ':
-      statusNotification = 'Получен';
+      nextStatusNotification = 'Получен';
       break;
     case 'Получен':
-      statusNotification = 'Отзыв';
+      nextStatusNotification = 'Отзыв';
       break;
     case 'Отзыв':
     case 'Отзыв на проверке':
-      statusNotification = 'Штрих-код';
+      nextStatusNotification = 'Штрих-код';
       break;
     case 'Штрих-код':
-      statusNotification = 'Чек';
+      nextStatusNotification = 'Чек';
       break;
   }
   return filterNotificationValue(
     notifications,
     statisticNotifications,
-    statusNotification,
+    nextStatusNotification,
   );
 };
 
