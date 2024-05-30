@@ -256,13 +256,17 @@ export class TelegramService {
 
       await this.updateToAirtable(ctx.session);
 
-      return await ctx.callbackQuery.message.editText(
+      if (ctx.session.step === STEPS.DELIVERY_DATE) {
+        ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
+      }
+
+      await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
-        STEPS.DELIVERY_DATE === ctx.session.step
+        ctx.session.step === STEPS.DELIVERY_DATE
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
-
+      ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       if (ctx.session.step === STEPS.FINISH) {
         await ctx.react('🎉');
       }
@@ -455,6 +459,9 @@ export class TelegramService {
           ctx.session.deliveryDate = dateFormat(text);
           ctx.session = nextStep(ctx.session);
           await this.updateToAirtable(ctx.session);
+          this.bot.api
+            .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
+            .catch(() => {});
           return await ctx.reply(getTextByNextStep(ctx.session.step));
         }
 
@@ -523,7 +530,6 @@ export class TelegramService {
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
-    console.log('delivery date', session.deliveryDate)
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
       Артикул: session.data.articul,
