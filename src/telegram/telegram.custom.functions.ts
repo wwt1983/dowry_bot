@@ -390,7 +390,9 @@ export const scheduleNotification = (
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
     case 'Заказ':
       if (countSendNotification === 0) {
-        return dateDelivery ? days === 0 : days > 6;
+        return dateDelivery ? days === 1 : days > 6;
+      } else {
+        return days > 2 && days < 4;
       }
     case 'Получен':
     case 'Отзыв':
