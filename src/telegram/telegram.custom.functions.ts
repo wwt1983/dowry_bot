@@ -377,8 +377,10 @@ export const scheduleNotification = (
   stopTime: string,
   startTime: string,
   countSendNotification: number,
+  dateDelivery: string,
 ) => {
-  const days = getDifferenceInDays(stopTime);
+  const days = getDifferenceInDays(dateDelivery || stopTime);
+
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
@@ -388,7 +390,7 @@ export const scheduleNotification = (
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
     case 'Заказ':
       if (countSendNotification === 0) {
-        return days > 6;
+        return dateDelivery ? days === 0 : days > 6;
       }
     case 'Получен':
     case 'Отзыв':

@@ -627,6 +627,7 @@ export class TelegramService {
     startTime: string,
     stopTime: string,
     offerName: string,
+    dateDelivery: string,
   ): Promise<void> {
     try {
       console.log(chat_id, sessionId, botId, status);
@@ -676,6 +677,7 @@ export class TelegramService {
           stopTime || startTime,
           startTime,
           value?.statistic?.fields['Количество отправок'] || 0,
+          dateDelivery,
         )
       ) {
         return;

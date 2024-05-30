@@ -60,6 +60,7 @@ export class TelegramController {
       startTime: string;
       stopTime: string;
       offerName: string;
+      dateDelivery: string;
     },
   ): Promise<void> {
     await this.telegramService.sendNotificationToUser(
@@ -70,6 +71,7 @@ export class TelegramController {
       data.startTime,
       data.stopTime,
       data.offerName,
+      data.dateDelivery,
     );
   }
 }
