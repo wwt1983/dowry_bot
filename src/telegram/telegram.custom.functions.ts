@@ -306,7 +306,6 @@ export const getNotificationValue = (
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
   startTime: string,
-  stopTime: string,
 ) => {
   let statusNotification: BotStatus;
   console.log('====>', status);
@@ -315,7 +314,7 @@ export const getNotificationValue = (
     case 'Артикул правильный':
     case 'Проблема с артикулом':
     case 'Поиск':
-      const minutes = getDifferenceInMinutes(stopTime || startTime);
+      const minutes = getDifferenceInMinutes(startTime);
       if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
         statusNotification = 'Время истекло';
       } else {
@@ -369,16 +368,17 @@ const filterNotificationValue = (
 
 export const scheduleNotification = (
   status: BotStatus,
-  date: string,
+  stopTime: string,
+  startTime: string,
   countSendNotification: number,
 ) => {
-  const days = getDifferenceInDays(date);
+  const days = getDifferenceInDays(stopTime);
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
     case 'Поиск':
-      const minutes = getDifferenceInMinutes(date);
+      const minutes = getDifferenceInMinutes(startTime);
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
     case 'Заказ':
       if (countSendNotification === 0) {

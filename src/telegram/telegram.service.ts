@@ -610,7 +610,6 @@ export class TelegramService {
         statisticNotifications,
         status,
         startTime,
-        stopTime,
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
@@ -639,7 +638,8 @@ export class TelegramService {
       if (
         !scheduleNotification(
           status,
-          stopTime || startTime,
+          stopTime,
+          startTime,
           value?.statistic?.fields['Количество отправок'] || 0,
         )
       ) {
