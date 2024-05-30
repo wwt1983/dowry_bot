@@ -87,6 +87,7 @@ export function createInitialSessionData(
     location: null,
     errorStatus: null,
     countTryError: 0,
+    deliveryDate: null,
     conversation: null,
   };
 }
@@ -106,7 +107,6 @@ export function UpdateSessionByStep(
   isPhotoMsg?: boolean,
 ): ISessionData {
   const { step } = session;
-
   switch (step) {
     case STEPS.INBOT:
     case STEPS.CHECK_ARTICUL:
@@ -123,6 +123,9 @@ export function UpdateSessionByStep(
       session.isLoadImageOrderWithPVZ = true;
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
+      break;
+    case STEPS.DELIVERY_DATE:
+      session.status = 'Дата доставки';
       break;
     case STEPS.RECEIVED:
       session.isLoadImageGiveGood = true;
@@ -157,7 +160,9 @@ export function UpdateSessionByStep(
     session.lastLoadImage = data;
   }
 
-  session = nextStep(session);
+  if (step !== STEPS.DELIVERY_DATE) {
+    session = nextStep(session);
+  }
 
   return session;
 }
@@ -205,6 +210,8 @@ export function getTextByNextStep(step: number): string {
       return FIRST_STEP_A + FIRST_STEP_B + getNumberText(step);
     case STEPS.ORDER:
       return FIRST_STEP_C + getNumberText(step);
+    case STEPS.DELIVERY_DATE:
+      return 'Введите ориентировочную дату доставки (в формате 12.12.2024)';
     case STEPS.RECEIVED:
       return SECOND_STEP + getNumberText(step);
     case STEPS.COMMENT_ON_CHECK:

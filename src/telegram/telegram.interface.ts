@@ -42,6 +42,7 @@ export interface ISessionData {
   location?: string;
   countTryError: number; //количество попыток сделать какое-то действие
   errorStatus: BrokeBotStatus;
+  deliveryDate: string;
   conversation: any;
 }
 

@@ -47,14 +47,16 @@ import { getGeoUrl, parseGeoResponse } from './telegram.geo';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import {
   commentKeyboard,
-  helpKeyboard,
+  operatorKeyboard,
   shareKeyboard,
   stepKeyboard,
   userMenu,
+  deliveryDateKeyboard,
 } from './telegram.command';
 import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
+import { dateFormat } from 'src/common/date/date.methods';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -174,8 +176,9 @@ export class TelegramService {
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       const { step, data } = ctx.session;
-      if (!data)
+      if (!data) {
         return ctx.reply('Вам нужно нажать на кнопку ⬆️ "Dowry раздачи"');
+      }
 
       if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
 
@@ -208,6 +211,14 @@ export class TelegramService {
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
     });
 
+    /*======== NO DELIVERY =======*/
+    this.bot.callbackQuery('no_delivery_date', async (ctx) => {
+      ctx.session.step = STEPS.RECEIVED;
+      await ctx.callbackQuery.message.editText(
+        getTextByNextStep(ctx.session.step),
+      );
+    });
+
     /*======== DEL =======*/
     this.bot.callbackQuery('del', async (ctx) => {
       ctx.session.images = ctx.session.images.filter(
@@ -222,6 +233,7 @@ export class TelegramService {
 
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
+      //IMAGE
       if (STEPS_TYPES.image.includes(ctx.session.step)) {
         if (!ctx.session.lastMessage) {
           return;
@@ -235,14 +247,21 @@ export class TelegramService {
 
         await statusMessage.editText('Фото загружено!');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
+        //TEXT MESSAGE
         ctx.session = nextStep(ctx.session);
       }
-      await ctx.callbackQuery.message.editText(
-        getTextByNextStep(ctx.session.step),
-      );
+
       await this.updateToAirtable(ctx.session);
+
+      return await ctx.callbackQuery.message.editText(
+        getTextByNextStep(ctx.session.step),
+        STEPS.DELIVERY_DATE === ctx.session.step
+          ? { reply_markup: deliveryDateKeyboard }
+          : null,
+      );
 
       if (ctx.session.step === STEPS.FINISH) {
         await ctx.react('🎉');
@@ -400,7 +419,7 @@ export class TelegramService {
                   helpText,
                 ctx.session.countTryError === COUNT_TRY_ERROR
                   ? {
-                      reply_markup: helpKeyboard,
+                      reply_markup: operatorKeyboard,
                     }
                   : null,
               );
@@ -429,6 +448,14 @@ export class TelegramService {
             await this.updateToAirtable(ctx.session);
             return await ctx.reply(getTextByNextStep(ctx.session.step));
           }
+        }
+
+        //дата доставки
+        if (step === STEPS.DELIVERY_DATE) {
+          ctx.session.deliveryDate = dateFormat(text);
+          ctx.session = nextStep(ctx.session);
+          await this.updateToAirtable(ctx.session);
+          return await ctx.reply(getTextByNextStep(ctx.session.step));
         }
 
         //отзыв пользователя
@@ -496,6 +523,7 @@ export class TelegramService {
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
+    console.log(session.deliveryDate)
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
       Артикул: session.data.articul,
@@ -508,6 +536,7 @@ export class TelegramService {
       Images: session.images,
       StopTime: session.stopTime,
       ['Сообщения от пользователя']: session.comment,
+      ['Дата получения']: session.deliveryDate,
       Финиш: session.isFinish,
     });
   }

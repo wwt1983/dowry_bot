@@ -40,6 +40,8 @@ export enum STEP_COMMANDS {
   cancel = 'Отменить',
   back = 'Назад',
   operator = 'Нужна помощь оператора?',
+  delivery_date = 'Сохранить дату',
+  no_delivery_date = 'Пропустить',
 }
 
 export const STEPS = {
@@ -48,12 +50,13 @@ export const STEPS = {
   CHECK_ARTICUL: 3, // проверка артикул (text)
   SEARCH: 4, //поиск (photo)
   ORDER: 5, //заказ (photo)
-  RECEIVED: 6, // получен (photo)
-  COMMENT_ON_CHECK: 7, // отзыв на проверке (text)
-  COMMENT: 8, //отзыв (photo)
-  SHTRIH_CODE: 9, // штрих-код (photo)
-  CHECK: 10, //чек
-  FINISH: 11, // finish
+  DELIVERY_DATE: 6, //дата получения ориентировочная
+  RECEIVED: 7, // получен (photo)
+  COMMENT_ON_CHECK: 8, // отзыв на проверке (text)
+  COMMENT: 9, //отзыв (photo)
+  SHTRIH_CODE: 10, // штрих-код (photo)
+  CHECK: 11, //чек
+  FINISH: 12, // finish
   BROKE_LOCATION: -1, //геолокация не совпадает с раздачей
   BROKE_ARTICUL: -2, // артикул не совпадает с раздачей
   HELP: -3,
@@ -75,6 +78,7 @@ export const STEPS_TYPES = {
     STEPS.COMMENT_ON_CHECK,
     STEPS.HELP,
     STEPS.CHECK_ARTICUL,
+    STEPS.DELIVERY_DATE,
   ],
 };
 
