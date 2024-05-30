@@ -523,7 +523,6 @@ export class TelegramService {
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
-    console.log(session.deliveryDate)
     return await this.airtableService.updateToAirtable({
       SessionId: session.sessionId,
       Артикул: session.data.articul,
