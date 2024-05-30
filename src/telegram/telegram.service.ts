@@ -638,7 +638,7 @@ export class TelegramService {
       if (
         !scheduleNotification(
           status,
-          stopTime,
+          stopTime || startTime,
           startTime,
           value?.statistic?.fields['Количество отправок'] || 0,
         )

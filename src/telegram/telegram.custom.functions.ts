@@ -314,6 +314,7 @@ export const getNotificationValue = (
     case 'Проблема с артикулом':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(startTime);
+      console.log('minutes', minutes)
       if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
         statusNotification = 'Время истекло';
       } else {
