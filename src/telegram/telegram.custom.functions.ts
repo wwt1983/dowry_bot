@@ -308,7 +308,6 @@ export const getNotificationValue = (
   startTime: string,
 ) => {
   let statusNotification: BotStatus;
-  console.log('====>', status);
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
