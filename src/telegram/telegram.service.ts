@@ -143,7 +143,7 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.call;
       return await ctx.reply('Опишите вашу проблему');
     });
-    
+
     /*======== HISTORY =======*/
     this.bot.command(COMMAND_NAMES.history, async (ctx) => {
       try {
@@ -340,7 +340,8 @@ export class TelegramService {
             Статус === 'Заказ'
               ? STEPS_VALUE[Статус].step + 2
               : STEPS_VALUE[Статус].step + 1,
-          images: Images.map((x) => x.url),
+          images:
+            Images && Array.isArray(Images) ? Images?.map((x) => x.url) : [],
           offerId: OfferId[0],
           status: Статус,
           deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
