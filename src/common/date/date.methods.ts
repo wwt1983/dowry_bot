@@ -35,8 +35,17 @@ export const getDifferenceInDays = (date: string) => {
 };
 
 export const dateFormat = (date: string) => {
+  if (!date) return null;
   if (isValid(new Date(date))) {
     return format(new Date(date), FORMAT_DATE_NO_TIME);
+  }
+  return null;
+};
+
+export const dateFormatWithTZ = (date: string) => {
+  if (!date) return null;
+  if (isValid(new Date(date))) {
+    return format(new Date(date), FORMAT_DATE);
   }
   return null;
 };

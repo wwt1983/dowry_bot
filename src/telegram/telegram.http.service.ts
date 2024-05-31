@@ -12,6 +12,7 @@ import {
 } from 'src/airtable/airtable.constants';
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
 import { firstValueFrom, map } from 'rxjs';
+import { IBot } from 'src/airtable/types/IBot.interface';
 
 @Injectable()
 export class TelegramHttpService {
@@ -63,6 +64,13 @@ export class TelegramHttpService {
     //console.log('data ===>>> ', data);
     return data.records;
   }
+  async getBotByFilter(value: string, field: string): Promise<IBot[] | null> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${value}",{${field}})`;
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records;
+  }
+
   get(url: string) {
     return firstValueFrom(
       this.httpService

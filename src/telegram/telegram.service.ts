@@ -23,6 +23,7 @@ import {
   STOP_TEXT,
   COUNT_TRY_ERROR,
   ADMIN_COMMANDS_TELEGRAM,
+  STEPS_VALUE,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -40,6 +41,7 @@ import {
   getSecretChatId,
   getNotificationValue,
   scheduleNotification,
+  createContinueSessionData,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -50,13 +52,13 @@ import {
   operatorKeyboard,
   shareKeyboard,
   stepKeyboard,
-  userMenu,
   deliveryDateKeyboard,
+  createHistoryKeyboard,
 } from './telegram.command';
 import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
-import { dateFormat } from 'src/common/date/date.methods';
+import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -134,10 +136,30 @@ export class TelegramService {
     });
 
     /*======== HISTORY =======*/
-    this.bot.command(COMMAND_NAMES.history, (ctx) => {
-      return ctx.reply('🛍️', {
-        reply_markup: userMenu,
-      });
+    this.bot.command(COMMAND_NAMES.history, async (ctx) => {
+      try {
+        const { id } = ctx.from;
+
+        const dataBuyer = await this.commandService.getBotByFilter(
+          id.toString(),
+          'chat_id',
+        );
+        if (!dataBuyer) {
+          return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢');
+        }
+        const orderButtons = createHistoryKeyboard(dataBuyer);
+        return await ctx.reply(
+          orderButtons
+            ? 'Выбирите раздачу, чтобы продолжить заполнение⤵️'
+            : 'Все раздачи завершены ✌️',
+          {
+            reply_markup: orderButtons,
+          },
+        );
+      } catch (e) {
+        console.log('orders show', e);
+        return await ctx.reply('Раздел обновляется');
+      }
     });
     // this.bot.on('', async (ctx) => {
     //   return ctx.reply('В бот нужно отправлять только картинки');
@@ -213,7 +235,7 @@ export class TelegramService {
 
     /*======== NO DELIVERY =======*/
     this.bot.callbackQuery('no_delivery_date', async (ctx) => {
-      ctx.session.step = STEPS.RECEIVED;
+      ctx.session.step = STEPS.RECEIVED.step;
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
       );
@@ -256,56 +278,59 @@ export class TelegramService {
 
       await this.updateToAirtable(ctx.session);
 
-      if (ctx.session.step === STEPS.DELIVERY_DATE) {
+      if (ctx.session.step === STEPS.DELIVERY_DATE.step) {
         ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       }
 
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(ctx.session.step),
-        ctx.session.step === STEPS.DELIVERY_DATE
+        ctx.session.step === STEPS.DELIVERY_DATE.step
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
-      if (ctx.session.step === STEPS.FINISH) {
+      if (ctx.session.step === STEPS.FINISH.step) {
         await ctx.react('🎉');
-      }
-    });
-
-    /*======== SHOW ORDERS =======*/
-    this.bot.callbackQuery('showOrders', async (ctx) => {
-      try {
-        const { first_name, last_name, username, id } = ctx.from;
-
-        const dataBuyer =
-          await this.commandService.getDistributionTableByFilter(
-            ctx.session.user,
-          );
-        if (!dataBuyer) {
-          return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢', {
-            parse_mode: 'HTML',
-          });
-        }
-
-        const allCash = dataBuyer.reduce(function (newArr, record) {
-          if (record.fields['Кэш выплачен']) {
-            newArr.push(
-              `${record.fields['Дата заказа']} ${record.fields['Раздача']}: ${record.fields['Кэшбек']} руб.`,
-            );
-          }
-          return newArr;
-        }, []);
-        return await ctx.api.sendMessage(id, allCash.join('\n'), {
-          parse_mode: 'HTML',
-        });
-      } catch (e) {
-        console.log('orders show', e);
-        return await ctx.reply('Раздел обновляется');
       }
     });
 
     /*======== CALBACK_QUERY =======*/
     this.bot.on('callback_query', async (ctx) => {
+      /*продолжение раздачи*/
+      if (ctx.callbackQuery.data.includes('sessionId_')) {
+        const sessionId = ctx.callbackQuery.data
+          .replace('sessionId_', '')
+          .trim();
+
+        const data = await this.commandService.getBotByFilter(
+          sessionId,
+          'SessionId',
+        );
+        const { first_name, last_name, username, id } = ctx.from;
+        const { StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
+          data[0].fields;
+
+        const value: ISessionData = {
+          sessionId: sessionId,
+          user: username || `${first_name} ${last_name || ''}`,
+          chat_id: id.toString(),
+          startTime: dateFormatWithTZ(StartTime),
+          stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
+          stopTime: dateFormatWithTZ(StopTime),
+          step:
+            Статус === 'Заказ'
+              ? STEPS_VALUE[Статус].step + 2
+              : STEPS_VALUE[Статус].step + 1,
+          images: [],
+          offerId: OfferId[0],
+          status: Статус,
+          deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+        };
+
+        ctx.session = createContinueSessionData(value, Артикул, Раздача);
+        await ctx.answerCallbackQuery();
+        return await ctx.reply(getTextByNextStep(ctx.session.step));
+      }
       await ctx.answerCallbackQuery();
     });
 
@@ -358,7 +383,7 @@ export class TelegramService {
         }
 
         //первый шаг
-        if (STEPS.CHOOSE_OFFER === step && data) {
+        if (STEPS.CHOOSE_OFFER.step === step && data) {
           ctx.session = nextStep(ctx.session);
 
           await this.updateToAirtable(ctx.session);
@@ -371,7 +396,7 @@ export class TelegramService {
         }
 
         //проверка артикула
-        if (STEPS.CHECK_ARTICUL === step) {
+        if (STEPS.CHECK_ARTICUL.step === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { errorStatus, countTryError } = ctx.session;
             if (errorStatus === 'articulError') {
@@ -455,7 +480,7 @@ export class TelegramService {
         }
 
         //дата доставки
-        if (step === STEPS.DELIVERY_DATE) {
+        if (step === STEPS.DELIVERY_DATE.step) {
           ctx.session.deliveryDate = dateFormat(text);
           ctx.session = nextStep(ctx.session);
           await this.updateToAirtable(ctx.session);
@@ -466,7 +491,7 @@ export class TelegramService {
         }
 
         //отзыв пользователя
-        if (step === STEPS.COMMENT_ON_CHECK) {
+        if (step === STEPS.COMMENT_ON_CHECK.step) {
           ctx.session = UpdateSessionByField(
             ctx.session,
             'comment',

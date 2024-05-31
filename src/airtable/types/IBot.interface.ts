@@ -1,12 +1,35 @@
 export interface IBot {
-  User: string;
-  Images: string[];
-  Раздача: string;
-  Артикул: string;
-  StartTime: string;
-  ['Время выкупа']: string;
-  StopTime: string;
-  ['Сообщения от пользователя']: string;
+  id: string;
+  createdTime: Date;
+  fields: {
+    Id: string;
+    User: string;
+    chat_id: number;
+    SessionId: string;
+    Статус: BotStatus;
+    Images: string[];
+    Раздача: string;
+    Артикул: string;
+    StartTime: string;
+    StopTime: string;
+    ['Время выкупа']: string;
+    ['Сообщения от пользователя']: string;
+    OfferId: string[];
+    ['Id (from OfferId)']: [];
+    ['Оповещения стаститка']: [];
+    ['Статусы оповещения']: [];
+    ['Статус (from Оповещения стаститка)']: [];
+    ['Дата получения']: string;
+    Location: string;
+    Напомнить: boolean;
+    ['Снять с раздачи']: boolean;
+    Финиш: boolean;
+    Помощь: string;
+  };
+}
+
+export interface IBots {
+  records: IBot[];
 }
 
 export type BotStatus =

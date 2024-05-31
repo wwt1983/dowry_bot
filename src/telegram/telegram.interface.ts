@@ -40,10 +40,10 @@ export interface ISessionData {
   offerId?: string;
   status?: BotStatus;
   location?: string;
-  countTryError: number; //количество попыток сделать какое-то действие
-  errorStatus: BrokeBotStatus;
+  countTryError?: number; //количество попыток сделать какое-то действие
+  errorStatus?: BrokeBotStatus;
   deliveryDate: string;
-  conversation: any;
+  conversation?: any;
 }
 
 export type MyContext = HydrateFlavor<
@@ -62,7 +62,7 @@ export interface ITelegramWebApp {
   articul: string;
   keys: string;
   offerId: string;
-  description: string;
+  description?: string;
   location?: string;
   positionOnWB?: string;
 }

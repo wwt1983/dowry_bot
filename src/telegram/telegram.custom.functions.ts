@@ -76,7 +76,7 @@ export function createInitialSessionData(
     isLoadImageBrokeCode: false,
     isLoadImageCheck: false,
     isLoadImageOrderWithPVZ: false,
-    step: STEPS.INBOT,
+    step: STEPS.INBOT.step,
     comment: '',
     images: [],
     lastLoadImage: null,
@@ -92,6 +92,39 @@ export function createInitialSessionData(
   };
 }
 
+export function createContinueSessionData(
+  data: ISessionData,
+  articul: string,
+  offer: string,
+): ISessionData {
+  return {
+    data: {
+      offerId: data.offerId,
+      title: offer,
+      cash: null,
+      priceForYou: null,
+      priceWb: null,
+      image: null,
+      id: null,
+      articul: articul,
+      keys: null,
+    },
+    sessionId: data.sessionId,
+    user: data.user,
+    chat_id: data.chat_id,
+    startTime: data.startTime,
+    stopBuyTime: data.stopBuyTime,
+    stopTime: data.stopTime,
+    step: data.step,
+    images: data.images,
+    offerId: data.offerId,
+    status: data.status,
+    deliveryDate: data.deliveryDate,
+    isFinish: false,
+    location: null,
+    comment: null,
+  };
+}
 export function UpdateSessionByField(
   session: ISessionData,
   field: string,
@@ -108,44 +141,44 @@ export function UpdateSessionByStep(
 ): ISessionData {
   const { step } = session;
   switch (step) {
-    case STEPS.INBOT:
-    case STEPS.CHECK_ARTICUL:
+    case STEPS.INBOT.step:
+    case STEPS.CHECK_ARTICUL.step:
       break;
-    case STEPS.CHOOSE_OFFER:
+    case STEPS.CHOOSE_OFFER.step:
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.SEARCH:
+    case STEPS.SEARCH.step:
       session.isLoadImageSearch = true;
       session.status = 'Поиск';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.ORDER:
+    case STEPS.ORDER.step:
       session.isLoadImageOrderWithPVZ = true;
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
       break;
-    case STEPS.DELIVERY_DATE:
+    case STEPS.DELIVERY_DATE.step:
       session.status = 'Дата доставки';
       break;
-    case STEPS.RECEIVED:
+    case STEPS.RECEIVED.step:
       session.isLoadImageGiveGood = true;
       session.status = 'Получен';
       break;
-    case STEPS.COMMENT_ON_CHECK:
+    case STEPS.COMMENT_ON_CHECK.step:
       session.comment = data;
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.COMMENT:
+    case STEPS.COMMENT.step:
       session.isLoadImageOnComment = true;
       session.status = 'Отзыв';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.SHTRIH_CODE:
+    case STEPS.SHTRIH_CODE.step:
       session.isLoadImageBrokeCode = true;
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.CHECK:
+    case STEPS.CHECK.step:
       session.isLoadImageCheck = true;
       session.stopTime = getTimeWithTz();
       session.status = 'Чек';
@@ -160,7 +193,7 @@ export function UpdateSessionByStep(
     session.lastLoadImage = data;
   }
 
-  if (step !== STEPS.DELIVERY_DATE) {
+  if (step !== STEPS.DELIVERY_DATE.step) {
     session = nextStep(session);
   }
 
@@ -203,24 +236,24 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
 
 export function getTextByNextStep(step: number): string {
   switch (step) {
-    case STEPS.CHOOSE_OFFER:
+    case STEPS.CHOOSE_OFFER.step:
       return FIRST_STEP_LINK;
-    case STEPS.SEARCH:
-    case STEPS.CHECK_ARTICUL:
+    case STEPS.SEARCH.step:
+    case STEPS.CHECK_ARTICUL.step:
       return FIRST_STEP_A + FIRST_STEP_B + getNumberText(step);
-    case STEPS.ORDER:
+    case STEPS.ORDER.step:
       return FIRST_STEP_C + getNumberText(step);
-    case STEPS.DELIVERY_DATE:
+    case STEPS.DELIVERY_DATE.step:
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024)';
-    case STEPS.RECEIVED:
+    case STEPS.RECEIVED.step:
       return SECOND_STEP + getNumberText(step);
-    case STEPS.COMMENT_ON_CHECK:
+    case STEPS.COMMENT_ON_CHECK.step:
       return THREE_STEP + getNumberText(step);
-    case STEPS.COMMENT:
+    case STEPS.COMMENT.step:
       return FOUR_STEP + THREE_STEP_A + getNumberText(step);
-    case STEPS.SHTRIH_CODE:
+    case STEPS.SHTRIH_CODE.step:
       return FOUR_STEP_A + getNumberText(step);
-    case STEPS.CHECK:
+    case STEPS.CHECK.step:
       return FOUR_STEP_B + getNumberText(step);
     default:
       return FOOTER;
@@ -230,23 +263,23 @@ export function getTextByNextStep(step: number): string {
 function getNumberText(step: number) {
   const finish_txt = `До финиша `;
   switch (step) {
-    case STEPS.CHOOSE_OFFER:
+    case STEPS.CHOOSE_OFFER.step:
       return finish_txt + '8️⃣ шагов\n';
-    case STEPS.SEARCH:
+    case STEPS.SEARCH.step:
       return finish_txt + '7️⃣ шагов\n';
-    case STEPS.ORDER:
+    case STEPS.ORDER.step:
       return finish_txt + '6️⃣ шагов\n';
-    case STEPS.RECEIVED:
+    case STEPS.RECEIVED.step:
       return finish_txt + '5️⃣ шагов\n';
-    case STEPS.COMMENT_ON_CHECK:
+    case STEPS.COMMENT_ON_CHECK.step:
       return finish_txt + '4️⃣ шага\n';
-    case STEPS.COMMENT:
+    case STEPS.COMMENT.step:
       return finish_txt + '3️⃣ шага\n';
-    case STEPS.SHTRIH_CODE:
+    case STEPS.SHTRIH_CODE.step:
       return finish_txt + '2️⃣ шага\n';
-    case STEPS.CHECK:
+    case STEPS.CHECK.step:
       return finish_txt + '1️⃣ шаг\n';
-    case STEPS.INBOT:
+    case STEPS.INBOT.step:
       return '';
   }
 }

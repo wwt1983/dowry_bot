@@ -1,3 +1,5 @@
+import { BotStatus } from 'src/airtable/types/IBot.interface';
+
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_NAME = '@DowryWorkBot';
@@ -45,40 +47,55 @@ export enum STEP_COMMANDS {
 }
 
 export const STEPS = {
-  INBOT: 1, //в боте
-  CHOOSE_OFFER: 2, // выбор раздачи (web)
-  CHECK_ARTICUL: 3, // проверка артикул (text)
-  SEARCH: 4, //поиск (photo)
-  ORDER: 5, //заказ (photo)
-  DELIVERY_DATE: 6, //дата получения ориентировочная
-  RECEIVED: 7, // получен (photo)
-  COMMENT_ON_CHECK: 8, // отзыв на проверке (text)
-  COMMENT: 9, //отзыв (photo)
-  SHTRIH_CODE: 10, // штрих-код (photo)
-  CHECK: 11, //чек
-  FINISH: 12, // finish
-  BROKE_LOCATION: -1, //геолокация не совпадает с раздачей
-  BROKE_ARTICUL: -2, // артикул не совпадает с раздачей
-  HELP: -3,
+  INBOT: { step: 1, value: 'В боте' }, //в боте
+  CHOOSE_OFFER: { step: 2, value: 'Выбор раздачи' }, // выбор раздачи (web)
+  CHECK_ARTICUL: { step: 3, value: 'Артикул правильный' }, // проверка артикул (text)
+  SEARCH: { step: 4, value: 'Поиск' }, //поиск (photo)
+  ORDER: { step: 5, value: 'Заказ' }, //заказ (photo)
+  DELIVERY_DATE: { step: 6, value: 'Дата доставки' }, //дата получения ориентировочная
+  RECEIVED: { step: 7, value: 'Получен' }, // получен (photo)
+  COMMENT_ON_CHECK: { step: 8, value: 'Отзыв на проверке' }, // отзыв на проверке (text)
+  COMMENT: { step: 9, value: 'Отзыв' }, //отзыв (photo)
+  SHTRIH_CODE: { step: 10, value: 'Штрих-код' }, // штрих-код (photo)
+  CHECK: { step: 11, value: 'Чек' }, //чек
+  FINISH: { step: 12, value: '' }, // finish
+  BROKE_LOCATION: { step: -1, value: 'Проблема с локацией' }, //геолокация не совпадает с раздачей
+  BROKE_ARTICUL: { step: -2, value: 'Проблема с артикулом' }, // артикул не совпадает с раздачей
+  HELP: { step: -3, value: '' },
+};
+export const STEPS_VALUE = {
+  ['В боте']: STEPS.INBOT,
+  ['Выбор раздачи']: STEPS.CHOOSE_OFFER,
+  ['Артикул правильный']: STEPS.CHECK_ARTICUL,
+  Поиск: STEPS.SEARCH,
+  Заказ: STEPS.ORDER,
+  ['Дата доставки']: STEPS.DELIVERY_DATE,
+  Получен: STEPS.RECEIVED,
+  ['Отзыв на проверке']: STEPS.COMMENT_ON_CHECK,
+  Отзыв: STEPS.COMMENT,
+  ['Штрих-код']: STEPS.SHTRIH_CODE,
+  Чек: STEPS.CHECK,
+  Финиш: STEPS.FINISH,
+  ['Проблема с локацией']: STEPS.BROKE_LOCATION,
+  ['Проблема с артикулом']: STEPS.BROKE_ARTICUL,
 };
 
 export const STEPS_TYPES = {
   image: [
-    STEPS.SEARCH,
-    STEPS.ORDER,
-    STEPS.RECEIVED,
-    STEPS.COMMENT,
-    STEPS.SHTRIH_CODE,
-    STEPS.CHECK,
+    STEPS.SEARCH.step,
+    STEPS.ORDER.step,
+    STEPS.RECEIVED.step,
+    STEPS.COMMENT.step,
+    STEPS.SHTRIH_CODE.step,
+    STEPS.CHECK.step,
   ],
   text: [
-    STEPS.INBOT,
-    STEPS.CHOOSE_OFFER,
-    STEPS.CHECK_ARTICUL,
-    STEPS.COMMENT_ON_CHECK,
-    STEPS.HELP,
-    STEPS.CHECK_ARTICUL,
-    STEPS.DELIVERY_DATE,
+    STEPS.INBOT.step,
+    STEPS.CHOOSE_OFFER.step,
+    STEPS.CHECK_ARTICUL.step,
+    STEPS.COMMENT_ON_CHECK.step,
+    STEPS.HELP.step,
+    STEPS.DELIVERY_DATE.step,
   ],
 };
 

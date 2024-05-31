@@ -1,4 +1,4 @@
-import { Injectable, Session } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
@@ -29,7 +29,7 @@ export class AirtableService {
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===>', response);
+    console.log('postWebhook update ===>', response);
     return response;
   }
   async updateStatusInBotTableAirtable(
