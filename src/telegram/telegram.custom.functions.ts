@@ -353,6 +353,7 @@ export const getNotificationValue = (
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
+    case 'Вызов':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(startTime);
       if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
@@ -419,6 +420,7 @@ export const scheduleNotification = (
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
+    case 'Вызов':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(startTime);
       return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
