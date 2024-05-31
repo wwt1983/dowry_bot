@@ -99,12 +99,19 @@ export class TelegramService {
       scope: { type: 'default' },
     });
 
+    this.bot.command(COMMAND_NAMES.messageSend, async (ctx) => {
+      await ctx.conversation.enter('message');
+      ctx.session.lastCommand = COMMAND_NAMES.messageSend;
+    });
+
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { first_name, last_name, username, id } = ctx.from;
       ctx.session = createInitialSessionData(
         id?.toString(),
         username || `${first_name} ${last_name || ''}`,
       );
+
+      ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
 
@@ -128,16 +135,20 @@ export class TelegramService {
     });
 
     this.bot.command(COMMAND_NAMES.help, (ctx) => {
-      ctx.reply(HELP_TEXT);
+      ctx.session.lastCommand = COMMAND_NAMES.help;
+      return ctx.reply(HELP_TEXT);
     });
 
-    this.bot.command(COMMAND_NAMES.messageSend, async (ctx) => {
-      await ctx.conversation.enter('message');
+    this.bot.command(COMMAND_NAMES.call, async (ctx) => {
+      ctx.session.lastCommand = COMMAND_NAMES.call;
+      return await ctx.reply('Опишите вашу проблему');
     });
-
+    
     /*======== HISTORY =======*/
     this.bot.command(COMMAND_NAMES.history, async (ctx) => {
       try {
+        ctx.session.lastCommand = COMMAND_NAMES.history;
+
         const { id } = ctx.from;
 
         const dataBuyer = await this.commandService.getBotByFilter(
@@ -350,8 +361,21 @@ export class TelegramService {
 
         const { text } = ctx.update.message;
 
+        if (ctx.session.lastCommand === COMMAND_NAMES.call) {
+          const msgToSecretChat = createMsgToSecretChat(
+            ctx.from,
+            text,
+            ctx.session?.data?.articul || '⁇ Вопрос без раздачи ⁇',
+            ctx.from.id.toString(),
+          );
+          await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
+          return await ctx.reply(
+            'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
+          );
+        }
+
         if (!ctx.session.data && !text?.includes('query_id')) {
-          return await ctx.reply(`✌️`);
+          return await ctx.reply('✌️');
         }
 
         let data = null;

@@ -1,11 +1,9 @@
-import { BotStatus } from 'src/airtable/types/IBot.interface';
-
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_NAME = '@DowryWorkBot';
 export const TELEGRAM_CHAT_ID = '-1002002256034';
 export const TELEGRAM_SECRET_CHAT_ID = '-1002155788141';
-export const TELEGRAM_MESSAGE_CHAT_TEST = '-4262552024';
+export const TELEGRAM_MESSAGE_CHAT_TEST = '-1002227889311';
 export const TELEGRAM_MESSAGE_CHAT_PROD = '-4289825366';
 export const TELEGRAM_API_URL = 'https://api.telegram.org/bot';
 export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';
@@ -19,6 +17,7 @@ export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
   history = 'history',
+  call = 'call',
   messageSend = 'message_send',
 }
 
@@ -26,6 +25,7 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
+  { command: COMMAND_NAMES.call, description: 'Написать оператору' },
 ];
 
 export const ADMIN_COMMANDS_TELEGRAM = [

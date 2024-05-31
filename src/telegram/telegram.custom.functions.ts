@@ -89,6 +89,7 @@ export function createInitialSessionData(
     countTryError: 0,
     deliveryDate: null,
     conversation: null,
+    lastCommand: null,
   };
 }
 

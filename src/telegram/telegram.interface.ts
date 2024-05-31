@@ -44,6 +44,7 @@ export interface ISessionData {
   errorStatus?: BrokeBotStatus;
   deliveryDate: string;
   conversation?: any;
+  lastCommand?: string;
 }
 
 export type MyContext = HydrateFlavor<
