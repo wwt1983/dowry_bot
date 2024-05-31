@@ -306,9 +306,17 @@ export class TelegramService {
           sessionId,
           'SessionId',
         );
+
         const { first_name, last_name, username, id } = ctx.from;
-        const { StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
-          data[0].fields;
+        const {
+          Images,
+          StopTime,
+          StartTime,
+          Статус,
+          OfferId,
+          Артикул,
+          Раздача,
+        } = data[0].fields;
 
         const value: ISessionData = {
           sessionId: sessionId,
@@ -321,7 +329,7 @@ export class TelegramService {
             Статус === 'Заказ'
               ? STEPS_VALUE[Статус].step + 2
               : STEPS_VALUE[Статус].step + 1,
-          images: [],
+          images: Images.map((x) => x.url),
           offerId: OfferId[0],
           status: Статус,
           deliveryDate: dateFormat(data[0]?.fields['Дата получения']),

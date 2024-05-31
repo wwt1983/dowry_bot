@@ -7,7 +7,7 @@ export interface IBot {
     chat_id: number;
     SessionId: string;
     Статус: BotStatus;
-    Images: string[];
+    Images: IPhoto[];
     Раздача: string;
     Артикул: string;
     StartTime: string;
@@ -26,6 +26,14 @@ export interface IBot {
     Финиш: boolean;
     Помощь: string;
   };
+}
+interface IPhoto {
+  id: string;
+  width: string;
+  height: string;
+  url: string;
+  size: string;
+  type: string;
 }
 
 export interface IBots {
