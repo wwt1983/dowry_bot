@@ -20,10 +20,12 @@ import {
   TELEGRAM_MESSAGE_CHAT_PROD,
   TELEGRAM_MESSAGE_CHAT_TEST,
   LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+  COMMAND_NAMES,
+  COUNT_TRY_ERROR,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
-import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 import {
@@ -438,5 +440,30 @@ export const scheduleNotification = (
       return days === 1;
     default:
       return false;
+  }
+};
+
+export const getTextForArticleError = (
+  positionOnWB: string,
+  countTryError: number,
+  status: BrokeBotStatus,
+) => {
+  const helpText =
+    positionOnWB && countTryError <= COUNT_TRY_ERROR
+      ? `\nЭта позиция находится примерно на ${positionOnWB} странице.`
+      : '';
+  if (countTryError <= COUNT_TRY_ERROR)
+    return (
+      'Артикулы не совпадают. Проверьте, пожалуйста, правильно ли вы нашли товар' +
+      helpText
+    );
+
+  switch (status) {
+    case 'operator':
+      return 'Попробуйте снова или ожидайте ответа оператора';
+    case 'wait':
+      return 'Выбирите, что нужно сделать?';
+    case 'check_articul':
+      return 'Артикулы не совпадают. Попробуйте снова или нажмите кнопку "Помощь оператора" ⤵️';
   }
 };

@@ -41,9 +41,10 @@ export enum STEP_COMMANDS {
   comment = 'Отправить отзыв на соглосование?',
   cancel = 'Отменить',
   back = 'Назад',
-  operator = 'Нужна помощь оператора?',
+  operator = 'Помощь оператора?',
   delivery_date = 'Сохранить дату',
   no_delivery_date = 'Пропустить',
+  check_articul = 'Проверка артикула',
 }
 
 export const STEPS = {

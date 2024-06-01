@@ -16,7 +16,7 @@ export async function message(conversation: MyConversation, ctx: MyContext) {
       msg: { text },
     } = await conversation.waitFor('message:text');
 
-    await ctx.api.sendMessage(chatId, text);
+    await ctx.api.sendMessage(chatId, 'Ответ оператора🧑‍💻 \n→ ' + text);
     await ctx.reply(`Ваше сообщение отправлено!`);
     return;
   } catch (e) {

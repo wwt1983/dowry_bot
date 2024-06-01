@@ -42,6 +42,7 @@ import {
   getNotificationValue,
   scheduleNotification,
   createContinueSessionData,
+  getTextForArticleError,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -49,7 +50,7 @@ import { getGeoUrl, parseGeoResponse } from './telegram.geo';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import {
   commentKeyboard,
-  operatorKeyboard,
+  getArticulCommand,
   shareKeyboard,
   stepKeyboard,
   deliveryDateKeyboard,
@@ -237,11 +238,29 @@ export class TelegramService {
     /*======== OPERATOR =======*/
     this.bot.callbackQuery('operator', async (ctx) => {
       ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
+      ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
       this.bot.api
         .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
         .catch(() => {});
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
+    });
+
+    this.bot.callbackQuery('check_articul', async (ctx) => {
+      ctx.session.errorStatus = 'check_articul';
+      if (!parseUrl(ctx.callbackQuery.data, ctx.session.data.articul)) {
+        await ctx.reply(
+          getTextForArticleError(
+            ctx.session.data.positionOnWB,
+            ctx.session.countTryError,
+            ctx.session.errorStatus,
+          ),
+          getArticulCommand(ctx.session.countTryError, ctx.session.errorStatus),
+        );
+      } else {
+        ctx.session.errorStatus = null;
+        nextStep(ctx.session);
+      }
     });
 
     /*======== NO DELIVERY =======*/
@@ -370,6 +389,7 @@ export class TelegramService {
             ctx.from.id.toString(),
           );
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
+
           return await ctx.reply(
             'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
           );
@@ -431,41 +451,27 @@ export class TelegramService {
         //проверка артикула
         if (STEPS.CHECK_ARTICUL.step === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
-            const { errorStatus, countTryError } = ctx.session;
-            if (errorStatus === 'articulError') {
-              if (countTryError === COUNT_TRY_ERROR) {
-                ctx.session = UpdateSessionByField(
-                  ctx.session,
-                  'comment',
-                  ctx.message.text,
-                );
-                await this.updateToAirtable(ctx.session);
-                const msgToSecretChat = createMsgToSecretChat(
-                  ctx.from,
-                  ctx.message.text,
-                  ctx.session.data.articul,
-                  ctx.session.chat_id,
-                );
-                await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
-              } else {
-                if (countTryError > COUNT_TRY_ERROR) {
-                  return await ctx.reply(
-                    'Для продолжения необходимо ввести правильный артикул.',
-                  );
-                }
-              }
+            const { countTryError } = ctx.session;
+
+            if (countTryError === COUNT_TRY_ERROR) {
+              ctx.session = UpdateSessionByField(
+                ctx.session,
+                'comment',
+                ctx.message.text,
+              );
+
+              await this.updateToAirtable(ctx.session);
+
+              const msgToSecretChat = createMsgToSecretChat(
+                ctx.from,
+                text,
+                ctx.session?.data?.articul,
+                ctx.from.id.toString(),
+              );
+              await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
             }
-
-            ctx.session.errorStatus = 'articulError';
-
-            if (errorStatus === 'operatorCall') {
-              ctx.session.errorStatus = 'articulError';
-              return ctx.reply('Ждите ответа оператора');
-            }
-
-            const helpText = ctx.session.data.positionOnWB
-              ? `\nЭта позиция находится примерно на ${ctx.session.data.positionOnWB} странице.`
-              : '';
+            ctx.session.lastMessage = ctx.message.message_id;
+            ctx.session.countTryError++;
 
             if (ctx.session.countTryError < COUNT_TRY_ERROR) {
               ctx.session = UpdateSessionByField(
@@ -473,30 +479,34 @@ export class TelegramService {
                 'status',
                 'Проблема с артикулом',
               );
-              ctx.session.lastMessage = ctx.message.message_id;
-              ++ctx.session.countTryError;
 
-              const articulResponse = await ctx.reply(
-                'Артикулы не совпадают. Проверьте, пожалуйста, правильно ли вы нашли товар.' +
-                  helpText,
-                ctx.session.countTryError === COUNT_TRY_ERROR
-                  ? {
-                      reply_markup: operatorKeyboard,
-                    }
-                  : null,
-              );
-              if (ctx.session.countTryError <= 1) {
+              if (ctx.session.countTryError === 1) {
                 await this.updateToAirtable(ctx.session);
               }
-              return articulResponse;
-            } else {
-              ctx.session.lastMessage = ctx.message.message_id;
-              ++ctx.session.countTryError;
-              ctx.session.errorStatus = 'operatorCall';
-              return ctx.reply(
-                'Попробуйте снова или подождите ответа оператора',
-              );
             }
+
+            await ctx.reply(
+              getTextForArticleError(
+                ctx.session.data.positionOnWB,
+                ctx.session.countTryError,
+                ctx.session.errorStatus,
+              ),
+              getArticulCommand(
+                ctx.session.countTryError,
+                ctx.session.errorStatus,
+              ),
+            );
+            switch (ctx.session.errorStatus) {
+              case 'operator':
+                ctx.session.errorStatus = 'wait';
+                break;
+              case 'wait':
+                ctx.session.errorStatus = 'operator';
+                break;
+              default:
+                break;
+            }
+            return;
           } else {
             ctx.session.errorStatus = null;
             ctx.session.countTryError = 0;
@@ -540,7 +550,7 @@ export class TelegramService {
 
           const msgToSecretChat = createMsgToSecretChat(
             ctx.from,
-            ctx.message.text,
+            'Отзыв➡️ ' + ctx.message.text,
             ctx.session.data.articul,
             ctx.session.chat_id,
           );

@@ -59,4 +59,8 @@ export type BotStatus =
   | 'Время истекло'
   | 'Дата доставки';
 
-export type BrokeBotStatus = 'locationError' | 'articulError' | 'operatorCall';
+export type BrokeBotStatus =
+  | 'locationError'
+  | 'check_articul'
+  | 'wait'
+  | 'operator';

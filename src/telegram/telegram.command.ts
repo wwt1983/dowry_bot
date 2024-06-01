@@ -1,6 +1,6 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
-import { STEP_COMMANDS } from './telegram.constants';
-import { IBot } from 'src/airtable/types/IBot.interface';
+import { COUNT_TRY_ERROR, STEP_COMMANDS } from './telegram.constants';
+import { BrokeBotStatus, IBot } from 'src/airtable/types/IBot.interface';
 
 export const stepKeyboard = new InlineKeyboard()
   .text(STEP_COMMANDS.del, 'del')
@@ -15,6 +15,11 @@ export const operatorKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.operator,
   'operator',
 );
+
+export const articulKeyboard = new InlineKeyboard()
+  .text(STEP_COMMANDS.operator, 'operator')
+  .row()
+  .text(STEP_COMMANDS.check_articul, 'check_articul');
 
 export const deliveryDateKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.no_delivery_date,
@@ -42,7 +47,8 @@ export const createHistoryKeyboard = (data: IBot[]) => {
       record.fields.Статус !== 'В боте' &&
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
-      record.fields.Статус !== 'Чек'
+      record.fields.Статус !== 'Чек' &&
+      record.fields.Статус !== 'Вызов'
     ) {
       newArr.push([
         record.fields.Раздача,
@@ -59,4 +65,29 @@ export const createHistoryKeyboard = (data: IBot[]) => {
     keyboard.add(InlineKeyboard.text(label, data)).row(),
   );
   return keyboard;
+};
+
+export const getArticulCommand = (
+  countTryError: number,
+  status: BrokeBotStatus,
+) => {
+  if (countTryError < COUNT_TRY_ERROR) return null;
+  if (countTryError === COUNT_TRY_ERROR) {
+    return {
+      reply_markup: operatorKeyboard,
+    };
+  } else {
+    switch (status) {
+      case 'operator':
+        return null;
+      case 'check_articul':
+        return {
+          reply_markup: operatorKeyboard,
+        };
+      default:
+        return {
+          reply_markup: articulKeyboard,
+        };
+    }
+  }
 };
