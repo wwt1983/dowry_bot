@@ -212,7 +212,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   const caption =
     `🔥${title}🔥` +
     '\n' +
-    description +
+    // description +
     '\n' +
     '❌Цена на WB ~' +
     priceWb +
@@ -220,9 +220,10 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '\n' +
     `❗️ Кешбэк ~ ${cash}❗️ \n` +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
-    '\n\n' +
+    '\n' +
     HEADER +
     FIRST_STEP +
+    '➡️ ' +
     keys +
     '\n\n' +
     FIRST_STEP_LINK +

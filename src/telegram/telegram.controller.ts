@@ -13,7 +13,7 @@ export class TelegramController {
   @Post('bot')
   bot(@Body() data: any): void {
     console.log(
-      `WEB DATA time=${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
+      `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
       data,
     );
 
