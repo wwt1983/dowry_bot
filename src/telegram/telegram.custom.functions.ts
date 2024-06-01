@@ -463,7 +463,6 @@ export const getTextForArticleError = (
     case 'operator':
       return 'Попробуйте снова или ожидайте ответа оператора';
     case 'wait':
-      return 'Для проверки нажмите кнопку ⤵️';
     case 'check_articul':
       return 'Артикулы не совпадают. Попробуйте снова или нажмите кнопку "Помощь оператора" ⤵️';
   }

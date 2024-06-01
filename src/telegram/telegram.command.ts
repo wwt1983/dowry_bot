@@ -80,6 +80,7 @@ export const getArticulCommand = (
     switch (status) {
       case 'operator':
         return null;
+      case 'wait':
       case 'check_articul':
         return {
           reply_markup: operatorKeyboard,
