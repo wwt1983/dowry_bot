@@ -238,17 +238,17 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   ];
 }
 
-export function getTextByNextStep(step: number): string {
+export function getTextByNextStep(step: number, startTime?: string): string {
   switch (step) {
     case STEPS.CHOOSE_OFFER.step:
       return FIRST_STEP_LINK;
     case STEPS.SEARCH.step:
     case STEPS.CHECK_ARTICUL.step:
-      return FIRST_STEP_A + getNumberText(step);
+      return FIRST_STEP_A + getNumberText(step, startTime);
     case STEPS.ORDER.step:
-      return FIRST_STEP_C + getNumberText(step);
+      return FIRST_STEP_C + getNumberText(step, startTime);
     case STEPS.DELIVERY_DATE.step:
-      return 'Введите ориентировочную дату доставки (в формате 12.12.2024)';
+      return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
     case STEPS.RECEIVED.step:
       return SECOND_STEP + getNumberText(step);
     case STEPS.COMMENT_ON_CHECK.step:
@@ -264,15 +264,20 @@ export function getTextByNextStep(step: number): string {
   }
 }
 
-function getNumberText(step: number) {
+function getNumberText(step: number, startTime?: string) {
   const finish_txt = `До финиша `;
+  const minutes = startTime
+    ? LIMIT_TIME_IN_MINUTES_FOR_ORDER - getDifferenceInMinutes(startTime)
+    : null;
+  const waitTime = minutes ? `(осталось ${minutes} мин. для заказа)` : '';
+
   switch (step) {
     case STEPS.CHOOSE_OFFER.step:
-      return finish_txt + '8️⃣ шагов\n';
+      return finish_txt + `8️⃣ шагов ${waitTime}\n`;
     case STEPS.SEARCH.step:
-      return finish_txt + '7️⃣ шагов\n';
+      return finish_txt + `7️⃣ шагов ${waitTime}\n`;
     case STEPS.ORDER.step:
-      return finish_txt + '6️⃣ шагов\n';
+      return finish_txt + `6️⃣ шагов ${waitTime}\n`;
     case STEPS.RECEIVED.step:
       return finish_txt + '5️⃣ шагов\n';
     case STEPS.COMMENT_ON_CHECK.step:

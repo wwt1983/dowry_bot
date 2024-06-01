@@ -265,7 +265,7 @@ export class TelegramService {
     this.bot.callbackQuery('no_delivery_date', async (ctx) => {
       ctx.session.step = STEPS.RECEIVED.step;
       await ctx.callbackQuery.message.editText(
-        getTextByNextStep(ctx.session.step),
+        getTextByNextStep(ctx.session.step, ctx.session.startTime),
       );
     });
 
@@ -311,7 +311,7 @@ export class TelegramService {
       }
 
       await ctx.callbackQuery.message.editText(
-        getTextByNextStep(ctx.session.step),
+        getTextByNextStep(ctx.session.step, ctx.session.startTime),
         ctx.session.step === STEPS.DELIVERY_DATE.step
           ? { reply_markup: deliveryDateKeyboard }
           : null,
@@ -366,7 +366,9 @@ export class TelegramService {
 
         ctx.session = createContinueSessionData(value, Артикул, Раздача);
         await ctx.answerCallbackQuery();
-        return await ctx.reply(getTextByNextStep(ctx.session.step));
+        return await ctx.reply(
+          getTextByNextStep(ctx.session.step, ctx.session.startTime),
+        );
       }
       await ctx.answerCallbackQuery();
     });
@@ -510,7 +512,9 @@ export class TelegramService {
 
             ctx.session = nextStep(ctx.session);
             await this.updateToAirtable(ctx.session);
-            return await ctx.reply(getTextByNextStep(ctx.session.step));
+            return await ctx.reply(
+              getTextByNextStep(ctx.session.step, ctx.session.startTime),
+            );
           }
         }
 
@@ -522,7 +526,9 @@ export class TelegramService {
           this.bot.api
             .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
             .catch(() => {});
-          return await ctx.reply(getTextByNextStep(ctx.session.step));
+          return await ctx.reply(
+            getTextByNextStep(ctx.session.step, ctx.session.startTime),
+          );
         }
 
         //отзыв пользователя
