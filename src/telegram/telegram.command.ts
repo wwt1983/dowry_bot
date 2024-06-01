@@ -17,8 +17,8 @@ export const operatorKeyboard = new InlineKeyboard().text(
 );
 
 export const articulKeyboard = new InlineKeyboard()
-  .text(STEP_COMMANDS.operator, 'operator')
-  .row()
+  //.text(STEP_COMMANDS.operator, 'operator')
+  //.row()
   .text(STEP_COMMANDS.check_articul, 'check_articul');
 
 export const deliveryDateKeyboard = new InlineKeyboard().text(

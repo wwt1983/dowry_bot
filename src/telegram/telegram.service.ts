@@ -173,9 +173,6 @@ export class TelegramService {
         return await ctx.reply('Раздел обновляется');
       }
     });
-    // this.bot.on('', async (ctx) => {
-    //   return ctx.reply('В бот нужно отправлять только картинки');
-    // });
 
     /*======== LOCATION =======*/
     this.bot.on(':location', async (ctx) => {
@@ -243,9 +240,6 @@ export class TelegramService {
       ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
       ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
-      this.bot.api
-        .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
-        .catch(() => {});
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
     });
 

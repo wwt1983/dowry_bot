@@ -104,7 +104,7 @@ export const COUNT_STEPS = 10;
 export const COUNT_TRY_ERROR = 3;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
-export const FIRST_STEP = '1️⃣ НАЙТИ товар по вашему ключевому запросу\n';
+export const FIRST_STEP = '1️⃣ НАЙТИ товар по запросу\n';
 export const FIRST_STEP_LINK =
   'Загрузите сюда ссылку с артикулом товара (например, https://www.wildberries.ru/catalog/168217638/detail.aspx)\n';
 export const FIRST_STEP_A =
