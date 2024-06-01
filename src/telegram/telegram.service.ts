@@ -209,6 +209,9 @@ export class TelegramService {
 
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
+      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend)
+        return ctx.reply('📵');
+
       const { step, data } = ctx.session;
       if (!data) {
         return ctx.reply('Вам нужно нажать на кнопку ⬆️ "Dowry раздачи"');
