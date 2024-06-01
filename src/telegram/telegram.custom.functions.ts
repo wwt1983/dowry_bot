@@ -461,9 +461,20 @@ export const getTextForArticleError = (
 
   switch (status) {
     case 'operator':
-      return 'Попробуйте снова или ожидайте ответа оператора';
+      return 'Попробуйте снова или ожидайте ответа оператора👩‍💻';
     case 'wait':
     case 'check_articul':
       return 'Артикулы не совпадают. Попробуйте снова или нажмите кнопку "Помощь оператора" ⤵️';
+  }
+};
+
+export const getArticulErrorStatus = (
+  errorStatus: BrokeBotStatus,
+): BrokeBotStatus => {
+  switch (errorStatus) {
+    case 'operator':
+      return 'wait';
+    default:
+      return 'wait';
   }
 };

@@ -43,6 +43,7 @@ import {
   scheduleNotification,
   createContinueSessionData,
   getTextForArticleError,
+  getArticulErrorStatus,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -240,7 +241,7 @@ export class TelegramService {
       ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
       ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
-      return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора');
+      return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора🧑‍💻');
     });
 
     this.bot.callbackQuery('check_articul', async (ctx) => {
@@ -493,16 +494,10 @@ export class TelegramService {
                 ctx.session.errorStatus,
               ),
             );
-            switch (ctx.session.errorStatus) {
-              case 'operator':
-                ctx.session.errorStatus = 'wait';
-                break;
-              case 'wait':
-                ctx.session.errorStatus = 'operator';
-                break;
-              default:
-                break;
-            }
+
+            ctx.session.errorStatus = getArticulErrorStatus(
+              ctx.session.errorStatus,
+            );
             return;
           } else {
             ctx.session.errorStatus = null;
