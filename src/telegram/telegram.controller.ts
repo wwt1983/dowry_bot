@@ -3,6 +3,8 @@ import { TelegramService } from './telegram.service';
 import { SubscribeDto } from './dto/SubscribeDto';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { FORMAT_DATE } from 'src/common/date/date.methods';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @Controller('telegram')
 export class TelegramController {
@@ -10,7 +12,10 @@ export class TelegramController {
 
   @Post('bot')
   bot(@Body() data: any): void {
-    console.log(`WEB DATA time= ${Date.now()}=`, data);
+    console.log(
+      `WEB DATA time=${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
+      data,
+    );
 
     try {
       if (data.query_id) {
@@ -23,7 +28,9 @@ export class TelegramController {
           },
         });
       } else {
-        console.log(`empty${data.query_id} query_id time=` + Date.now());
+        console.log(
+          `empty${data.query_id} query_id time=${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
+        );
       }
     } catch (e) {
       console.log(e);

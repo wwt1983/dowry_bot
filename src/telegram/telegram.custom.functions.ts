@@ -13,15 +13,15 @@ import {
   FOUR_STEP_A,
   FOUR_STEP_B,
   FOOTER,
-  THREE_STEP_A,
   TELEGRAM_BOT_NAME,
   FIRST_STEP_LINK,
   STEPS,
   TELEGRAM_MESSAGE_CHAT_PROD,
   TELEGRAM_MESSAGE_CHAT_TEST,
   LIMIT_TIME_IN_MINUTES_FOR_ORDER,
-  COMMAND_NAMES,
   COUNT_TRY_ERROR,
+  FIVE_STEP,
+  SIX_STEP,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -243,7 +243,7 @@ export function getTextByNextStep(step: number): string {
       return FIRST_STEP_LINK;
     case STEPS.SEARCH.step:
     case STEPS.CHECK_ARTICUL.step:
-      return FIRST_STEP_A + FIRST_STEP_B + getNumberText(step);
+      return FIRST_STEP_A + getNumberText(step);
     case STEPS.ORDER.step:
       return FIRST_STEP_C + getNumberText(step);
     case STEPS.DELIVERY_DATE.step:
@@ -253,11 +253,11 @@ export function getTextByNextStep(step: number): string {
     case STEPS.COMMENT_ON_CHECK.step:
       return THREE_STEP + getNumberText(step);
     case STEPS.COMMENT.step:
-      return FOUR_STEP + THREE_STEP_A + getNumberText(step);
+      return FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step);
     case STEPS.SHTRIH_CODE.step:
-      return FOUR_STEP_A + getNumberText(step);
+      return FIVE_STEP + getNumberText(step);
     case STEPS.CHECK.step:
-      return FOUR_STEP_B + getNumberText(step);
+      return SIX_STEP + getNumberText(step);
     default:
       return FOOTER;
   }
