@@ -54,15 +54,15 @@ export type MyConversation = Conversation<MyContext>;
 export type MyApi = HydrateApiFlavor<Api>;
 
 export interface ITelegramWebApp {
-  title: string;
-  cash: string;
-  priceForYou: string;
-  priceWb: string;
-  image: string;
   id: string;
   articul: string;
-  keys: string;
   offerId: string;
+  title?: string;
+  cash?: string;
+  priceForYou?: string;
+  priceWb?: string;
+  image?: string;
+  keys?: string;
   description?: string;
   location?: string;
   positionOnWB?: string;

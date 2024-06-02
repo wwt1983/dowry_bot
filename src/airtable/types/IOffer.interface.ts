@@ -19,6 +19,8 @@ export interface IOffer {
     Кешбэк: string;
     'Ваша цена': string;
     Id: string;
+    Региональность: string;
+    ['Позиция в WB']: string;
   };
 }
 

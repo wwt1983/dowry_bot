@@ -402,9 +402,17 @@ export class TelegramService {
         let data = null;
 
         //ответ от веб-интерфейса с выбором раздачи
-        if (!ctx.session.data) {
-          data = JSON.parse(text) as ITelegramWebApp;
-          console.log('==== WEB API ====');
+        if (!ctx.session.data && ctx.msg.text.includes('query_id')) {
+          const webData = JSON.parse(text) as ITelegramWebApp;
+          /*Удаляем первый ответ от сайта он формате объекта*/
+          ctx.message.delete().catch(() => {});
+
+          data = await this.getOfferFromWeb(
+            webData.offerId,
+            webData.id,
+            webData.title,
+          );
+          console.log('==== WEB API ====', data);
           ctx.session = UpdateSessionByField(ctx.session, 'data', data);
           ctx.session = UpdateSessionByField(
             ctx.session,
@@ -418,10 +426,6 @@ export class TelegramService {
           );
           ctx.session = UpdateSessionByStep(ctx.session);
 
-          /*Удаляем первый ответ от сайта он формате объекта*/
-          if (ctx.msg.text.includes('query_id')) {
-            ctx.message.delete().catch(() => {});
-          }
           if (data.location && data.location !== 'undefined') {
             await ctx.reply(`Поделиться локацией`, {
               reply_markup: shareKeyboard.oneTime(),
@@ -579,6 +583,30 @@ export class TelegramService {
     });
 
     this.bot.start();
+  }
+  /*
+получаем предложение
+*/
+  async getOfferFromWeb(
+    offerId: string,
+    id: string,
+    title: string,
+  ): Promise<ITelegramWebApp> {
+    const offerAirtable = await this.airtableService.getOffer(offerId);
+    return {
+      id: id,
+      articul: offerAirtable.fields['Артикул'].toString(),
+      offerId,
+      title,
+      cash: offerAirtable.fields['Кешбэк'],
+      priceForYou: offerAirtable.fields['Ваша цена'],
+      priceWb: offerAirtable.fields['Цена WB'],
+      image: offerAirtable.fields['Фото'][0].url,
+      keys: offerAirtable.fields['Ключевые слова'],
+      description: offerAirtable.fields['Описание'],
+      location: offerAirtable.fields['Региональность'],
+      positionOnWB: offerAirtable.fields['Позиция в WB'],
+    };
   }
   /*
 отправляем заполненные данные пользоваетля через веб-хук в airtable
