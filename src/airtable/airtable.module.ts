@@ -12,7 +12,7 @@ import { TelegramModule } from 'src/telegram/telegram.module';
     TelegramModule,
     ConfigModule,
     HttpModule.register({
-      timeout: 6000,
+      timeout: 30000,
     }),
   ],
   providers: [AirtableService, AirtableHttpService],

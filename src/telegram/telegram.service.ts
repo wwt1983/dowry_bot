@@ -50,7 +50,6 @@ import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import {
   commentKeyboard,
   getArticulCommand,
-  shareKeyboard,
   stepKeyboard,
   deliveryDateKeyboard,
   createHistoryKeyboard,
@@ -313,51 +312,45 @@ export class TelegramService {
     /*======== CALBACK_QUERY =======*/
     this.bot.on('callback_query', async (ctx) => {
       /*продолжение раздачи*/
-      if (ctx.callbackQuery.data.includes('sessionId_')) {
-        const sessionId = ctx.callbackQuery.data
-          .replace('sessionId_', '')
-          .trim();
+      if (!ctx.callbackQuery.data.includes('sessionId_'))
+        return await ctx.answerCallbackQuery();
+      this.bot.api
+        .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
+        .catch(() => {});
+      const sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
 
-        const data = await this.commandService.getBotByFilter(
-          sessionId,
-          'SessionId',
-        );
+      const data = await this.commandService.getBotByFilter(
+        sessionId,
+        'SessionId',
+      );
 
-        const { first_name, last_name, username, id } = ctx.from;
-        const {
-          Images,
-          StopTime,
-          StartTime,
-          Статус,
-          OfferId,
-          Артикул,
-          Раздача,
-        } = data[0].fields;
+      const { first_name, last_name, username, id } = ctx.from;
+      const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
+        data[0].fields;
 
-        const value: ISessionData = {
-          sessionId: sessionId,
-          user: username || `${first_name} ${last_name || ''}`,
-          chat_id: id.toString(),
-          startTime: dateFormatWithTZ(StartTime),
-          stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
-          stopTime: dateFormatWithTZ(StopTime),
-          step:
-            Статус === 'Заказ'
-              ? STEPS_VALUE[Статус].step + 2
-              : STEPS_VALUE[Статус].step + 1,
-          images:
-            Images && Array.isArray(Images) ? Images?.map((x) => x.url) : [],
-          offerId: OfferId[0],
-          status: Статус,
-          deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
-        };
+      const value: ISessionData = {
+        sessionId: sessionId,
+        user: username || `${first_name} ${last_name || ''}`,
+        chat_id: id.toString(),
+        startTime: dateFormatWithTZ(StartTime),
+        stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
+        stopTime: dateFormatWithTZ(StopTime),
+        step:
+          Статус === 'Заказ'
+            ? STEPS_VALUE[Статус].step + 2
+            : STEPS_VALUE[Статус].step + 1,
+        images:
+          Images && Array.isArray(Images) ? Images?.map((x) => x.url) : [],
+        offerId: OfferId[0],
+        status: Статус,
+        deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+      };
 
-        ctx.session = createContinueSessionData(value, Артикул, Раздача);
-        await ctx.answerCallbackQuery();
-        return await ctx.reply(
-          getTextByNextStep(ctx.session.step, ctx.session.startTime),
-        );
-      }
+      ctx.session = createContinueSessionData(value, Артикул, Раздача);
+      const response = await ctx.reply(
+        getTextByNextStep(ctx.session.step, ctx.session.startTime),
+      );
+      ctx.session.lastMessage = response.message_id;
       await ctx.answerCallbackQuery();
     });
 
@@ -391,7 +384,8 @@ export class TelegramService {
         let data = null;
 
         //ответ от веб-интерфейса с выбором раздачи
-        if (!ctx.session.data && ctx.msg.text.includes('query_id')) {
+        if (ctx.msg.text.includes('query_id')) {
+          ctx.session.step = STEPS.INBOT.step;
           const webData = JSON.parse(text) as ITelegramWebApp;
           /*Удаляем первый ответ от сайта он формате объекта*/
           ctx.message.delete().catch(() => {});
@@ -414,12 +408,6 @@ export class TelegramService {
             'Выбор раздачи',
           );
           ctx.session = UpdateSessionByStep(ctx.session);
-
-          if (data.location && data.location !== 'undefined') {
-            await ctx.reply(`Поделиться локацией`, {
-              reply_markup: shareKeyboard.oneTime(),
-            });
-          }
         }
 
         const { step } = ctx.session;
@@ -434,10 +422,15 @@ export class TelegramService {
 
           await this.updateToAirtable(ctx.session);
 
-          return await this.bot.api.sendMediaGroup(
+          const response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
           );
+
+          ctx.session.lastMessage = response[response.length - 1].message_id;
+          console.log(response[response.length - 1].message_id);
+          return response;
+
           //return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
         }
 
@@ -600,7 +593,7 @@ export class TelegramService {
     };
   }
   /*
-отправляем заполненные данные пользоваетля через веб-хук в airtable
+отправляем заполненные данные пользоваетля в airtable
 */
   async saveToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.saveToAirtable(session);

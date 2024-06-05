@@ -51,15 +51,12 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
       !record.fields.Финиш &&
       record.fields.Статус !== 'Бот удален' &&
       record.fields.Статус !== 'Поиск' &&
-      record.fields.Статус !== 'Артикул правильный' &&
-      record.fields.Статус !== 'Проблема с артикулом' &&
       record.fields.Статус !== 'Выбор раздачи' &&
       record.fields.Статус !== 'Время истекло' &&
       record.fields.Статус !== 'В боте' &&
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
-      record.fields.Статус !== 'Чек' &&
-      record.fields.Статус !== 'Вызов'
+      record.fields.Статус !== 'Чек'
     ) {
       newArr.push([
         record.fields.Раздача,
@@ -82,7 +79,7 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
   }
   if (ordersLabel && ordersLabel.length > 0) {
     ordersLabel.forEach(([label, data]) =>
-      keyboard.add(InlineKeyboard.text(label, data)).row(),
+      keyboard.add(InlineKeyboard.text('➡️ ' + label, data)).row(),
     );
   }
   return keyboard;
