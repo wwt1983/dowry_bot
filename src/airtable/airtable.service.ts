@@ -8,6 +8,7 @@ import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus } from './types/IBot.interface';
 import { getTimeWithTz } from 'src/common/date/date.methods';
+import { ISessionData } from 'src/telegram/telegram.interface';
 
 @Injectable()
 export class AirtableService {
@@ -16,7 +17,14 @@ export class AirtableService {
     private readonly configService: ConfigService,
   ) {}
 
-  async saveToAirtable(data: any): Promise<any> {
+  async saveToAirtable(session: ISessionData): Promise<any> {
+    const data = {
+      SessionId: session.sessionId,
+      User: session.user,
+      Bot: true,
+      chat_id: session.chat_id,
+      Статус: session.status,
+    };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
     );
@@ -24,7 +32,22 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
-  async updateToAirtable(data: any): Promise<any> {
+  async updateToAirtable(session: ISessionData): Promise<any> {
+    const data = {
+      SessionId: session.sessionId,
+      Артикул: session.data.articul,
+      StartTime: session.startTime,
+      ['Время выкупа']: session.stopBuyTime,
+      OfferId: session.offerId,
+      Статус: session.status,
+      Location: session.location,
+      Раздача: session.data.title,
+      Images: session.images,
+      StopTime: session.stopTime,
+      ['Сообщения от пользователя']: session.comment,
+      ['Дата получения']: session.deliveryDate,
+      Финиш: session.isFinish,
+    };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
     );

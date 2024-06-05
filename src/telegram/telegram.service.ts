@@ -15,9 +15,7 @@ import {
   COMMANDS_TELEGRAM,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
-  WEB_APP,
   STEPS_TYPES,
-  WEB_APP_TEST,
   TELEGRAM_CHAT_ID,
   STEPS,
   STOP_TEXT,
@@ -112,27 +110,17 @@ export class TelegramService {
         id?.toString(),
         username || `${first_name} ${last_name || ''}`,
       );
-
+      const dataBuyer = await this.commandService.getBotByFilter(
+        id.toString(),
+        'chat_id',
+      );
+      const historyButtons = createHistoryKeyboard(dataBuyer, true);
       ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
 
       ctx.reply(sayHi(first_name, username), {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: 'Dowry раздачи',
-                web_app: {
-                  url:
-                    process.env.NODE_ENV === 'development'
-                      ? WEB_APP_TEST
-                      : WEB_APP,
-                },
-              },
-            ],
-          ],
-        },
+        reply_markup: historyButtons,
       });
     });
 
@@ -588,7 +576,7 @@ export class TelegramService {
     this.bot.start();
   }
   /*
-получаем предложение
+получаем раздачу
 */
   async getOfferFromWeb(
     offerId: string,
@@ -615,33 +603,13 @@ export class TelegramService {
 отправляем заполненные данные пользоваетля через веб-хук в airtable
 */
   async saveToAirtable(session: ISessionData): Promise<any> {
-    return await this.airtableService.saveToAirtable({
-      SessionId: session.sessionId,
-      User: session.user,
-      Bot: true,
-      chat_id: session.chat_id,
-      Статус: session.status,
-    });
+    return await this.airtableService.saveToAirtable(session);
   }
   /*
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
-    return await this.airtableService.updateToAirtable({
-      SessionId: session.sessionId,
-      Артикул: session.data.articul,
-      StartTime: session.startTime,
-      ['Время выкупа']: session.stopBuyTime,
-      OfferId: session.offerId,
-      Статус: session.status,
-      Location: session.location,
-      Раздача: session.data.title,
-      Images: session.images,
-      StopTime: session.stopTime,
-      ['Сообщения от пользователя']: session.comment,
-      ['Дата получения']: session.deliveryDate,
-      Финиш: session.isFinish,
-    });
+    return await this.airtableService.updateToAirtable(session);
   }
 
   /*public offer in work chat*/

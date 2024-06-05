@@ -1,6 +1,18 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
-import { COUNT_TRY_ERROR, STEP_COMMANDS } from './telegram.constants';
+import {
+  COUNT_TRY_ERROR,
+  STEP_COMMANDS,
+  WEB_APP,
+  WEB_APP_TEST,
+} from './telegram.constants';
 import { BrokeBotStatus, IBot } from 'src/airtable/types/IBot.interface';
+
+export const webKeyboard = {
+  text: 'Dowry раздачи',
+  web_app: {
+    url: process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
+  },
+};
 
 export const stepKeyboard = new InlineKeyboard()
   .text(STEP_COMMANDS.del, 'del')
@@ -33,11 +45,10 @@ export const shareKeyboard = new Keyboard()
 
 export const userMenu = new InlineKeyboard().text('История раздач', 'history');
 
-export const createHistoryKeyboard = (data: IBot[]) => {
+export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
   const ordersLabel = data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
-      record.fields.StartTime &&
       record.fields.Статус !== 'Бот удален' &&
       record.fields.Статус !== 'Поиск' &&
       record.fields.Статус !== 'Артикул правильный' &&
@@ -61,6 +72,16 @@ export const createHistoryKeyboard = (data: IBot[]) => {
   if (!ordersLabel || ordersLabel.length === 0) return null;
 
   const keyboard = new InlineKeyboard().row();
+  if (web) {
+    keyboard
+      .add(
+        InlineKeyboard.webApp(
+          'Dowry раздачи',
+          process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
+        ),
+      )
+      .row();
+  }
   ordersLabel.forEach(([label, data]) =>
     keyboard.add(InlineKeyboard.text(label, data)).row(),
   );
