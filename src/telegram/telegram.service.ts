@@ -163,7 +163,7 @@ export class TelegramService {
         const orderButtons = createHistoryKeyboard(dataBuyer);
         return await ctx.reply(
           orderButtons
-            ? 'Выбирите раздачу, чтобы продолжить заполнение⤵️'
+            ? 'Выберите раздачу, чтобы продолжить заполнение⤵️'
             : 'Все раздачи завершены ✌️',
           {
             reply_markup: orderButtons,

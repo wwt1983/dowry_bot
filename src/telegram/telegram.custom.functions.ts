@@ -53,7 +53,7 @@ export function createMsgToSecretChat(
   //     : `/message=${chatId}@DowryWorkBot`;
 
   const instruction =
-    '\nВыбирите комманду /message_send,cкопируйте chat_id и следуйте дальше по инструкции бота';
+    '\nВыберите комманду /message_send,cкопируйте chat_id и следуйте дальше по инструкции бота';
   const userComment = comment
     ? `\nРаздача:${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
     : '';
