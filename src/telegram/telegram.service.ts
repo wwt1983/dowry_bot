@@ -148,9 +148,10 @@ export class TelegramService {
           return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢');
         }
         const orderButtons = createHistoryKeyboard(dataBuyer);
+
         return await ctx.reply(
           orderButtons
-            ? 'Выберите раздачу, чтобы продолжить заполнение⤵️'
+            ? 'Выберите раздачу, чтобы продолжить заполнение ⤵️'
             : 'Все раздачи завершены ✌️',
           {
             reply_markup: orderButtons,

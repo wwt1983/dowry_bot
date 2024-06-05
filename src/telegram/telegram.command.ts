@@ -49,14 +49,18 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
   const ordersLabel = data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
+      record.fields.StartTime &&
       record.fields.Статус !== 'Бот удален' &&
       record.fields.Статус !== 'Поиск' &&
+      record.fields.Статус !== 'Артикул правильный' &&
+      record.fields.Статус !== 'Проблема с артикулом' &&
       record.fields.Статус !== 'Выбор раздачи' &&
       record.fields.Статус !== 'Время истекло' &&
       record.fields.Статус !== 'В боте' &&
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
-      record.fields.Статус !== 'Чек'
+      record.fields.Статус !== 'Чек' &&
+      record.fields.Статус !== 'Вызов'
     ) {
       newArr.push([
         record.fields.Раздача,
@@ -82,7 +86,7 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
       keyboard.add(InlineKeyboard.text('➡️ ' + label, data)).row(),
     );
   }
-  return keyboard;
+  return ordersLabel.length > 0 || web ? keyboard : null;
 };
 
 export const getArticulCommand = (
