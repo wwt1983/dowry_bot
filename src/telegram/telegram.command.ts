@@ -45,8 +45,8 @@ export const shareKeyboard = new Keyboard()
 
 export const userMenu = new InlineKeyboard().text('История раздач', 'history');
 
-export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
-  const ordersLabel = data?.reduce(function (newArr, record) {
+export const createLabelHistory = (data: IBot[]) => {
+  return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
       record.fields.StartTime &&
@@ -69,6 +69,9 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
     }
     return newArr;
   }, []);
+};
+export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
+  const ordersLabel = createLabelHistory(data);
 
   const keyboard = new InlineKeyboard().row();
   if (web) {

@@ -93,6 +93,7 @@ export function createInitialSessionData(
     deliveryDate: null,
     conversation: null,
     lastCommand: null,
+    countWorkOrdes: 0,
   };
 }
 

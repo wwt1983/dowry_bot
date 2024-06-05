@@ -53,6 +53,7 @@ import {
   stepKeyboard,
   deliveryDateKeyboard,
   createHistoryKeyboard,
+  createLabelHistory,
 } from './telegram.command';
 import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
@@ -114,6 +115,7 @@ export class TelegramService {
       );
       const historyButtons = createHistoryKeyboard(dataBuyer, true);
       ctx.session.lastCommand = COMMAND_NAMES.start;
+      ctx.session.countWorkOrdes = createLabelHistory(dataBuyer).length;
 
       await this.saveToAirtable(ctx.session);
 
@@ -721,9 +723,24 @@ export class TelegramService {
           botId,
           value.notification.fields.Id,
         );
+
         await this.bot.api.sendMessage(
           chat_id,
           value.notification.fields.Сообщение + ` ➡️Раздача: ${offerName}`,
+        );
+        const dataBuyer = await this.commandService.getBotByFilter(
+          chat_id.toString(),
+          'chat_id',
+        );
+        const historyButtons = createHistoryKeyboard(dataBuyer, true);
+        const countWorkLabels = createLabelHistory(dataBuyer).length;
+
+        await this.bot.api.sendMessage(
+          chat_id.toString(),
+          `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите незаконченные ⤵️' : '⤵️'}`,
+          {
+            reply_markup: historyButtons,
+          },
         );
         return;
       }
