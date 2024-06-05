@@ -69,8 +69,6 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
     return newArr;
   }, []);
 
-  if (!ordersLabel || ordersLabel.length === 0) return null;
-
   const keyboard = new InlineKeyboard().row();
   if (web) {
     keyboard
@@ -82,9 +80,11 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
       )
       .row();
   }
-  ordersLabel.forEach(([label, data]) =>
-    keyboard.add(InlineKeyboard.text(label, data)).row(),
-  );
+  if (ordersLabel && ordersLabel.length > 0) {
+    ordersLabel.forEach(([label, data]) =>
+      keyboard.add(InlineKeyboard.text(label, data)).row(),
+    );
+  }
   return keyboard;
 };
 
