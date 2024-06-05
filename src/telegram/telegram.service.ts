@@ -73,8 +73,7 @@ export class TelegramService {
   ) {
     this.options = options;
 
-    console.log('------- START BOT --------');
-    console.log('process.env.NODE_ENV=', process.env.NODE_ENV);
+    console.log('------- START BOT --------', process.env.NODE_ENV);
 
     this.bot = new Bot<MyContext, MyApi>(this.options.token);
     this.bot.use(hydrateContext());
@@ -429,7 +428,6 @@ export class TelegramService {
           );
 
           ctx.session.lastMessage = response[response.length - 1].message_id;
-          console.log(response[response.length - 1].message_id);
           return response;
 
           //return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
