@@ -385,8 +385,9 @@ export class TelegramService {
           const msgToSecretChat = createMsgToSecretChat(
             ctx.from,
             text,
-            ctx.session?.data?.articul || '⁇ Вопрос без раздачи ⁇',
+            ctx.session?.data?.articul || '',
             ctx.from.id.toString(),
+            ctx.session?.data?.title || '',
           );
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 
@@ -469,8 +470,9 @@ export class TelegramService {
               const msgToSecretChat = createMsgToSecretChat(
                 ctx.from,
                 text,
-                ctx.session?.data?.articul,
+                ctx.session?.data?.articul || '',
                 ctx.from.id.toString(),
+                ctx.session?.data?.title || '',
               );
               await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
             }
@@ -555,6 +557,7 @@ export class TelegramService {
             'Отзыв➡️ ' + ctx.message.text,
             ctx.session.data.articul,
             ctx.session.chat_id,
+            ctx.session?.data?.title || '',
           );
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 

@@ -45,17 +45,18 @@ export function createMsgToSecretChat(
   comment: string,
   order: string,
   chatId: string,
+  name: string,
 ) {
   const { first_name, last_name, username } = from;
   // const commandForBot =
   //   botType === 'development'
   //     ? `/message=${chatId}@test_dowry_bot`
   //     : `/message=${chatId}@DowryWorkBot`;
-
+  const typeMessage = order ? `Раздача:${name}` : 'Вопрос от пользователя';
   const instruction =
-    '\nВыберите комманду /message_send,cкопируйте chat_id и следуйте дальше по инструкции бота';
+    '\nВыберите комманду /message_send,cкопируйте chat_id и следуйте дальше';
   const userComment = comment
-    ? `\nРаздача:${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
+    ? `\n${typeMessage} ${name} ${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
     : '';
   return `❓Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
   ${userComment}${instruction}❓`;
