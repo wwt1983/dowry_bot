@@ -295,7 +295,7 @@ export class TelegramService {
           await statusMessage.editText(
             'Фото загружено! ' + getMessageFromParseImg(parseResult),
           );
-          setTimeout(() => statusMessage.delete().catch(() => {}), 4000);
+          setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
         } else {
           await statusMessage.editText('Фото загружено!');
           setTimeout(() => statusMessage.delete().catch(() => {}), 500);

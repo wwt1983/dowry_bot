@@ -491,5 +491,5 @@ export const getMessageFromParseImg = (
   parseResult: false | { checkOnArticul: boolean; countArticules: number },
 ) => {
   if (!parseResult) return '';
-  return `Найдено в фото ${parseResult.countArticules} артикул(а) ${parseResult.checkOnArticul ? 'артикул заказа ✅' : 'артикула заказа ❌'}`;
+  return `Найдено в фото ${parseResult.countArticules} артикул(а), ${parseResult.checkOnArticul ? 'артикул заказа ✅' : 'артикула заказа ❌'}`;
 };
