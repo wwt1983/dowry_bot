@@ -407,6 +407,7 @@ export class TelegramService {
               id?.toString(),
               username || `${first_name} ${last_name || ''}`,
             );
+            await this.saveToAirtable(ctx.session);
           }
 
           const webData = JSON.parse(text) as ITelegramWebApp;
@@ -431,10 +432,6 @@ export class TelegramService {
             'Выбор раздачи',
           );
           ctx.session = UpdateSessionByStep(ctx.session);
-
-          if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
-            await this.saveToAirtable(ctx.session);
-          }
         }
 
         const { step } = ctx.session;
