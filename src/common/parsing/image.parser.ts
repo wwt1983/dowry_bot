@@ -48,7 +48,7 @@ const checkParse = (text: string, status: BotStatus, data: string) => {
 async function imageToGray(imgUrl: string) {
   try {
     const image = await Jimp.read(imgUrl);
-    image.grayscale().contrast(+0.5).normalize().dither565();
+    image.grayscale().normalize().dither565();
     return await image.writeAsync('grayscale_image.jpg');
   } catch (e) {
     console.log('imageToGray error=', e);
@@ -62,7 +62,7 @@ const checkSearch = (data: string, text: string) => {
     if (text.includes('Артикул')) {
       const count = (text.match(/Артикул/g) || []).length;
       return {
-        check: true,
+        check: text.includes(data),
         count: count,
       };
     } else {
