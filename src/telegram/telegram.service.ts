@@ -432,13 +432,14 @@ export class TelegramService {
             'Выбор раздачи',
           );
           ctx.session = UpdateSessionByStep(ctx.session);
+        } else {
+          if (!STEPS_TYPES.text.find((x) => x === step)) {
+            console.log('step=', ctx.session.step, ctx.session.sessionId);
+            return await ctx.reply('На этом шаге должно быть отправлено фото');
+          }
         }
 
         const { step } = ctx.session;
-
-        if (!STEPS_TYPES.text.find((x) => x === step)) {
-          return await ctx.reply('На этом шаге должно быть отправлено фото');
-        }
 
         //первый шаг
         if (STEPS.CHOOSE_OFFER.step === step && data) {
