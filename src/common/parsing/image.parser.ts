@@ -19,7 +19,7 @@ export const parseText = async (
       data: { text },
     } = await worker.recognize('grayscale_image.jpg');
 
-    console.log('Распознанный текст: ', text);
+    //console.log('Распознанный текст: ', text);
 
     await worker.terminate();
     return checkParse(text, status, value);
@@ -59,8 +59,8 @@ async function imageToGray(imgUrl: string) {
 /*проверка фото поиска*/
 const checkSearch = (data: string, text: string) => {
   try {
-    if (text.includes('Артикул')) {
-      const count = (text.match(/Артикул/g) || []).length;
+    const count = (text.match(/Артикул/g) || []).length;
+    if (count > 0) {
       return {
         check: text.includes(data),
         count: count,
