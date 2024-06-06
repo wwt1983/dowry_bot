@@ -35,7 +35,7 @@ export class AirtableService {
   async updateToAirtable(session: ISessionData): Promise<any> {
     const data = {
       SessionId: session.sessionId,
-      Артикул: session.data.articul,
+      Артикул: session.data?.articul,
       StartTime: session.startTime,
       ['Время выкупа']: session.stopBuyTime,
       OfferId: session.offerId,

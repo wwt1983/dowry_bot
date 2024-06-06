@@ -42,6 +42,7 @@ import {
   createContinueSessionData,
   getTextForArticleError,
   getArticulErrorStatus,
+  getMessageFromParseImg,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -59,6 +60,7 @@ import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
+import { parseText } from 'src/common/parsing/text.parser';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -284,8 +286,16 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        await statusMessage.editText('Фото загружено!');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+        const parseResult = await parseText(
+          ctx.session.lastLoadImage,
+          ctx.session.status,
+          ctx.session.data.articul,
+        );
+
+        await statusMessage.editText(
+          'Фото загружено! ' + getMessageFromParseImg(parseResult),
+        );
+        setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
