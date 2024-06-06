@@ -89,7 +89,7 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
       keyboard.add(InlineKeyboard.text('➡️ ' + label, data)).row(),
     );
   }
-  return ordersLabel.length > 0 || web ? keyboard : null;
+  return (ordersLabel && ordersLabel.length > 0) || web ? keyboard : null;
 };
 
 export const getArticulCommand = (
