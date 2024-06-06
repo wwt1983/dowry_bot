@@ -49,10 +49,6 @@ export function createMsgToSecretChat(
   status?: BotStatus,
 ) {
   const { first_name, last_name, username } = from;
-  // const commandForBot =
-  //   botType === 'development'
-  //     ? `/message=${chatId}@test_dowry_bot`
-  //     : `/message=${chatId}@DowryWorkBot`;
 
   const statusText = status ? ` (${status})` : '';
   const typeMessage = order

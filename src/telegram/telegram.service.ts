@@ -55,6 +55,7 @@ import {
   deliveryDateKeyboard,
   createHistoryKeyboard,
   createLabelHistory,
+  operatorKeyboard,
 } from './telegram.command';
 import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
@@ -229,6 +230,9 @@ export class TelegramService {
 
     /*======== OPERATOR =======*/
     this.bot.callbackQuery('operator', async (ctx) => {
+      if (ctx.session.step === STEPS.FINISH.step) {
+        return ctx.reply('Напишите сообщение оператору и ожидайте ответа🧑‍💻');
+      }
       ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
       ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
@@ -322,6 +326,9 @@ export class TelegramService {
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       if (ctx.session.step === STEPS.FINISH.step) {
         await ctx.react('🎉');
+        await ctx.reply('👩‍💻', {
+          reply_markup: operatorKeyboard,
+        });
       }
     });
 
@@ -378,13 +385,17 @@ export class TelegramService {
 
         const { text } = ctx.update.message;
 
-        if (ctx.session.lastCommand === COMMAND_NAMES.call) {
+        if (
+          ctx.session.lastCommand === COMMAND_NAMES.call ||
+          ctx.session.step === STEPS.FINISH.step
+        ) {
           const msgToSecretChat = createMsgToSecretChat(
             ctx.from,
             text,
             ctx.session?.data?.articul || '',
             ctx.from.id.toString(),
             ctx.session?.data?.title || '',
+            ctx.session.status,
           );
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 

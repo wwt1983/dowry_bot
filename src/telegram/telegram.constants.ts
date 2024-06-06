@@ -97,6 +97,7 @@ export const STEPS_TYPES = {
     STEPS.COMMENT_ON_CHECK.step,
     STEPS.HELP.step,
     STEPS.DELIVERY_DATE.step,
+    STEPS.FINISH.step,
   ],
 };
 
