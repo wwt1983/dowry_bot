@@ -281,7 +281,7 @@ export class TelegramService {
           return;
         }
         ctx.session.lastMessage = null;
-        const statusMessage = await ctx.reply('Загрузка...');
+        const statusMessage = await ctx.reply('⏳');
 
         const firebaseUrl = await this.firebaseService.uploadImageAsync(
           ctx.session.lastLoadImage,
