@@ -61,7 +61,13 @@ export function createMsgToSecretChat(
   return `❓Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
   ${userComment}${instruction}❓`;
 }
-
+export const createNewSession = (session: ISessionData): ISessionData => {
+  (session.sessionId = uuidv4()),
+    (session.startTime = getTimeWithTz()),
+    (session.step = STEPS.INBOT.step),
+    (session.status = 'В боте');
+  return session;
+};
 export function createInitialSessionData(
   id?: string,
   user?: string,

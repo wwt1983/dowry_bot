@@ -43,6 +43,7 @@ import {
   getTextForArticleError,
   getArticulErrorStatus,
   getMessageFromParseImg,
+  createNewSession,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -401,7 +402,8 @@ export class TelegramService {
 
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg.text.includes('query_id')) {
-          ctx.session.step = STEPS.INBOT.step;
+          ctx.session = createNewSession(ctx.session);
+
           const webData = JSON.parse(text) as ITelegramWebApp;
           /*Удаляем первый ответ от сайта он формате объекта*/
           ctx.message.delete().catch(() => {});
@@ -751,7 +753,7 @@ export class TelegramService {
 
         await this.bot.api.sendMessage(
           chat_id.toString(),
-          `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите незаконченные ⤵️' : '⤵️'}`,
+          `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : '⤵️'}`,
           {
             reply_markup: historyButtons,
           },
