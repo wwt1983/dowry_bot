@@ -5,7 +5,7 @@ import Jimp from 'jimp';
 export const parseText = async (
   image: string,
   status: BotStatus,
-  articul: string,
+  data: string,
 ) => {
   try {
     const worker = await createWorker(['rus', 'eng'], OEM.LSTM_ONLY);
@@ -14,29 +14,28 @@ export const parseText = async (
     });
 
     await imageToGray(image);
+
     const {
       data: { text },
     } = await worker.recognize('grayscale_image.jpg');
-    //console.log('Распознанный текст: ', text);
+
+    console.log('Распознанный текст: ', text);
 
     await worker.terminate();
-    return checkParse(text, status, articul);
+    return checkParse(text, status, data);
   } catch (e) {
-    console.log('tesseract', e);
+    console.log('parseText', e);
     return null;
   }
 };
 
-const checkParse = (text: string, status: BotStatus, articul: string) => {
+const checkParse = (text: string, status: BotStatus, data: string) => {
   try {
     if (!text) return false;
     switch (status) {
       case 'Артикул правильный':
-        const count = (text.match(/Артикул/g) || []).length;
-        return {
-          checkOnArticul: text.includes(articul),
-          countArticules: count,
-        };
+        const result = checkSearch(data, text);
+        return getMessageForSearch(result);
       default:
         return false;
     }
@@ -49,13 +48,48 @@ const checkParse = (text: string, status: BotStatus, articul: string) => {
 async function imageToGray(imgUrl: string) {
   try {
     const image = await Jimp.read(imgUrl);
-    image.grayscale().contrast(+0.5);
+    image.grayscale().contrast(+0.5).normalize().dither565();
     return await image.writeAsync('grayscale_image.jpg');
   } catch (e) {
     console.log('imageToGray error=', e);
     return null;
   }
 }
+
+/*проверка фото поиска*/
+const checkSearch = (data: string, text: string) => {
+  try {
+    if (text.includes('Артикул')) {
+      const count = (text.match(/Артикул/g) || []).length;
+      return {
+        check: true,
+        count: count,
+      };
+    } else {
+      if (text.includes('Кошельком')) {
+        const count = (text.match(/Кошельком/g) || []).length;
+        return {
+          check: false,
+          count: count,
+        };
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    return {
+      check: false,
+      count: 0,
+    };
+  }
+};
+
+const getMessageForSearch = (result: { check: boolean; count: number }) => {
+  if (!result) return '';
+  return `Найдено в фото ${result.count} товара(-ов), 
+  ${result.check ? 'артикул заказа ✅' : 'артикула заказа ❌'}
+  `;
+};
 
 /*
 PageSegMod представляет собой целочисленное значение, которое указывает Tesseract, как он должен сегментировать страницу для распознавания текста. Доступные значения для PageSegMod включают:
@@ -73,6 +107,4 @@ PageSegMod представляет собой целочисленное зна
 11. PSM_SINGLE_CHAR (10) - Обрабатывает страницу как единый символ.
 12. PSM_SPARSE_TEXT (11) - Обрабатывает страницу как разреженный текст без поиска структуры.
 13. PSM_SPARSE_TEXT_OSD (12) - Обрабатывает страницу как разреженный текст с определением ориентации и направления письма.
-
-
 */
