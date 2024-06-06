@@ -482,6 +482,7 @@ export class TelegramService {
                 ctx.session?.data?.articul || '',
                 ctx.from.id.toString(),
                 ctx.session?.data?.title || '',
+                ctx.session.status,
               );
               await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
             }
@@ -567,6 +568,7 @@ export class TelegramService {
             ctx.session.data.articul,
             ctx.session.chat_id,
             ctx.session?.data?.title || '',
+            ctx.session.status,
           );
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 
