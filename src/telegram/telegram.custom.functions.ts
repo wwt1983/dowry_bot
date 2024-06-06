@@ -323,6 +323,7 @@ export function getOffer(data: IOffer) {
 
 export const parseUrl = (url: string, articul: string): boolean => {
   if (!url) return false;
+
   try {
     const splitUrl = url.trim().split('?')[0];
     const articulOnCheck = splitUrl.replace(/\D/g, '');
