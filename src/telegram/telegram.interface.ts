@@ -7,6 +7,7 @@ import {
 import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
 import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
+import { COMMAND_NAMES } from './telegram.constants';
 
 export interface ITelegramOptions {
   token: string;
@@ -45,7 +46,7 @@ export interface ISessionData {
   errorStatus?: BrokeBotStatus;
   deliveryDate: string;
   conversation?: any;
-  lastCommand?: string;
+  lastCommand?: COMMAND_NAMES;
   countWorkOrdes?: number;
 }
 

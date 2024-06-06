@@ -402,7 +402,11 @@ export class TelegramService {
 
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg.text.includes('query_id')) {
-          ctx.session = createNewSession(ctx.session);
+          console.log('command = ', ctx.session.lastCommand);
+          if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
+            ctx.session = createNewSession(ctx.session);
+            await this.saveToAirtable(ctx.session);
+          }
 
           const webData = JSON.parse(text) as ITelegramWebApp;
           /*Удаляем первый ответ от сайта он формате объекта*/
