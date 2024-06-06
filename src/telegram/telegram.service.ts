@@ -575,7 +575,7 @@ export class TelegramService {
 
           const msgToSecretChat = createMsgToSecretChat(
             ctx.from,
-            'Отзыв➡️ ' + ctx.message.text,
+            ctx.message.text,
             ctx.session.data.articul,
             ctx.session.chat_id,
             ctx.session?.data?.title || '',
