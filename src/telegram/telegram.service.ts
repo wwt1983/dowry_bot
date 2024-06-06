@@ -433,8 +433,9 @@ export class TelegramService {
           );
           ctx.session = UpdateSessionByStep(ctx.session);
         } else {
+          const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
-            console.log('step=', ctx.session.step, ctx.session.sessionId);
+            console.log('step=', step, ctx.session.sessionId);
             return await ctx.reply('На этом шаге должно быть отправлено фото');
           }
         }
