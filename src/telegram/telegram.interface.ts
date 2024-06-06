@@ -47,7 +47,6 @@ export interface ISessionData {
   deliveryDate: string;
   conversation?: any;
   lastCommand?: COMMAND_NAMES;
-  countWorkOrdes?: number;
 }
 
 export type MyContext = HydrateFlavor<
