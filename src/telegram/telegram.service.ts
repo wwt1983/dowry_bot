@@ -117,7 +117,7 @@ export class TelegramService {
       );
       const historyButtons = createHistoryKeyboard(dataBuyer, true);
       ctx.session.lastCommand = COMMAND_NAMES.start;
-      ctx.session.countWorkOrdes = createLabelHistory(dataBuyer).length;
+      ctx.session.countWorkOrdes = createLabelHistory(dataBuyer)?.length;
 
       await this.saveToAirtable(ctx.session);
 

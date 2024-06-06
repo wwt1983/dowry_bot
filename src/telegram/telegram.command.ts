@@ -46,6 +46,7 @@ export const shareKeyboard = new Keyboard()
 export const userMenu = new InlineKeyboard().text('История раздач', 'history');
 
 export const createLabelHistory = (data: IBot[]) => {
+  if (!data || data.length === 0) return [];
   return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
