@@ -56,7 +56,7 @@ export function createMsgToSecretChat(
   const instruction =
     '\nВыберите комманду /message_send,cкопируйте chat_id и следуйте дальше';
   const userComment = comment
-    ? `\n${typeMessage} ${name} ${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
+    ? `\n${typeMessage} ${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
     : '';
   return `❓Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
   ${userComment}${instruction}❓`;

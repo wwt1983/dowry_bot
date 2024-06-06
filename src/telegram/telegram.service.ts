@@ -465,7 +465,10 @@ export class TelegramService {
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
 
-            if (countTryError === COUNT_TRY_ERROR) {
+            if (
+              countTryError === COUNT_TRY_ERROR ||
+              ctx.session.errorStatus === 'operator'
+            ) {
               ctx.session = UpdateSessionByField(
                 ctx.session,
                 'comment',
