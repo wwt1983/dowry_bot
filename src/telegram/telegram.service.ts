@@ -401,8 +401,12 @@ export class TelegramService {
 
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg.text.includes('query_id')) {
-          console.log('command = ', ctx.session.lastCommand);
           if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
+            const { first_name, last_name, username, id } = ctx.from;
+            ctx.session = createInitialSessionData(
+              id?.toString(),
+              username || `${first_name} ${last_name || ''}`,
+            );
             ctx.session = createInitialSessionData();
             await this.saveToAirtable(ctx.session);
           }
