@@ -43,7 +43,6 @@ import {
   getTextForArticleError,
   getArticulErrorStatus,
   getMessageFromParseImg,
-  createNewSession,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -404,7 +403,7 @@ export class TelegramService {
         if (ctx.msg.text.includes('query_id')) {
           console.log('command = ', ctx.session.lastCommand);
           if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
-            ctx.session = createNewSession(ctx.session);
+            ctx.session = createInitialSessionData();
             await this.saveToAirtable(ctx.session);
           }
 
