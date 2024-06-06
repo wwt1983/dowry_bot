@@ -286,16 +286,20 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        const parseResult = await parseText(
-          ctx.session.lastLoadImage,
-          ctx.session.status,
-          ctx.session.data.articul,
-        );
-
-        await statusMessage.editText(
-          'Фото загружено! ' + getMessageFromParseImg(parseResult),
-        );
-        setTimeout(() => statusMessage.delete().catch(() => {}), 2000);
+        if (ctx.session.status === 'Артикул правильный') {
+          const parseResult = await parseText(
+            ctx.session.lastLoadImage,
+            ctx.session.status,
+            ctx.session.data.articul,
+          );
+          await statusMessage.editText(
+            'Фото загружено! ' + getMessageFromParseImg(parseResult),
+          );
+          setTimeout(() => statusMessage.delete().catch(() => {}), 4000);
+        } else {
+          await statusMessage.editText('Фото загружено!');
+          setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+        }
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
