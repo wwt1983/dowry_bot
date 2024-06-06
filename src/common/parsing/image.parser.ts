@@ -5,7 +5,7 @@ import Jimp from 'jimp';
 export const parseText = async (
   image: string,
   status: BotStatus,
-  data: string,
+  value: string,
 ) => {
   try {
     const worker = await createWorker(['rus', 'eng'], OEM.LSTM_ONLY);
@@ -22,7 +22,7 @@ export const parseText = async (
     console.log('Распознанный текст: ', text);
 
     await worker.terminate();
-    return checkParse(text, status, data);
+    return checkParse(text, status, value);
   } catch (e) {
     console.log('parseText', e);
     return null;
@@ -66,17 +66,14 @@ const checkSearch = (data: string, text: string) => {
         count: count,
       };
     } else {
-      if (text.includes('Кошельком')) {
-        const count = (text.match(/Кошельком/g) || []).length;
-        return {
-          check: false,
-          count: count,
-        };
-      }
+      const count = (text.match(/Кошельком/g) || []).length;
+      return {
+        check: false,
+        count: count,
+      };
     }
   } catch (error) {
     console.log(error);
-  } finally {
     return {
       check: false,
       count: 0,
