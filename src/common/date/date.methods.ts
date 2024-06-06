@@ -9,22 +9,33 @@ import {
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_NO_TIME = 'yyyy-MM-dd';
+const ERROR_TIME = -1000;
 
 export const getTimeWithTz = () =>
   formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE);
 
 export const getDifferenceInMinutes = (date: string) => {
-  return differenceInMinutes(
-    getTimeWithTz(),
-    formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE),
-  );
+  try {
+    if (!date) return ERROR_TIME;
+    return differenceInMinutes(
+      getTimeWithTz(),
+      formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE),
+    );
+  } catch (e) {
+    return ERROR_TIME;
+  }
 };
 
 export const getDifferenceInHours = (date: string) => {
-  return differenceInHours(
-    getTimeWithTz(),
-    formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE),
-  );
+  try {
+    return differenceInHours(
+      getTimeWithTz(),
+      formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE),
+    );
+  } catch (e) {
+    console.log(e);
+    return ERROR_TIME;
+  }
 };
 
 export const getDifferenceInDays = (date: string) => {
