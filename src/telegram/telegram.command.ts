@@ -19,20 +19,20 @@ export const stepKeyboard = new InlineKeyboard()
   .text(STEP_COMMANDS.del, 'del')
   .text(STEP_COMMANDS.next, 'next');
 
-export const commentKeyboard = new InlineKeyboard().text(
-  STEP_COMMANDS.next,
-  'next',
-);
+export const commentKeyboard = new InlineKeyboard()
+  .text(STEP_COMMANDS.next, 'next')
+  .row()
+  .text(STEP_COMMANDS.operator, 'operator');
 
 export const operatorKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.operator,
   'operator',
 );
 
-export const articulKeyboard = new InlineKeyboard()
-  //.text(STEP_COMMANDS.operator, 'operator')
-  //.row()
-  .text(STEP_COMMANDS.check_articul, 'check_articul');
+export const articulKeyboard = new InlineKeyboard().text(
+  STEP_COMMANDS.check_articul,
+  'check_articul',
+);
 
 export const deliveryDateKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.no_delivery_date,
