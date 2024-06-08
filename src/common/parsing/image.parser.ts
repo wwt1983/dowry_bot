@@ -8,6 +8,7 @@ type ResponseParse = {
   data?: string;
 };
 
+const DEFAULT_RESPONSE_TEXT = '\nПроверка: ❌';
 const DEFAULT_RESPONSE: ResponseParse = {
   check: false,
   count: 0,
@@ -49,7 +50,8 @@ const checkParse = (
   title: string,
 ) => {
   try {
-    if (!text) return '';
+    if (!text) return DEFAULT_RESPONSE_TEXT;
+
     text = text.replace(/\s/gi, ' ');
     let result: ResponseParse = null;
     switch (status) {
@@ -71,10 +73,10 @@ const checkParse = (
         break;
     }
 
-    return result ? getMessage(result) : '';
+    return result ? getMessage(result) : DEFAULT_RESPONSE_TEXT;
   } catch (error) {
     console.log('checkParse=', error);
-    return '';
+    return DEFAULT_RESPONSE_TEXT;
   }
 };
 
@@ -93,7 +95,7 @@ async function imageToGray(imgUrl: string, status: BotStatus) {
 }
 
 const getMessage = (result: ResponseParse) => {
-  if (!result) return '\nПроверка: ❌';
+  if (!result) return DEFAULT_RESPONSE_TEXT;
   const data = result.data ? ` ➡️ ${result.data}` : '';
   return `\nПроверка: ${result.check ? '✅' : '❌'} ${data}`;
 };
