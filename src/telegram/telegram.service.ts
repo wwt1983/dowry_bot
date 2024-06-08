@@ -288,7 +288,6 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        // if (ctx.session.status === 'Артикул правильный') {
         const parseResult = await parseTextFromPhoto(
           ctx.session.lastLoadImage,
           ctx.session.status,
@@ -297,10 +296,6 @@ export class TelegramService {
         );
         await statusMessage.editText('Фото загружено! ' + parseResult || '');
         setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
-        // } else {
-        // await statusMessage.editText('Фото загружено!');
-        //  setTimeout(() => statusMessage.delete().catch(() => {}), 500);
-        // }
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -443,7 +438,6 @@ export class TelegramService {
         } else {
           const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
-            console.log('step=', step, ctx.session.sessionId);
             return await ctx.reply('На этом шаге должно быть отправлено фото');
           }
         }
