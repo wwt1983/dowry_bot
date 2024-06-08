@@ -763,7 +763,7 @@ export class TelegramService {
 
         await this.bot.api.sendMessage(
           chat_id,
-          value.notification.fields.Сообщение + ` ➡️Раздача: ${offerName}`,
+          value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
         );
         await this.sendMessageWithKeyboardHistory(chat_id);
         return;
@@ -809,7 +809,7 @@ export class TelegramService {
 
       await this.bot.api.sendMessage(
         chat_id,
-        value.notification.fields.Сообщение + ` ➡️Раздача: ${offerName}`,
+        value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
       );
     } catch (error: any) {
       if (error instanceof Error) {
