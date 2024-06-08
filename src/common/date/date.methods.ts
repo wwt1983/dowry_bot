@@ -4,7 +4,6 @@ import {
   differenceInHours,
   differenceInDays,
   isValid,
-  format,
 } from 'date-fns';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
@@ -16,7 +15,7 @@ export const getTimeWithTz = () =>
 
 export const getDifferenceInMinutes = (date: string) => {
   try {
-    if (!date) return ERROR_TIME;
+    if (!date || date === 'undefined') return ERROR_TIME;
     return differenceInMinutes(
       getTimeWithTz(),
       formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE),
@@ -48,7 +47,11 @@ export const getDifferenceInDays = (date: string) => {
 export const dateFormat = (date: string) => {
   if (!date) return null;
   if (isValid(new Date(date))) {
-    return format(new Date(date), FORMAT_DATE_NO_TIME);
+    return formatInTimeZone(
+      new Date(date),
+      'Europe/Moscow',
+      FORMAT_DATE_NO_TIME,
+    );
   }
   return null;
 };
@@ -56,7 +59,7 @@ export const dateFormat = (date: string) => {
 export const dateFormatWithTZ = (date: string) => {
   if (!date) return null;
   if (isValid(new Date(date))) {
-    return format(new Date(date), FORMAT_DATE);
+    return formatInTimeZone(new Date(date), 'Europe/Moscow', FORMAT_DATE);
   }
   return null;
 };

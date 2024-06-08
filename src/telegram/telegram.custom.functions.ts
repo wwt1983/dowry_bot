@@ -274,6 +274,7 @@ function getNumberText(step: number, startTime?: string) {
   const waitTime = minutes ? `(осталось ${minutes} мин. для заказа)` : '';
 
   switch (step) {
+    case STEPS.CHECK_ARTICUL.step:
     case STEPS.CHOOSE_OFFER.step:
       return finish_txt + `8️⃣ шагов ${waitTime}\n`;
     case STEPS.SEARCH.step:
@@ -291,6 +292,8 @@ function getNumberText(step: number, startTime?: string) {
     case STEPS.CHECK.step:
       return finish_txt + '1️⃣ шаг\n';
     case STEPS.INBOT.step:
+      return '';
+    default:
       return '';
   }
 }

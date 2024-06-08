@@ -60,7 +60,7 @@ import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
-import { parseText } from 'src/common/parsing/image.parser';
+import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -160,7 +160,7 @@ export class TelegramService {
           },
         );
       } catch (e) {
-        console.log('orders show', e);
+        console.log('history', e);
         return await ctx.reply('Раздел обновляется');
       }
     });
@@ -201,11 +201,11 @@ export class TelegramService {
         return ctx.reply('📵');
 
       const { step, data } = ctx.session;
-      if (!data) {
-        return ctx.reply('Вам нужно нажать на кнопку ⬆️ "Dowry раздачи"');
-      }
-
       if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
+
+      if (!data) {
+        return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      }
 
       if (!STEPS_TYPES.image.includes(step)) {
         return ctx.reply('На этом шаге должно быть текстовое сообщение');
@@ -288,18 +288,19 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        if (ctx.session.status === 'Артикул правильный') {
-          const parseResult = await parseText(
-            ctx.session.lastLoadImage,
-            ctx.session.status,
-            ctx.session.data.articul,
-          );
-          await statusMessage.editText('Фото загружено! ' + parseResult || '');
-          setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
-        } else {
-          await statusMessage.editText('Фото загружено!');
-          setTimeout(() => statusMessage.delete().catch(() => {}), 500);
-        }
+        // if (ctx.session.status === 'Артикул правильный') {
+        const parseResult = await parseTextFromPhoto(
+          ctx.session.lastLoadImage,
+          ctx.session.status,
+          ctx.session.data.articul,
+          ctx.session.data.title,
+        );
+        await statusMessage.editText('Фото загружено! ' + parseResult || '');
+        setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
+        // } else {
+        // await statusMessage.editText('Фото загружено!');
+        //  setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+        // }
 
         ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -764,23 +765,9 @@ export class TelegramService {
           chat_id,
           value.notification.fields.Сообщение + ` ➡️Раздача: ${offerName}`,
         );
-        const dataBuyer = await this.commandService.getBotByFilter(
-          chat_id.toString(),
-          'chat_id',
-        );
-        const historyButtons = createHistoryKeyboard(dataBuyer, true);
-        const countWorkLabels = createLabelHistory(dataBuyer).length;
-
-        await this.bot.api.sendMessage(
-          chat_id.toString(),
-          `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : '⤵️'}`,
-          {
-            reply_markup: historyButtons,
-          },
-        );
+        await this.sendMessageWithKeyboardHistory(chat_id);
         return;
       }
-
       if (
         !scheduleNotification(
           status,
@@ -835,5 +822,22 @@ export class TelegramService {
         }
       }
     }
+  }
+
+  async sendMessageWithKeyboardHistory(chatId: number | string) {
+    const dataBuyer = await this.commandService.getBotByFilter(
+      chatId.toString(),
+      'chat_id',
+    );
+    const historyButtons = createHistoryKeyboard(dataBuyer, true);
+    const countWorkLabels = createLabelHistory(dataBuyer).length;
+
+    await this.bot.api.sendMessage(
+      chatId.toString(),
+      `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : '⤵️'}`,
+      {
+        reply_markup: historyButtons,
+      },
+    );
   }
 }
