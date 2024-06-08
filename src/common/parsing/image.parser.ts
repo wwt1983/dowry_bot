@@ -93,9 +93,9 @@ async function imageToGray(imgUrl: string, status: BotStatus) {
 }
 
 const getMessage = (result: ResponseParse) => {
-  if (!result) return '';
+  if (!result) return '\nПроверка: ❌';
   const data = result.data ? ` ➡️ ${result.data}` : '';
-  return `\nПроверка:${result.check ? ' ✅' : ' ❌'} ${data}`;
+  return `\nПроверка: ${result.check ? '✅' : '❌'} ${data}`;
 };
 
 /* проверка фото поиска */
