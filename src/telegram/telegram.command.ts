@@ -1,6 +1,7 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
 import {
   COUNT_TRY_ERROR,
+  START_NAME,
   STEP_COMMANDS,
   WEB_APP,
   WEB_APP_TEST,
@@ -8,7 +9,7 @@ import {
 import { BrokeBotStatus, IBot } from 'src/airtable/types/IBot.interface';
 
 export const webKeyboard = {
-  text: 'Dowry раздачи',
+  text: START_NAME,
   web_app: {
     url: process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
   },
@@ -79,7 +80,7 @@ export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
     keyboard
       .add(
         InlineKeyboard.webApp(
-          'Dowry раздачи',
+          START_NAME,
           process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
         ),
       )

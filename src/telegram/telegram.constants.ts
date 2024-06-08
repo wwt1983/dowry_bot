@@ -12,6 +12,7 @@ export const WEB_APP = 'https://dowrybot-front.vercel.app';
 export const WEB_APP_TEST = 'https://dowry-bot.netlify.app/';
 export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 30;
+export const START_NAME = '👉 Dowry раздачи 👈';
 
 export enum COMMAND_NAMES {
   start = 'start',
