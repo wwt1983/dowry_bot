@@ -662,13 +662,17 @@ export class TelegramService {
         status === 'Done'
           ? `❗️❗️❗️ Раздача закрыта ❗️❗️❗️`
           : `❗️❗️❗️ Раздача временно остановлена ❗️❗️❗️`;
+
+      if (!messageId) return 'No';
+
       await this.bot.api.editMessageCaption(TELEGRAM_CHAT_ID, messageId, {
         caption: text,
       });
-
       return 'Ok';
     } catch (e) {
       console.log('sendOfferToChat', e);
+    } finally {
+      return 'No';
     }
   }
 
