@@ -96,6 +96,7 @@ export class TelegramService {
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM, {
       scope: { type: 'all_private_chats' },
     });
+
     this.bot.api.setMyCommands(ADMIN_COMMANDS_TELEGRAM, {
       scope: { type: 'default' },
     });
@@ -663,7 +664,7 @@ export class TelegramService {
           ? `❗️❗️❗️ Раздача закрыта ❗️❗️❗️`
           : `❗️❗️❗️ Раздача временно остановлена ❗️❗️❗️`;
 
-      if (!messageId) return 'No';
+      if (!messageId) return 'no messageId';
 
       await this.bot.api.editMessageCaption(TELEGRAM_CHAT_ID, messageId, {
         caption: text,

@@ -102,7 +102,6 @@ export const STEPS_TYPES = {
   ],
 };
 
-export const COUNT_STEPS = 10;
 export const COUNT_TRY_ERROR = 3;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
