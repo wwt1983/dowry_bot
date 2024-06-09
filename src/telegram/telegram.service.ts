@@ -28,20 +28,22 @@ import {
   createInitialSessionData,
   getTextByNextStep,
   getTextForFirstStep,
-  UpdateSessionByStep,
-  UpdateSessionByField,
+  updateSessionByStep,
+  updateSessionByField,
   sayHi,
   nextStep,
   getOffer,
   parseUrl,
   LocationCheck,
-  createMsgToSecretChat,
+  sendToSecretChat,
   getSecretChatId,
   getNotificationValue,
   scheduleNotification,
   createContinueSessionData,
   getTextForArticleError,
   getArticulErrorStatus,
+  createCommentForDb,
+  getUserName,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -61,6 +63,7 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
 import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
+import { User } from '@grammyjs/types';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -107,10 +110,11 @@ export class TelegramService {
     });
 
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
-      const { first_name, last_name, username, id } = ctx.from;
+      const { id, first_name } = ctx.from;
+      const userValue = getUserName(ctx.from);
       ctx.session = createInitialSessionData(
         id?.toString(),
-        username || `${first_name} ${last_name || ''}`,
+        userValue.userName || userValue.fio,
       );
       const dataBuyer = await this.commandService.getBotByFilter(
         id.toString(),
@@ -121,7 +125,7 @@ export class TelegramService {
 
       await this.saveToAirtable(ctx.session);
 
-      ctx.reply(sayHi(first_name, username), {
+      ctx.reply(sayHi(first_name, userValue.userName), {
         reply_markup: historyButtons,
       });
     });
@@ -176,12 +180,12 @@ export class TelegramService {
       );
       const location = parseGeoResponse(data);
       if (location) {
-        ctx.session = UpdateSessionByField(ctx.session, 'location', location);
+        ctx.session = updateSessionByField(ctx.session, 'location', location);
       }
       const locationResult = LocationCheck(ctx.session.data.location, location);
 
       if (!locationResult.status) {
-        ctx.session = UpdateSessionByField(
+        ctx.session = updateSessionByField(
           ctx.session,
           'status',
           'Проблема с локацией',
@@ -215,7 +219,7 @@ export class TelegramService {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
       ctx.session.lastMessage = ctx.message.message_id;
-      ctx.session = UpdateSessionByField(ctx.session, 'lastLoadImage', url);
+      ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
 
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
@@ -232,7 +236,7 @@ export class TelegramService {
       if (ctx.session.step === STEPS.FINISH.step) {
         return ctx.reply('Напишите сообщение оператору и ожидайте ответа🧑‍💻');
       }
-      ctx.session = UpdateSessionByField(ctx.session, 'status', 'Вызов');
+      ctx.session = updateSessionByField(ctx.session, 'status', 'Вызов');
       ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора🧑‍💻');
@@ -298,7 +302,7 @@ export class TelegramService {
         await statusMessage.editText('Фото загружено! ' + parseResult || '');
         setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
 
-        ctx.session = UpdateSessionByStep(ctx.session, firebaseUrl, true);
+        ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
         //TEXT MESSAGE
         ctx.session = nextStep(ctx.session);
@@ -340,13 +344,14 @@ export class TelegramService {
         'SessionId',
       );
 
-      const { first_name, last_name, username, id } = ctx.from;
+      const { id } = ctx.from;
+      const userValue = getUserName(ctx.from);
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
       const value: ISessionData = {
         sessionId: sessionId,
-        user: username || `${first_name} ${last_name || ''}`,
+        user: userValue.userName || userValue.fio,
         chat_id: id.toString(),
         startTime: dateFormatWithTZ(StartTime),
         stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
@@ -382,14 +387,14 @@ export class TelegramService {
           ctx.session.lastCommand === COMMAND_NAMES.call ||
           ctx.session.step === STEPS.FINISH.step
         ) {
-          const msgToSecretChat = createMsgToSecretChat(
+          const msgToSecretChat = await this.saveComment(
             ctx.from,
             text,
             ctx.session?.data?.articul || '',
-            ctx.from.id.toString(),
             ctx.session?.data?.title || '',
             ctx.session.status,
           );
+
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 
           return await ctx.reply(
@@ -406,10 +411,11 @@ export class TelegramService {
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg.text.includes('query_id')) {
           if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
-            const { first_name, last_name, username, id } = ctx.from;
+            const { id } = ctx.from;
+            const userValue = getUserName(ctx.from);
             ctx.session = createInitialSessionData(
               id?.toString(),
-              username || `${first_name} ${last_name || ''}`,
+              userValue.userName || userValue.fio,
             );
             await this.saveToAirtable(ctx.session);
           }
@@ -424,18 +430,18 @@ export class TelegramService {
             webData.title,
           );
           console.log('==== WEB API ====', data);
-          ctx.session = UpdateSessionByField(ctx.session, 'data', data);
-          ctx.session = UpdateSessionByField(
+          ctx.session = updateSessionByField(ctx.session, 'data', data);
+          ctx.session = updateSessionByField(
             ctx.session,
             'offerId',
             data.offerId,
           );
-          ctx.session = UpdateSessionByField(
+          ctx.session = updateSessionByField(
             ctx.session,
             'status',
             'Выбор раздачи',
           );
-          ctx.session = UpdateSessionByStep(ctx.session);
+          ctx.session = updateSessionByStep(ctx.session);
         } else {
           const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
@@ -471,7 +477,7 @@ export class TelegramService {
               countTryError === COUNT_TRY_ERROR ||
               ctx.session.errorStatus === 'operator'
             ) {
-              ctx.session = UpdateSessionByField(
+              ctx.session = updateSessionByField(
                 ctx.session,
                 'comment',
                 ctx.message.text,
@@ -479,21 +485,21 @@ export class TelegramService {
 
               await this.updateToAirtable(ctx.session);
 
-              const msgToSecretChat = createMsgToSecretChat(
+              const msgToSecretChat = await this.saveComment(
                 ctx.from,
                 text,
                 ctx.session?.data?.articul || '',
-                ctx.from.id.toString(),
                 ctx.session?.data?.title || '',
                 ctx.session.status,
               );
+
               await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
             }
             ctx.session.lastMessage = ctx.message.message_id;
             ctx.session.countTryError++;
 
             if (ctx.session.countTryError < COUNT_TRY_ERROR) {
-              ctx.session = UpdateSessionByField(
+              ctx.session = updateSessionByField(
                 ctx.session,
                 'status',
                 'Проблема с артикулом',
@@ -523,7 +529,7 @@ export class TelegramService {
           } else {
             ctx.session.errorStatus = null;
             ctx.session.countTryError = 0;
-            ctx.session = UpdateSessionByField(
+            ctx.session = updateSessionByField(
               ctx.session,
               'status',
               'Артикул правильный',
@@ -552,27 +558,26 @@ export class TelegramService {
 
         //отзыв пользователя
         if (step === STEPS.COMMENT_ON_CHECK.step) {
-          ctx.session = UpdateSessionByField(
+          ctx.session = updateSessionByField(
             ctx.session,
             'comment',
             ctx.message.text,
           );
-          ctx.session = UpdateSessionByField(
+          ctx.session = updateSessionByField(
             ctx.session,
             'status',
             'Отзыв на проверке',
           );
 
           await this.updateToAirtable(ctx.session);
-
-          const msgToSecretChat = createMsgToSecretChat(
+          const msgToSecretChat = await this.saveComment(
             ctx.from,
             ctx.message.text,
             ctx.session.data.articul,
-            ctx.session.chat_id,
             ctx.session?.data?.title || '',
             ctx.session.status,
           );
+
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 
           return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
@@ -838,5 +843,28 @@ export class TelegramService {
         reply_markup: historyButtons,
       },
     );
+  }
+
+  async saveComment(
+    from: User,
+    comment: string,
+    order: string,
+    name: string,
+    status?: BotStatus,
+  ) {
+    const msgToChat = sendToSecretChat(
+      from,
+      comment,
+      order,
+      from.id,
+      name,
+      status,
+    );
+
+    await this.airtableService.updateCommentInBotTableAirtable(
+      from,
+      createCommentForDb(comment),
+    );
+    return msgToChat;
   }
 }

@@ -16,6 +16,7 @@ export enum TablesName {
   Offers = 'Offers',
   Notifications = 'Оповещения',
   NotificationStatistics = 'Оповещения статистика',
+  UserComments = 'Бот сообщения',
 }
 
 export const TablesDowray: IData[] = [
@@ -64,5 +65,10 @@ export const TablesDowray: IData[] = [
     title: TablesName.NotificationStatistics,
     tableName: 'tblzqiU7Gi4NSci4Y',
     view: 'viw18CCrp8izswhSA',
+  },
+  {
+    title: TablesName.UserComments,
+    tableName: 'tblUi3oMVXlDc6kVQ',
+    view: 'viwU3pdfqe01D2sTR',
   },
 ];

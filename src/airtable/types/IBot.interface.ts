@@ -13,7 +13,7 @@ export interface IBot {
     StartTime: string;
     StopTime: string;
     ['Время выкупа']: string;
-    ['Сообщения от пользователя']: string;
+    CommentsLink: string;
     OfferId: string[];
     ['Id (from OfferId)']: [];
     ['Оповещения стаститка']: [];

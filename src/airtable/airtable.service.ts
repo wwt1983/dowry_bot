@@ -9,6 +9,9 @@ import { INotificationStatistics } from './types/INotificationStatistic.interfac
 import { BotStatus } from './types/IBot.interface';
 import { getTimeWithTz } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
+import { IBotComments } from './types/IBotComment';
+import { User } from '@grammyjs/types';
+import { getUserName } from 'src/telegram/telegram.custom.functions';
 
 @Injectable()
 export class AirtableService {
@@ -44,9 +47,9 @@ export class AirtableService {
       Раздача: session.data.title,
       Images: session.images,
       StopTime: session.stopTime,
-      ['Сообщения от пользователя']: session.comment,
       ['Дата получения']: session.deliveryDate,
       Финиш: session.isFinish,
+      CommentsLink: session.chat_id,
     };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
@@ -70,6 +73,38 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
+  async updateCommentInBotTableAirtable(
+    from: User,
+    comment: string,
+  ): Promise<any> {
+    let tableUrl = '';
+    const comments = await this.getCommetByChatId(from.id);
+    const userValue = getUserName(from);
+    let data = null;
+    if (comments && comments.records && comments.records.length > 0) {
+      tableUrl = tableUrl = this.configService.get(
+        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_COMMENTS',
+      );
+      comment = comment + '\n' + comments.records[0].fields.Комментарии;
+      data = {
+        id: comments.records[0].id,
+        Комментарии: comment,
+      };
+    } else {
+      tableUrl = this.configService.get(
+        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_ADD_COMMENTS',
+      );
+      data = {
+        chat_id: from.id,
+        Комментарии: comment,
+        Name: userValue.fio + ' ' + userValue.userName,
+      };
+    }
+    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
+    console.log('postWebhook ===>', response);
+    return response;
+  }
+
   async addToAirtableNotificationStatistic(data: any): Promise<any> {
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_ADD',
@@ -93,6 +128,10 @@ export class AirtableService {
   async getUserFromBot(sessionId: string): Promise<any> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
     return await this.airtableHttpService.get(TablesName.Bot, filter);
+  }
+  async getCommetByChatId(chat_id: string | number): Promise<IBotComments> {
+    const filter = `&${FILTER_BY_FORMULA}=FIND("${chat_id}",{chat_id})`;
+    return await this.airtableHttpService.get(TablesName.UserComments, filter);
   }
   async getOffers(): Promise<IOffers> {
     const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;

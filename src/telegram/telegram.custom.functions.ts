@@ -40,16 +40,15 @@ export function sayHi(first_name: string, username: string): string {
   );
 }
 
-export function createMsgToSecretChat(
+export function sendToSecretChat(
   from: User,
   comment: string,
   order: string,
-  chatId: string,
+  chatId: string | number,
   name: string,
   status?: BotStatus,
 ) {
-  const { first_name, last_name, username } = from;
-
+  const userValue = getUserName(from);
   const statusText = status ? ` (${status})` : '';
   const typeMessage = order
     ? `Раздача:${name} ${statusText}`
@@ -59,9 +58,21 @@ export function createMsgToSecretChat(
   const userComment = comment
     ? `\n${typeMessage} ${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
     : '';
-  return `❓Старт: ${getTimeWithTz()}\n${first_name} ${last_name || ''} username=${username || ''} 
+  return `❓Старт: ${getTimeWithTz()}\n${userValue.fio} username=${userValue.userName} 
   ${userComment}${instruction}❓`;
 }
+export const createCommentForDb = (comment: string) => {
+  if (!comment) return '';
+  return `${getTimeWithTz()}\n❓${comment}❓\n`;
+};
+
+export const getUserName = (from: User) => {
+  const { first_name, last_name, username } = from;
+  return {
+    fio: `${first_name} ${last_name || ''}`,
+    userName: `${username || ''}`,
+  };
+};
 
 export function createInitialSessionData(
   id?: string,
@@ -130,7 +141,7 @@ export function createContinueSessionData(
     comment: null,
   };
 }
-export function UpdateSessionByField(
+export function updateSessionByField(
   session: ISessionData,
   field: string,
   data: string | ITelegramWebApp,
@@ -139,7 +150,7 @@ export function UpdateSessionByField(
   return session;
 }
 
-export function UpdateSessionByStep(
+export function updateSessionByStep(
   session: ISessionData,
   data?: string,
   isPhotoMsg?: boolean,
