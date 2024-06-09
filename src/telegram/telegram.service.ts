@@ -815,6 +815,7 @@ export class TelegramService {
         chat_id,
         value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
       );
+      await this.sendMessageWithKeyboardHistory(chat_id);
     } catch (error: any) {
       if (error instanceof Error) {
         console.log('sendNotificationToUser error=', error);
