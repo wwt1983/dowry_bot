@@ -163,7 +163,7 @@ export class TelegramService {
           },
         );
       } catch (e) {
-        console.log('history', e);
+        console.log('history=', e);
         return await ctx.reply('Раздел обновляется');
       }
     });
@@ -754,6 +754,7 @@ export class TelegramService {
     stopTime: string,
     offerName: string,
     dateDelivery: string,
+    outFromOffer: boolean,
   ): Promise<void> {
     try {
       console.log(chat_id, sessionId, botId, status);
@@ -763,6 +764,13 @@ export class TelegramService {
         status === 'Время истекло'
       )
         return;
+      if (outFromOffer) {
+        await this.bot.api.sendMessage(
+          chat_id,
+          `\n➡️Раздача: ${offerName} закрыта для продолжения`,
+        );
+        return;
+      }
       const notifications = await this.airtableService.getNotifications();
       const statisticNotifications =
         await this.airtableService.getNotificationStatistics(sessionId);
