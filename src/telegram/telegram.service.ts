@@ -334,20 +334,28 @@ export class TelegramService {
       /*продолжение раздачи*/
       if (!ctx.callbackQuery.data.includes('sessionId_'))
         return await ctx.answerCallbackQuery();
+
+      const { id } = ctx.from;
+
       this.bot.api
         .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
         .catch(() => {});
-      const sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
 
+      const sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
       const data = await this.commandService.getBotByFilter(
         sessionId,
         'SessionId',
       );
-
-      const { id } = ctx.from;
-      const userValue = getUserName(ctx.from);
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
+
+      if (!STEPS_VALUE[Статус] || STEPS_VALUE[Статус]?.step < 0) {
+        await this.sendMessageWithKeyboardHistory(id);
+        await ctx.answerCallbackQuery();
+        return;
+      }
+
+      const userValue = getUserName(ctx.from);
 
       const value: ISessionData = {
         sessionId: sessionId,

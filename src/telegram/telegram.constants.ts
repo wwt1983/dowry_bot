@@ -64,6 +64,7 @@ export const STEPS = {
   BROKE_LOCATION: { step: -1, value: 'Проблема с локацией' }, //геолокация не совпадает с раздачей
   BROKE_ARTICUL: { step: -2, value: 'Проблема с артикулом' }, // артикул не совпадает с раздачей
   HELP: { step: -3, value: '' },
+  TIMEOUT: { step: -4, value: 'Время истекло' },
 };
 export const STEPS_VALUE = {
   ['В боте']: STEPS.INBOT,
@@ -80,6 +81,7 @@ export const STEPS_VALUE = {
   Финиш: STEPS.FINISH,
   ['Проблема с локацией']: STEPS.BROKE_LOCATION,
   ['Проблема с артикулом']: STEPS.BROKE_ARTICUL,
+  ['Время истекло']: STEPS.TIMEOUT,
 };
 
 export const STEPS_TYPES = {
