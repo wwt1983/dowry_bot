@@ -157,9 +157,7 @@ export class TelegramService {
         const orderButtons = createHistoryKeyboard(dataBuyer);
 
         return await ctx.reply(
-          orderButtons
-            ? 'Выберите раздачу, чтобы продолжить заполнение ⤵️'
-            : 'Все раздачи завершены ✌️',
+          orderButtons ? 'Продолжите ⤵️' : 'Все раздачи завершены ✌️',
           {
             reply_markup: orderButtons,
           },
@@ -263,7 +261,11 @@ export class TelegramService {
     this.bot.callbackQuery('no_delivery_date', async (ctx) => {
       ctx.session.step = STEPS.RECEIVED.step;
       await ctx.callbackQuery.message.editText(
-        getTextByNextStep(ctx.session.step, ctx.session.startTime),
+        getTextByNextStep(
+          ctx.session.step,
+          ctx.session.startTime,
+          ctx.session.data.title,
+        ),
       );
     });
 
@@ -315,7 +317,11 @@ export class TelegramService {
       }
 
       await ctx.callbackQuery.message.editText(
-        getTextByNextStep(ctx.session.step, ctx.session.startTime),
+        getTextByNextStep(
+          ctx.session.step,
+          ctx.session.startTime,
+          ctx.session.data.title,
+        ),
         ctx.session.step === STEPS.DELIVERY_DATE.step
           ? { reply_markup: deliveryDateKeyboard }
           : null,
@@ -377,7 +383,11 @@ export class TelegramService {
 
       ctx.session = createContinueSessionData(value, Артикул, Раздача);
       const response = await ctx.reply(
-        getTextByNextStep(ctx.session.step, ctx.session.startTime),
+        getTextByNextStep(
+          ctx.session.step,
+          ctx.session.startTime,
+          ctx.session.data.title,
+        ),
       );
       ctx.session.lastMessage = response.message_id;
       await ctx.answerCallbackQuery();
@@ -546,7 +556,11 @@ export class TelegramService {
             ctx.session = nextStep(ctx.session);
             await this.updateToAirtable(ctx.session);
             return await ctx.reply(
-              getTextByNextStep(ctx.session.step, ctx.session.startTime),
+              getTextByNextStep(
+                ctx.session.step,
+                ctx.session.startTime,
+                ctx.session.data.title,
+              ),
             );
           }
         }
@@ -560,7 +574,11 @@ export class TelegramService {
             .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
             .catch(() => {});
           return await ctx.reply(
-            getTextByNextStep(ctx.session.step, ctx.session.startTime),
+            getTextByNextStep(
+              ctx.session.step,
+              ctx.session.startTime,
+              ctx.session.data.title,
+            ),
           );
         }
 

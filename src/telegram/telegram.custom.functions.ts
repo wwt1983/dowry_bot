@@ -251,34 +251,41 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   ];
 }
 
-export function getTextByNextStep(step: number, startTime?: string): string {
+export function getTextByNextStep(
+  step: number,
+  startTime: string,
+  name: string,
+): string {
   switch (step) {
     case STEPS.CHOOSE_OFFER.step:
       return FIRST_STEP_LINK;
     case STEPS.SEARCH.step:
     case STEPS.CHECK_ARTICUL.step:
-      return FIRST_STEP_A + getNumberText(step, startTime);
+      return FIRST_STEP_A + getNumberText(step, startTime, name);
     case STEPS.ORDER.step:
-      return FIRST_STEP_C + getNumberText(step, startTime);
+      return FIRST_STEP_C + getNumberText(step, startTime, name);
     case STEPS.DELIVERY_DATE.step:
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
     case STEPS.RECEIVED.step:
-      return SECOND_STEP + getNumberText(step);
+      return SECOND_STEP + getNumberText(step, null, name);
     case STEPS.COMMENT_ON_CHECK.step:
-      return THREE_STEP + getNumberText(step);
+      return THREE_STEP + getNumberText(step, null, name);
     case STEPS.COMMENT.step:
-      return FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step);
+      return (
+        FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
+      );
     case STEPS.SHTRIH_CODE.step:
-      return FIVE_STEP + getNumberText(step);
+      return FIVE_STEP + getNumberText(step, null, name);
     case STEPS.CHECK.step:
-      return SIX_STEP + getNumberText(step);
+      return SIX_STEP + getNumberText(step, null, name);
     default:
       return FOOTER;
   }
 }
 
-function getNumberText(step: number, startTime?: string) {
-  const finish_txt = `До финиша `;
+function getNumberText(step: number, startTime: string, name: string) {
+  const textOffer = `→ ${name}\n\n`;
+  const finish_txt = `${textOffer}До финиша `;
   const minutes = startTime
     ? LIMIT_TIME_IN_MINUTES_FOR_ORDER - getDifferenceInMinutes(startTime)
     : null;
@@ -293,15 +300,15 @@ function getNumberText(step: number, startTime?: string) {
     case STEPS.ORDER.step:
       return finish_txt + `6️⃣ шагов ${waitTime}\n`;
     case STEPS.RECEIVED.step:
-      return finish_txt + '5️⃣ шагов\n';
+      return finish_txt + `5️⃣ шагов\n`;
     case STEPS.COMMENT_ON_CHECK.step:
-      return finish_txt + '4️⃣ шага\n';
+      return finish_txt + `4️⃣ шага\n`;
     case STEPS.COMMENT.step:
-      return finish_txt + '3️⃣ шага\n';
+      return finish_txt + `3️⃣ шага\n`;
     case STEPS.SHTRIH_CODE.step:
-      return finish_txt + '2️⃣ шага\n';
+      return finish_txt + `2️⃣ шага\n`;
     case STEPS.CHECK.step:
-      return finish_txt + '1️⃣ шаг\n';
+      return finish_txt + `1️⃣ шаг\n`;
     case STEPS.INBOT.step:
       return '';
     default:
