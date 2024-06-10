@@ -11,7 +11,7 @@ import {
 } from './telegram.interface';
 import {
   TELEGRAM_MODULE_OPTIONS,
-  HELP_TEXT,
+  createHelpText,
   COMMANDS_TELEGRAM,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
@@ -130,9 +130,11 @@ export class TelegramService {
       });
     });
 
-    this.bot.command(COMMAND_NAMES.help, (ctx) => {
+    this.bot.command(COMMAND_NAMES.help, async (ctx) => {
       ctx.session.lastCommand = COMMAND_NAMES.help;
-      return ctx.reply(HELP_TEXT);
+      for (const value of createHelpText()) {
+        await this.bot.api.sendMediaGroup(ctx.message.from.id, [value]);
+      }
     });
 
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {

@@ -131,7 +131,7 @@ export const FOUR_STEP_A =
 export const FOUR_STEP_B = '✔️загрузите скриншот отзыва;\n\n';
 export const FIVE_STEP =
   '5️⃣ ЗАГРУЗИТЕ\n' +
-  '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих кода УПАКОВКИ И БИРКИ \n\n';
+  '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих-кода УПАКОВКИ И БИРКИ \n\n';
 export const SIX_STEP =
   '6️⃣ ЗАГРУЗИТЕ\n' + '✔️Чек покупки из личного кабинета ВБ\n\n';
 export const FOOTER =
@@ -139,16 +139,48 @@ export const FOOTER =
   'Переводы осуществляются с понедельника по пятницу с 10.00 до 23.00\n\n' +
   '❗️Если дата вашего получения выпала на выходные, то кешбэк будет начислен в ПН🙌\n\n' +
   '🤝 Кешбэк будет выплачен только при соблюдении всех условий инструкции.\n';
-export const HELP_TEXT =
-  FIRST_STEP +
-  FIRST_STEP_A +
-  FIRST_STEP_B +
-  FIRST_STEP_C +
-  SECOND_STEP +
-  THREE_STEP +
-  FOUR_STEP +
-  FOUR_STEP_A +
-  FOUR_STEP_B +
-  FIVE_STEP +
-  SIX_STEP +
-  FOOTER;
+
+export const IMAGES_STEP = [
+  {
+    type: STEPS.SEARCH.value,
+    url: WEB_APP + '/images/wb.jpg',
+    text: FIRST_STEP + FIRST_STEP_A,
+  },
+  {
+    type: STEPS.ORDER.step,
+    url: WEB_APP + '/images/search.jpg',
+    text: FIRST_STEP_B + FIRST_STEP_C,
+  },
+  {
+    type: STEPS.RECEIVED.value,
+    url: WEB_APP + '/images/pvz.jpg',
+    text: SECOND_STEP + THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
+  },
+  {
+    type: STEPS.COMMENT_ON_CHECK.value,
+    url: WEB_APP + '/images/comment.png',
+    text: FIVE_STEP + SIX_STEP,
+  },
+  // {
+  //   type: STEPS.SHTRIH_CODE.value,
+  //   url: '',
+  //   text: FIVE_STEP,
+  // },
+  {
+    type: STEPS.FINISH.value,
+    url: WEB_APP + '/images/check.png',
+    text: FOOTER,
+  },
+];
+
+export const createHelpText = () => {
+  const medias = [];
+  for (let i = 0; i < IMAGES_STEP.length; i++) {
+    medias.push({
+      type: 'photo',
+      media: IMAGES_STEP[i].url,
+      caption: IMAGES_STEP[i].text,
+    });
+  }
+  return medias;
+};
