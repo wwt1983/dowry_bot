@@ -767,7 +767,7 @@ export class TelegramService {
       if (outFromOffer) {
         await this.bot.api.sendMessage(
           chat_id,
-          `\n➡️Раздача: ${offerName} закрыта для продолжения`,
+          `\n❌ Раздача: ${offerName} закрыта для продолжения ❌`,
         );
         return;
       }
