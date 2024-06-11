@@ -102,10 +102,10 @@ export class AirtableService {
       tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_COMMENTS',
       );
-      comment = comment + '\n' + comments.records[0].fields.Комментарии;
+      comment = '\n' + comment + '\n' + comments.records[0].fields.Комментарии;
       data = {
         id: comments.records[0].id,
-        Комментарии: comment,
+        Комментарии: comment.trim(),
         Status: isAnswer ? 'Done' : 'Todo',
       };
     } else {
@@ -114,7 +114,7 @@ export class AirtableService {
       );
       data = {
         chat_id: from.id,
-        Комментарии: comment,
+        Комментарии: comment.trim(),
         Name: userValue.fio + ' ' + userValue.userName,
       };
     }
