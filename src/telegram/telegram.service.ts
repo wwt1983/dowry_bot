@@ -303,7 +303,7 @@ export class TelegramService {
           ctx.session.data.title,
         );
         await statusMessage.editText('Фото загружено! ' + parseResult || '');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 6000);
+        setTimeout(() => statusMessage.delete().catch(() => {}), 1500);
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -429,7 +429,11 @@ export class TelegramService {
                 is_bot: false,
                 first_name: ctx.from.first_name,
               },
-              createCommentForDb(`Ответ от ${ctx.from.first_name}⤵\n` + text),
+              createCommentForDb(
+                `Ответ от ${ctx.from.first_name}\n` + text,
+                true,
+              ),
+              true,
             );
             await ctx.reply(`Ваше сообщение отправлено!`);
             return;

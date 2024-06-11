@@ -92,6 +92,7 @@ export class AirtableService {
   async updateCommentInBotTableAirtable(
     from: User,
     comment: string,
+    isAnswer?: boolean,
   ): Promise<any> {
     let tableUrl = '';
     const comments = await this.getCommetByChatId(from.id);
@@ -105,6 +106,7 @@ export class AirtableService {
       data = {
         id: comments.records[0].id,
         Комментарии: comment,
+        Status: isAnswer ? 'Done' : 'Todo',
       };
     } else {
       tableUrl = this.configService.get(
