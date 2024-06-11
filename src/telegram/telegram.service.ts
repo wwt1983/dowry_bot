@@ -398,6 +398,7 @@ export class TelegramService {
     /*======== MESSAGE =======*/
     this.bot.on('message', async (ctx) => {
       try {
+        console.log('text msg')
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(STOP_TEXT);
 
