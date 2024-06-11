@@ -36,27 +36,39 @@ export class AirtableService {
     return response;
   }
   async updateToAirtable(session: ISessionData): Promise<any> {
-    const data = {
-      SessionId: session.sessionId,
-      Артикул: session.data?.articul,
-      StartTime: session.startTime,
-      ['Время выкупа']: session.stopBuyTime,
-      OfferId: session.offerId,
-      Статус: session.status,
-      Location: session.location,
-      Раздача: session.data.title,
-      Images: session.images,
-      StopTime: session.stopTime,
-      ['Дата получения']: session.deliveryDate,
-      Финиш: session.isFinish,
-      CommentsLink: session.chat_id,
-    };
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook update ===>', response);
-    return response;
+    try {
+      if (!session.sessionId) {
+        console.log('empty session=', session);
+        return null;
+      }
+      const data = {
+        SessionId: session.sessionId,
+        Артикул: session.data?.articul,
+        StartTime: session.startTime,
+        ['Время выкупа']: session.stopBuyTime,
+        OfferId: session.offerId,
+        Статус: session.status,
+        Location: session.location,
+        Раздача: session.data.title,
+        Images: session.images,
+        StopTime: session.stopTime,
+        ['Дата получения']: session.deliveryDate,
+        Финиш: session.isFinish,
+        CommentsLink: session.chat_id,
+      };
+      const tableUrl = this.configService.get(
+        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
+      );
+      const response = await this.airtableHttpService.postWebhook(
+        tableUrl,
+        data,
+      );
+      console.log('postWebhook update updateToAirtable ok===>', response);
+      return response;
+    } catch (e) {
+      console.log('updateToAirtable', session, e);
+      return null;
+    }
   }
   async updateStatusInBotTableAirtable(
     sessionId: string,
@@ -65,6 +77,10 @@ export class AirtableService {
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
     );
+    if (!sessionId) {
+      console.log('empty session=', status);
+      return null;
+    }
     const response = await this.airtableHttpService.postWebhook(tableUrl, {
       SessionId: sessionId,
       Статус: status,

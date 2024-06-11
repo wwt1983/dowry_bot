@@ -58,12 +58,13 @@ export const createLabelHistory = (data: IBot[]) => {
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
       record.fields.Статус !== 'Чек' &&
-      !record.fields['Снять с раздачи']
+      record.fields.Статус !== 'Проблема с артикулом' &&
+      !record.fields['Снять с раздачи'] &&
       //record.fields.Статус !== 'Поиск' &&
       //record.fields.Статус !== 'Артикул правильный' &&
-      //record.fields.Статус !== 'Проблема с артикулом' &&
-      //record.fields.Статус !== 'Выбор раздачи' &&
-      //record.fields.Статус !== 'Вызов'
+      //record.fields.Статус !== 'Проблема с артикулом'
+      record.fields.Статус !== 'Выбор раздачи' &&
+      record.fields.Статус !== 'Вызов'
     ) {
       newArr.push([
         record.fields.Раздача,

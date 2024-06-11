@@ -353,10 +353,20 @@ export class TelegramService {
         sessionId,
         'SessionId',
       );
+      if (!data || data.length === 0) {
+        await this.sendMessageWithKeyboardHistory(id);
+        return await ctx.answerCallbackQuery();
+      }
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      if (!STEPS_VALUE[Статус] || STEPS_VALUE[Статус]?.step < 0) {
+      console.log('Status -', Статус, ctx.session);
+      if (
+        !STEPS_VALUE[Статус] ||
+        STEPS_VALUE[Статус]?.step < 0 ||
+        !Images ||
+        Images.length === 0
+      ) {
         await this.sendMessageWithKeyboardHistory(id);
         await ctx.answerCallbackQuery();
         return;
@@ -371,12 +381,8 @@ export class TelegramService {
         startTime: dateFormatWithTZ(StartTime),
         stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
         stopTime: dateFormatWithTZ(StopTime),
-        step:
-          Статус === 'Заказ'
-            ? STEPS_VALUE[Статус].step + 2
-            : STEPS_VALUE[Статус].step + 1,
-        images:
-          Images && Array.isArray(Images) ? Images?.map((x) => x.url) : [],
+        step: (STEPS_VALUE[Статус].step as number) + 1,
+        images: Images?.map((x) => x.url),
         offerId: OfferId[0],
         status: Статус,
         deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
@@ -404,6 +410,10 @@ export class TelegramService {
 
         switch (ctx.session.lastCommand) {
           case COMMAND_NAMES.messageSend:
+            const isDigitsOnly = /^\d+$/.test(text);
+            if (!isDigitsOnly)
+              return await ctx.reply('В номере должны быть только цифры');
+
             ctx.session.comment = text;
             ctx.session.lastCommand = COMMAND_NAMES.saveMessage;
             return await ctx.reply('Введите текст для [' + text + ']');
