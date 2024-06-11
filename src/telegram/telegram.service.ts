@@ -360,7 +360,6 @@ export class TelegramService {
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      console.log('Status -', Статус, ctx.session);
       if (
         !STEPS_VALUE[Статус] ||
         STEPS_VALUE[Статус]?.step < 0 ||
