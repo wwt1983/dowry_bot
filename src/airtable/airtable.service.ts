@@ -99,7 +99,7 @@ export class AirtableService {
     const userValue = getUserName(from);
     let data = null;
     if (comments && comments.records && comments.records.length > 0) {
-      tableUrl = tableUrl = this.configService.get(
+      tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_COMMENTS',
       );
       comment = comment + '\n' + comments.records[0].fields.Комментарии;

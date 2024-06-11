@@ -64,7 +64,7 @@ export function sendToSecretChat(
 export const createCommentForDb = (comment: string, isAnswer?: boolean) => {
   if (!comment) return '';
   const emoji = isAnswer ? '✅' : '❓';
-  return `${getTimeWithTz()}\n${emoji} ${comment}\n`;
+  return `${getTimeWithTz()}\n${emoji} ${comment}`;
 };
 
 export const getUserName = (from: User) => {
