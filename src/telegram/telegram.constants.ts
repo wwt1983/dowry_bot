@@ -20,6 +20,7 @@ export enum COMMAND_NAMES {
   history = 'history',
   call = 'call',
   messageSend = 'message_send',
+  saveMessage = 'saveMessage',
 }
 
 export const COMMANDS_TELEGRAM = [

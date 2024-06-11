@@ -58,7 +58,6 @@ import {
   createLabelHistory,
   operatorKeyboard,
 } from './telegram.command';
-import { message } from './conversation/telegram.message.conversation';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
@@ -93,8 +92,8 @@ export class TelegramService {
       }),
     );
 
-    this.bot.use(conversations());
-    this.bot.use(createConversation(message, 'message'));
+    //this.bot.use(conversations());
+    //this.bot.use(createConversation(message, 'message'));
 
     this.bot.api.setMyCommands(COMMANDS_TELEGRAM, {
       scope: { type: 'all_private_chats' },
@@ -105,7 +104,7 @@ export class TelegramService {
     });
 
     this.bot.command(COMMAND_NAMES.messageSend, async (ctx) => {
-      await ctx.conversation.enter('message');
+      await ctx.reply('Введите номер пользователя (поле chat_id)');
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
     });
 
@@ -398,11 +397,33 @@ export class TelegramService {
     /*======== MESSAGE =======*/
     this.bot.on('message', async (ctx) => {
       try {
-        console.log('text msg')
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(STOP_TEXT);
 
         const { text } = ctx.update.message;
+
+        switch (ctx.session.lastCommand) {
+          case COMMAND_NAMES.messageSend:
+            ctx.session.comment = text;
+            ctx.session.lastCommand = COMMAND_NAMES.saveMessage;
+            return await ctx.reply('Введите текст для [' + text + ']');
+          case COMMAND_NAMES.saveMessage:
+            ctx.session.lastCommand = null;
+            await ctx.api.sendMessage(
+              ctx.session.comment,
+              'Ответ оператора🧑‍💻 \n→ ' + text,
+            );
+            await this.airtableService.updateCommentInBotTableAirtable(
+              {
+                id: ctx.session.comment as any as number,
+                is_bot: false,
+                first_name: ctx.from.first_name,
+              },
+              createCommentForDb(`Ответ от ${ctx.from.first_name}⤵\n` + text),
+            );
+            await ctx.reply(`Ваше сообщение отправлено!`);
+            return;
+        }
 
         if (
           ctx.session.lastCommand === COMMAND_NAMES.call ||
