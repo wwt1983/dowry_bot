@@ -33,7 +33,7 @@ import {
   nextStep,
   getOffer,
   parseUrl,
-  LocationCheck,
+  locationCheck,
   sendToSecretChat,
   getSecretChatId,
   getNotificationValue,
@@ -60,7 +60,7 @@ import {
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
-import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
+//import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
@@ -180,7 +180,7 @@ export class TelegramService {
       if (location) {
         ctx.session = updateSessionByField(ctx.session, 'location', location);
       }
-      const locationResult = LocationCheck(ctx.session.data.location, location);
+      const locationResult = locationCheck(ctx.session.data.location, location);
 
       if (!locationResult.status) {
         ctx.session = updateSessionByField(

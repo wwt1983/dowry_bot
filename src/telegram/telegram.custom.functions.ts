@@ -356,7 +356,7 @@ export const parseUrl = (url: string, articul: string): boolean => {
   }
 };
 
-export const LocationCheck = (
+export const locationCheck = (
   locationOffer: string,
   locationUser: string,
 ): { status: boolean; text: string } => {
