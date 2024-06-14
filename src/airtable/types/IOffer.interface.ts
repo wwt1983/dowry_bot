@@ -14,13 +14,15 @@ export interface IOffer {
     Стоп: Date;
     Количество: number;
     Артикул: number;
-    'Ключевые слова': string;
+    'Количество заказов': number;
     'Цена WB': string;
     Кешбэк: string;
     'Ваша цена': string;
     Id: string;
     Региональность: string;
-    ['Позиция в WB']: string;
+    'Позиция в WB': string;
+    Ключи?: string[];
+    'Ключевые слова'?: string;
   };
 }
 

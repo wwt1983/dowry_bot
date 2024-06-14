@@ -12,6 +12,7 @@ import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import { getUserName } from 'src/telegram/telegram.custom.functions';
+import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
 
 @Injectable()
 export class AirtableService {
@@ -55,6 +56,7 @@ export class AirtableService {
         ['Дата получения']: session.deliveryDate,
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
+        'Ключевые слова': session.data.keys,
       };
       const tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
@@ -155,8 +157,48 @@ export class AirtableService {
     const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
-  async getOffer(id: string): Promise<IOffer> {
-    return await this.airtableHttpService.getById(TablesName.Offers, id);
+  async getOffer(id: string, needKeys?: boolean): Promise<IOffer> {
+    const offer = await this.airtableHttpService.getById(TablesName.Offers, id);
+    if (needKeys) {
+      const keyIds = (offer as IOffer).fields.Ключи;
+      if (keyIds && keyIds.length > 0) {
+        const filter =
+          keyIds.length === 1
+            ? `&${FILTER_BY_FORMULA}=FIND("${keyIds[0]}",{Id})`
+            : `&${FILTER_BY_FORMULA}=OR(${keyIds.map((x) => `{Id}="${x}"`).join(',')})`;
+
+        const keys = await this.airtableHttpService.get(
+          TablesName.KeyWords,
+          filter,
+        );
+
+        const count = (offer as IOffer).fields.Количество;
+        const countOrder = (offer as IOffer).fields['Количество заказов'];
+
+        if (count >= countOrder && (keys as IKeyWords).records.length > 0) {
+          let flagForGetKey = false;
+          let allCountKeys = 0;
+          for (let i = 0; i < (keys as IKeyWords).records.length; i++) {
+            const countKye = (keys as IKeyWords).records[i].fields.Количество;
+            allCountKeys = allCountKeys + countKye;
+            const keyValue = (keys.records[i] as IKeyWord).fields.Название;
+            if (allCountKeys > countOrder) {
+              flagForGetKey = true;
+              (offer as IOffer).fields['Ключевые слова'] = keyValue;
+              break;
+            }
+          }
+          if (!flagForGetKey) {
+            (offer as IOffer).fields['Ключевые слова'] =
+              'Ключевое слово уточните у менеджера';
+          }
+        } else {
+          (offer as IOffer).fields['Ключевые слова'] =
+            'Ключевое слово уточните у менеджера';
+        }
+      }
+    }
+    return offer as IOffer;
   }
   async getNotifications(): Promise<INotifications> {
     return await this.airtableHttpService.get(TablesName.Notifications);

@@ -25,6 +25,7 @@ export interface IBot {
     ['Снять с раздачи']: boolean;
     Финиш: boolean;
     Помощь: string;
+    'Ключевое слово': string;
   };
 }
 interface IPhoto {

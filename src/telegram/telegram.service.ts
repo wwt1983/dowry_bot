@@ -1,6 +1,5 @@
 import { Injectable, Inject, Scope } from '@nestjs/common';
 import { Bot, session, GrammyError, HttpError } from 'grammy';
-import { conversations, createConversation } from '@grammyjs/conversations';
 import { hydrateApi, hydrateContext } from '@grammyjs/hydrate';
 import {
   ITelegramOptions,
@@ -296,14 +295,14 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        const parseResult = await parseTextFromPhoto(
-          ctx.session.lastLoadImage,
-          ctx.session.status,
-          ctx.session.data.articul,
-          ctx.session.data.title,
-        );
-        await statusMessage.editText('Фото загружено! ' + parseResult || '');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 1500);
+        // const parseResult = await parseTextFromPhoto(
+        //   ctx.session.lastLoadImage,
+        //   ctx.session.status,
+        //   ctx.session.data.articul,
+        //   ctx.session.data.title,
+        // );
+        await statusMessage.editText('Фото загружено! ');
+        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -677,7 +676,7 @@ export class TelegramService {
     id: string,
     title: string,
   ): Promise<ITelegramWebApp> {
-    const offerAirtable = await this.airtableService.getOffer(offerId);
+    const offerAirtable = await this.airtableService.getOffer(offerId, true);
     return {
       id: id,
       articul: offerAirtable.fields['Артикул'].toString(),

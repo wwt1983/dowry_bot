@@ -149,27 +149,32 @@ export const IMAGES_STEP = [
   },
   {
     type: STEPS.ORDER.step,
-    url: WEB_APP + '/images/search.jpg',
+    url: WEB_APP + '/images/1.jpeg',
     text: FIRST_STEP_B + FIRST_STEP_C,
   },
   {
     type: STEPS.RECEIVED.value,
-    url: WEB_APP + '/images/pvz.jpg',
-    text: SECOND_STEP + THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
+    url: WEB_APP + '/images/2.jpeg',
+    text: SECOND_STEP,
+  },
+  {
+    type: STEPS.COMMENT.value,
+    url: WEB_APP + '/images/3.jpeg',
+    text: THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
   },
   {
     type: STEPS.COMMENT_ON_CHECK.value,
-    url: WEB_APP + '/images/comment.png',
-    text: FIVE_STEP + SIX_STEP,
+    url: WEB_APP + '/images/4.jpeg',
+    text: FIVE_STEP,
   },
-  // {
-  //   type: STEPS.SHTRIH_CODE.value,
-  //   url: '',
-  //   text: FIVE_STEP,
-  // },
+  {
+    type: STEPS.SHTRIH_CODE.value,
+    url: WEB_APP + '/images/5.jpeg',
+    text: SIX_STEP,
+  },
   {
     type: STEPS.FINISH.value,
-    url: WEB_APP + '/images/check.png',
+    url: WEB_APP + '/images/6.jpeg',
     text: FOOTER,
   },
 ];
