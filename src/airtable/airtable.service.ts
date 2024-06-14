@@ -162,44 +162,41 @@ export class AirtableService {
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
   async getOffer(id: string, needKeys?: boolean): Promise<IOffer> {
-    const offer = await this.airtableHttpService.getById(TablesName.Offers, id);
+    const offer = (await this.airtableHttpService.getById(
+      TablesName.Offers,
+      id,
+    )) as IOffer;
+
+    offer.fields['Ключевые слова'] = ErrorKeyWord;
+
     if (needKeys) {
-      const keyIds = (offer as IOffer).fields.Ключи;
+      const keyIds = offer.fields.Ключи;
       if (keyIds && keyIds.length > 0) {
         const filter =
           keyIds.length === 1
             ? `&${FILTER_BY_FORMULA}=FIND("${keyIds[0]}",{Id})`
             : `&${FILTER_BY_FORMULA}=OR(${keyIds.map((x) => `{Id}="${x}"`).join(',')})`;
 
-        const keys = await this.airtableHttpService.get(
+        const keys = (await this.airtableHttpService.get(
           TablesName.KeyWords,
           filter,
-        );
+        )) as IKeyWords;
 
-        const count = (offer as IOffer).fields.Количество;
-        const countOrder = (offer as IOffer).fields['Количество заказов'];
+        const count = offer.fields.Количество;
+        const countOrder = offer.fields['Количество заказов'];
 
-        if (count >= countOrder && (keys as IKeyWords).records.length > 0) {
-          let flagForGetKey = false;
+        if (count >= countOrder && keys.records.length > 0) {
           let allCountKeys = 0;
-          for (let i = 0; i < (keys as IKeyWords).records.length; i++) {
-            const countKye = (keys as IKeyWords).records[i].fields.Количество;
+          for (let i = 0; i < keys.records.length; i++) {
+            const countKye = keys.records[i].fields.Количество;
             allCountKeys = allCountKeys + countKye;
             const keyValue = (keys.records[i] as IKeyWord).fields.Название;
             if (allCountKeys > countOrder) {
-              flagForGetKey = true;
-              (offer as IOffer).fields['Ключевые слова'] = keyValue;
+              offer.fields['Ключевые слова'] = keyValue;
               break;
             }
           }
-          if (!flagForGetKey) {
-            (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
-          }
-        } else {
-          (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
         }
-      } else {
-        (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
       }
     }
     return offer as IOffer;

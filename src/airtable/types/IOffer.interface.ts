@@ -23,6 +23,7 @@ export interface IOffer {
     'Позиция в WB': string;
     Ключи?: string[];
     'Ключевые слова'?: string;
+    Время?: string;
   };
 }
 

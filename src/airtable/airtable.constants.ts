@@ -18,6 +18,7 @@ export enum TablesName {
   NotificationStatistics = 'Оповещения статистика',
   UserComments = 'Бот сообщения',
   KeyWords = 'Ключевые слова',
+  TimeOffer = 'Время раздач',
 }
 
 export const TablesDowray: IData[] = [
@@ -76,6 +77,11 @@ export const TablesDowray: IData[] = [
     title: TablesName.KeyWords,
     tableName: 'tbl0bMwjoMwtrhOjH',
     view: 'viwNbsbJ754Xgm0v4',
+  },
+  {
+    title: TablesName.TimeOffer,
+    tableName: 'tblc3PIVK9wiDPVCU',
+    view: 'viwUNV2Uq0062fRie',
   },
 ];
 
