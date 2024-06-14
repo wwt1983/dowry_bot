@@ -519,9 +519,9 @@ export class TelegramService {
             getTextForFirstStep(data) as any[],
           );
           if (data.keys === ErrorKeyWord) {
-            await ctx.reply('Нажмите кнопку ⤵️', {
-              reply_markup: operatorKeyboard,
-            });
+            // await ctx.reply('Нажмите кнопку ⤵️', {
+            //   reply_markup: operatorKeyboard,
+            // });
           }
           ctx.session.lastMessage = response[response.length - 1].message_id;
           return response;
