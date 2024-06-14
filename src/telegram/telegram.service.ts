@@ -119,11 +119,15 @@ export class TelegramService {
         id.toString(),
         'chat_id',
       );
-      const historyButtons = createHistoryKeyboard(dataBuyer, true);
+
       ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
 
+      for (const value of createHelpText()) {
+        await this.bot.api.sendMediaGroup(ctx.message.from.id, [value]);
+      }
+      const historyButtons = createHistoryKeyboard(dataBuyer, true);
       ctx.reply(sayHi(first_name, userValue.userName), {
         reply_markup: historyButtons,
       });

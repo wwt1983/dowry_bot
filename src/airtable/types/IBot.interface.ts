@@ -58,7 +58,8 @@ export type BotStatus =
   | 'Бот удален'
   | 'Ошибка'
   | 'Время истекло'
-  | 'Дата доставки';
+  | 'Дата доставки'
+  | 'Проблема с ключевым словом';
 
 export type BrokeBotStatus =
   | 'locationError'
