@@ -196,6 +196,9 @@ export class AirtableService {
           (offer as IOffer).fields['Ключевые слова'] =
             'Ключевое слово уточните у менеджера';
         }
+      } else {
+        (offer as IOffer).fields['Ключевые слова'] =
+          'Ключевое слово уточните у менеджера';
       }
     }
     return offer as IOffer;
