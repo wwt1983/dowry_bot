@@ -78,3 +78,5 @@ export const TablesDowray: IData[] = [
     view: 'viwNbsbJ754Xgm0v4',
   },
 ];
+
+export const ErrorKeyWord = 'Ключевое слово уточните у менеджера';

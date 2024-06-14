@@ -62,6 +62,7 @@ import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationS
 import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
+import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -460,7 +461,7 @@ export class TelegramService {
           return await ctx.reply('✌️');
         }
 
-        let data = null;
+        let data: ITelegramWebApp = null;
 
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg.text.includes('query_id')) {
@@ -483,7 +484,9 @@ export class TelegramService {
             webData.id,
             webData.title,
           );
+
           console.log('==== WEB API ====', data);
+
           ctx.session = updateSessionByField(ctx.session, 'data', data);
           ctx.session = updateSessionByField(
             ctx.session,
@@ -515,7 +518,11 @@ export class TelegramService {
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
           );
-
+          if (data.keys === ErrorKeyWord) {
+            await ctx.reply('Нажмите кнопку ⤵️', {
+              reply_markup: operatorKeyboard,
+            });
+          }
           ctx.session.lastMessage = response[response.length - 1].message_id;
           return response;
 

@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
-import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
+import {
+  ErrorKeyWord,
+  FILTER_BY_FORMULA,
+  TablesName,
+} from './airtable.constants';
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
@@ -189,16 +193,13 @@ export class AirtableService {
             }
           }
           if (!flagForGetKey) {
-            (offer as IOffer).fields['Ключевые слова'] =
-              'Ключевое слово уточните у менеджера';
+            (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
           }
         } else {
-          (offer as IOffer).fields['Ключевые слова'] =
-            'Ключевое слово уточните у менеджера';
+          (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
         }
       } else {
-        (offer as IOffer).fields['Ключевые слова'] =
-          'Ключевое слово уточните у менеджера';
+        (offer as IOffer).fields['Ключевые слова'] = ErrorKeyWord;
       }
     }
     return offer as IOffer;
