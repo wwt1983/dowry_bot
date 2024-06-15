@@ -86,12 +86,6 @@ export function createInitialSessionData(
     startTime: getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
-    isLoadImageSearch: false,
-    isLoadImageGiveGood: false,
-    isLoadImageOnComment: false,
-    isLoadImageBrokeCode: false,
-    isLoadImageCheck: false,
-    isLoadImageOrderWithPVZ: false,
     step: STEPS.INBOT.step,
     comment: '',
     images: [],
@@ -106,6 +100,7 @@ export function createInitialSessionData(
     deliveryDate: null,
     conversation: null,
     lastCommand: null,
+    times: null,
   };
 }
 
@@ -165,12 +160,10 @@ export function updateSessionByStep(
       session.stopTime = getTimeWithTz();
       break;
     case STEPS.SEARCH.step:
-      session.isLoadImageSearch = true;
       session.status = 'Поиск';
       session.stopTime = getTimeWithTz();
       break;
     case STEPS.ORDER.step:
-      session.isLoadImageOrderWithPVZ = true;
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
       break;
@@ -178,7 +171,6 @@ export function updateSessionByStep(
       session.status = 'Дата доставки';
       break;
     case STEPS.RECEIVED.step:
-      session.isLoadImageGiveGood = true;
       session.status = 'Получен';
       break;
     case STEPS.COMMENT_ON_CHECK.step:
@@ -186,17 +178,14 @@ export function updateSessionByStep(
       session.stopTime = getTimeWithTz();
       break;
     case STEPS.COMMENT.step:
-      session.isLoadImageOnComment = true;
       session.status = 'Отзыв';
       session.stopTime = getTimeWithTz();
       break;
     case STEPS.SHTRIH_CODE.step:
-      session.isLoadImageBrokeCode = true;
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
       break;
     case STEPS.CHECK.step:
-      session.isLoadImageCheck = true;
       session.stopTime = getTimeWithTz();
       session.status = 'Чек';
       session.isFinish = true;
@@ -222,12 +211,11 @@ export function nextStep(session: ISessionData): ISessionData {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
-  const { title, keys, cash, priceWb, description, priceForYou } = data;
+  console.log(data.keys)
+  const { title, keys, cash, priceWb, priceForYou, times, location } = data;
   const caption =
     `🔥${title}🔥` +
-    '\n' +
-    // description +
-    '\n' +
+    '\n\n' +
     '❌Цена на WB ~' +
     priceWb +
     ' ₽' +
@@ -240,9 +228,13 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '➡️ ' +
     keys +
     '\n\n' +
+    (times && times.length && times.length > 0
+      ? `❗️Начало раздачи в ${times[0]}❗️\n\n`
+      : '') +
     FIRST_STEP_LINK +
     //FIRST_STEP_A +
-    (data.location ? `❗️Раздача только для региона: ${data.location}❗️\n` : '');
+    (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
+
   return [
     {
       type: 'photo',

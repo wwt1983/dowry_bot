@@ -8,6 +8,8 @@ import {
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_NO_TIME = 'yyyy-MM-dd';
+export const FORMAT_DATE_NO_DATE = 'HH:mm';
+
 const ERROR_TIME = -1000;
 
 export const getTimeWithTz = () =>
@@ -62,4 +64,16 @@ export const dateFormatWithTZ = (date: string) => {
     return formatInTimeZone(new Date(date), 'Europe/Moscow', FORMAT_DATE);
   }
   return null;
+};
+
+export const getTimesFromDate = (dates: string[]) => {
+  try {
+    if (!dates || dates.length === 0) return null;
+    return dates.map((date) =>
+      formatInTimeZone(date, 'Europe/Moscow', FORMAT_DATE_NO_DATE),
+    );
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
 };

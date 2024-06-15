@@ -59,7 +59,11 @@ import {
 } from './telegram.command';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
-import { dateFormat, dateFormatWithTZ } from 'src/common/date/date.methods';
+import {
+  dateFormat,
+  dateFormatWithTZ,
+  getTimesFromDate,
+} from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
@@ -537,7 +541,6 @@ export class TelegramService {
         if (STEPS.CHECK_ARTICUL.step === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
-
             if (
               countTryError === COUNT_TRY_ERROR ||
               ctx.session.errorStatus === 'operator'
@@ -687,7 +690,11 @@ export class TelegramService {
     id: string,
     title: string,
   ): Promise<ITelegramWebApp> {
-    const offerAirtable = await this.airtableService.getOffer(offerId, true);
+    const offerAirtable = await this.airtableService.getOffer(
+      offerId,
+      true,
+      true,
+    );
     return {
       id: id,
       articul: offerAirtable.fields['Артикул'].toString(),
@@ -701,6 +708,7 @@ export class TelegramService {
       description: offerAirtable.fields['Описание'],
       location: offerAirtable.fields['Региональность'],
       positionOnWB: offerAirtable.fields['Позиция в WB'],
+      times: getTimesFromDate(offerAirtable.fields['Время бронь']),
     };
   }
   /*

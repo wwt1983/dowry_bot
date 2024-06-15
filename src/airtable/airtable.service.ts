@@ -17,6 +17,8 @@ import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import { getUserName } from 'src/telegram/telegram.custom.functions';
 import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
+import { getFilterById } from './airtable.custom';
+import { ITime, ITimes } from './types/ITimes.interface';
 
 @Injectable()
 export class AirtableService {
@@ -46,6 +48,11 @@ export class AirtableService {
         console.log('empty session=', session);
         return null;
       }
+      const timeStartOffer =
+        session.data.times && session.data.times?.length
+          ? ` (${session.data.times[0]})`
+          : '';
+
       const data = {
         SessionId: session.sessionId,
         Артикул: session.data?.articul,
@@ -60,7 +67,7 @@ export class AirtableService {
         ['Дата получения']: session.deliveryDate,
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
-        'Ключевые слова': session.data.keys,
+        'Ключевые слова': session.data.keys + timeStartOffer,
       };
       const tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
@@ -161,29 +168,28 @@ export class AirtableService {
     const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
-  async getOffer(id: string, needKeys?: boolean): Promise<IOffer> {
+  async getOffer(
+    id: string,
+    needKeys?: boolean,
+    needTimes?: boolean,
+  ): Promise<IOffer> {
     const offer = (await this.airtableHttpService.getById(
       TablesName.Offers,
       id,
     )) as IOffer;
 
     offer.fields['Ключевые слова'] = ErrorKeyWord;
+    const count = offer.fields.Количество;
+    const countOrder = offer.fields['Количество заказов'];
+    offer.fields['Время бронь'] = null;
 
     if (needKeys) {
       const keyIds = offer.fields.Ключи;
       if (keyIds && keyIds.length > 0) {
-        const filter =
-          keyIds.length === 1
-            ? `&${FILTER_BY_FORMULA}=FIND("${keyIds[0]}",{Id})`
-            : `&${FILTER_BY_FORMULA}=OR(${keyIds.map((x) => `{Id}="${x}"`).join(',')})`;
-
         const keys = (await this.airtableHttpService.get(
           TablesName.KeyWords,
-          filter,
+          getFilterById(keyIds),
         )) as IKeyWords;
-
-        const count = offer.fields.Количество;
-        const countOrder = offer.fields['Количество заказов'];
 
         if (count >= countOrder && keys.records.length > 0) {
           let allCountKeys = 0;
@@ -194,6 +200,32 @@ export class AirtableService {
             if (allCountKeys > countOrder) {
               offer.fields['Ключевые слова'] = keyValue;
               break;
+            }
+          }
+        }
+      }
+    }
+
+    if (needTimes) {
+      if (offer.fields.Время) {
+        const keyIds = offer.fields.Время;
+        if (keyIds && keyIds.length > 0) {
+          const times = (await this.airtableHttpService.get(
+            TablesName.TimeOffer,
+            getFilterById(keyIds),
+          )) as ITimes;
+
+          if (count >= countOrder && times.records.length > 0) {
+            let allCountTimes = 0;
+            for (let i = 0; i < times.records.length; i++) {
+              const countTime =
+                times.records[i].fields['Количество предложений'];
+              allCountTimes = allCountTimes + countTime;
+              const keyValue = (times.records[i] as ITime).fields;
+              if (allCountTimes > countOrder) {
+                offer.fields['Время бронь'] = [keyValue.Start, keyValue.Stop];
+                break;
+              }
             }
           }
         }

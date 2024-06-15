@@ -27,12 +27,6 @@ export interface ISessionData {
   startTime?: string;
   stopTime?: string;
   stopBuyTime?: string; //время выкупа товра после начала сессии
-  isLoadImageSearch?: boolean; // поиск товара
-  isLoadImageOrderWithPVZ?: boolean; // подвтверждение факта заказа
-  isLoadImageGiveGood?: boolean; // получен товар
-  isLoadImageOnComment?: boolean; // отзыв
-  isLoadImageBrokeCode?: boolean; // фото порванного штрих-кода
-  isLoadImageCheck?: boolean; // чек
   step?: number;
   comment?: string;
   images?: string[];
@@ -47,6 +41,7 @@ export interface ISessionData {
   deliveryDate: string;
   conversation?: any;
   lastCommand?: COMMAND_NAMES;
+  times?: string[];
 }
 
 export type MyContext = HydrateFlavor<
@@ -68,4 +63,5 @@ export interface ITelegramWebApp {
   description?: string;
   location?: string;
   positionOnWB?: string;
+  times?: string[];
 }
