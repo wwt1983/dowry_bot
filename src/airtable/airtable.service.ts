@@ -12,10 +12,9 @@ import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus } from './types/IBot.interface';
 import {
-  FORMAT_DATE_SIMPLE,
   TIME_FULL,
-  dateFormatNoTZ,
   getTimeWithTz,
+  getDate,
 } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
@@ -55,13 +54,13 @@ export class AirtableService {
       }
       const timeStartOffer =
         session.data.times && session.data.times?.length
-          ? ` (${session.data.times[1] === TIME_FULL ? dateFormatNoTZ(session.data.times[0], FORMAT_DATE_SIMPLE) : session.data.times[0]})`
+          ? ` (${session.data.times[1] === TIME_FULL ? session.data.times[0] : `${getDate()} ${session.data.times[0]}`})`
           : '';
 
       const data = {
         SessionId: session.sessionId,
         Артикул: session.data?.articul,
-        StartTime: session.startTime,
+        StartTime: timeStartOffer || session.startTime,
         ['Время выкупа']: session.stopBuyTime,
         OfferId: session.offerId,
         Статус: session.status,
