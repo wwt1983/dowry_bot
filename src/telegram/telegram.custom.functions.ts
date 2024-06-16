@@ -247,7 +247,7 @@ export const getMessageForTimeOffer = (times: string[]) => {
   if (!times || !times.length || times.length === 0) return '';
   if (times[2] === TIME_FULL) {
     if (getDifferenceInDays(times[1]) <= 0) {
-      return getDifferenceInDays(times[0]) >= 0
+      return getDifferenceInMinutes(times[0]) >= 0
         ? ''
         : `❗️Начало раздачи ${dateFormatNoTZ(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
     } else {
