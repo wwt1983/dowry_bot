@@ -254,7 +254,7 @@ export const getMessageForTimeOffer = (times: string[]) => {
       return 'Время раздачи истекло. Уточните новую раздачу у менеджера\n\n';
     }
   }
-  return getDifferenceInMinutes(times[0]) >= 0
+  return getDifferenceInMinutes(times[0]) <= 0
     ? ''
     : `❗️Начало раздачи ${times[0]}❗️\n\n`;
 };
