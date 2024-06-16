@@ -26,7 +26,6 @@ export interface IOffer {
     Время?: string[];
     'Время бронь'?: {
       startTime: string;
-      stopTime: string;
       onlyTime: boolean;
     }; // время из списка которое закрепляется за пользователем как и ключевое слово
   };

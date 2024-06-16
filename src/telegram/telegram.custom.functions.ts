@@ -35,6 +35,7 @@ import {
   getDifferenceInMinutes,
   getTimeWithTz,
   dateFormatNoTZ,
+  getDate,
 } from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
@@ -244,19 +245,25 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   ];
 }
 export const getMessageForTimeOffer = (times: string[]) => {
-  if (!times || !times.length || times.length === 0) return '';
-  if (times[2] === TIME_FULL) {
-    if (getDifferenceInDays(times[1]) <= 0) {
-      return getDifferenceInMinutes(times[0]) >= 0
-        ? ''
-        : `❗️Начало раздачи ${dateFormatNoTZ(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
-    } else {
-      return 'Время раздачи истекло. Уточните новую раздачу у менеджера\n\n';
+  try {
+    if (!times || !times.length || times.length === 0) return '';
+
+    if (times[1] === TIME_FULL) {
+      if (getDifferenceInDays(times[0]) <= 0) {
+        return getDifferenceInMinutes(times[0]) >= 0
+          ? ''
+          : `❗️Начало раздачи ${dateFormatNoTZ(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
+      } else {
+        return 'Время раздачи истекло. Уточните новую раздачу у менеджера\n\n';
+      }
     }
+    return getDifferenceInMinutes(`${getDate()} ${times[0]}`) > 0
+      ? ''
+      : `❗️Начало раздачи ${times[0]}❗️\n\n`;
+  } catch (e) {
+    console.log(e);
+    return '';
   }
-  return getDifferenceInMinutes(times[0]) <= 0
-    ? ''
-    : `❗️Начало раздачи ${times[0]}❗️\n\n`;
 };
 
 export function getTextByNextStep(

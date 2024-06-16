@@ -55,7 +55,7 @@ export class AirtableService {
       }
       const timeStartOffer =
         session.data.times && session.data.times?.length
-          ? ` (${session.data.times[2] === TIME_FULL ? dateFormatNoTZ(session.data.times[0], FORMAT_DATE_SIMPLE) : session.data.times[0]})`
+          ? ` (${session.data.times[1] === TIME_FULL ? dateFormatNoTZ(session.data.times[0], FORMAT_DATE_SIMPLE) : session.data.times[0]})`
           : '';
 
       const data = {
@@ -230,7 +230,6 @@ export class AirtableService {
               if (allCountTimes > countOrder) {
                 offer.fields['Время бронь'] = {
                   startTime: keyValue.Start,
-                  stopTime: keyValue.Stop,
                   onlyTime: times.records[i].fields['Только время'],
                 };
                 break;

@@ -19,8 +19,10 @@ const ERROR_TIME = -1000;
 export const getTimeWithTz = (format?: string) =>
   formatInTimeZone(new Date(), TIME_ZONE, format || FORMAT_DATE);
 
+export const getDate = () =>
+  formatInTimeZone(new Date(), TIME_ZONE, FORMAT_DATE_NO_TIME);
+
 export const getDifferenceInMinutes = (date: string, format?: string) => {
-  console.log(getTimeWithTz(format), date, format);
   try {
     if (!date || date === 'undefined') return ERROR_TIME;
     return differenceInMinutes(
@@ -78,7 +80,6 @@ export const dateFormatNoTZ = (date: string, formatType?: string) => {
 };
 export const getTimesFromTimesTable = (dates: {
   startTime: string;
-  stopTime: string;
   onlyTime: boolean;
 }) => {
   try {
@@ -86,11 +87,6 @@ export const getTimesFromTimesTable = (dates: {
     return [
       formatInTimeZone(
         dates.startTime,
-        TIME_ZONE,
-        dates.onlyTime ? FORMAT_DATE_NO_DATE : FORMAT_DATE,
-      ),
-      formatInTimeZone(
-        dates.stopTime,
         TIME_ZONE,
         dates.onlyTime ? FORMAT_DATE_NO_DATE : FORMAT_DATE,
       ),
