@@ -7,6 +7,7 @@ export interface ITime {
     Stop: string;
     'Количество предложений': number;
     Status: TimeStatus;
+    'Только время': boolean;
   };
 }
 

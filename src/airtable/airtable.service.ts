@@ -11,7 +11,12 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus } from './types/IBot.interface';
-import { getTimeWithTz } from 'src/common/date/date.methods';
+import {
+  FORMAT_DATE_SIMPLE,
+  TIME_FULL,
+  dateFormat,
+  getTimeWithTz,
+} from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
@@ -50,7 +55,7 @@ export class AirtableService {
       }
       const timeStartOffer =
         session.data.times && session.data.times?.length
-          ? ` (${session.data.times[0]})`
+          ? ` (${session.data.times[2] === TIME_FULL ? dateFormat(session.data.times[0], FORMAT_DATE_SIMPLE) : session.data.times[0]})`
           : '';
 
       const data = {
@@ -223,7 +228,11 @@ export class AirtableService {
               allCountTimes = allCountTimes + countTime;
               const keyValue = (times.records[i] as ITime).fields;
               if (allCountTimes > countOrder) {
-                offer.fields['Время бронь'] = [keyValue.Start, keyValue.Stop];
+                offer.fields['Время бронь'] = {
+                  startTime: keyValue.Start,
+                  stopTime: keyValue.Stop,
+                  onlyTime: times.records[i].fields['Только время'],
+                };
                 break;
               }
             }

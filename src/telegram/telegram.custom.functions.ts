@@ -29,6 +29,9 @@ import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 import {
+  dateFormat,
+  FORMAT_DATE_SIMPLE,
+  TIME_FULL,
   getDifferenceInDays,
   getDifferenceInMinutes,
   getTimeWithTz,
@@ -211,7 +214,6 @@ export function nextStep(session: ISessionData): ISessionData {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
-  console.log(data.keys)
   const { title, keys, cash, priceWb, priceForYou, times, location } = data;
   const caption =
     `🔥${title}🔥` +
@@ -228,9 +230,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '➡️ ' +
     keys +
     '\n\n' +
-    (times && times.length && times.length > 0
-      ? `❗️Начало раздачи в ${times[0]}❗️\n\n`
-      : '') +
+    getMessageForTimeOffer(times) +
     FIRST_STEP_LINK +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
@@ -243,6 +243,19 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     },
   ];
 }
+export const getMessageForTimeOffer = (times: string[]) => {
+  if (!times || !times.length || times.length === 0) return '';
+  if (times[2] === TIME_FULL) {
+    if (getDifferenceInDays(times[1]) <= 0) {
+      return getDifferenceInDays(times[0]) > 0
+        ? ''
+        : `❗️Начало раздачи ${dateFormat(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
+    } else {
+      return 'Время раздачи истекло. Уточните новую раздачу у менеджера\n\n';
+    }
+  }
+  return `❗️Начало раздачи ${times[0]}❗️\n\n`;
+};
 
 export function getTextByNextStep(
   step: number,

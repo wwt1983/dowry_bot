@@ -60,9 +60,9 @@ import {
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import {
+  FORMAT_DATE,
   dateFormat,
-  dateFormatWithTZ,
-  getTimesFromDate,
+  getTimesFromTimesTable,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
@@ -385,9 +385,9 @@ export class TelegramService {
         sessionId: sessionId,
         user: userValue.userName || userValue.fio,
         chat_id: id.toString(),
-        startTime: dateFormatWithTZ(StartTime),
-        stopBuyTime: dateFormatWithTZ(data[0].fields['Время выкупа']),
-        stopTime: dateFormatWithTZ(StopTime),
+        startTime: dateFormat(StartTime, FORMAT_DATE),
+        stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
+        stopTime: dateFormat(StopTime, FORMAT_DATE),
         step: (STEPS_VALUE[Статус].step as number) + 1,
         images: Images?.map((x) => x.url),
         offerId: OfferId[0],
@@ -708,7 +708,7 @@ export class TelegramService {
       description: offerAirtable.fields['Описание'],
       location: offerAirtable.fields['Региональность'],
       positionOnWB: offerAirtable.fields['Позиция в WB'],
-      times: getTimesFromDate(offerAirtable.fields['Время бронь']),
+      times: getTimesFromTimesTable(offerAirtable.fields['Время бронь']),
     };
   }
   /*
