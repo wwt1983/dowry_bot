@@ -4,6 +4,7 @@ import {
   differenceInHours,
   differenceInDays,
   isValid,
+  format,
 } from 'date-fns';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
@@ -68,6 +69,13 @@ export const dateFormat = (date: string, format?: string) => {
   return null;
 };
 
+export const dateFormatNoTZ = (date: string, formatType?: string) => {
+  if (!date) return null;
+  if (isValid(new Date(date))) {
+    return format(date, formatType || FORMAT_DATE_NO_TIME);
+  }
+  return null;
+};
 export const getTimesFromTimesTable = (dates: {
   startTime: string;
   stopTime: string;

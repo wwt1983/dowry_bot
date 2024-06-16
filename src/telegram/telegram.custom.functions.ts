@@ -29,12 +29,12 @@ import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 import {
-  dateFormat,
   FORMAT_DATE_SIMPLE,
   TIME_FULL,
   getDifferenceInDays,
   getDifferenceInMinutes,
   getTimeWithTz,
+  dateFormatNoTZ,
 } from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
@@ -249,7 +249,7 @@ export const getMessageForTimeOffer = (times: string[]) => {
     if (getDifferenceInDays(times[1]) <= 0) {
       return getDifferenceInDays(times[0]) > 0
         ? ''
-        : `❗️Начало раздачи ${dateFormat(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
+        : `❗️Начало раздачи ${dateFormatNoTZ(times[0], FORMAT_DATE_SIMPLE)}❗️\n\n`;
     } else {
       return 'Время раздачи истекло. Уточните новую раздачу у менеджера\n\n';
     }
