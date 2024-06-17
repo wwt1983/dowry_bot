@@ -107,7 +107,7 @@ export const STEPS_TYPES = {
   ],
 };
 
-export const COUNT_TRY_ERROR = 3;
+export const COUNT_TRY_ERROR = 1;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP = '1️⃣ НАЙТИ товар по запросу\n';
