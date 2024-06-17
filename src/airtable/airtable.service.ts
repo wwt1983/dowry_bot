@@ -166,7 +166,10 @@ export class AirtableService {
     return await this.airtableHttpService.get(TablesName.UserComments, filter);
   }
   async getOffers(): Promise<IOffers> {
-    const filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
+    const filter =
+      process.env.NODE_ENV === 'development'
+        ? `&${FILTER_BY_FORMULA}=SEARCH("Test",{Status})`
+        : `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
   async getOffer(
