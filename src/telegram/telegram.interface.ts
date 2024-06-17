@@ -64,4 +64,6 @@ export interface ITelegramWebApp {
   location?: string;
   positionOnWB?: string;
   times?: string[];
+  countTryError?: number;
+  errorStatus?: string;
 }

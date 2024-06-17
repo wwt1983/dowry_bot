@@ -361,6 +361,7 @@ export class TelegramService {
         sessionId,
         'SessionId',
       );
+
       if (!data || data.length === 0) {
         await this.sendMessageWithKeyboardHistory(id);
         return await ctx.answerCallbackQuery();
@@ -368,15 +369,19 @@ export class TelegramService {
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      if (
-        !STEPS_VALUE[Статус] ||
-        STEPS_VALUE[Статус]?.step < 0 ||
-        !Images ||
-        Images.length === 0
-      ) {
-        await this.sendMessageWithKeyboardHistory(id);
-        await ctx.answerCallbackQuery();
-        return;
+      if (Статус === 'Выбор раздачи' || Статус === 'Артикул правильный') {
+        //
+      } else {
+        if (
+          !STEPS_VALUE[Статус] ||
+          STEPS_VALUE[Статус]?.step < 0 ||
+          !Images ||
+          Images.length === 0
+        ) {
+          await this.sendMessageWithKeyboardHistory(id);
+          await ctx.answerCallbackQuery();
+          return;
+        }
       }
 
       const userValue = getUserName(ctx.from);
@@ -388,22 +393,47 @@ export class TelegramService {
         startTime: dateFormat(StartTime, FORMAT_DATE),
         stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
         stopTime: dateFormat(StopTime, FORMAT_DATE),
-        step: (STEPS_VALUE[Статус].step as number) + 1,
+        step:
+          Статус === 'Выбор раздачи'
+            ? (STEPS_VALUE[Статус].step as number)
+            : (STEPS_VALUE[Статус].step as number) + 1,
         images: Images?.map((x) => x.url),
         offerId: OfferId[0],
         status: Статус,
         deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
       };
 
-      ctx.session = createContinueSessionData(value, Артикул, Раздача);
-      const response = await ctx.reply(
-        getTextByNextStep(
-          ctx.session.step,
-          ctx.session.startTime,
-          ctx.session.data.title,
-        ),
+      ctx.session = createContinueSessionData(
+        value,
+        Артикул,
+        Раздача,
+        data[0].fields['Ключевое слово'],
       );
-      ctx.session.lastMessage = response.message_id;
+      let response = null;
+
+      if (Статус === 'Выбор раздачи') {
+        const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
+          ctx.session.offerId,
+          ctx.session.chat_id,
+        );
+
+        ctx.session = updateSessionByStep(ctx.session);
+        ctx.session.errorStatus = 'check_articul';
+        response = await this.bot.api.sendMediaGroup(
+          ctx.session.chat_id,
+          getTextForFirstStep(sessionData) as any[],
+        );
+        ctx.session.lastMessage = response[response.length - 1].message_id;
+      } else {
+        response = await ctx.reply(
+          getTextByNextStep(
+            ctx.session.step,
+            ctx.session.startTime,
+            ctx.session.data.title,
+          ),
+        );
+        ctx.session.lastMessage = response.message_id;
+      }
       await ctx.answerCallbackQuery();
     });
 
@@ -414,7 +444,6 @@ export class TelegramService {
           return ctx.reply(STOP_TEXT);
 
         const { text } = ctx.update.message;
-
         switch (ctx.session.lastCommand) {
           case COMMAND_NAMES.messageSend:
             const isDigitsOnly = /^\d+$/.test(text);
@@ -526,11 +555,7 @@ export class TelegramService {
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
           );
-          if (data.keys === ErrorKeyWord) {
-            // await ctx.reply('Нажмите кнопку ⤵️', {
-            //   reply_markup: operatorKeyboard,
-            // });
-          }
+
           ctx.session.lastMessage = response[response.length - 1].message_id;
           return response;
 
@@ -541,6 +566,7 @@ export class TelegramService {
         if (STEPS.CHECK_ARTICUL.step === step) {
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
+
             if (
               countTryError === COUNT_TRY_ERROR ||
               ctx.session.errorStatus === 'operator'
@@ -688,7 +714,7 @@ export class TelegramService {
   async getOfferFromWeb(
     offerId: string,
     id: string,
-    title: string,
+    title?: string,
   ): Promise<ITelegramWebApp> {
     const offerAirtable = await this.airtableService.getOffer(
       offerId,
@@ -699,7 +725,7 @@ export class TelegramService {
       id: id,
       articul: offerAirtable.fields['Артикул'].toString(),
       offerId,
-      title,
+      title: title || offerAirtable.fields.Name,
       cash: offerAirtable.fields['Кешбэк'],
       priceForYou: offerAirtable.fields['Ваша цена'],
       priceWb: offerAirtable.fields['Цена WB'],
@@ -709,6 +735,8 @@ export class TelegramService {
       location: offerAirtable.fields['Региональность'],
       positionOnWB: offerAirtable.fields['Позиция в WB'],
       times: getTimesFromTimesTable(offerAirtable.fields['Время бронь']),
+      countTryError: 0,
+      errorStatus: null,
     };
   }
   /*

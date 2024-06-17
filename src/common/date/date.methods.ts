@@ -6,6 +6,7 @@ import {
   isValid,
   format,
 } from 'date-fns';
+import { ISessionData } from 'src/telegram/telegram.interface';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_SIMPLE = 'dd.MM.yyyy HH:mm';
@@ -95,5 +96,40 @@ export const getTimesFromTimesTable = (dates: {
   } catch (e) {
     console.log('getTimesFromTimesTable=', e);
     return null;
+  }
+};
+
+export const getOfferTime = (session: ISessionData) => {
+  try {
+    if (
+      session.data.times &&
+      session.data.times?.length &&
+      session.data.times?.length > 0
+    ) {
+      let time = null;
+      if (session.data.times[1] === TIME_FULL) {
+        time = session.data.times[0];
+      } else {
+        time = `${getDate()} ${session.data.times[0]}`;
+      }
+      return {
+        time: time,
+        itsFutureTime: getDifferenceInMinutes(time) < 0,
+        itsTimeOrder: true,
+      };
+    } else {
+      return {
+        time: session.startTime,
+        itsFutureTime: false,
+        itsTimeOrder: false,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      time: session.startTime,
+      itsFutureTime: false,
+      itsTimeOrder: false,
+    };
   }
 };

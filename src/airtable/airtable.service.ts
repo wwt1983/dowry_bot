@@ -11,11 +11,7 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus } from './types/IBot.interface';
-import {
-  TIME_FULL,
-  getTimeWithTz,
-  getDate,
-} from 'src/common/date/date.methods';
+import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
@@ -52,15 +48,14 @@ export class AirtableService {
         console.log('empty session=', session);
         return null;
       }
-      const timeStartOffer =
-        session.data.times && session.data.times?.length
-          ? ` (${session.data.times[1] === TIME_FULL ? session.data.times[0] : `${getDate()} ${session.data.times[0]}`})`
-          : '';
+      const correctTime = getOfferTime(session);
 
       const data = {
         SessionId: session.sessionId,
         Артикул: session.data?.articul,
-        StartTime: timeStartOffer || session.startTime,
+        StartTime: correctTime?.itsFutureTime
+          ? correctTime.time
+          : session.startTime,
         ['Время выкупа']: session.stopBuyTime,
         OfferId: session.offerId,
         Статус: session.status,
@@ -71,7 +66,9 @@ export class AirtableService {
         ['Дата получения']: session.deliveryDate,
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
-        'Ключевые слова': session.data.keys + timeStartOffer,
+        'Ключевые слова':
+          session.data.keys +
+          (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
       };
       const tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',

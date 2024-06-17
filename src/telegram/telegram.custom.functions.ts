@@ -112,6 +112,7 @@ export function createContinueSessionData(
   data: ISessionData,
   articul: string,
   offer: string,
+  key?: string,
 ): ISessionData {
   return {
     data: {
@@ -123,7 +124,7 @@ export function createContinueSessionData(
       image: null,
       id: null,
       articul: articul,
-      keys: null,
+      keys: key,
     },
     sessionId: data.sessionId,
     user: data.user,
@@ -199,7 +200,7 @@ export function updateSessionByStep(
   }
 
   if (isPhotoMsg) {
-    session.images = [...session.images, data];
+    session.images = !session.images ? [data] : [...session.images, data];
     session.lastLoadImage = data;
   }
 
@@ -215,7 +216,8 @@ export function nextStep(session: ISessionData): ISessionData {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
-  const { title, keys, cash, priceWb, priceForYou, times, location } = data;
+  const { title, keys, cash, priceWb, priceForYou, times, location, image } =
+    data;
   const caption =
     `🔥${title}🔥` +
     '\n\n' +
@@ -239,7 +241,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   return [
     {
       type: 'photo',
-      media: data.image,
+      media: image,
       caption: caption,
     },
   ];
@@ -259,7 +261,7 @@ export const getMessageForTimeOffer = (times: string[]) => {
     }
     return getDifferenceInMinutes(`${getDate()} ${times[0]}`) > 0
       ? ''
-      : `❗️Начало раздачи ${times[0]}❗️\n\n`;
+      : `❗️Начало раздачи в ${times[0]}❗️\n\n`;
   } catch (e) {
     console.log(e);
     return '';
@@ -510,6 +512,8 @@ export const getTextForArticleError = (
     case 'wait':
     case 'check_articul':
       return 'Артикулы не совпадают. Попробуйте снова или нажмите кнопку "Помощь оператора" ⤵️';
+    default:
+      return status;
   }
 };
 
