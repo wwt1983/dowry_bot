@@ -448,10 +448,13 @@ const filterNotificationValue = (
       statisticNotifications.records.length === 0
         ? null
         : statisticNotifications.records.find(
-            (x) => x.fields.Шаблон[0] === notification.fields.Id,
+            (x) =>
+              x.fields.Шаблон &&
+              x.fields.Шаблон.length &&
+              x.fields.Шаблон[0] === notification.fields.Id,
           );
   } catch (e) {
-    console.log('filterNotificationValue', e);
+    console.log('filterNotificationValue', e, status, statisticNotifications);
   } finally {
     return { notification, statistic, status };
   }
