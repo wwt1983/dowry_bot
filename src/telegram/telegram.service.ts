@@ -861,6 +861,7 @@ export class TelegramService {
           notifications.records.find((x) => x.fields.Название === 'В боте')
             .fields.Сообщение,
         );
+        await this.sendMessageWithKeyboardHistory(chat_id);
         return;
       }
       const statisticNotifications =
