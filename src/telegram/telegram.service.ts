@@ -855,6 +855,14 @@ export class TelegramService {
         return;
       }
       const notifications = await this.airtableService.getNotifications();
+      if (status === 'В боте') {
+        await this.bot.api.sendMessage(
+          chat_id,
+          notifications.records.find((x) => x.fields.Название === 'В боте')
+            .fields.Сообщение,
+        );
+        return;
+      }
       const statisticNotifications =
         await this.airtableService.getNotificationStatistics(sessionId);
 
