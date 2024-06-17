@@ -22,6 +22,7 @@ import {
   COUNT_TRY_ERROR,
   FIVE_STEP,
   SIX_STEP,
+  LIMIT_TIME_IN_MINUTES_FOR_BUY,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -302,15 +303,15 @@ function getNumberText(step: number, startTime: string, name: string) {
   const textOffer = `→ ${name}\n\n`;
   const finish_txt = `${textOffer}До финиша `;
   const minutes = startTime
-    ? LIMIT_TIME_IN_MINUTES_FOR_ORDER - getDifferenceInMinutes(startTime)
+    ? LIMIT_TIME_IN_MINUTES_FOR_BUY - getDifferenceInMinutes(startTime)
     : null;
   const waitTime = minutes ? `(осталось ${minutes} мин. для заказа)` : '';
 
   switch (step) {
     case STEPS.CHOOSE_OFFER.step:
-      return finish_txt + `9️⃣ шагов ${waitTime}\n`;
+      return finish_txt + `9️⃣ шагов\n`;
     case STEPS.CHECK_ARTICUL.step:
-      return finish_txt + `8️⃣ шагов ${waitTime}\n`;
+      return finish_txt + `8️⃣ шагов\n`;
     case STEPS.SEARCH.step:
       return finish_txt + `7️⃣ шагов ${waitTime}\n`;
     case STEPS.ORDER.step:
@@ -403,8 +404,11 @@ export const getNotificationValue = (
     case 'Проблема с артикулом':
     case 'Вызов':
     case 'Поиск':
-      const minutes = getDifferenceInMinutes(startTime);
-      if (minutes > LIMIT_TIME_IN_MINUTES_FOR_ORDER) {
+      const minutes =
+        status === 'Артикул правильный'
+          ? getDifferenceInMinutes(startTime)
+          : LIMIT_TIME_IN_MINUTES_FOR_BUY;
+      if (minutes > LIMIT_TIME_IN_MINUTES_FOR_BUY) {
         nextStatusNotification = 'Время истекло';
       } else {
         nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
@@ -474,7 +478,12 @@ export const scheduleNotification = (
     case 'Вызов':
     case 'Поиск':
       const minutes = getDifferenceInMinutes(startTime);
-      return minutes <= LIMIT_TIME_IN_MINUTES_FOR_ORDER && minutes > 10;
+      return (
+        minutes <=
+          (status === 'Артикул правильный'
+            ? LIMIT_TIME_IN_MINUTES_FOR_BUY
+            : LIMIT_TIME_IN_MINUTES_FOR_ORDER) && minutes > 10
+      );
     case 'Заказ':
       if (countSendNotification === 0) {
         return dateDelivery ? days === 1 : days > 6;
