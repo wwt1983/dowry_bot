@@ -39,9 +39,7 @@ import {
 } from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
-  return (
-    `Привет, ${first_name || username}! \n\n` + FIRST_STEP_B + 'В путь ⤵\n'
-  );
+  return `\n\n\n\n\️Привет, ${first_name || username}!✌️` + '\n\nВ путь ⤵\n';
 }
 
 export function sendToSecretChat(
