@@ -58,7 +58,7 @@ export const createLabelHistory = (data: IBot[]) => {
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
       record.fields.Статус !== 'Чек' &&
-      record.fields.Статус !== 'Проблема с артикулом' &&
+      //record.fields.Статус !== 'Проблема с артикулом' &&
       !record.fields['Снять с раздачи'] &&
       //record.fields.Статус !== 'Поиск' &&
       //record.fields.Статус !== 'Артикул правильный' &&

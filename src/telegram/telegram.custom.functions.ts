@@ -139,6 +139,7 @@ export function createContinueSessionData(
     isFinish: false,
     location: null,
     comment: null,
+    countTryError: 0,
   };
 }
 export function updateSessionByField(
@@ -210,10 +211,43 @@ export function updateSessionByStep(
   return session;
 }
 export function nextStep(session: ISessionData): ISessionData {
+  const nextCountStep = session.step + 1;
+  session.step = nextCountStep;
   console.log('session=', session);
-  session.step = session.step + 1;
+
   return session;
 }
+
+export const getStatusName = (step: number): BotStatus => {
+  switch (step) {
+    case STEPS.INBOT.step:
+      return STEPS.INBOT.value as BotStatus;
+    case STEPS.CHECK_ARTICUL.step:
+      return STEPS.CHECK_ARTICUL.value as BotStatus;
+    case STEPS.CHOOSE_OFFER.step:
+      return STEPS.CHOOSE_OFFER.value as BotStatus;
+    case STEPS.SEARCH.step:
+      return STEPS.SEARCH.value as BotStatus;
+    case STEPS.ORDER.step:
+      return STEPS.ORDER.value as BotStatus;
+    case STEPS.DELIVERY_DATE.step:
+      return STEPS.DELIVERY_DATE.value as BotStatus;
+    case STEPS.RECEIVED.step:
+      return STEPS.RECEIVED.value as BotStatus;
+    case STEPS.COMMENT_ON_CHECK.step:
+      return STEPS.COMMENT_ON_CHECK.value as BotStatus;
+    case STEPS.COMMENT.step:
+      return STEPS.COMMENT.value as BotStatus;
+    case STEPS.SHTRIH_CODE.step:
+      return STEPS.SHTRIH_CODE.value as BotStatus;
+    case STEPS.CHECK.step:
+      return STEPS.CHECK.value as BotStatus;
+    case STEPS.BROKE_ARTICUL.step:
+      return STEPS.BROKE_ARTICUL.value as BotStatus;
+    default:
+      break;
+  }
+};
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
   const { title, keys, cash, priceWb, priceForYou, times, location, image } =
@@ -274,6 +308,7 @@ export function getTextByNextStep(
   name: string,
 ): string {
   switch (step) {
+    case STEPS.BROKE_ARTICUL.step:
     case STEPS.CHOOSE_OFFER.step:
       return FIRST_STEP_LINK;
     case STEPS.SEARCH.step:

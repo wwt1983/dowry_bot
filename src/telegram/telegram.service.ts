@@ -371,7 +371,13 @@ export class TelegramService {
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      if (Статус === 'Выбор раздачи' || Статус === 'Артикул правильный') {
+      console.log('restore session = ', id, STEPS_VALUE[Статус].step, Статус);
+
+      if (
+        Статус === 'Выбор раздачи' ||
+        Статус === 'Артикул правильный' ||
+        Статус === 'Проблема с артикулом'
+      ) {
         //
       } else {
         if (
@@ -395,10 +401,7 @@ export class TelegramService {
         startTime: dateFormat(StartTime, FORMAT_DATE),
         stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
         stopTime: dateFormat(StopTime, FORMAT_DATE),
-        step:
-          Статус === 'Выбор раздачи'
-            ? (STEPS_VALUE[Статус].step as number)
-            : (STEPS_VALUE[Статус].step as number) + 1,
+        step: STEPS_VALUE[Статус].step as number,
         images: Images?.map((x) => x.url),
         offerId: OfferId[0],
         status: Статус,
@@ -419,23 +422,41 @@ export class TelegramService {
           ctx.session.chat_id,
         );
 
-        ctx.session = updateSessionByStep(ctx.session);
-        ctx.session.errorStatus = 'check_articul';
+        ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
           getTextForFirstStep(sessionData) as any[],
         );
-        ctx.session.lastMessage = response[response.length - 1].message_id;
+        ctx.session = nextStep(ctx.session);
       } else {
-        response = await ctx.reply(
-          getTextByNextStep(
-            ctx.session.step,
-            ctx.session.startTime,
-            ctx.session.data.title,
-          ),
-        );
-        ctx.session.lastMessage = response.message_id;
+        if (Статус === 'Проблема с артикулом') {
+          ctx.session.errorStatus = 'check_articul';
+          response = await ctx.api.sendMessage(
+            ctx.session.chat_id,
+            getTextByNextStep(
+              ctx.session.step,
+              ctx.session.startTime,
+              ctx.session.data.title,
+            ),
+            {
+              link_preview_options: {
+                is_disabled: true,
+              },
+            },
+          );
+          ctx.session.step = STEPS.CHECK_ARTICUL.step;
+        } else {
+          ctx.session = nextStep(ctx.session);
+          response = await ctx.reply(
+            getTextByNextStep(
+              ctx.session.step,
+              ctx.session.startTime,
+              ctx.session.data.title,
+            ),
+          );
+        }
       }
+      ctx.session.lastMessage = response.message_id;
       await ctx.answerCallbackQuery();
     });
 
@@ -563,9 +584,15 @@ export class TelegramService {
 
           //return await ctx.replyWithPhoto(`${WEB_APP}/images/wb-search.jpg`);
         }
-
         //проверка артикула
-        if (STEPS.CHECK_ARTICUL.step === step) {
+        if (
+          STEPS.CHECK_ARTICUL.step === step ||
+          STEPS.BROKE_ARTICUL.step === step
+        ) {
+          if (STEPS.BROKE_ARTICUL.step === step) {
+            ctx.session.step = STEPS.CHECK_ARTICUL.step;
+          }
+
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
 
@@ -594,7 +621,7 @@ export class TelegramService {
             ctx.session.lastMessage = ctx.message.message_id;
             ctx.session.countTryError++;
 
-            if (ctx.session.countTryError < COUNT_TRY_ERROR) {
+            if (ctx.session.countTryError <= COUNT_TRY_ERROR) {
               ctx.session = updateSessionByField(
                 ctx.session,
                 'status',
