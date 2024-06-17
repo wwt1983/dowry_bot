@@ -210,6 +210,7 @@ export function updateSessionByStep(
   return session;
 }
 export function nextStep(session: ISessionData): ISessionData {
+  console.log('session=', session);
   session.step = session.step + 1;
   return session;
 }

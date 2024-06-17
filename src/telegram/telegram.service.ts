@@ -66,7 +66,6 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
-import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 //import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -225,8 +224,11 @@ export class TelegramService {
 
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+
       ctx.session.lastMessage = ctx.message.message_id;
       ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
+
+      console.log('photo=', url, ctx.session);
 
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
@@ -501,7 +503,7 @@ export class TelegramService {
         let data: ITelegramWebApp = null;
 
         //ответ от веб-интерфейса с выбором раздачи
-        if (ctx.msg.text.includes('query_id')) {
+        if (ctx.msg?.text?.includes('query_id')) {
           if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
             const { id } = ctx.from;
             const userValue = getUserName(ctx.from);
@@ -749,6 +751,7 @@ export class TelegramService {
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
+    console.log('update airtable=', session);
     return await this.airtableService.updateToAirtable(session);
   }
 
