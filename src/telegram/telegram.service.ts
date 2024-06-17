@@ -354,9 +354,9 @@ export class TelegramService {
 
       const { id } = ctx.from;
 
-      this.bot.api
-        .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
-        .catch(() => {});
+      // this.bot.api
+      //   .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
+      //   .catch(() => {});
 
       const sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
       const data = await this.commandService.getBotByFilter(
