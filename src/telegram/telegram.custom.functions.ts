@@ -441,8 +441,8 @@ export const getNotificationValue = (
     case 'Поиск':
       const minutes =
         status === 'Артикул правильный' || status === 'Проблема с артикулом'
-          ? getDifferenceInMinutes(getDate()) + LIMIT_TIME_IN_MINUTES_FOR_BUY
-          : getDifferenceInMinutes(startTime) + LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+          ? getDifferenceInMinutes(getDate()) - LIMIT_TIME_IN_MINUTES_FOR_BUY
+          : getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
 
       console.log('minutes=', status, minutes);
 
