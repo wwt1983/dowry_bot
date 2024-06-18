@@ -446,7 +446,7 @@ export const getNotificationValue = (
 
       console.log('minutes=', status, minutes);
 
-      if (minutes < 0) {
+      if (minutes > 0) {
         nextStatusNotification = 'Время истекло';
       } else {
         nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
