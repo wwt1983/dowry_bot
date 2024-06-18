@@ -901,7 +901,7 @@ export class TelegramService {
         notifications,
         statisticNotifications,
         status,
-        //startTime,
+        startTime,
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
@@ -962,10 +962,6 @@ export class TelegramService {
           value.notification.fields.Id,
         );
       }
-      await this.airtableService.updateStatusInBotTableAirtable(
-        sessionId,
-        value.status,
-      );
 
       await this.bot.api.sendMessage(
         chat_id,

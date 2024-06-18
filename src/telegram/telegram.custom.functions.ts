@@ -431,20 +431,19 @@ export const getNotificationValue = (
   notifications: INotifications,
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
-  //startTime: string,
+  startTime: string,
 ) => {
   let nextStatusNotification: BotStatus;
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
-    case 'Вызов':
     case 'Поиск':
       const minutes =
         status === 'Артикул правильный' || status === 'Проблема с артикулом'
-          ? getDifferenceInMinutes(getDate())
-          : LIMIT_TIME_IN_MINUTES_FOR_BUY;
-      if (minutes > LIMIT_TIME_IN_MINUTES_FOR_BUY) {
+          ? getDifferenceInMinutes(getDate()) + LIMIT_TIME_IN_MINUTES_FOR_BUY
+          : getDifferenceInMinutes(startTime) + LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+      if (minutes < 0) {
         nextStatusNotification = 'Время истекло';
       } else {
         nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
