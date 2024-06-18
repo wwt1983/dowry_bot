@@ -870,7 +870,7 @@ export class TelegramService {
     outFromOffer: boolean,
   ): Promise<void> {
     try {
-      console.log(chat_id, sessionId, botId, status);
+      console.log('sendNotificationToUser=', chat_id, sessionId, botId, status);
       if (
         status === 'Бот удален' ||
         status === 'Ошибка' ||
