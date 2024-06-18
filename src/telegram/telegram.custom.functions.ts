@@ -431,7 +431,7 @@ export const getNotificationValue = (
   notifications: INotifications,
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
-  startTime: string,
+  //startTime: string,
 ) => {
   let nextStatusNotification: BotStatus;
   switch (status) {
@@ -441,8 +441,8 @@ export const getNotificationValue = (
     case 'Вызов':
     case 'Поиск':
       const minutes =
-        status === 'Артикул правильный'
-          ? getDifferenceInMinutes(startTime)
+        status === 'Артикул правильный' || status === 'Проблема с артикулом'
+          ? getDifferenceInMinutes(getDate())
           : LIMIT_TIME_IN_MINUTES_FOR_BUY;
       if (minutes > LIMIT_TIME_IN_MINUTES_FOR_BUY) {
         nextStatusNotification = 'Время истекло';

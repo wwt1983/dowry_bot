@@ -901,7 +901,7 @@ export class TelegramService {
         notifications,
         statisticNotifications,
         status,
-        startTime,
+        //startTime,
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
