@@ -443,6 +443,9 @@ export const getNotificationValue = (
         status === 'Артикул правильный' || status === 'Проблема с артикулом'
           ? getDifferenceInMinutes(getDate()) + LIMIT_TIME_IN_MINUTES_FOR_BUY
           : getDifferenceInMinutes(startTime) + LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+
+      console.log('minutes=', status, minutes);
+
       if (minutes < 0) {
         nextStatusNotification = 'Время истекло';
       } else {
