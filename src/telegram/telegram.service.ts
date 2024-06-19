@@ -198,16 +198,6 @@ export class TelegramService {
       }
     });
 
-    /*======== HISTORY =======*/
-    this.bot.command('test', async (ctx) => {
-      try {
-        console.log('test');
-      } catch (e) {
-        console.log('history=', e);
-        return await ctx.reply('Раздел обновляется');
-      }
-    });
-
     /*======== LOCATION =======*/
     this.bot.on(':location', async (ctx) => {
       const data = await commandService.get(
