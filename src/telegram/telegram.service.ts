@@ -20,6 +20,7 @@ import {
   STOP_TEXT,
   COUNT_TRY_ERROR,
   ADMIN_COMMANDS_TELEGRAM,
+  STEP_EXAMPLE_TEXT_UP,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -308,13 +309,7 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
-      return await this.bot.api.sendMediaGroup(ctx.from.id, [
-        {
-          type: 'photo',
-          media: getErrorTextByStep(STEPS.Получен.step)?.url,
-          caption: '',
-        },
-      ]);
+      return await this.sendMediaByStep(STEPS.Получен.step, ctx);
     });
 
     /*======== DEL =======*/
@@ -382,6 +377,9 @@ export class TelegramService {
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
+
+      await this.sendMediaByStep(ctx.session.step, ctx);
+
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       if (ctx.session.step === STEPS.Финиш.step) {
         await ctx.react('🎉');
@@ -499,18 +497,7 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
-          if (
-            getErrorTextByStep(ctx.session.step) &&
-            getErrorTextByStep(ctx.session.step)?.url
-          ) {
-            response = await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
-              {
-                type: 'photo',
-                media: getErrorTextByStep(ctx.session.step)?.url,
-                caption: '(образец ⬆️)',
-              },
-            ]);
-          }
+          await this.sendMediaByStep(ctx.session.step, ctx);
         }
       }
       ctx.session.lastMessage = response.message_id;
@@ -628,16 +615,7 @@ export class TelegramService {
                 },
               },
             );
-
-            if (getErrorTextByStep(step)?.url) {
-              return await this.bot.api.sendMediaGroup(ctx.from.id, [
-                {
-                  type: 'photo',
-                  media: getErrorTextByStep(step)?.url,
-                  caption: '',
-                },
-              ]);
-            }
+            await this.sendMediaByStep(step, ctx);
           }
         }
 
@@ -735,13 +713,16 @@ export class TelegramService {
 
             ctx.session = nextStep(ctx.session);
             await this.updateToAirtable(ctx.session);
-            return await ctx.reply(
+            await ctx.reply(
               getTextByNextStep(
                 ctx.session.step,
                 ctx.session.startTime,
                 ctx.session.data.title,
               ),
             );
+
+            await this.sendMediaByStep(STEPS.Поиск.step, ctx);
+            return;
           }
         }
 
@@ -1094,5 +1075,17 @@ export class TelegramService {
       createCommentForDb(comment),
     );
     return msgToChat;
+  }
+
+  async sendMediaByStep(step: number, ctx: MyContext) {
+    if (getErrorTextByStep(step)?.url) {
+      await this.bot.api.sendMediaGroup(ctx.from.id, [
+        {
+          type: 'photo',
+          media: getErrorTextByStep(step)?.url,
+          caption: STEP_EXAMPLE_TEXT_UP,
+        },
+      ]);
+    }
   }
 }

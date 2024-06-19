@@ -24,7 +24,7 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_BUY,
   STEP_ERROR_TEXT,
   WEB_APP,
-  STEP_EXAMPLE_TEXT,
+  STEP_EXAMPLE_TEXT_DOWN,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -546,9 +546,9 @@ export const getErrorTextByStep = (
     error:
       STEP_ERROR_TEXT +
       stepType.erroText +
-      (STEPS[stepType.value].image ? STEP_EXAMPLE_TEXT : ''),
-    url: STEPS[stepType.value].image
-      ? WEB_APP + STEPS[stepType.value].image
+      (STEPS[stepType.value]?.image ? STEP_EXAMPLE_TEXT_DOWN : ''),
+    url: STEPS[stepType.value]?.image
+      ? WEB_APP + STEPS[stepType.value]?.image
       : null,
   };
 };

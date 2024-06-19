@@ -53,7 +53,9 @@ export enum STEP_COMMANDS {
   help = 'Пошаговая инструкция',
 }
 export const STEP_ERROR_TEXT = 'На этом шаге нужно ';
-export const STEP_EXAMPLE_TEXT = ' (образец ⤵️)';
+export const STEP_EXAMPLE_TEXT_DOWN = ' (образец ⤵️)';
+export const STEP_EXAMPLE_TEXT_UP = ' (образец ⬆️)';
+
 export const STEPS = {
   ['В боте']: {
     step: 1,
