@@ -20,7 +20,6 @@ import {
   STOP_TEXT,
   COUNT_TRY_ERROR,
   ADMIN_COMMANDS_TELEGRAM,
-  STEPS_VALUE,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -219,7 +218,7 @@ export class TelegramService {
       }
 
       if (!STEPS_TYPES.image.includes(step)) {
-        return ctx.reply('На этом шаге должно быть текстовое сообщение');
+        return ctx.reply('dfdfdfdfdfdfdf');
       }
 
       const path = await ctx.getFile();
@@ -242,7 +241,7 @@ export class TelegramService {
 
     /*======== OPERATOR =======*/
     this.bot.callbackQuery('operator', async (ctx) => {
-      if (ctx.session.step === STEPS.FINISH.step) {
+      if (ctx.session.step === STEPS.Финиш.step) {
         return ctx.reply('Напишите сообщение оператору и ожидайте ответа🧑‍💻');
       }
       ctx.session = updateSessionByField(ctx.session, 'status', 'Вызов');
@@ -270,7 +269,7 @@ export class TelegramService {
 
     /*======== NO DELIVERY =======*/
     this.bot.callbackQuery('no_delivery_date', async (ctx) => {
-      ctx.session.step = STEPS.RECEIVED.step;
+      ctx.session.step = STEPS.Получен.step;
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(
           ctx.session.step,
@@ -314,6 +313,7 @@ export class TelegramService {
         // );
         await statusMessage.editText('Фото загружено! ');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+        console.log('STEPS == ', Object.values(STEPS));
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -323,7 +323,7 @@ export class TelegramService {
 
       await this.updateToAirtable(ctx.session);
 
-      if (ctx.session.step === STEPS.DELIVERY_DATE.step) {
+      if (ctx.session.step === STEPS['Дата доставки'].step) {
         ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       }
 
@@ -333,12 +333,12 @@ export class TelegramService {
           ctx.session.startTime,
           ctx.session.data.title,
         ),
-        ctx.session.step === STEPS.DELIVERY_DATE.step
+        ctx.session.step === STEPS['Дата доставки'].step
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
-      if (ctx.session.step === STEPS.FINISH.step) {
+      if (ctx.session.step === STEPS.Финиш.step) {
         await ctx.react('🎉');
         await ctx.reply('👩‍💻', {
           reply_markup: operatorKeyboard,
@@ -371,7 +371,7 @@ export class TelegramService {
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      console.log('restore session = ', id, STEPS_VALUE[Статус].step, Статус);
+      console.log('restore session = ', id, STEPS[Статус].step, Статус);
 
       if (
         Статус === 'Выбор раздачи' ||
@@ -381,8 +381,8 @@ export class TelegramService {
         //
       } else {
         if (
-          !STEPS_VALUE[Статус] ||
-          STEPS_VALUE[Статус]?.step < 0 ||
+          !STEPS[Статус] ||
+          STEPS[Статус]?.step < 0 ||
           !Images ||
           Images.length === 0
         ) {
@@ -401,7 +401,7 @@ export class TelegramService {
         startTime: dateFormat(StartTime, FORMAT_DATE),
         stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
         stopTime: dateFormat(StopTime, FORMAT_DATE),
-        step: STEPS_VALUE[Статус].step as number,
+        step: STEPS[Статус].step as number,
         images: Images?.map((x) => x.url),
         offerId: OfferId[0],
         status: Статус,
@@ -444,7 +444,7 @@ export class TelegramService {
               },
             },
           );
-          ctx.session.step = STEPS.CHECK_ARTICUL.step;
+          ctx.session.step = STEPS['Артикул правильный'].step;
         } else {
           ctx.session = nextStep(ctx.session);
           response = await ctx.reply(
@@ -500,7 +500,7 @@ export class TelegramService {
 
         if (
           ctx.session.lastCommand === COMMAND_NAMES.call ||
-          ctx.session.step === STEPS.FINISH.step
+          ctx.session.step === STEPS.Финиш.step
         ) {
           const msgToSecretChat = await this.saveComment(
             ctx.from,
@@ -569,7 +569,7 @@ export class TelegramService {
         const { step } = ctx.session;
 
         //первый шаг
-        if (STEPS.CHOOSE_OFFER.step === step && data) {
+        if (STEPS['Выбор раздачи'].step === step && data) {
           ctx.session = nextStep(ctx.session);
 
           await this.updateToAirtable(ctx.session);
@@ -586,11 +586,11 @@ export class TelegramService {
         }
         //проверка артикула
         if (
-          STEPS.CHECK_ARTICUL.step === step ||
-          STEPS.BROKE_ARTICUL.step === step
+          STEPS['Артикул правильный'].step === step ||
+          STEPS['Проблема с артикулом'].step === step
         ) {
-          if (STEPS.BROKE_ARTICUL.step === step) {
-            ctx.session.step = STEPS.CHECK_ARTICUL.step;
+          if (STEPS['Проблема с артикулом'].step === step) {
+            ctx.session.step = STEPS['Артикул правильный'].step;
           }
 
           if (!parseUrl(text, ctx.session.data.articul)) {
@@ -671,7 +671,7 @@ export class TelegramService {
         }
 
         //дата доставки
-        if (step === STEPS.DELIVERY_DATE.step) {
+        if (step === STEPS['Дата доставки'].step) {
           ctx.session.deliveryDate = dateFormat(text);
           ctx.session = nextStep(ctx.session);
           await this.updateToAirtable(ctx.session);
@@ -688,7 +688,7 @@ export class TelegramService {
         }
 
         //отзыв пользователя
-        if (step === STEPS.COMMENT_ON_CHECK.step) {
+        if (step === STEPS['Отзыв на проверке'].step) {
           ctx.session = updateSessionByField(
             ctx.session,
             'comment',

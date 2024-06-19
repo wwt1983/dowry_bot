@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   FIRST_STEP,
-  HEADER,
   FIRST_STEP_A,
   //FIRST_STEP_B,
   FIRST_STEP_C,
@@ -89,7 +88,7 @@ export function createInitialSessionData(
     startTime: getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
-    step: STEPS.INBOT.step,
+    step: STEPS['В боте'].step,
     comment: '',
     images: [],
     lastLoadImage: null,
@@ -157,40 +156,41 @@ export function updateSessionByStep(
   isPhotoMsg?: boolean,
 ): ISessionData {
   const { step } = session;
+
   switch (step) {
-    case STEPS.INBOT.step:
-    case STEPS.CHECK_ARTICUL.step:
+    case STEPS['В боте'].step:
+    case STEPS['Артикул правильный'].step:
       break;
-    case STEPS.CHOOSE_OFFER.step:
+    case STEPS['Выбор раздачи'].step:
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.SEARCH.step:
+    case STEPS.Поиск.step:
       session.status = 'Поиск';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.ORDER.step:
+    case STEPS.Заказ.step:
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
       break;
-    case STEPS.DELIVERY_DATE.step:
+    case STEPS['Дата доставки'].step:
       session.status = 'Дата доставки';
       break;
-    case STEPS.RECEIVED.step:
+    case STEPS.Получен.step:
       session.status = 'Получен';
       break;
-    case STEPS.COMMENT_ON_CHECK.step:
+    case STEPS['Отзыв на проверке'].step:
       session.comment = data;
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.COMMENT.step:
+    case STEPS.Отзыв.step:
       session.status = 'Отзыв';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.SHTRIH_CODE.step:
+    case STEPS['Штрих-код'].step:
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.CHECK.step:
+    case STEPS.Чек.step:
       session.stopTime = getTimeWithTz();
       session.status = 'Чек';
       session.isFinish = true;
@@ -204,7 +204,7 @@ export function updateSessionByStep(
     session.lastLoadImage = data;
   }
 
-  if (step !== STEPS.DELIVERY_DATE.step) {
+  if (step !== STEPS['Дата доставки'].step) {
     session = nextStep(session);
   }
 
@@ -217,37 +217,6 @@ export function nextStep(session: ISessionData): ISessionData {
 
   return session;
 }
-
-export const getStatusName = (step: number): BotStatus => {
-  switch (step) {
-    case STEPS.INBOT.step:
-      return STEPS.INBOT.value as BotStatus;
-    case STEPS.CHECK_ARTICUL.step:
-      return STEPS.CHECK_ARTICUL.value as BotStatus;
-    case STEPS.CHOOSE_OFFER.step:
-      return STEPS.CHOOSE_OFFER.value as BotStatus;
-    case STEPS.SEARCH.step:
-      return STEPS.SEARCH.value as BotStatus;
-    case STEPS.ORDER.step:
-      return STEPS.ORDER.value as BotStatus;
-    case STEPS.DELIVERY_DATE.step:
-      return STEPS.DELIVERY_DATE.value as BotStatus;
-    case STEPS.RECEIVED.step:
-      return STEPS.RECEIVED.value as BotStatus;
-    case STEPS.COMMENT_ON_CHECK.step:
-      return STEPS.COMMENT_ON_CHECK.value as BotStatus;
-    case STEPS.COMMENT.step:
-      return STEPS.COMMENT.value as BotStatus;
-    case STEPS.SHTRIH_CODE.step:
-      return STEPS.SHTRIH_CODE.value as BotStatus;
-    case STEPS.CHECK.step:
-      return STEPS.CHECK.value as BotStatus;
-    case STEPS.BROKE_ARTICUL.step:
-      return STEPS.BROKE_ARTICUL.value as BotStatus;
-    default:
-      break;
-  }
-};
 
 export function getTextForFirstStep(data: ITelegramWebApp) {
   const { title, keys, cash, priceWb, priceForYou, times, location, image } =
@@ -307,27 +276,27 @@ export function getTextByNextStep(
   name: string,
 ): string {
   switch (step) {
-    case STEPS.BROKE_ARTICUL.step:
-    case STEPS.CHOOSE_OFFER.step:
+    case STEPS['Проблема с артикулом'].step:
+    case STEPS['Выбор раздачи'].step:
       return FIRST_STEP_LINK;
-    case STEPS.SEARCH.step:
-    case STEPS.CHECK_ARTICUL.step:
+    case STEPS.Поиск.step:
+    case STEPS['Артикул правильный'].step:
       return FIRST_STEP_A + getNumberText(step, startTime, name);
-    case STEPS.ORDER.step:
+    case STEPS.Заказ.step:
       return FIRST_STEP_C + getNumberText(step, startTime, name);
-    case STEPS.DELIVERY_DATE.step:
+    case STEPS['Дата доставки'].step:
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
-    case STEPS.RECEIVED.step:
+    case STEPS.Получен.step:
       return SECOND_STEP + getNumberText(step, null, name);
-    case STEPS.COMMENT_ON_CHECK.step:
+    case STEPS['Отзыв на проверке'].step:
       return THREE_STEP + getNumberText(step, null, name);
-    case STEPS.COMMENT.step:
+    case STEPS.Отзыв.step:
       return (
         FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
       );
-    case STEPS.SHTRIH_CODE.step:
+    case STEPS['Штрих-код'].step:
       return FIVE_STEP + getNumberText(step, null, name);
-    case STEPS.CHECK.step:
+    case STEPS.Чек.step:
       return SIX_STEP + getNumberText(step, null, name);
     default:
       return FOOTER;
@@ -341,31 +310,19 @@ function getNumberText(step: number, startTime: string, name: string) {
     ? LIMIT_TIME_IN_MINUTES_FOR_BUY - getDifferenceInMinutes(startTime)
     : null;
   const waitTime = minutes ? `(осталось ${minutes} мин. для заказа)` : '';
-
-  switch (step) {
-    case STEPS.CHOOSE_OFFER.step:
-      return finish_txt + `9️⃣ шагов\n`;
-    case STEPS.CHECK_ARTICUL.step:
-      return finish_txt + `8️⃣ шагов\n`;
-    case STEPS.SEARCH.step:
-      return finish_txt + `7️⃣ шагов ${waitTime}\n`;
-    case STEPS.ORDER.step:
-      return finish_txt + `6️⃣ шагов ${waitTime}\n`;
-    case STEPS.RECEIVED.step:
-      return finish_txt + `5️⃣ шагов\n`;
-    case STEPS.COMMENT_ON_CHECK.step:
-      return finish_txt + `4️⃣ шага\n`;
-    case STEPS.COMMENT.step:
-      return finish_txt + `3️⃣ шага\n`;
-    case STEPS.SHTRIH_CODE.step:
-      return finish_txt + `2️⃣ шага\n`;
-    case STEPS.CHECK.step:
-      return finish_txt + `1️⃣ шаг\n`;
-    case STEPS.INBOT.step:
-      return '';
-    default:
-      return '';
+  const stepValues = Object.values(STEPS);
+  for (let i = 0; i < stepValues.length; i++) {
+    if (step === stepValues[i].step) {
+      return (
+        finish_txt +
+        stepValues[i].textStepCount +
+        (stepValues[i].value === 'Поиск' || stepValues[i].value === 'Заказ'
+          ? ` ${waitTime}\n`
+          : '')
+      );
+    }
   }
+  return '';
 }
 
 export function getOffer(data: IOffer) {

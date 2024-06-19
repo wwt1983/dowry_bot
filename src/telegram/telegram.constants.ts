@@ -50,60 +50,113 @@ export enum STEP_COMMANDS {
   no_delivery_date = 'Пропустить',
   check_articul = 'Проверка артикула',
 }
-
+const STEP_ERROR_TEXT = 'На этом шаге нужно ';
 export const STEPS = {
-  INBOT: { step: 1, value: 'В боте' }, //в боте
-  CHOOSE_OFFER: { step: 2, value: 'Выбор раздачи' }, // выбор раздачи (web)
-  CHECK_ARTICUL: { step: 3, value: 'Артикул правильный' }, // проверка артикул (text)
-  SEARCH: { step: 4, value: 'Поиск' }, //поиск (photo)
-  ORDER: { step: 5, value: 'Заказ' }, //заказ (photo)
-  DELIVERY_DATE: { step: 6, value: 'Дата доставки' }, //дата получения ориентировочная
-  RECEIVED: { step: 7, value: 'Получен' }, // получен (photo)
-  COMMENT_ON_CHECK: { step: 8, value: 'Отзыв на проверке' }, // отзыв на проверке (text)
-  COMMENT: { step: 9, value: 'Отзыв' }, //отзыв (photo)
-  SHTRIH_CODE: { step: 10, value: 'Штрих-код' }, // штрих-код (photo)
-  CHECK: { step: 11, value: 'Чек' }, //чек
-  FINISH: { step: 12, value: '' }, // finish
-  BROKE_LOCATION: { step: -1, value: 'Проблема с локацией' }, //геолокация не совпадает с раздачей
-  BROKE_ARTICUL: { step: -2, value: 'Проблема с артикулом' }, // артикул не совпадает с раздачей
-  HELP: { step: -3, value: '' },
-  TIMEOUT: { step: -4, value: 'Время истекло' },
-};
-export const STEPS_VALUE = {
-  ['В боте']: STEPS.INBOT,
-  ['Выбор раздачи']: STEPS.CHOOSE_OFFER,
-  ['Артикул правильный']: STEPS.CHECK_ARTICUL,
-  Поиск: STEPS.SEARCH,
-  Заказ: STEPS.ORDER,
-  ['Дата доставки']: STEPS.DELIVERY_DATE,
-  Получен: STEPS.RECEIVED,
-  ['Отзыв на проверке']: STEPS.COMMENT_ON_CHECK,
-  Отзыв: STEPS.COMMENT,
-  ['Штрих-код']: STEPS.SHTRIH_CODE,
-  Чек: STEPS.CHECK,
-  Финиш: STEPS.FINISH,
-  ['Проблема с локацией']: STEPS.BROKE_LOCATION,
-  ['Проблема с артикулом']: STEPS.BROKE_ARTICUL,
-  ['Время истекло']: STEPS.TIMEOUT,
+  ['В боте']: {
+    step: 1,
+    value: 'В боте',
+    erroText: '',
+    textStepCount: '',
+  }, //в боте
+  ['Выбор раздачи']: {
+    step: 2,
+    value: 'Выбор раздачи',
+    erroText: '',
+    textStepCount: `9️⃣ шагов\n`,
+  }, // выбор раздачи (web)
+  'Артикул правильный': {
+    step: 3,
+    value: 'Артикул правильный',
+    erroText: STEP_ERROR_TEXT + 'ввести артикул товара',
+    textStepCount: `8️⃣ шагов\n`,
+  }, // проверка артикул (text)
+  Поиск: {
+    step: 4,
+    value: 'Поиск',
+    erroText: '',
+    textStepCount: `7️⃣ шагов`,
+  }, //поиск (photo)
+  Заказ: {
+    step: 5,
+    value: 'Заказ',
+    erroText: '',
+    textStepCount: `6️⃣ шагов`,
+  }, //заказ (photo)
+  'Дата доставки': {
+    step: 6,
+    value: 'Дата доставки',
+    erroText: '',
+    textStepCount: '',
+  }, //дата получения ориентировочная
+  Получен: {
+    step: 7,
+    value: 'Получен',
+    erroText: '',
+    textStepCount: `5️⃣ шагов\n`,
+  }, // получен (photo)
+  ['Отзыв на проверке']: {
+    step: 8,
+    value: 'Отзыв на проверке',
+    erroText: '',
+    textStepCount: `4️⃣ шага\n`,
+  }, // отзыв на проверке (text)
+  Отзыв: { step: 9, value: 'Отзыв', erroText: '', textStepCount: `3️⃣ шага\n` }, //отзыв (photo)
+  ['Штрих-код']: {
+    step: 10,
+    value: 'Штрих-код',
+    erroText: '',
+    textStepCount: `2️⃣ шага\n`,
+  }, // штрих-код (photo)
+  Чек: {
+    step: 11,
+    value: 'Чек',
+    erroText: '',
+    textStepCount: `1️⃣ шаг\n`,
+  }, //чек
+  Финиш: {
+    step: 12,
+    value: '',
+    erroText: '',
+    textStepCount: '',
+  }, // finish
+  ['Проблема с локацией']: {
+    step: -1,
+    value: 'Проблема с локацией',
+    erroText: '',
+    textStepCount: '',
+  }, //геолокация не совпадает с раздачей
+  ['Проблема с артикулом']: {
+    step: -2,
+    value: 'Проблема с артикулом',
+    erroText: '',
+    textStepCount: '',
+  }, // артикул не совпадает с раздачей
+  HELP: { step: -3, value: '', erroText: '', textStepCount: '' },
+  ['Время истекло']: {
+    step: -4,
+    value: 'Время истекло',
+    erroText: '',
+    textStepCount: '',
+  },
 };
 
 export const STEPS_TYPES = {
   image: [
-    STEPS.SEARCH.step,
-    STEPS.ORDER.step,
-    STEPS.RECEIVED.step,
-    STEPS.COMMENT.step,
-    STEPS.SHTRIH_CODE.step,
-    STEPS.CHECK.step,
+    STEPS.Поиск.step,
+    STEPS.Заказ.step,
+    STEPS.Получен.step,
+    STEPS.Отзыв.step,
+    STEPS['Штрих-код'].step,
+    STEPS.Чек.step,
   ],
   text: [
-    STEPS.INBOT.step,
-    STEPS.CHOOSE_OFFER.step,
-    STEPS.CHECK_ARTICUL.step,
-    STEPS.COMMENT_ON_CHECK.step,
+    STEPS['В боте'].step,
+    STEPS['Выбор раздачи'].step,
+    STEPS['Артикул правильный'].step,
+    STEPS['Отзыв на проверке'].step,
     STEPS.HELP.step,
-    STEPS.DELIVERY_DATE.step,
-    STEPS.FINISH.step,
+    STEPS['Дата доставки'].step,
+    STEPS.Финиш.step,
   ],
 };
 
@@ -149,47 +202,47 @@ export const FOOTER =
 
 export const IMAGES_STEP = [
   {
-    type: STEPS.INBOT,
+    type: STEPS['В боте'],
     url: WEB_APP + '/images/wb.jpg',
     text: FIRST_STEP_START_HELP,
   },
   {
-    type: STEPS.CHOOSE_OFFER,
+    type: STEPS['Выбор раздачи'],
     url: WEB_APP + '/images/0.jpg',
     text: FIRST_STEP_OFFER,
   },
   {
-    type: STEPS.CHOOSE_OFFER,
+    type: STEPS['Выбор раздачи'],
     url: WEB_APP + '/images/7.jpg',
     text: FIRST_STEP + FIRST_STEP_KEY + FIRST_STEP_A,
   },
   {
-    type: STEPS.ORDER.step,
+    type: STEPS.Заказ.step,
     url: WEB_APP + '/images/1.jpeg',
     text: FIRST_STEP_B + FIRST_STEP_C,
   },
   {
-    type: STEPS.RECEIVED.value,
+    type: STEPS.Получен.value,
     url: WEB_APP + '/images/2.jpeg',
     text: SECOND_STEP,
   },
   {
-    type: STEPS.COMMENT.value,
+    type: STEPS.Отзыв.value,
     url: WEB_APP + '/images/3.jpeg',
     text: THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
   },
   {
-    type: STEPS.COMMENT_ON_CHECK.value,
+    type: STEPS['Отзыв на проверке'].value,
     url: WEB_APP + '/images/4.jpeg',
     text: FIVE_STEP,
   },
   {
-    type: STEPS.SHTRIH_CODE.value,
+    type: STEPS['Штрих-код'].value,
     url: WEB_APP + '/images/5.jpeg',
     text: SIX_STEP,
   },
   {
-    type: STEPS.FINISH.value,
+    type: STEPS.Финиш.value,
     url: WEB_APP + '/images/6.jpeg',
     text: FOOTER,
   },
