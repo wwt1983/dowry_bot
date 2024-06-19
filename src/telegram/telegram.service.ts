@@ -67,7 +67,6 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
-//import { parseQrCode } from './qrcode/grcode.parse';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -135,6 +134,26 @@ export class TelegramService {
       await ctx.reply(sayHi(first_name, userValue.userName), {
         reply_markup: historyButtons,
       });
+
+      if (ctx.match) {
+        const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
+          ctx.match,
+          id.toString(),
+        );
+
+        ctx.session.step = STEPS['Выбор раздачи'].step;
+        ctx.session.status = 'Выбор раздачи';
+        ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
+        const response = await this.bot.api.sendMediaGroup(
+          ctx.session.chat_id,
+          getTextForFirstStep(sessionData) as any[],
+        );
+        ctx.session = nextStep(ctx.session);
+        ctx.session.lastMessage =
+          response.length && response.length > 0
+            ? response[0].message_id
+            : null;
+      }
     });
 
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
@@ -173,6 +192,16 @@ export class TelegramService {
             reply_markup: orderButtons,
           },
         );
+      } catch (e) {
+        console.log('history=', e);
+        return await ctx.reply('Раздел обновляется');
+      }
+    });
+
+    /*======== HISTORY =======*/
+    this.bot.command('test', async (ctx) => {
+      try {
+        console.log('test');
       } catch (e) {
         console.log('history=', e);
         return await ctx.reply('Раздел обновляется');
