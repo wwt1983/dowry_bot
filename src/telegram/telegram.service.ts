@@ -499,7 +499,10 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
-          if (getErrorTextByStep(ctx.session.step)) {
+          if (
+            getErrorTextByStep(ctx.session.step) &&
+            getErrorTextByStep(ctx.session.step)?.url
+          ) {
             response = await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
               {
                 type: 'photo',
