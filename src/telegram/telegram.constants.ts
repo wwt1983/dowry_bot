@@ -1,6 +1,7 @@
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_NAME = '@DowryWorkBot';
+export const TELEGRAM_BOT_TEST_NAME = '@test_dowry_bot';
 export const TELEGRAM_CHAT_ID = '-1002002256034';
 export const TELEGRAM_SECRET_CHAT_ID = '-1002155788141';
 export const TELEGRAM_MESSAGE_CHAT_TEST = '-1002227889311';

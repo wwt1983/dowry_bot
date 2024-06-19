@@ -149,6 +149,8 @@ export class TelegramService {
           getTextForFirstStep(sessionData) as any[],
         );
         ctx.session = nextStep(ctx.session);
+        await this.updateToAirtable(ctx.session);
+        ctx.session.lastCommand = null;
       }
     });
 
