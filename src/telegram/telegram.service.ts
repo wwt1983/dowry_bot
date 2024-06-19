@@ -158,7 +158,8 @@ export class TelegramService {
         await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
       }
 
-      await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      const response = await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      ctx.session.lastMessage = response.message_id;
     });
 
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
@@ -331,8 +332,8 @@ export class TelegramService {
       for (const value of createHelpText()) {
         await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
       }
-
-      await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      const response = await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      ctx.session.lastMessage = response.message_id;
     });
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
@@ -1058,7 +1059,7 @@ export class TelegramService {
     const historyButtons = createHistoryKeyboard(dataBuyer, true);
     const countWorkLabels = createLabelHistory(dataBuyer).length;
 
-    await this.bot.api.sendMessage(
+    return await this.bot.api.sendMessage(
       chatId.toString(),
       `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : '⤵️'}`,
       {
