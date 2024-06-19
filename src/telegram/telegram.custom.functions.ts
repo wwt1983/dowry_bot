@@ -216,7 +216,7 @@ export function updateSessionByStep(
 export function nextStep(session: ISessionData): ISessionData {
   const nextCountStep = session.step + 1;
   session.step = nextCountStep;
-  console.log('session=', session);
+  //console.log('session=', session);
 
   return session;
 }

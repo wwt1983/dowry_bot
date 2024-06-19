@@ -569,15 +569,13 @@ export class TelegramService {
 
         //ответ от веб-интерфейса с выбором раздачи
         if (ctx.msg?.text?.includes('query_id')) {
-          if (ctx.session.lastCommand !== COMMAND_NAMES.start) {
-            const { id } = ctx.from;
-            const userValue = getUserName(ctx.from);
-            ctx.session = createInitialSessionData(
-              id?.toString(),
-              userValue.userName || userValue.fio,
-            );
-            await this.saveToAirtable(ctx.session);
-          }
+          const { id } = ctx.from;
+          const userValue = getUserName(ctx.from);
+          ctx.session = createInitialSessionData(
+            id?.toString(),
+            userValue.userName || userValue.fio,
+          );
+          await this.saveToAirtable(ctx.session);
 
           const webData = JSON.parse(text) as ITelegramWebApp;
           /*Удаляем первый ответ от сайта он формате объекта*/
@@ -589,7 +587,7 @@ export class TelegramService {
             webData.title,
           );
 
-          console.log('==== WEB API ====', data);
+          console.log('==== WEB API ====', data, ctx.session);
 
           ctx.session = updateSessionByField(ctx.session, 'data', data);
           ctx.session = updateSessionByField(
@@ -834,7 +832,7 @@ export class TelegramService {
 обновляем данные в airtable
 */
   async updateToAirtable(session: ISessionData): Promise<void> {
-    console.log('update airtable=', session);
+    //console.log('update airtable=', session);
     return await this.airtableService.updateToAirtable(session);
   }
 
@@ -1078,14 +1076,18 @@ export class TelegramService {
   }
 
   async sendMediaByStep(step: number, ctx: MyContext) {
-    if (getErrorTextByStep(step)?.url) {
-      await this.bot.api.sendMediaGroup(ctx.from.id, [
-        {
-          type: 'photo',
-          media: getErrorTextByStep(step)?.url,
-          caption: STEP_EXAMPLE_TEXT_UP,
-        },
-      ]);
+    try {
+      if (getErrorTextByStep(step)?.url) {
+        return await this.bot.api.sendMediaGroup(ctx.from.id, [
+          {
+            type: 'photo',
+            media: getErrorTextByStep(step)?.url,
+            caption: STEP_EXAMPLE_TEXT_UP,
+          },
+        ]);
+      }
+    } catch (e) {
+      console.log('sendMediaByStep=', e);
     }
   }
 }
