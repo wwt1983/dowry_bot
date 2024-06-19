@@ -262,7 +262,6 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     `❗️ Кешбэк ~ ${cash}❗️ \n` +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
     '\n' +
-    HEADER +
     FIRST_STEP +
     '➡️ ' +
     keys +

@@ -110,7 +110,11 @@ export const STEPS_TYPES = {
 export const COUNT_TRY_ERROR = 1;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
-export const FIRST_STEP = '1️⃣ НАЙТИ товар по запросу\n';
+export const FIRST_STEP_START_HELP =
+  '➡️ Для получения списка раздач нажмите "Dowry раздачи"';
+export const FIRST_STEP_OFFER = '➡️ Выберите раздачу';
+export const FIRST_STEP = '1️⃣ НАЙТИ товар на wildberries по запросу\n';
+export const FIRST_STEP_KEY = '(его вы увидите после выбора раздачи)\n';
 export const FIRST_STEP_LINK =
   'Загрузите сюда ссылку с артикулом товара (например, https://www.wildberries.ru/catalog/168217638/detail.aspx)\n';
 export const FIRST_STEP_A =
@@ -145,8 +149,18 @@ export const FOOTER =
 
 export const IMAGES_STEP = [
   {
-    type: STEPS.SEARCH.value,
+    type: STEPS.INBOT,
     url: WEB_APP + '/images/wb.jpg',
+    text: FIRST_STEP_START_HELP,
+  },
+  {
+    type: STEPS.CHOOSE_OFFER,
+    url: WEB_APP + '/images/0.jpg',
+    text: FIRST_STEP_OFFER,
+  },
+  {
+    type: STEPS.CHOOSE_OFFER,
+    url: WEB_APP + '/images/7.jpg',
     text: FIRST_STEP + FIRST_STEP_A,
   },
   {
