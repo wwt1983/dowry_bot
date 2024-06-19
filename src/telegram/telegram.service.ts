@@ -144,15 +144,11 @@ export class TelegramService {
         ctx.session.step = STEPS['Выбор раздачи'].step;
         ctx.session.status = 'Выбор раздачи';
         ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
-        const response = await this.bot.api.sendMediaGroup(
+        await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
           getTextForFirstStep(sessionData) as any[],
         );
         ctx.session = nextStep(ctx.session);
-        ctx.session.lastMessage =
-          response.length && response.length > 0
-            ? response[0].message_id
-            : null;
       }
     });
 
