@@ -476,13 +476,11 @@ export const scheduleNotification = (
     case 'Проблема с артикулом':
     case 'Вызов':
     case 'Поиск':
-      const minutes = getDifferenceInMinutes(startTime);
-      return (
-        minutes <=
-          (status === 'Артикул правильный'
-            ? LIMIT_TIME_IN_MINUTES_FOR_BUY
-            : LIMIT_TIME_IN_MINUTES_FOR_ORDER) && minutes > 10
-      );
+      const minutes =
+        status === 'Артикул правильный' || status === 'Проблема с артикулом'
+          ? getDifferenceInMinutes(getDate()) - LIMIT_TIME_IN_MINUTES_FOR_BUY
+          : getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+      return minutes >= 0;
     case 'Заказ':
       if (countSendNotification === 0) {
         return dateDelivery ? days === 1 : days > 6;
