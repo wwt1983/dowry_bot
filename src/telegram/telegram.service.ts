@@ -865,6 +865,7 @@ export class TelegramService {
         TELEGRAM_CHAT_ID,
         medias,
       );
+      
       return result.at(-1).message_id;
     } catch (e) {
       console.log('sendOfferToChat', e);
