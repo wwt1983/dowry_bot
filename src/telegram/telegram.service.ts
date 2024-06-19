@@ -223,7 +223,7 @@ export class TelegramService {
 
       if (!STEPS_TYPES.image.includes(step)) {
         await ctx.api.sendMessage(
-          ctx.session.chat_id,
+          ctx.from.id,
           getErrorTextByStep(step)?.error || '⤵️',
           {
             link_preview_options: {
@@ -290,7 +290,7 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
-      return await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
+      return await this.bot.api.sendMediaGroup(ctx.from.id, [
         {
           type: 'photo',
           media: getErrorTextByStep(STEPS.Получен.step)?.url,
@@ -481,6 +481,15 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
+          if (getErrorTextByStep(ctx.session.step)) {
+            response = await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
+              {
+                type: 'photo',
+                media: getErrorTextByStep(ctx.session.step)?.url,
+                caption: '(образец ⬆️)',
+              },
+            ]);
+          }
         }
       }
       ctx.session.lastMessage = response.message_id;
@@ -590,7 +599,7 @@ export class TelegramService {
           const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
             await ctx.api.sendMessage(
-              ctx.session.chat_id,
+              ctx.from.id,
               getErrorTextByStep(step).error || '⤵️',
               {
                 link_preview_options: {
@@ -600,7 +609,7 @@ export class TelegramService {
             );
 
             if (getErrorTextByStep(step)?.url) {
-              return await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
+              return await this.bot.api.sendMediaGroup(ctx.from.id, [
                 {
                   type: 'photo',
                   media: getErrorTextByStep(step)?.url,
