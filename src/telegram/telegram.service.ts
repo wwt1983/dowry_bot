@@ -313,7 +313,6 @@ export class TelegramService {
         // );
         await statusMessage.editText('Фото загружено! ');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
-        console.log('STEPS == ', Object.values(STEPS));
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
