@@ -161,7 +161,7 @@ export const IMAGES_STEP = [
   {
     type: STEPS.CHOOSE_OFFER,
     url: WEB_APP + '/images/7.jpg',
-    text: FIRST_STEP + FIRST_STEP_A,
+    text: FIRST_STEP + FIRST_STEP_KEY + FIRST_STEP_A,
   },
   {
     type: STEPS.ORDER.step,
