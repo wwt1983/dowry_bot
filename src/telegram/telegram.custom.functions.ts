@@ -22,6 +22,9 @@ import {
   FIVE_STEP,
   SIX_STEP,
   LIMIT_TIME_IN_MINUTES_FOR_BUY,
+  STEP_ERROR_TEXT,
+  WEB_APP,
+  STEP_EXAMPLE_TEXT,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -530,4 +533,20 @@ export const getArticulErrorStatus = (
     default:
       return 'wait';
   }
+};
+
+export const getErrorTextByStep = (
+  step: number,
+): { error: string; url?: string } | null => {
+  const stepType = Object.values(STEPS).find((x) => x.step === step);
+  if (!stepType) return null;
+  return {
+    error:
+      STEP_ERROR_TEXT +
+      stepType.erroText +
+      (STEPS[stepType.value].image ? STEP_EXAMPLE_TEXT : ''),
+    url: STEPS[stepType.value].image
+      ? WEB_APP + STEPS[stepType.value].image
+      : null,
+  };
 };

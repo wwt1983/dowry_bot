@@ -34,6 +34,11 @@ export const articulKeyboard = new InlineKeyboard().text(
   'check_articul',
 );
 
+export const helpKeyboard = new InlineKeyboard().text(
+  STEP_COMMANDS.help,
+  'help',
+);
+
 export const deliveryDateKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.no_delivery_date,
   'no_delivery_date',

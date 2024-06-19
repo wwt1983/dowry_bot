@@ -49,69 +49,83 @@ export enum STEP_COMMANDS {
   delivery_date = 'Сохранить дату',
   no_delivery_date = 'Пропустить',
   check_articul = 'Проверка артикула',
+  help = 'Пошаговая инструкция',
 }
-const STEP_ERROR_TEXT = 'На этом шаге нужно ';
+export const STEP_ERROR_TEXT = 'На этом шаге нужно ';
+export const STEP_EXAMPLE_TEXT = ' (образец ⤵️)';
 export const STEPS = {
   ['В боте']: {
     step: 1,
     value: 'В боте',
-    erroText: '',
+    erroText: 'выбрать раздачу',
     textStepCount: '',
   }, //в боте
   ['Выбор раздачи']: {
     step: 2,
     value: 'Выбор раздачи',
-    erroText: '',
+    erroText: 'выбрать раздачу',
     textStepCount: `9️⃣ шагов\n`,
   }, // выбор раздачи (web)
   'Артикул правильный': {
     step: 3,
     value: 'Артикул правильный',
-    erroText: STEP_ERROR_TEXT + 'ввести артикул товара',
+    erroText:
+      'загрузить ссылку найденного товара из wildberries (образец: https://www.wildberries.ru/catalog/222361220/detail.aspx)',
     textStepCount: `8️⃣ шагов\n`,
   }, // проверка артикул (text)
   Поиск: {
     step: 4,
     value: 'Поиск',
-    erroText: '',
+    erroText: 'загрузить скриншот поиска',
     textStepCount: `7️⃣ шагов`,
+    image: '/images/1.jpeg',
   }, //поиск (photo)
   Заказ: {
     step: 5,
     value: 'Заказ',
-    erroText: '',
+    erroText: 'загрузить скриншот заказа',
     textStepCount: `6️⃣ шагов`,
+    image: '/images/2.jpeg',
   }, //заказ (photo)
   'Дата доставки': {
     step: 6,
     value: 'Дата доставки',
-    erroText: '',
+    erroText: 'ввести дату доставки (в формате 12.12.2024)',
     textStepCount: '',
   }, //дата получения ориентировочная
   Получен: {
     step: 7,
     value: 'Получен',
-    erroText: '',
+    erroText: 'загрузить скриншот получения товара',
     textStepCount: `5️⃣ шагов\n`,
+    image: '/images/3.jpeg',
   }, // получен (photo)
   ['Отзыв на проверке']: {
     step: 8,
     value: 'Отзыв на проверке',
-    erroText: '',
+    erroText: 'написать отзыв или ожидать ответа',
     textStepCount: `4️⃣ шага\n`,
   }, // отзыв на проверке (text)
-  Отзыв: { step: 9, value: 'Отзыв', erroText: '', textStepCount: `3️⃣ шага\n` }, //отзыв (photo)
+  Отзыв: {
+    step: 9,
+    value: 'Отзыв',
+    erroText: 'загрузить скриншот отзыва с 5 ⭐️',
+    textStepCount: `3️⃣ шага\n`,
+    image: '/images/4.jpeg',
+  }, //отзыв (photo)
   ['Штрих-код']: {
     step: 10,
     value: 'Штрих-код',
-    erroText: '',
+    erroText: 'загрузить скриншот со штрих-кодом',
     textStepCount: `2️⃣ шага\n`,
+    image: '/images/5.jpeg',
   }, // штрих-код (photo)
   Чек: {
     step: 11,
     value: 'Чек',
-    erroText: '',
+    erroText: 'загрузить скриншот чека',
     textStepCount: `1️⃣ шаг\n`,
+    image: '/images/6.jpeg',
   }, //чек
   Финиш: {
     step: 12,
@@ -128,14 +142,14 @@ export const STEPS = {
   ['Проблема с артикулом']: {
     step: -2,
     value: 'Проблема с артикулом',
-    erroText: '',
+    erroText: 'ввести правильную ссылку из wildberries',
     textStepCount: '',
   }, // артикул не совпадает с раздачей
   HELP: { step: -3, value: '', erroText: '', textStepCount: '' },
   ['Время истекло']: {
     step: -4,
     value: 'Время истекло',
-    erroText: '',
+    erroText: 'написать о своей проблеме',
     textStepCount: '',
   },
 };
@@ -153,6 +167,7 @@ export const STEPS_TYPES = {
     STEPS['В боте'].step,
     STEPS['Выбор раздачи'].step,
     STEPS['Артикул правильный'].step,
+    STEPS['Проблема с артикулом'].step,
     STEPS['Отзыв на проверке'].step,
     STEPS.HELP.step,
     STEPS['Дата доставки'].step,
@@ -171,7 +186,7 @@ export const FIRST_STEP_KEY = '(его вы увидите после выбор
 export const FIRST_STEP_LINK =
   'Загрузите сюда ссылку с артикулом товара (например, https://www.wildberries.ru/catalog/168217638/detail.aspx)\n';
 export const FIRST_STEP_A =
-  '✔️Положите в корзину несколько товаров от других продавцов.\n ' +
+  '✔️Положите в корзину в wildberries несколько товаров от других продавцов.\n ' +
   '✔️Загрузите скриншот поиска \n\n';
 export const FIRST_STEP_B =
   '❗️Заказ нужно сделать в течение 30 минут после подтверждения или повторно запросить его.\n' +

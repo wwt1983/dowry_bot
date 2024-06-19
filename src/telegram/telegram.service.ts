@@ -42,6 +42,7 @@ import {
   getArticulErrorStatus,
   createCommentForDb,
   getUserName,
+  getErrorTextByStep,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -55,6 +56,7 @@ import {
   createHistoryKeyboard,
   createLabelHistory,
   operatorKeyboard,
+  helpKeyboard,
 } from './telegram.command';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
@@ -125,12 +127,12 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
+      await ctx.reply('⤵️', {
+        reply_markup: helpKeyboard,
+      });
 
-      for (const value of createHelpText()) {
-        await this.bot.api.sendMediaGroup(ctx.message.from.id, [value]);
-      }
       const historyButtons = createHistoryKeyboard(dataBuyer, true);
-      ctx.reply(sayHi(first_name, userValue.userName), {
+      await ctx.reply(sayHi(first_name, userValue.userName), {
         reply_markup: historyButtons,
       });
     });
@@ -138,8 +140,10 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
       ctx.session.lastCommand = COMMAND_NAMES.help;
       for (const value of createHelpText()) {
-        await this.bot.api.sendMediaGroup(ctx.message.from.id, [value]);
+        await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
       }
+
+      await this.sendMessageWithKeyboardHistory(ctx.from.id);
     });
 
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
@@ -218,7 +222,16 @@ export class TelegramService {
       }
 
       if (!STEPS_TYPES.image.includes(step)) {
-        return ctx.reply('dfdfdfdfdfdfdf');
+        await ctx.api.sendMessage(
+          ctx.session.chat_id,
+          getErrorTextByStep(step)?.error || '⤵️',
+          {
+            link_preview_options: {
+              is_disabled: true,
+            },
+          },
+        );
+        return;
       }
 
       const path = await ctx.getFile();
@@ -277,6 +290,13 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
+      return await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
+        {
+          type: 'photo',
+          media: getErrorTextByStep(STEPS.Получен.step)?.url,
+          caption: '',
+        },
+      ]);
     });
 
     /*======== DEL =======*/
@@ -291,6 +311,14 @@ export class TelegramService {
       await ctx.callbackQuery.message.editText('Загрузите новое фото');
     });
 
+    /*======== HELP =======*/
+    this.bot.callbackQuery('help', async (ctx) => {
+      for (const value of createHelpText()) {
+        await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
+      }
+
+      await this.sendMessageWithKeyboardHistory(ctx.from.id);
+    });
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
       //IMAGE
@@ -561,7 +589,25 @@ export class TelegramService {
         } else {
           const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
-            return await ctx.reply('На этом шаге должно быть отправлено фото');
+            await ctx.api.sendMessage(
+              ctx.session.chat_id,
+              getErrorTextByStep(step).error || '⤵️',
+              {
+                link_preview_options: {
+                  is_disabled: true,
+                },
+              },
+            );
+
+            if (getErrorTextByStep(step)?.url) {
+              return await this.bot.api.sendMediaGroup(ctx.session.chat_id, [
+                {
+                  type: 'photo',
+                  media: getErrorTextByStep(step)?.url,
+                  caption: '',
+                },
+              ]);
+            }
           }
         }
 
