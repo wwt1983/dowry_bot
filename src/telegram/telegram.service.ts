@@ -146,6 +146,11 @@ export class TelegramService {
         ctx.session.step = STEPS['Выбор раздачи'].step;
         ctx.session.status = 'Выбор раздачи';
         ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
+        ctx.session = updateSessionByField(
+          ctx.session,
+          'offerId',
+          sessionData.offerId,
+        );
         await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
           getTextForFirstStep(sessionData) as any[],
@@ -415,7 +420,13 @@ export class TelegramService {
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
 
-      console.log('restore session = ', id, STEPS[Статус].step, Статус);
+      console.log(
+        'restore session = ',
+        id,
+        STEPS[Статус].step,
+        Статус,
+        OfferId,
+      );
 
       if (
         Статус === 'Выбор раздачи' ||
