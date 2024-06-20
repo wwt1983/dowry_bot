@@ -405,7 +405,7 @@ export const getNotificationValue = (
           ? getDifferenceInMinutes(getDate()) - LIMIT_TIME_IN_MINUTES_FOR_BUY
           : getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
 
-      console.log('minutes=', status, minutes);
+      console.log('getNotificationValue minutes=', status, startTime, minutes);
 
       if (minutes > 0) {
         nextStatusNotification = 'Время истекло';
@@ -480,7 +480,9 @@ export const scheduleNotification = (
         status === 'Артикул правильный' || status === 'Проблема с артикулом'
           ? getDifferenceInMinutes(getDate()) - LIMIT_TIME_IN_MINUTES_FOR_BUY
           : getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
-      return minutes >= 0;
+      console.log('scheduleNotification minutes=', status, startTime, minutes);
+
+      return minutes > -40;
     case 'Заказ':
       if (countSendNotification === 0) {
         return dateDelivery ? days === 1 : days > 6;

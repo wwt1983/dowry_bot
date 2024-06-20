@@ -64,6 +64,7 @@ import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationS
 import {
   FORMAT_DATE,
   dateFormat,
+  getDateWithTz,
   getTimesFromTimesTable,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
@@ -924,7 +925,14 @@ export class TelegramService {
     outFromOffer: boolean,
   ): Promise<void> {
     try {
-      console.log('sendNotificationToUser=', chat_id, sessionId, botId, status);
+      console.log(
+        'sendNotificationToUser=',
+        chat_id,
+        sessionId,
+        botId,
+        status,
+        getDateWithTz(startTime),
+      );
       if (
         status === 'Бот удален' ||
         status === 'Ошибка' ||
