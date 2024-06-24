@@ -44,6 +44,7 @@ import {
   createCommentForDb,
   getUserName,
   getErrorTextByStep,
+  createMediaForArticul,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -157,6 +158,7 @@ export class TelegramService {
         );
         ctx.session = nextStep(ctx.session);
         await this.updateToAirtable(ctx.session);
+        await this.sendMediaByStep(ctx.session.step, ctx);
         ctx.session.lastCommand = null;
       }
     });
@@ -483,6 +485,7 @@ export class TelegramService {
           getTextForFirstStep(sessionData) as any[],
         );
         ctx.session = nextStep(ctx.session);
+        await this.sendMediaByStep(ctx.session.step, ctx);
       } else {
         if (Статус === 'Проблема с артикулом') {
           ctx.session.errorStatus = 'check_articul';
@@ -637,9 +640,13 @@ export class TelegramService {
 
           await this.updateToAirtable(ctx.session);
 
-          const response = await this.bot.api.sendMediaGroup(
+          let response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
+          );
+          response = await this.bot.api.sendMediaGroup(
+            ctx.message.from.id,
+            createMediaForArticul() as any,
           );
 
           ctx.session.lastMessage = response[response.length - 1].message_id;
@@ -734,7 +741,7 @@ export class TelegramService {
             await this.sendMediaByStep(STEPS.Поиск.step, ctx);
             return;
           }
-        }
+        } //конец проверки артикула
 
         //дата доставки
         if (step === STEPS['Дата доставки'].step) {

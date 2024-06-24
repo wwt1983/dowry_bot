@@ -16,6 +16,7 @@ export interface INotifications {
 export type NotificationName =
   | 'В боте'
   | 'Поиск'
+  | 'Корзина'
   | 'Выбор раздачи'
   | 'Заказ'
   | 'Время истекло'

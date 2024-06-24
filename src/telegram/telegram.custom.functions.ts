@@ -25,6 +25,8 @@ import {
   STEP_ERROR_TEXT,
   WEB_APP,
   STEP_EXAMPLE_TEXT_DOWN,
+  STEP_EXAMPLE_TEXT_UP,
+  FIRST_STEP_CART,
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
@@ -171,6 +173,10 @@ export function updateSessionByStep(
       session.status = 'Поиск';
       session.stopTime = getTimeWithTz();
       break;
+    case STEPS.Корзина.step:
+      session.status = 'Корзина';
+      session.stopTime = getTimeWithTz();
+      break;
     case STEPS.Заказ.step:
       session.stopBuyTime = getTimeWithTz();
       session.status = 'Заказ';
@@ -216,8 +222,6 @@ export function updateSessionByStep(
 export function nextStep(session: ISessionData): ISessionData {
   const nextCountStep = session.step + 1;
   session.step = nextCountStep;
-  //console.log('session=', session);
-
   return session;
 }
 
@@ -239,8 +243,8 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     keys +
     '\n\n' +
     getMessageForTimeOffer(times) +
-    FIRST_STEP_LINK +
     //FIRST_STEP_A +
+    FIRST_STEP_LINK +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
 
   return [
@@ -251,6 +255,15 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     },
   ];
 }
+export const createMediaForArticul = () => {
+  return [
+    {
+      type: 'photo',
+      media: WEB_APP + STEPS['Артикул правильный'].image,
+      caption: STEP_EXAMPLE_TEXT_UP,
+    },
+  ];
+};
 export const getMessageForTimeOffer = (times: string[]) => {
   try {
     if (!times || !times.length || times.length === 0) return '';
@@ -279,14 +292,17 @@ export function getTextByNextStep(
   name: string,
 ): string {
   switch (step) {
-    case STEPS['Проблема с артикулом'].step:
     case STEPS['Выбор раздачи'].step:
       return FIRST_STEP_LINK;
-    case STEPS.Поиск.step:
+    case STEPS['Проблема с артикулом'].step:
     case STEPS['Артикул правильный'].step:
-      return FIRST_STEP_A + getNumberText(step, startTime, name);
+      return FIRST_STEP_LINK + getNumberText(step, null, name);
+    case STEPS.Поиск.step:
+      return FIRST_STEP_A + getNumberText(step, null, name);
+    case STEPS.Корзина.step:
+      return FIRST_STEP_CART + getNumberText(step, null, name);
     case STEPS.Заказ.step:
-      return FIRST_STEP_C + getNumberText(step, startTime, name);
+      return FIRST_STEP_C + getNumberText(step, null, name);
     case STEPS['Дата доставки'].step:
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
     case STEPS.Получен.step:
@@ -307,8 +323,8 @@ export function getTextByNextStep(
 }
 
 function getNumberText(step: number, startTime: string, name: string) {
-  const textOffer = `→ ${name}\n\n`;
-  const finish_txt = `${textOffer}До финиша `;
+  const textOffer = `\n→ ${name}\n\n`;
+  const finish_txt = `До финиша `;
   const minutes = startTime
     ? LIMIT_TIME_IN_MINUTES_FOR_BUY - getDifferenceInMinutes(startTime)
     : null;
@@ -319,9 +335,8 @@ function getNumberText(step: number, startTime: string, name: string) {
       return (
         finish_txt +
         stepValues[i].textStepCount +
-        (stepValues[i].value === 'Поиск' || stepValues[i].value === 'Заказ'
-          ? ` ${waitTime}\n`
-          : '')
+        (stepValues[i].value === 'Заказ' ? ` ${waitTime}\n` : '') +
+        textOffer
       );
     }
   }
@@ -360,8 +375,9 @@ export const parseUrl = (url: string, articul: string): boolean => {
   if (!url) return false;
 
   try {
-    const splitUrl = url.trim().split('?')[0];
+    const splitUrl = url.trim().split('detail.aspx')[0];
     const articulOnCheck = splitUrl.replace(/\D/g, '');
+
     return articul.trim() == articulOnCheck.trim();
   } catch (e) {
     return false;
