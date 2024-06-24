@@ -238,6 +238,31 @@ export class TelegramService {
 
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
+      const path = await ctx.getFile();
+      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+
+      if (
+        ctx.session.lastCommand === COMMAND_NAMES.call ||
+        ctx.session.status === 'Вызов'
+      ) {
+        const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
+        const msgToSecretChat = await this.saveComment(
+          ctx.from,
+          firebaseUrl,
+          ctx.session?.data?.articul || '',
+          ctx.session?.data?.title || '',
+          ctx.session.status,
+        );
+
+        await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat, {
+          parse_mode: 'HTML',
+        });
+
+        return await ctx.reply(
+          'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
+        );
+      }
+
       if (ctx.session.lastCommand === COMMAND_NAMES.messageSend)
         return ctx.reply('📵');
 
@@ -261,13 +286,8 @@ export class TelegramService {
         return;
       }
 
-      const path = await ctx.getFile();
-      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-
       ctx.session.lastMessage = ctx.message.message_id;
       ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
-
-      console.log('photo=', url, ctx.session);
 
       return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
@@ -471,6 +491,7 @@ export class TelegramService {
         Раздача,
         data[0].fields['Ключевое слово'],
       );
+
       let response = null;
 
       if (Статус === 'Выбор раздачи') {
@@ -488,6 +509,8 @@ export class TelegramService {
         await this.sendMediaByStep(ctx.session.step, ctx);
       } else {
         if (Статус === 'Проблема с артикулом') {
+          ctx.session.step = STEPS['Артикул правильный'].step;
+
           ctx.session.errorStatus = 'check_articul';
           response = await ctx.api.sendMessage(
             ctx.session.chat_id,
@@ -502,7 +525,7 @@ export class TelegramService {
               },
             },
           );
-          ctx.session.step = STEPS['Артикул правильный'].step;
+          await this.sendMediaByStep(ctx.session.step, ctx);
         } else {
           ctx.session = nextStep(ctx.session);
           response = await ctx.reply(
@@ -512,9 +535,10 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
-          await this.sendMediaByStep(ctx.session.step, ctx);
         }
+        await this.sendMediaByStep(ctx.session.step, ctx);
       }
+
       ctx.session.lastMessage = response.message_id;
       await ctx.answerCallbackQuery();
     });

@@ -296,7 +296,10 @@ export function getTextByNextStep(
       return FIRST_STEP_LINK;
     case STEPS['Проблема с артикулом'].step:
     case STEPS['Артикул правильный'].step:
-      return FIRST_STEP_LINK + getNumberText(step, null, name);
+      return (
+        FIRST_STEP_LINK +
+        getNumberText(STEPS['Артикул правильный'].step, null, name)
+      );
     case STEPS.Поиск.step:
       return FIRST_STEP_A + getNumberText(step, null, name);
     case STEPS.Корзина.step:
