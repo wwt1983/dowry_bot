@@ -362,7 +362,7 @@ export const parseUrl = (url: string, articul: string): boolean => {
   try {
     const splitUrl = url.trim().split('?')[0];
     const articulOnCheck = splitUrl.replace(/\D/g, '');
-    return articul == articulOnCheck;
+    return articul.trim() == articulOnCheck.trim();
   } catch (e) {
     return false;
   }
