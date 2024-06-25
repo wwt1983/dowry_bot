@@ -875,7 +875,7 @@ export class TelegramService {
     );
     return {
       id: id,
-      articul: offerAirtable.fields['Артикул'].toString(),
+      articul: offerAirtable.fields['Артикул']?.toString(),
       offerId,
       title: title || offerAirtable.fields.Name,
       cash: offerAirtable.fields['Кешбэк'],
