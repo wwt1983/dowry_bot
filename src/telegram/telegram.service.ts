@@ -881,7 +881,7 @@ export class TelegramService {
       cash: offerAirtable.fields['Кешбэк'],
       priceForYou: offerAirtable.fields['Ваша цена'],
       priceWb: offerAirtable.fields['Цена WB'],
-      image: offerAirtable.fields['Фото'][0].url,
+      image: offerAirtable.fields['Фото'][0].thumbnails.full.url,
       keys: offerAirtable.fields['Ключевые слова'],
       description: offerAirtable.fields['Описание'],
       location: offerAirtable.fields['Региональность'],
