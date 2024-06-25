@@ -376,9 +376,12 @@ export function getOffer(data: IOffer) {
 
 export const parseUrl = (url: string, articul: string): boolean => {
   if (!url) return false;
+  console.log('url=', url);
 
   try {
     const splitUrl = url.trim().split('detail.aspx')[0];
+    console.log('splitUrl=', splitUrl);
+
     const articulOnCheck = splitUrl.replace(/\D/g, '');
 
     return articul.trim() == articulOnCheck.trim();
