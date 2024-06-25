@@ -240,31 +240,37 @@ export class TelegramService {
     this.bot.on('message:photo', async (ctx) => {
       const path = await ctx.getFile();
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-
       if (
         ctx.session.lastCommand === COMMAND_NAMES.call ||
-        ctx.session.status === 'Вызов'
+        ctx.session.status === 'Вызов' ||
+        ctx.session.lastCommand === COMMAND_NAMES.saveMessage
       ) {
         const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
-        const msgToSecretChat = await this.saveComment(
-          ctx.from,
-          firebaseUrl,
-          ctx.session?.data?.articul || '',
-          ctx.session?.data?.title || '',
-          ctx.session.status,
-        );
-
-        await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat, {
-          parse_mode: 'HTML',
-        });
-
+        if (ctx.session.lastCommand === COMMAND_NAMES.saveMessage) {
+          await ctx.api.sendMessage(ctx.session.comment, firebaseUrl);
+          await this.airtableService.updateCommentInBotTableAirtable(
+            ctx.from,
+            createCommentForDb(firebaseUrl, true),
+            true,
+          );
+        } else {
+          const msgToSecretChat = await this.saveComment(
+            ctx.from,
+            firebaseUrl,
+            ctx.session?.data?.articul || '',
+            ctx.session?.data?.title || '',
+            ctx.session.status,
+          );
+          await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
+        }
         return await ctx.reply(
           'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
         );
       }
 
-      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend)
+      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend) {
         return ctx.reply('📵');
+      }
 
       const { step, data } = ctx.session;
       if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
