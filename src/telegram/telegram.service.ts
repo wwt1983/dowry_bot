@@ -531,7 +531,7 @@ export class TelegramService {
               },
             },
           );
-          await this.sendMediaByStep(ctx.session.step, ctx);
+          //await this.sendMediaByStep(ctx.session.step, ctx);
         } else {
           ctx.session = nextStep(ctx.session);
           response = await ctx.reply(
