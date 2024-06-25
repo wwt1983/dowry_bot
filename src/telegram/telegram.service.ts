@@ -21,6 +21,8 @@ import {
   COUNT_TRY_ERROR,
   ADMIN_COMMANDS_TELEGRAM,
   STEP_EXAMPLE_TEXT_UP,
+  TELEGRAM_MESSAGE_CHAT_TEST,
+  TELEGRAM_MESSAGE_CHAT_PROD,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -607,7 +609,25 @@ export class TelegramService {
         }
 
         if (!ctx.session.data && !text?.includes('query_id')) {
-          return await ctx.reply('✌️');
+          if (
+            ctx.message.chat.id.toString() === TELEGRAM_MESSAGE_CHAT_TEST ||
+            ctx.message.chat.id.toString() === TELEGRAM_MESSAGE_CHAT_PROD
+          ) {
+            return await ctx.reply(`/${COMMAND_NAMES.messageSend}`);
+          }
+          const { id, first_name } = ctx.from;
+          const userValue = getUserName(ctx.from);
+          const dataBuyer = await this.commandService.getBotByFilter(
+            id.toString(),
+            'chat_id',
+          );
+
+          const historyButtons = createHistoryKeyboard(dataBuyer, true);
+          return await ctx.reply(sayHi(first_name, userValue.userName), {
+            reply_markup: historyButtons,
+          });
+
+          //
         }
 
         let data: ITelegramWebApp = null;
