@@ -375,14 +375,25 @@ export function getOffer(data: IOffer) {
 }
 
 export const parseUrl = (url: string, articul: string): boolean => {
-  if (!url || !url.includes('catalog')) return false;
+  if (url.trim() === articul.trim()) return true;
+
+  if (!url || !url.includes('wildberries')) return false;
 
   try {
-    const articulOnCheck = url
-      .split('/catalog/')
-      .pop()
-      .split('/detail.aspx')[0]
-      .replace(/\D/g, '');
+    let articulOnCheck = '';
+    if (url.includes('global.wildberries.ru')) {
+      articulOnCheck = url
+        .split('https://global.wildberries.ru/product?card=')
+        .pop()
+        .split('&')[0]
+        .replace(/\D/g, '');
+    } else {
+      articulOnCheck = url
+        .split('/catalog/')
+        .pop()
+        .split('/detail.aspx')[0]
+        .replace(/\D/g, '');
+    }
 
     return articul.trim() == articulOnCheck.trim();
   } catch (e) {
