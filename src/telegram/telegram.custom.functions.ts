@@ -380,7 +380,7 @@ export const parseUrl = (url: string, articul: string): boolean => {
 
   try {
     let splitUrl = url.trim().split('https://wildberries.ru/catalog/')[1];
-    splitUrl = url.trim().split('detail.aspx')[0];
+    splitUrl = splitUrl.trim().split('detail.aspx')[0];
     console.log('splitUrl=', splitUrl);
 
     const articulOnCheck = splitUrl.replace(/\D/g, '');
