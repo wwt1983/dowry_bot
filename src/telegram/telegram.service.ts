@@ -244,7 +244,7 @@ export class TelegramService {
       const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
       if (
         ctx.session.lastCommand === COMMAND_NAMES.call ||
-        ctx.session.status === 'Вызов' ||
+        ctx.session.errorStatus ||
         ctx.session.lastCommand === COMMAND_NAMES.saveMessage
       ) {
         const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
@@ -312,7 +312,7 @@ export class TelegramService {
       if (ctx.session.step === STEPS.Финиш.step) {
         return ctx.reply('Напишите сообщение оператору и ожидайте ответа🧑‍💻');
       }
-      ctx.session = updateSessionByField(ctx.session, 'status', 'Вызов');
+      //ctx.session = updateSessionByField(ctx.session, 'status', 'Вызов');
       ctx.session.errorStatus = 'operator';
       await this.updateToAirtable(ctx.session);
       return ctx.reply('Опишите вашу проблему и ожидайте ответа оператора🧑‍💻');
