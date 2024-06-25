@@ -375,13 +375,14 @@ export function getOffer(data: IOffer) {
 }
 
 export const parseUrl = (url: string, articul: string): boolean => {
-  if (!url) return false;
+  if (!url || !url.includes('catalog')) return false;
 
   try {
-    let splitUrl = url.trim().split('https://wildberries.ru/catalog/')[1];
-    splitUrl = splitUrl.trim().split('detail.aspx')[0];
-
-    const articulOnCheck = splitUrl.replace(/\D/g, '');
+    const articulOnCheck = url
+      .split('/catalog/')
+      .pop()
+      .split('/detail.aspx')[0]
+      .replace(/\D/g, '');
 
     return articul.trim() == articulOnCheck.trim();
   } catch (e) {
@@ -419,6 +420,7 @@ export const getNotificationValue = (
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
+    case 'Корзина':
     case 'Проблема с артикулом':
     case 'Поиск':
       const minutes =
@@ -495,7 +497,7 @@ export const scheduleNotification = (
     case 'Выбор раздачи':
     case 'Артикул правильный':
     case 'Проблема с артикулом':
-    case 'Вызов':
+    case 'Корзина':
     case 'Поиск':
       const minutes =
         status === 'Артикул правильный' || status === 'Проблема с артикулом'
