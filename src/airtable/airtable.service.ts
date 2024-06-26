@@ -184,7 +184,7 @@ export class AirtableService {
 
     offer.fields['Ключевые слова'] = ErrorKeyWord;
     const count = offer.fields.Количество;
-    const countOrder = offer.fields['Количество заказов'];
+    const countOrder = offer.fields['Количество заказов сегодня'];
     offer.fields['Время бронь'] = null;
 
     if (needKeys) {

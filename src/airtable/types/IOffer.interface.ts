@@ -22,6 +22,7 @@ export interface IOffer {
     Региональность: string;
     'Позиция в WB': string;
     Ключи?: string[];
+    'Количество заказов сегодня': number;
     'Ключевые слова'?: string;
     Время?: string[];
     'Время бронь'?: {
