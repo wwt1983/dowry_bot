@@ -917,30 +917,27 @@ export class TelegramService {
       );
       return result.at(-1).message_id;
     } catch (e) {
-      console.log('sendOfferToChat', e);
+      console.log('sendOfferToChat = возможно не опубликован в чате или ', e);
     }
   }
   /*work chat close*/
   async closeOfferInChat(
     messageId: number,
     status: OfferStatus,
-  ): Promise<string> {
+  ): Promise<void> {
     try {
       const text =
         status === 'Done'
           ? `❗️❗️❗️ Раздача закрыта ❗️❗️❗️`
           : `❗️❗️❗️ Раздача временно остановлена ❗️❗️❗️`;
 
-      if (!messageId) return 'no messageId';
+      if (!messageId) return;
 
       await this.bot.api.editMessageCaption(TELEGRAM_CHAT_ID, messageId, {
         caption: text,
       });
-      return 'Ok';
     } catch (e) {
       console.log('sendOfferToChat', e);
-    } finally {
-      return 'No';
     }
   }
 
