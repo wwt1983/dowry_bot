@@ -120,7 +120,7 @@ export class AirtableService {
       data = {
         id: comments.records[0].id,
         Комментарии: comment.trim(),
-        Status: isAnswer ? 'Обработано' : 'Вызов',
+        Status: isAnswer ? 'Ответ' : 'Вопрос',
       };
     } else {
       tableUrl = this.configService.get(
