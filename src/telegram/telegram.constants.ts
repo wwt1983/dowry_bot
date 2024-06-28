@@ -154,6 +154,7 @@ export const STEPS = {
     value: 'Проблема с артикулом',
     erroText: 'ввести правильную ссылку из wildberries',
     textStepCount: '',
+    image: '/images/11.jpg',
   }, // артикул не совпадает с раздачей
   HELP: { step: -3, value: '', erroText: '', textStepCount: '' },
   'Время истекло': {

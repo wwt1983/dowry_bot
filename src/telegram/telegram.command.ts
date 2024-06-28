@@ -19,10 +19,10 @@ export const stepKeyboard = new InlineKeyboard()
   .text(STEP_COMMANDS.del, 'del')
   .text(STEP_COMMANDS.next, 'next');
 
-export const commentKeyboard = new InlineKeyboard()
-  .text(STEP_COMMANDS.next, 'next')
-  .row()
-  .text(STEP_COMMANDS.operator, 'operator');
+export const commentKeyboard = new InlineKeyboard().text(
+  STEP_COMMANDS.next,
+  'next',
+);
 
 export const operatorKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.operator,

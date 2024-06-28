@@ -23,6 +23,7 @@ import {
   STEP_EXAMPLE_TEXT_UP,
   TELEGRAM_MESSAGE_CHAT_TEST,
   TELEGRAM_MESSAGE_CHAT_PROD,
+  STEP_EXAMPLE_TEXT_DOWN,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -47,6 +48,7 @@ import {
   getUserName,
   getErrorTextByStep,
   createMediaForArticul,
+  getLastSession,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -68,6 +70,7 @@ import {
   FORMAT_DATE,
   dateFormat,
   getDateWithTz,
+  getTimeWithTz,
   getTimesFromTimesTable,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
@@ -274,17 +277,26 @@ export class TelegramService {
         return ctx.reply('📵');
       }
 
-      const { step, data } = ctx.session;
+      const { data } = ctx.session;
       if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
 
       if (!data) {
-        return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+        const dataBuyer = await this.commandService.getBotByFilter(
+          ctx.from.id.toString(),
+          'chat_id',
+        );
+
+        const lastSession = getLastSession(dataBuyer);
+        if (!lastSession)
+          return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+
+        ctx.session = await this.restoreSession(ctx, lastSession);
       }
 
-      if (!STEPS_TYPES.image.includes(step)) {
+      if (!STEPS_TYPES.image.includes(ctx.session.step)) {
         await ctx.api.sendMessage(
           ctx.from.id,
-          getErrorTextByStep(step)?.error || '⤵️',
+          getErrorTextByStep(ctx.session.step)?.error || '⤵️',
           {
             link_preview_options: {
               is_disabled: true,
@@ -388,6 +400,7 @@ export class TelegramService {
         //   ctx.session.data.articul,
         //   ctx.session.data.title,
         // );
+
         await statusMessage.editText('Фото загружено! ');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
@@ -491,6 +504,7 @@ export class TelegramService {
         offerId: OfferId[0],
         status: Статус,
         deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+        isRestore: true,
       };
 
       ctx.session = createContinueSessionData(
@@ -533,7 +547,6 @@ export class TelegramService {
               },
             },
           );
-          //await this.sendMediaByStep(ctx.session.step, ctx);
         } else {
           ctx.session = nextStep(ctx.session);
           response = await ctx.reply(
@@ -621,13 +634,17 @@ export class TelegramService {
             id.toString(),
             'chat_id',
           );
-
-          const historyButtons = createHistoryKeyboard(dataBuyer, true);
-          return await ctx.reply(sayHi(first_name, userValue.userName), {
-            reply_markup: historyButtons,
-          });
-
+          const lastSession = getLastSession(dataBuyer);
+          if (!lastSession)
+            return await this.sendMessageWithKeyboardHistory(ctx.from.id);
           //
+          ctx.session = await this.restoreSession(ctx, lastSession);
+          if (!ctx.session.isRestore) {
+            const historyButtons = createHistoryKeyboard(dataBuyer, true);
+            await ctx.reply(sayHi(first_name, userValue.userName), {
+              reply_markup: historyButtons,
+            });
+          }
         }
 
         let data: ITelegramWebApp = null;
@@ -712,7 +729,11 @@ export class TelegramService {
           if (STEPS['Проблема с артикулом'].step === step) {
             ctx.session.step = STEPS['Артикул правильный'].step;
           }
-
+          ctx.session = updateSessionByField(
+            ctx.session,
+            'stopTime',
+            getTimeWithTz(),
+          );
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
 
@@ -1148,19 +1169,94 @@ export class TelegramService {
     return msgToChat;
   }
 
-  async sendMediaByStep(step: number, ctx: MyContext) {
+  async sendMediaByStep(step: number, ctx: MyContext, caption?: 'up' | 'down') {
     try {
       if (getErrorTextByStep(step)?.url) {
         return await this.bot.api.sendMediaGroup(ctx.from.id, [
           {
             type: 'photo',
             media: getErrorTextByStep(step)?.url,
-            caption: STEP_EXAMPLE_TEXT_UP,
+            caption:
+              caption && caption === 'down'
+                ? STEP_EXAMPLE_TEXT_DOWN
+                : STEP_EXAMPLE_TEXT_UP,
           },
         ]);
       }
     } catch (e) {
       console.log('sendMediaByStep=', e);
     }
+  }
+
+  async restoreSession(ctx: MyContext, sessionId: string) {
+    /*продолжение раздачи*/
+    const { id } = ctx.from;
+
+    //sort by StopTime - this will be last session
+    const data = await this.commandService.getBotByFilter(
+      sessionId,
+      'SessionId',
+    );
+
+    if (!data || data.length === 0) {
+      await this.sendMessageWithKeyboardHistory(id);
+      return;
+    }
+    const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
+      data[0].fields;
+    if (STEPS[Статус].step > 3 && (!Images || Images.length === 0)) {
+      await this.sendMessageWithKeyboardHistory(id);
+      return;
+    }
+    console.log(
+      'restore full session= ',
+      sessionId,
+      id,
+      STEPS[Статус].step,
+      Статус,
+      OfferId,
+    );
+
+    const userValue = getUserName(ctx.from);
+
+    const value: ISessionData = {
+      sessionId: sessionId,
+      user: userValue.userName || userValue.fio,
+      chat_id: id.toString(),
+      startTime: dateFormat(StartTime, FORMAT_DATE),
+      stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
+      stopTime: dateFormat(StopTime, FORMAT_DATE),
+      step: STEPS[Статус].step as number,
+      images: Images?.map((x) => x.url),
+      offerId: OfferId[0],
+      status: Статус,
+      deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+      isRestore: true,
+    };
+
+    let session = createContinueSessionData(
+      value,
+      Артикул,
+      Раздача,
+      data[0].fields['Ключевое слово'],
+    );
+
+    const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
+      session.offerId,
+      session.chat_id,
+    );
+
+    session = updateSessionByField(session, 'data', sessionData);
+
+    if (Статус === 'Проблема с артикулом') {
+      session.errorStatus = 'check_articul';
+    } else {
+      if (Статус === 'Заказ') {
+        session = nextStep(session); //пропускаем дату доставки
+      }
+      session = nextStep(session);
+    }
+
+    return session;
   }
 }

@@ -30,7 +30,11 @@ import {
 } from './telegram.constants';
 import { User } from '@grammyjs/types';
 import { IOffer } from 'src/airtable/types/IOffer.interface';
-import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
+import {
+  BotStatus,
+  BrokeBotStatus,
+  IBot,
+} from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
 import {
@@ -111,6 +115,7 @@ export function createInitialSessionData(
     conversation: null,
     lastCommand: null,
     times: null,
+    isRestore: false,
   };
 }
 
@@ -147,6 +152,7 @@ export function createContinueSessionData(
     location: null,
     comment: null,
     countTryError: 0,
+    isRestore: true,
   };
 }
 export function updateSessionByField(
@@ -378,6 +384,8 @@ export function getOffer(data: IOffer) {
 }
 
 export const parseUrl = (url: string, articul: string): boolean => {
+  if (url.trim() === articul.trim()) return true;
+
   if (!url) return false;
   return url.indexOf(articul.trim()) > 0;
 };
@@ -566,4 +574,23 @@ export const getErrorTextByStep = (
       ? WEB_APP + STEPS[stepType.value]?.image
       : null,
   };
+};
+
+export const getLastSession = (dataBuyer: IBot[] | null) => {
+  if (!dataBuyer) return null;
+
+  const filterData = dataBuyer.filter(
+    (x) =>
+      x.fields.Статус !== 'В боте' &&
+      x.fields.Статус !== 'Время истекло' &&
+      x.fields.Статус !== 'Проблема с локацией' &&
+      !x.fields.Финиш,
+  );
+  if (!filterData || filterData.length === 0) return null;
+  if (filterData.length === 1) return filterData[0].fields.SessionId;
+  return filterData.sort(
+    (a, b) =>
+      getDifferenceInMinutes(a.fields.StopTime) -
+      getDifferenceInMinutes(b.fields.StopTime),
+  )[0].fields.SessionId;
 };

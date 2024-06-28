@@ -42,6 +42,7 @@ export interface ISessionData {
   conversation?: any;
   lastCommand?: COMMAND_NAMES;
   times?: string[];
+  isRestore: boolean;
 }
 
 export type MyContext = HydrateFlavor<
