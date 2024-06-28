@@ -134,9 +134,10 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
-      await ctx.reply('⤵️', {
-        reply_markup: helpKeyboard,
-      });
+      // await ctx.reply('⤵️', {
+      //   reply_markup: helpKeyboard,
+      // });
+      await this.getInstruction(ctx);
 
       const historyButtons = createHistoryKeyboard(dataBuyer, true);
       await ctx.reply(sayHi(first_name, userValue.userName), {
@@ -170,9 +171,7 @@ export class TelegramService {
 
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
       ctx.session.lastCommand = COMMAND_NAMES.help;
-      for (const value of createHelpText()) {
-        await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
-      }
+      await this.getInstruction(ctx);
 
       const response = await this.sendMessageWithKeyboardHistory(ctx.from.id);
       ctx.session.lastMessage = response.message_id;
@@ -1174,5 +1173,11 @@ export class TelegramService {
     }
 
     return session;
+  }
+
+  async getInstruction(ctx: MyContext) {
+    for (const value of createHelpText()) {
+      await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
+    }
   }
 }
