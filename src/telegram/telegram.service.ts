@@ -1208,14 +1208,6 @@ export class TelegramService {
       await this.sendMessageWithKeyboardHistory(id);
       return;
     }
-    console.log(
-      'restore full session= ',
-      sessionId,
-      id,
-      STEPS[Статус].step,
-      Статус,
-      OfferId,
-    );
 
     const userValue = getUserName(ctx.from);
 
