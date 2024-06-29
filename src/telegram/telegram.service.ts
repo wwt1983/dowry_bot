@@ -24,6 +24,7 @@ import {
   TELEGRAM_MESSAGE_CHAT_TEST,
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
+  FOOTER,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -134,10 +135,10 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.start;
 
       await this.saveToAirtable(ctx.session);
-      // await ctx.reply('⤵️', {
-      //   reply_markup: helpKeyboard,
-      // });
-      await this.getInstruction(ctx);
+      await ctx.reply('⤵️', {
+        reply_markup: helpKeyboard,
+      });
+      await ctx.api.sendMessage(id, FOOTER);
 
       const historyButtons = createHistoryKeyboard(dataBuyer, true);
       await ctx.reply(sayHi(first_name, userValue.userName), {
