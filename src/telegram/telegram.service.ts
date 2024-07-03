@@ -128,16 +128,6 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
     });
 
-    this.bot.command(COMMAND_NAMES.onlineCount, async (ctx) => {
-      const count = await this.bot.api.getChatMemberCount(
-        process.env.NODE_ENV === 'development'
-          ? TELEGRAM_BOT_TEST_ID
-          : TELEGRAM_BOT_ID,
-      );
-      await ctx.reply(`Сейчас в боте ${count} человек(а)`);
-      ctx.session.lastCommand = COMMAND_NAMES.onlineCount;
-    });
-
     /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
@@ -303,10 +293,7 @@ export class TelegramService {
         );
       }
 
-      if (
-        ctx.session.lastCommand === COMMAND_NAMES.messageSend ||
-        ctx.session.lastCommand === COMMAND_NAMES.onlineCount
-      ) {
+      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend) {
         return ctx.reply('📵');
       }
 

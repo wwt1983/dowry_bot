@@ -27,7 +27,6 @@ export enum COMMAND_NAMES {
   call = 'call',
   messageSend = 'message_send',
   saveMessage = 'saveMessage',
-  onlineCount = 'online_count',
   admin = 'admin',
 }
 
