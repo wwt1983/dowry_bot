@@ -117,6 +117,7 @@ export function createInitialSessionData(
     lastCommand: null,
     times: null,
     isRestore: false,
+    itsSubscriber: false,
   };
 }
 
@@ -615,9 +616,15 @@ export const getTextForSubscriber = (info: ChatMember) => {
     info.status === 'administrator' ||
     info.status === 'creator'
   ) {
-    return `✅ Не пропустите лучшие предложения в нашей группе <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`;
+    return {
+      text: `✅ Не пропустите лучшие предложения в нашей группе <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
+      status: true,
+    };
   }
-  return `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`;
+  return {
+    text: `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
+    status: false,
+  };
 };
 
 export const getUserOffersReady = (dataBuyer: IBot[]) => {
@@ -642,4 +649,12 @@ export const getUserBenefit = (
       parseInt(record.fields['Ваша цена']));
   }, 0);
   return { text: `Ваша общая выгода 💰: ${benefit} руб.`, sum: benefit };
+};
+
+export const itsSubscriber = (member: ChatMember) => {
+  return (
+    member.status === 'administrator' ||
+    member.status === 'creator' ||
+    member.status === 'member'
+  );
 };

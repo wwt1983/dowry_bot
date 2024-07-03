@@ -57,6 +57,7 @@ import {
   getTextForSubscriber,
   getUserOffersReady,
   getUserBenefit,
+  itsSubscriber,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -145,12 +146,11 @@ export class TelegramService {
         id?.toString(),
         userValue.userName || userValue.fio,
       );
-      const dataBuyer = await this.airtableService.getBotByFilter(
-        id.toString(),
-        'chat_id',
-      );
+
+      const userHistory = await this.getUserHistory(id, true);
 
       ctx.session.lastCommand = COMMAND_NAMES.start;
+      ctx.session.itsSubscriber = userHistory.itsSubscriber;
 
       await this.saveToAirtable(ctx.session);
       await ctx.reply('⤵️', {
@@ -158,9 +158,8 @@ export class TelegramService {
       });
       await ctx.api.sendMessage(id, FOOTER);
 
-      const historyButtons = createHistoryKeyboard(dataBuyer, true);
       await ctx.reply(sayHi(first_name, userValue.userName), {
-        reply_markup: historyButtons,
+        reply_markup: userHistory.orderButtons,
       });
 
       if (ctx.match) {
@@ -187,7 +186,6 @@ export class TelegramService {
         ctx.session.lastCommand = null;
       }
 
-      const userHistory = await this.getUserHistory(id);
       await this.bot.api.sendMessage(
         id,
         `${userHistory.benefit}\n${userHistory.subscribe}`,
@@ -217,22 +215,22 @@ export class TelegramService {
 
         const { id } = ctx.from;
         const userInfo = await this.getUserHistory(id);
-        if (!userInfo) {
-          return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢');
-        }
-        if (userInfo.sum > 0) {
-          await ctx.api.sendMessage(
-            id,
-            `Ваш номер 👉${id}\n\n${userInfo.benefit}\n${userInfo.offersReady}\n` +
-              userInfo.subscribe,
-            {
-              parse_mode: 'HTML',
-            },
-          );
-        }
+
+        await ctx.api.sendMessage(
+          id,
+          `Ваш номер 👉${id}\n\n${userInfo.benefit}\n${userInfo.offersReady}\n` +
+            userInfo.subscribe,
+          {
+            parse_mode: 'HTML',
+          },
+        );
 
         return await ctx.reply(
-          userInfo.orderButtons ? 'Продолжите ⤵️' : 'Все раздачи завершены ✌️',
+          userInfo.orderButtons
+            ? 'Продолжите ⤵️'
+            : !userInfo || userInfo.sum === 0
+              ? 'Вы пока ничего не купили 😢'
+              : 'Все раздачи завершены ✌️',
           {
             reply_markup: userInfo.orderButtons,
           },
@@ -617,6 +615,12 @@ export class TelegramService {
             id?.toString(),
             userValue.userName || userValue.fio,
           );
+          const memberInfo = await this.bot.api.getChatMember(
+            TELEGRAM_CHAT_ID,
+            id,
+          );
+          ctx.session.itsSubscriber = itsSubscriber(memberInfo);
+
           await this.saveToAirtable(ctx.session);
 
           const webData = JSON.parse(text) as ITelegramWebApp;
@@ -1224,7 +1228,7 @@ export class TelegramService {
       await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
     }
   }
-  async getUserHistory(id: number) {
+  async getUserHistory(id: number, web?: boolean) {
     const dataBuyer = await this.airtableService.getBotByFilter(
       id.toString(),
       'chat_id',
@@ -1233,7 +1237,7 @@ export class TelegramService {
       return null;
     }
 
-    const orderButtons = createHistoryKeyboard(dataBuyer);
+    const orderButtons = createHistoryKeyboard(dataBuyer, web);
     const offerIds = getUserOfferIds(dataBuyer);
     const userOffers = await this.airtableService.getUserOffers(offerIds);
     const benefit = getUserBenefit(userOffers);
@@ -1242,13 +1246,14 @@ export class TelegramService {
       offersReady = getUserOffersReady(dataBuyer);
     }
     const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
-
+    const subscribe = getTextForSubscriber(memberInfo);
     return {
       orderButtons,
       benefit: benefit.text,
       sum: benefit.sum,
       offersReady: offersReady,
-      subscribe: getTextForSubscriber(memberInfo),
+      subscribe: subscribe.text,
+      itsSubscriber: subscribe.status,
     };
   }
 }

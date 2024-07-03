@@ -36,9 +36,9 @@ export class AirtableService {
     const data = {
       SessionId: session.sessionId,
       User: session.user,
-      Bot: true,
       chat_id: session.chat_id,
       Статус: session.status,
+      Подписка: session.itsSubscriber,
     };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
