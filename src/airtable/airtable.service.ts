@@ -6,11 +6,12 @@ import {
   ErrorKeyWord,
   FILTER_BY_FORMULA,
   TablesName,
+  AIRTABLE_URL,
 } from './airtable.constants';
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
-import { BotStatus } from './types/IBot.interface';
+import { BotStatus, IBot } from './types/IBot.interface';
 import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
@@ -19,6 +20,10 @@ import { getUserName } from 'src/telegram/telegram.custom.functions';
 import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
 import { getFilterById } from './airtable.custom';
 import { ITime, ITimes } from './types/ITimes.interface';
+import { IBuyer } from 'src/airtable/types/IBuyer.interface';
+import { IDistribution } from '../airtable/types/IDisturbation.interface';
+import { IHelpers } from 'src/airtable/types/IHelper.interface';
+import { IArticle } from 'src/airtable/types/IArticle.interface';
 
 @Injectable()
 export class AirtableService {
@@ -251,5 +256,58 @@ export class AirtableService {
       TablesName.NotificationStatistics,
       filter,
     );
+  }
+  async getUserOffers(ids: string[]): Promise<IOffers> {
+    const query = ids.map((id) => `{Id}="${id}"`);
+    const filter = `&${FILTER_BY_FORMULA}=OR(${query})`;
+    return await this.airtableHttpService.get(TablesName.Offers, filter);
+  }
+  async getBotByFilter(value: string, field: string): Promise<IBot[] | null> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${value}",{${field}})`;
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records;
+  }
+
+  async getArticleById(id: string): Promise<IArticle | null> {
+    const data = await this.airtableHttpService.get(
+      `${AIRTABLE_URL}/${TablesName.Articuls}/${id}`,
+    );
+    if (!data) return null;
+    return data as IArticle;
+  }
+  async getArticlesInWork(): Promise<IArticle[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Articuls,
+      `&${FILTER_BY_FORMULA}=NOT({Раздачи} ='')`,
+    );
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records as IArticle[];
+  }
+  async getDistributionTableByFilter(
+    nick: string,
+  ): Promise<IDistribution[] | null> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${nick}",{Покупатели})`;
+    const data = await this.airtableHttpService.get(
+      TablesName.Distributions,
+      filter,
+    );
+    if (!data || (data.records && data.records.length === 0)) return null;
+    //console.log('data ===>>> ', data);
+    return data.records;
+  }
+
+  async getHelperTable(): Promise<IHelpers | null> {
+    const data = await this.airtableHttpService.get(TablesName.Helpers);
+    if (!data) return null;
+    return data as IHelpers;
+  }
+  async findBuyer(nick: string): Promise<IBuyer[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Buyer,
+      `&${FILTER_BY_FORMULA}=Find("${nick}",{Ник ТГ})`,
+    );
+    if (!data || data.records.length === 0) return null;
+    return data.records as IBuyer[];
   }
 }

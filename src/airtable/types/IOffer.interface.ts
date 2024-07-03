@@ -1,7 +1,12 @@
 export interface IOffers {
   records: IOffer[];
 }
-export type OfferStatus = 'Done' | 'In progress' | 'Stop' | 'Public in chat';
+export type OfferStatus =
+  | 'Done'
+  | 'In progress'
+  | 'Stop'
+  | 'Public in chat'
+  | 'Test';
 export interface IOffer {
   id: string;
   createdTime: Date;
@@ -29,6 +34,8 @@ export interface IOffer {
       startTime: string;
       onlyTime: boolean;
     }; // время из списка которое закрепляется за пользователем как и ключевое слово
+    Ссылка: string;
+    Переход: ['Чат', 'Бот'];
   };
 }
 

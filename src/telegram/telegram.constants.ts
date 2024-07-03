@@ -3,6 +3,7 @@ export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_NAME = '@DowryWorkBot';
 export const TELEGRAM_BOT_TEST_NAME = '@test_dowry_bot';
 export const TELEGRAM_CHAT_ID = '-1002002256034';
+export const TELEGRAM_CHAT_ID_OFFERS = '-1002089773580';
 export const TELEGRAM_SECRET_CHAT_ID = '-1002155788141';
 export const TELEGRAM_MESSAGE_CHAT_TEST = '-1002227889311';
 export const TELEGRAM_MESSAGE_CHAT_PROD = '-4289825366';
@@ -14,6 +15,7 @@ export const WEB_APP_TEST = 'https://dowry-bot.netlify.app/';
 export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 180;
 export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 60;
+export const SUBSCRIBE_CHAT_URL = 'https://t.me/+ydq8PI7q1qg2MGEy';
 
 export const START_NAME = '👉 Dowry раздачи 👈';
 

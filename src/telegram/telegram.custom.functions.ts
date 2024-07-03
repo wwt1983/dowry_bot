@@ -27,9 +27,10 @@ import {
   STEP_EXAMPLE_TEXT_DOWN,
   STEP_EXAMPLE_TEXT_UP,
   FIRST_STEP_CART,
+  SUBSCRIBE_CHAT_URL,
 } from './telegram.constants';
-import { User } from '@grammyjs/types';
-import { IOffer } from 'src/airtable/types/IOffer.interface';
+import { ChatMember, User } from '@grammyjs/types';
+import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
 import {
   BotStatus,
   BrokeBotStatus,
@@ -45,6 +46,7 @@ import {
   getTimeWithTz,
   dateFormatNoTZ,
   getDate,
+  dateFormat,
 } from 'src/common/date/date.methods';
 
 export function sayHi(first_name: string, username: string): string {
@@ -356,6 +358,8 @@ function getNumberText(step: number, startTime: string, name: string) {
 }
 
 export function getOffer(data: IOffer) {
+  const defaultLink =
+    '✅ Для заказа присылайте скрин или ссылку на это объявление в @Dowry_wb !\n';
   const offer =
     `🔥${data.fields['Name']}🔥` +
     '\n' +
@@ -366,22 +370,25 @@ export function getOffer(data: IOffer) {
     '\n' +
     `❗️ Кешбэк ~ ${data.fields['Кешбэк']}❗️ \n` +
     `⭐️ Ваша цена ~ ${data.fields['Ваша цена']} 🫶 \n` +
-    `✅ Для заказа присылайте скрин или ссылку на это объявлениеdf в ${TELEGRAM_BOT_NAME} !\n 
-     Перейти к предложению https://t.me/${TELEGRAM_BOT_NAME.replace('@', '')}?start=${data.id || 'recjUwNqL4v2jUm4F'} \n
-    Будем рады познакомиться🥰🥰🥰 \n
-   `;
+    `${!data.fields.Переход || data.fields.Переход?.includes('Чат') ? defaultLink : ''} ` +
+    `Будем рады познакомиться🥰🥰🥰 \n`;
 
   const medias = [];
   const countPhotos = data.fields['Фото'].length;
   for (let i = 0; i < data.fields['Фото'].length; i++) {
     medias.push({
       type: 'photo',
-      media: data.fields['Фото'][i].url,
+      media: data.fields['Фото'][i].thumbnails.full.url,
       caption: countPhotos - 1 === i ? offer : '',
     });
   }
   return medias;
 }
+
+export const getLinkForOffer = (data: IOffer) => {
+  const link = `✅ Для заказа <a href='${data.fields.Ссылка}'>перейдите в бот</a>\n`;
+  return data.fields.Переход?.includes('Бот') ? link : null;
+};
 
 export const parseUrl = (url: string, articul: string): boolean => {
   if (url.trim() === articul.trim()) return true;
@@ -593,4 +600,46 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
       getDifferenceInMinutes(a.fields.StopTime) -
       getDifferenceInMinutes(b.fields.StopTime),
   )[0].fields.SessionId;
+};
+
+export const getUserOfferIds = (data: IBot[]) => {
+  return data.map((x) => {
+    if (x.fields.Статус === 'Чек') {
+      return x.fields.OfferId[0];
+    }
+  });
+};
+
+export const getTextForSubscriber = (info: ChatMember) => {
+  if (
+    info.status === 'member' ||
+    info.status === 'administrator' ||
+    info.status === 'creator'
+  ) {
+    return `✅ Не пропустите лучшие предложения в нашей группе <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`;
+  }
+  return `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`;
+};
+
+export const getUserOffersReady = (dataBuyer: IBot[]) => {
+  if (!dataBuyer) return null;
+  return dataBuyer.reduce(function (data, record) {
+    if (record.fields.Статус === 'Чек') {
+      return (data += `➡️ ${dateFormat(record.fields.StartTime, FORMAT_DATE_SIMPLE)} ${record.fields.Раздача}\n`);
+    }
+    return data;
+  }, '');
+};
+
+export const getUserBenefit = (
+  userOffers: IOffers,
+): { text: string; sum: number } => {
+  if (!userOffers) return { text: 'Начни копить 💰 на покупках', sum: 0 };
+
+  const benefit = userOffers.records.reduce(function (sum, record) {
+    return (sum +=
+      parseInt(record.fields['Цена WB']) -
+      parseInt(record.fields['Ваша цена']));
+  }, 0);
+  return { text: `Ваша общая выгода 💰: ${benefit} руб.`, sum: benefit };
 };

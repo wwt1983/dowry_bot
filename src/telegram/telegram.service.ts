@@ -25,6 +25,8 @@ import {
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
   FOOTER,
+  TELEGRAM_CHAT_ID_OFFERS,
+  SUBSCRIBE_CHAT_URL,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -50,6 +52,11 @@ import {
   getErrorTextByStep,
   createMediaForArticul,
   getLastSession,
+  getLinkForOffer,
+  getUserOfferIds,
+  getTextForSubscriber,
+  getUserOffersReady,
+  getUserBenefit,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -120,6 +127,7 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
     });
 
+    /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
       const userValue = getUserName(ctx.from);
@@ -127,7 +135,7 @@ export class TelegramService {
         id?.toString(),
         userValue.userName || userValue.fio,
       );
-      const dataBuyer = await this.commandService.getBotByFilter(
+      const dataBuyer = await this.airtableService.getBotByFilter(
         id.toString(),
         'chat_id',
       );
@@ -168,6 +176,15 @@ export class TelegramService {
         await this.sendMediaByStep(ctx.session.step, ctx);
         ctx.session.lastCommand = null;
       }
+
+      const userHistory = await this.getUserHistory(id);
+      await this.bot.api.sendMessage(
+        id,
+        `${userHistory.benefit}\n${userHistory.subscribe}`,
+        {
+          parse_mode: 'HTML',
+        },
+      );
     });
 
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
@@ -189,20 +206,25 @@ export class TelegramService {
         ctx.session.lastCommand = COMMAND_NAMES.history;
 
         const { id } = ctx.from;
-
-        const dataBuyer = await this.commandService.getBotByFilter(
-          id.toString(),
-          'chat_id',
-        );
-        if (!dataBuyer) {
+        const userInfo = await this.getUserHistory(id);
+        if (!userInfo) {
           return await ctx.api.sendMessage(id, 'Пока вы ничего не купили 😢');
         }
-        const orderButtons = createHistoryKeyboard(dataBuyer);
+        if (userInfo.sum > 0) {
+          await ctx.api.sendMessage(
+            id,
+            `Ваш номер 👉${id}\n\n${userInfo.benefit}\n${userInfo.offersReady}\n` +
+              userInfo.subscribe,
+            {
+              parse_mode: 'HTML',
+            },
+          );
+        }
 
         return await ctx.reply(
-          orderButtons ? 'Продолжите ⤵️' : 'Все раздачи завершены ✌️',
+          userInfo.orderButtons ? 'Продолжите ⤵️' : 'Все раздачи завершены ✌️',
           {
-            reply_markup: orderButtons,
+            reply_markup: userInfo.orderButtons,
           },
         );
       } catch (e) {
@@ -278,10 +300,11 @@ export class TelegramService {
       }
 
       const { data } = ctx.session;
-      if (ctx.session.step < 0) return ctx.reply(STOP_TEXT);
+      if (ctx.session.step < 0 || !ctx.session.step)
+        return ctx.reply(STOP_TEXT);
 
       if (!data) {
-        const dataBuyer = await this.commandService.getBotByFilter(
+        const dataBuyer = await this.airtableService.getBotByFilter(
           ctx.from.id.toString(),
           'chat_id',
         );
@@ -554,7 +577,7 @@ export class TelegramService {
           }
           const { id, first_name } = ctx.from;
           const userValue = getUserName(ctx.from);
-          const dataBuyer = await this.commandService.getBotByFilter(
+          const dataBuyer = await this.airtableService.getBotByFilter(
             id.toString(),
             'chat_id',
           );
@@ -860,9 +883,16 @@ export class TelegramService {
         TELEGRAM_CHAT_ID,
         medias,
       );
+      const offerLink = getLinkForOffer(offerAirtable);
+      if (offerLink) {
+        await this.bot.api.sendMessage(TELEGRAM_CHAT_ID, offerLink, {
+          parse_mode: 'HTML',
+        });
+      }
+
       return result.at(-1).message_id;
     } catch (e) {
-      console.log('sendOfferToChat = возможно не опубликован в чате или ', e);
+      console.log('sendOfferToChat= возможно не опубликован в чате или ', e);
     }
   }
   /*work chat close*/
@@ -873,8 +903,8 @@ export class TelegramService {
     try {
       const text =
         status === 'Done'
-          ? `❗️❗️❗️ Раздача закрыта ❗️❗️❗️`
-          : `❗️❗️❗️ Раздача временно остановлена ❗️❗️❗️`;
+          ? `❗️ Раздача закрыта ❗️`
+          : `❗️ Раздача временно остановлена ❗️`;
 
       if (!messageId) return;
 
@@ -1054,7 +1084,7 @@ export class TelegramService {
   }
 
   async sendMessageWithKeyboardHistory(chatId: number | string) {
-    const dataBuyer = await this.commandService.getBotByFilter(
+    const dataBuyer = await this.airtableService.getBotByFilter(
       chatId.toString(),
       'chat_id',
     );
@@ -1117,7 +1147,7 @@ export class TelegramService {
     const { id } = ctx.from;
 
     //sort by StopTime - this will be last session
-    const data = await this.commandService.getBotByFilter(
+    const data = await this.airtableService.getBotByFilter(
       sessionId,
       'SessionId',
     );
@@ -1180,5 +1210,33 @@ export class TelegramService {
     for (const value of createHelpText()) {
       await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
     }
+  }
+  async getUserHistory(id: number) {
+    const dataBuyer = await this.airtableService.getBotByFilter(
+      id.toString(),
+      'chat_id',
+    );
+    if (!dataBuyer) {
+      return null;
+    }
+
+    const orderButtons = createHistoryKeyboard(dataBuyer);
+    const offerIds = getUserOfferIds(dataBuyer);
+    const userOffers = await this.airtableService.getUserOffers(offerIds);
+    let benefit;
+    let offersReady = '';
+    if (userOffers && userOffers.records && userOffers.records.length > 0) {
+      benefit = getUserBenefit(userOffers);
+      offersReady = getUserOffersReady(dataBuyer);
+    }
+    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
+
+    return {
+      orderButtons,
+      benefit: benefit.text,
+      sum: benefit.sum,
+      offersReady: offersReady,
+      subscribe: getTextForSubscriber(memberInfo),
+    };
   }
 }
