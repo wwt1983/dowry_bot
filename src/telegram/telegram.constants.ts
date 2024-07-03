@@ -42,10 +42,6 @@ export const ADMIN_COMMANDS_TELEGRAM = [
     command: COMMAND_NAMES.messageSend,
     description: 'Отправить сообщение пользователю',
   },
-  {
-    command: COMMAND_NAMES.onlineCount,
-    description: 'Online в боте',
-  },
 ];
 
 export enum STEP_COMMANDS {
