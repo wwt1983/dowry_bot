@@ -12,7 +12,6 @@ import {
   FOUR_STEP_A,
   FOUR_STEP_B,
   FOOTER,
-  TELEGRAM_BOT_NAME,
   FIRST_STEP_LINK,
   STEPS,
   TELEGRAM_MESSAGE_CHAT_PROD,
@@ -72,9 +71,9 @@ export function sendToSecretChat(
   const instruction =
     '\nВыберите комманду /message_send,cкопируйте chat_id и следуйте дальше';
   const userComment = comment
-    ? `\n${typeMessage} ${order}\n➡️chat_id=${chatId}\nСообщение:${comment}`
+    ? `\n${typeMessage} ${order}\n➡️chat_id=${chatId}\n\nСообщение:${comment}`
     : '';
-  return `❓Старт: ${getTimeWithTz()}\n${userValue.fio} username=${userValue.userName} 
+  return `❓${getTimeWithTz()}\n${userValue.fio} username=${userValue.userName} 
   ${userComment}${instruction}❓`;
 }
 export const createCommentForDb = (comment: string, isAnswer?: boolean) => {
@@ -634,7 +633,8 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
 export const getUserBenefit = (
   userOffers: IOffers,
 ): { text: string; sum: number } => {
-  if (!userOffers) return { text: 'Начни копить 💰 на покупках', sum: 0 };
+  if (!userOffers || userOffers.records.length === 0)
+    return { text: 'Начни копить 💰 на покупках', sum: 0 };
 
   const benefit = userOffers.records.reduce(function (sum, record) {
     return (sum +=

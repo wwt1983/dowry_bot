@@ -1,5 +1,6 @@
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
+export const TELEGRAM_BOT_TEST_ID = '7145649314';
 export const TELEGRAM_BOT_NAME = '@DowryWorkBot';
 export const TELEGRAM_BOT_TEST_NAME = '@test_dowry_bot';
 export const TELEGRAM_CHAT_ID = '-1002002256034';
@@ -26,6 +27,8 @@ export enum COMMAND_NAMES {
   call = 'call',
   messageSend = 'message_send',
   saveMessage = 'saveMessage',
+  onlineCount = 'online_count',
+  admin = 'admin',
 }
 
 export const COMMANDS_TELEGRAM = [
@@ -39,6 +42,10 @@ export const ADMIN_COMMANDS_TELEGRAM = [
   {
     command: COMMAND_NAMES.messageSend,
     description: 'Отправить сообщение пользователю',
+  },
+  {
+    command: COMMAND_NAMES.onlineCount,
+    description: 'Online в боте',
   },
 ];
 

@@ -25,8 +25,8 @@ import {
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
   FOOTER,
-  TELEGRAM_CHAT_ID_OFFERS,
-  SUBSCRIBE_CHAT_URL,
+  TELEGRAM_BOT_ID,
+  TELEGRAM_BOT_TEST_ID,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -125,6 +125,16 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.messageSend, async (ctx) => {
       await ctx.reply('Введите номер пользователя (поле chat_id)');
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
+    });
+
+    this.bot.command(COMMAND_NAMES.onlineCount, async (ctx) => {
+      const count = await this.bot.api.getChatMemberCount(
+        process.env.NODE_ENV === 'development'
+          ? TELEGRAM_BOT_TEST_ID
+          : TELEGRAM_BOT_ID,
+      );
+      await ctx.reply(`Сейчас в боте ${count} человек(а)`);
+      ctx.session.lastCommand = COMMAND_NAMES.onlineCount;
     });
 
     /*START*/
@@ -295,7 +305,10 @@ export class TelegramService {
         );
       }
 
-      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend) {
+      if (
+        ctx.session.lastCommand === COMMAND_NAMES.messageSend ||
+        ctx.session.lastCommand === COMMAND_NAMES.onlineCount
+      ) {
         return ctx.reply('📵');
       }
 
@@ -1223,10 +1236,9 @@ export class TelegramService {
     const orderButtons = createHistoryKeyboard(dataBuyer);
     const offerIds = getUserOfferIds(dataBuyer);
     const userOffers = await this.airtableService.getUserOffers(offerIds);
-    let benefit;
+    const benefit = getUserBenefit(userOffers);
     let offersReady = '';
     if (userOffers && userOffers.records && userOffers.records.length > 0) {
-      benefit = getUserBenefit(userOffers);
       offersReady = getUserOffersReady(dataBuyer);
     }
     const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
