@@ -158,10 +158,7 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
-  async getDistribution(): Promise<any> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("In progress",{Status})`;
-    return await this.airtableHttpService.get(TablesName.Distributions, filter);
-  }
+
   async getUserFromBot(sessionId: string): Promise<any> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
     return await this.airtableHttpService.get(TablesName.Bot, filter);
@@ -284,10 +281,10 @@ export class AirtableService {
     if (!data || (data.records && data.records.length === 0)) return null;
     return data.records as IArticle[];
   }
-  async getDistributionTableByFilter(
+  async getDistributionTableByNick(
     nick: string,
   ): Promise<IDistribution[] | null> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${nick}",{Покупатели})`;
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("@${nick}",{Покупатели})`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,

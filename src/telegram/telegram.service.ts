@@ -52,11 +52,12 @@ import {
   createMediaForArticul,
   getLastSession,
   getLinkForOffer,
-  getUserOfferIds,
+  getUserOfferIdsByStatus,
   getTextForSubscriber,
   getUserOffersReady,
   getUserBenefit,
   itsSubscriber,
+  getFilterDistribution,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -82,7 +83,7 @@ import {
   getTimesFromTimesTable,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
-import { User } from '@grammyjs/types';
+import { ChatMember, User } from '@grammyjs/types';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -136,7 +137,7 @@ export class TelegramService {
         userValue.userName || userValue.fio,
       );
 
-      const userHistory = await this.getUserHistory(id, true);
+      const userHistory = await this.getUserHistory(ctx.from, true, true);
 
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
@@ -203,7 +204,7 @@ export class TelegramService {
         ctx.session.lastCommand = COMMAND_NAMES.history;
 
         const { id } = ctx.from;
-        const userInfo = await this.getUserHistory(id);
+        const userInfo = await this.getUserHistory(ctx.from, false, true);
 
         await ctx.api.sendMessage(
           id,
@@ -1221,13 +1222,32 @@ export class TelegramService {
       await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
     }
   }
-  async getUserHistory(id: number, web?: boolean) {
+  //full - берем данные из таблицы Раздачи и Бот
+  async getUserHistory(from: User, web?: boolean, full?: boolean) {
+    const { id } = from;
     const dataBuyer = await this.airtableService.getBotByFilter(
       id.toString(),
       'chat_id',
     );
+    const name = getUserName(from);
+    let sum = 0;
+    let offersFromDistributions = '';
+    if (full && (name.fio || name.userName)) {
+      //if (name.userName === 'val_tom') name.userName = 'OxanaWeber';
+      const dataDistributions =
+        await this.airtableService.getDistributionTableByNick(
+          name.userName || name.fio,
+        );
+
+      const filterDistributions = getFilterDistribution(
+        dataDistributions,
+        dataBuyer,
+      );
+      sum = filterDistributions?.sum;
+      offersFromDistributions = filterDistributions.offers;
+    }
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
-    let member;
+    let member: ChatMember;
     try {
       member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
     } catch (e) {
@@ -1235,21 +1255,22 @@ export class TelegramService {
     }
     const subscribe = getTextForSubscriber(member);
 
-    if (!dataBuyer) {
-      const benefit = getUserBenefit(null);
+    if (!dataBuyer && sum === 0) {
+      const benefit = getUserBenefit(null, sum);
       return {
         orderButtons,
         benefit: benefit.text,
-        sum: benefit.sum,
+        sum: benefit.sum + sum,
         offersReady: '',
         subscribe: subscribe.text,
         itsSubscriber: subscribe.status,
       };
     }
 
-    const offerIds = getUserOfferIds(dataBuyer);
-    const userOffers = await this.airtableService.getUserOffers(offerIds);
-    const benefit = getUserBenefit(userOffers);
+    const offerIdsStatusCheck = getUserOfferIdsByStatus(dataBuyer);
+    const userOffers =
+      await this.airtableService.getUserOffers(offerIdsStatusCheck);
+    const benefit = getUserBenefit(userOffers, sum);
     let offersReady = '';
     if (userOffers && userOffers.records && userOffers.records.length > 0) {
       offersReady = getUserOffersReady(dataBuyer);
@@ -1258,8 +1279,8 @@ export class TelegramService {
     return {
       orderButtons,
       benefit: benefit.text,
-      sum: benefit.sum,
-      offersReady: offersReady,
+      sum: benefit.sum + sum,
+      offersReady: offersReady + offersFromDistributions,
       subscribe: subscribe.text,
       itsSubscriber: subscribe.status,
     };

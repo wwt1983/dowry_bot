@@ -10,6 +10,7 @@ import { ISessionData } from 'src/telegram/telegram.interface';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_SIMPLE = 'dd.MM.yyyy HH:mm';
+export const FORMAT_DATE_SIMPLE_NO_TIME = 'dd.MM.yyyy';
 export const FORMAT_DATE_NO_TIME = 'yyyy-MM-dd';
 export const FORMAT_DATE_NO_DATE = 'HH:mm';
 export const TIME_ZONE = 'Europe/Moscow';

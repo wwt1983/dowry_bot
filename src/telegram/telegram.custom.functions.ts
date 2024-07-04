@@ -45,8 +45,8 @@ import {
   getTimeWithTz,
   dateFormatNoTZ,
   getDate,
-  dateFormat,
 } from 'src/common/date/date.methods';
+import { IDistribution } from 'src/airtable/types/IDisturbation.interface';
 
 export function sayHi(first_name: string, username: string): string {
   return (
@@ -456,6 +456,8 @@ export const getNotificationValue = (
     case 'Штрих-код':
       nextStatusNotification = 'Чек';
       break;
+    default:
+      return null;
   }
   return filterNotificationValue(
     notifications,
@@ -602,9 +604,9 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
   )[0].fields.SessionId;
 };
 
-export const getUserOfferIds = (data: IBot[]) => {
+export const getUserOfferIdsByStatus = (data: IBot[], status = 'Чек') => {
   return data.map((x) => {
-    if (x.fields.Статус === 'Чек') {
+    if (x.fields.Статус === status) {
       return x.fields.OfferId[0];
     }
   });
@@ -633,7 +635,7 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
     if (record.fields.Статус === 'Чек') {
-      return (data += `➡️ ${dateFormat(record.fields.StartTime, FORMAT_DATE_SIMPLE)} ${record.fields.Раздача}\n`);
+      return (data += `✔️ ${record.fields.Раздача}\n`);
     }
     return data;
   }, '');
@@ -641,16 +643,24 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
 
 export const getUserBenefit = (
   userOffers: IOffers,
+  sumFromDistributions: number,
 ): { text: string; sum: number } => {
-  if (!userOffers || userOffers.records.length === 0)
+  if (
+    (!userOffers || userOffers.records.length === 0) &&
+    sumFromDistributions == 0
+  ) {
     return { text: 'Начни копить 💰 на покупках', sum: 0 };
+  }
 
-  const benefit = userOffers.records.reduce(function (sum, record) {
+  const benefit = userOffers.records?.reduce(function (sum, record) {
     return (sum +=
       parseInt(record.fields['Цена WB']) -
       parseInt(record.fields['Ваша цена']));
   }, 0);
-  return { text: `Ваша общая выгода 💰: ${benefit} руб.`, sum: benefit };
+  return {
+    text: `Ваша общая выгода 💰: ${benefit + sumFromDistributions} руб.`,
+    sum: benefit + sumFromDistributions,
+  };
 };
 
 export const itsSubscriber = (member?: ChatMember) => {
@@ -660,4 +670,38 @@ export const itsSubscriber = (member?: ChatMember) => {
     member.status === 'creator' ||
     member.status === 'member'
   );
+};
+
+export const getFilterDistribution = (
+  dataDistributions: IDistribution[],
+  dataBuyer: IBot[],
+) => {
+  const filterDistributionData = dataDistributions?.reduce(function (
+    arr,
+    record,
+  ) {
+    if (dataBuyer && dataBuyer.length > 0) {
+      if (
+        !dataBuyer.find(
+          (x) => x.fields?.Артикул == record.fields['Артикул WB'][0].toString(),
+        )
+      ) {
+        arr.push({
+          name: record.fields.Раздача,
+          sum: record.fields['Выплаченный кешбек'],
+          date: record.fields['Дата заказа'],
+        });
+      }
+      return arr;
+    }
+  }, []);
+  const sum =
+    filterDistributionData?.reduce((accumulator, record) => {
+      return accumulator + record.sum;
+    }, 0) || 0;
+  const offers =
+    filterDistributionData?.reduce((accumulator, record) => {
+      return (accumulator += `✔️ ${record.name}\n`);
+    }, '') || '';
+  return { sum, offers };
 };

@@ -50,4 +50,3 @@ export interface IDistribution {
 export interface IDistributions {
   records: IDistribution[];
 }
-
