@@ -601,11 +601,18 @@ export class TelegramService {
             id?.toString(),
             userValue.userName || userValue.fio,
           );
-          const memberInfo = await this.bot.api.getChatMember(
-            TELEGRAM_CHAT_ID_OFFERS,
-            id,
-          );
-          ctx.session.itsSubscriber = itsSubscriber(memberInfo);
+
+          let member;
+          try {
+            member = await this.bot.api.getChatMember(
+              TELEGRAM_CHAT_ID_OFFERS,
+              id,
+            );
+          } catch (e) {
+            console.log(e);
+          }
+
+          ctx.session.itsSubscriber = itsSubscriber(member);
 
           await this.saveToAirtable(ctx.session);
 
@@ -1220,8 +1227,13 @@ export class TelegramService {
       'chat_id',
     );
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
-    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
-    const subscribe = getTextForSubscriber(memberInfo);
+    let member;
+    try {
+      member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
+    } catch (e) {
+      console.log(e);
+    }
+    const subscribe = getTextForSubscriber(member);
 
     if (!dataBuyer) {
       const benefit = getUserBenefit(null);

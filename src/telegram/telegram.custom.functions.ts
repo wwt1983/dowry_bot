@@ -611,6 +611,11 @@ export const getUserOfferIds = (data: IBot[]) => {
 };
 
 export const getTextForSubscriber = (info: ChatMember) => {
+  const defaultResult = {
+    text: `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
+    status: false,
+  };
+  if (!info) return defaultResult;
   if (
     info.status === 'member' ||
     info.status === 'administrator' ||
@@ -621,10 +626,7 @@ export const getTextForSubscriber = (info: ChatMember) => {
       status: true,
     };
   }
-  return {
-    text: `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
-    status: false,
-  };
+  return defaultResult;
 };
 
 export const getUserOffersReady = (dataBuyer: IBot[]) => {
@@ -651,7 +653,8 @@ export const getUserBenefit = (
   return { text: `Ваша общая выгода 💰: ${benefit} руб.`, sum: benefit };
 };
 
-export const itsSubscriber = (member: ChatMember) => {
+export const itsSubscriber = (member?: ChatMember) => {
+  if (!member) return false;
   return (
     member.status === 'administrator' ||
     member.status === 'creator' ||
