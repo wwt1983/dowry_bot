@@ -1220,11 +1220,22 @@ export class TelegramService {
       id.toString(),
       'chat_id',
     );
+    const orderButtons = createHistoryKeyboard(dataBuyer, web);
+    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
+    const subscribe = getTextForSubscriber(memberInfo);
+
     if (!dataBuyer) {
-      return null;
+      const benefit = getUserBenefit(null);
+      return {
+        orderButtons,
+        benefit: benefit.text,
+        sum: benefit.sum,
+        offersReady: '',
+        subscribe: subscribe.text,
+        itsSubscriber: subscribe.status,
+      };
     }
 
-    const orderButtons = createHistoryKeyboard(dataBuyer, web);
     const offerIds = getUserOfferIds(dataBuyer);
     const userOffers = await this.airtableService.getUserOffers(offerIds);
     const benefit = getUserBenefit(userOffers);
@@ -1232,8 +1243,7 @@ export class TelegramService {
     if (userOffers && userOffers.records && userOffers.records.length > 0) {
       offersReady = getUserOffersReady(dataBuyer);
     }
-    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
-    const subscribe = getTextForSubscriber(memberInfo);
+
     return {
       orderButtons,
       benefit: benefit.text,
