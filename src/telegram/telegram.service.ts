@@ -1238,7 +1238,6 @@ export class TelegramService {
         await this.airtableService.getDistributionTableByNick(
           name.userName || name.fio,
         );
-
       const filterDistributions = getFilterDistribution(
         dataDistributions,
         dataBuyer,
@@ -1251,7 +1250,7 @@ export class TelegramService {
     try {
       member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
     } catch (e) {
-      console.log(e);
+      //console.log(e);
     }
     const subscribe = getTextForSubscriber(member);
 

@@ -680,18 +680,18 @@ export const getFilterDistribution = (
     arr,
     record,
   ) {
-    if (dataBuyer && dataBuyer.length > 0) {
-      if (
-        !dataBuyer.find(
-          (x) => x.fields?.Артикул == record.fields['Артикул WB'][0].toString(),
-        )
-      ) {
-        arr.push({
-          name: record.fields.Раздача,
-          sum: record.fields['Выплаченный кешбек'],
-          date: record.fields['Дата заказа'],
-        });
-      }
+    if (
+      !dataBuyer ||
+      dataBuyer.length === 0 ||
+      !dataBuyer?.find(
+        (x) => x.fields?.Артикул == record.fields['Артикул WB'][0].toString(),
+      )
+    ) {
+      arr.push({
+        name: record.fields.Раздача,
+        sum: record.fields['Выплаченный кешбек'],
+        date: record.fields['Дата заказа'],
+      });
       return arr;
     }
   }, []);
