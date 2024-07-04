@@ -25,8 +25,7 @@ import {
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
   FOOTER,
-  TELEGRAM_BOT_ID,
-  TELEGRAM_BOT_TEST_ID,
+  TELEGRAM_CHAT_ID_OFFERS,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -603,7 +602,7 @@ export class TelegramService {
             userValue.userName || userValue.fio,
           );
           const memberInfo = await this.bot.api.getChatMember(
-            TELEGRAM_CHAT_ID,
+            TELEGRAM_CHAT_ID_OFFERS,
             id,
           );
           ctx.session.itsSubscriber = itsSubscriber(memberInfo);
@@ -1221,7 +1220,7 @@ export class TelegramService {
       'chat_id',
     );
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
-    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID, id);
+    const memberInfo = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
     const subscribe = getTextForSubscriber(memberInfo);
 
     if (!dataBuyer) {
