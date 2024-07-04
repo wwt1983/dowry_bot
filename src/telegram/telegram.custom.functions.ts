@@ -612,7 +612,7 @@ export const getUserOfferIds = (data: IBot[]) => {
 
 export const getTextForSubscriber = (info: ChatMember) => {
   const defaultResult = {
-    text: `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгоднях предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
+    text: `✉️ Подпишитесь в группу для получения скидок (до 100% кешбэка) и выгодных предложений ТОЛЬКО ДЛЯ СВОИХ <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a>`,
     status: false,
   };
   if (!info) return defaultResult;
