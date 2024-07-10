@@ -35,4 +35,17 @@ export class FirebaseService {
     const url = `${FIREBASE_URL}${snapshot.ref.fullPath}?alt=media`;
     return url;
   }
+
+  async uploadBufferAsync(file): Promise<string> {
+    const storage = getStorage(this.app);
+    const storageRef = ref(storage, 'file_' + Date.now());
+
+    const metadata = {
+      contentType: 'image/jpeg',
+    };
+
+    const snapshot = await uploadBytes(storageRef, file, metadata);
+    const url = `${FIREBASE_URL}${snapshot.ref.fullPath}?alt=media`;
+    return url;
+  }
 }

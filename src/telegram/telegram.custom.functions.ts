@@ -236,7 +236,7 @@ export function nextStep(session: ISessionData): ISessionData {
   return session;
 }
 
-export function getTextForFirstStep(data: ITelegramWebApp) {
+export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
   const { title, keys, cash, priceWb, priceForYou, times, location, image } =
     data;
   const caption =
@@ -261,20 +261,21 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   return [
     {
       type: 'photo',
-      media: image,
+      media: wbScreen || image,
       caption: caption,
     },
   ];
 }
-export const createMediaForArticul = () => {
+export const createMediaForArticul = (url?: string, caption?: string) => {
   return [
     {
       type: 'photo',
-      media: WEB_APP + STEPS['Артикул правильный'].image,
-      caption: STEP_EXAMPLE_TEXT_UP,
+      media: url || WEB_APP + STEPS['Артикул правильный'].image,
+      caption: caption || STEP_EXAMPLE_TEXT_UP,
     },
   ];
 };
+
 export const getMessageForTimeOffer = (times: string[]) => {
   try {
     if (!times || !times.length || times.length === 0) return '';
