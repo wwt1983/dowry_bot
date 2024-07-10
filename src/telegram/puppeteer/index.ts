@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 
 export const getParseWbInfo = async (articul: string) => {
   try {
