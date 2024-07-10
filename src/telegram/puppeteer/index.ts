@@ -1,6 +1,5 @@
 import puppeteer from 'puppeteer';
 
-
 export const getParseWbInfo = async (articul: string) => {
   try {
     const browser = await puppeteer.launch();
