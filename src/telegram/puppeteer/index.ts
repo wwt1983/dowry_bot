@@ -3,7 +3,9 @@ import puppeteer from 'puppeteer';
 export const getParseWbInfo = async (articul: string) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/chromium-browser',
+      headless: 'shell',
+      executablePath: 'google-chrome-stable',
+      args: ['--no-sandbox', '--disable-dev-shm-usage'],
     });
     const page = await browser.newPage();
     await page.goto(
