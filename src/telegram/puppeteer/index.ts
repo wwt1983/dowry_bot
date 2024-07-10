@@ -2,11 +2,7 @@ import puppeteer from 'puppeteer';
 
 export const getParseWbInfo = async (articul: string) => {
   try {
-    const browser = await puppeteer.launch({
-      headless: 'shell',
-      executablePath: 'google-chrome-stable',
-      args: ['--no-sandbox', '--disable-dev-shm-usage'],
-    });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(
       `https://www.wildberries.ru/catalog/${articul}/detail.aspx`,
