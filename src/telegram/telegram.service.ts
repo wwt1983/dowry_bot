@@ -84,7 +84,7 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
-import { getParseWbInfo } from './puppeteer';
+//import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -665,16 +665,16 @@ export class TelegramService {
           const loader = await ctx.reply('⏳');
 
           await this.updateToAirtable(ctx.session);
-          const wbScreen = await getParseWbInfo(ctx.session.data.articul);
-          let wbUrl: string;
-          if (wbScreen) {
-            wbUrl = await firebaseService.uploadBufferAsync(wbScreen);
-          }
+          // const wbScreen = await getParseWbInfo(ctx.session.data.articul);
+          // let wbUrl: string;
+          // if (wbScreen) {
+          //   wbUrl = await firebaseService.uploadBufferAsync(wbScreen);
+          // }
           setTimeout(() => loader.delete().catch(() => {}), 100);
 
           let response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
-            getTextForFirstStep(data, wbUrl) as any[],
+            getTextForFirstStep(data) as any[],
           );
 
           response = await this.bot.api.sendMediaGroup(
