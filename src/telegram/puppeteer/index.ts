@@ -3,7 +3,13 @@ import puppeteer from 'puppeteer';
 export const getParseWbInfo = async (articul: string) => {
   try {
     const browser = await puppeteer.launch({
-      ignoreDefaultArgs: ['--disable-extensions'],
+      executablePath: '/usr/bin/chromium-browser',
+      args: [
+        '--disable-gpu',
+        '--disable-setuid-sandbox',
+        '--no-sandbox',
+        '--no-zygote',
+      ],
     });
     const page = await browser.newPage();
     await page.goto(
