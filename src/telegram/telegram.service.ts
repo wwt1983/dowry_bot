@@ -914,6 +914,28 @@ export class TelegramService {
       console.log('sendOfferToChat= возможно не опубликован в чате или ', e);
     }
   }
+
+  /*public order in chat*/
+  async sendOrderToChat(
+    phone: string,
+    name: string,
+    articul: string,
+  ): Promise<number> {
+    try {
+      const result = await this.bot.api.sendMessage(
+        TELEGRAM_CHAT_ID,
+        'Заявка с сайта \n' + phone + '\n' + name + '\n' + articul,
+        {
+          parse_mode: 'HTML',
+        },
+      );
+
+      return result?.message_id;
+    } catch (e) {
+      console.log('sendOrderToChat= возможно не опубликован в чате или ', e);
+      return -1;
+    }
+  }
   /*work chat close*/
   async closeOfferInChat(
     messageId: number,

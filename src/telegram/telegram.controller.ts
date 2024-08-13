@@ -83,4 +83,14 @@ export class TelegramController {
       data.outFromOffer,
     );
   }
+  @Post('orderFromSite')
+  async orderFromSite(
+    @Body() data: { phone: string; name: string; articul: string },
+  ): Promise<number> {
+    return await this.telegramService.sendOrderToChat(
+      data.phone,
+      data.name,
+      data.articul,
+    );
+  }
 }
