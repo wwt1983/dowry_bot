@@ -915,7 +915,7 @@ export class TelegramService {
     }
   }
 
-  /*public order in chat*/
+  /*публикация заявки с сайта*/
   async sendOrderToChat(
     phone: string,
     name: string,
@@ -924,7 +924,14 @@ export class TelegramService {
     try {
       const result = await this.bot.api.sendMessage(
         TELEGRAM_CHAT_ID,
-        'Заявка с сайта \n' + phone + '\n' + name + '\n' + articul,
+        'Заявка с сайта \n' +
+          'телефон: ' +
+          phone +
+          '\nФИО: ' +
+          name +
+          '\nАртикул: ' +
+          articul +
+          `\nДата заявки: ${getTimeWithTz()}`,
         {
           parse_mode: 'HTML',
         },
