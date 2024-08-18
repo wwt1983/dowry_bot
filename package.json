@@ -43,8 +43,6 @@
     "jimp": "^0.22.12",
     "jsqr": "^1.4.0",
     "node-fetch": "^3.3.2",
-    "puppeteer": "^22.12.1",
-    "puppeteer-core": "^22.12.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "tesseract.js": "^5.1.0",
