@@ -50,12 +50,14 @@ export class TelegramController {
     const messageId = await this.telegramService.sendOfferToChat(data.id);
     return messageId;
   }
+
   @Post('closeOffer')
   async closeOffer(
     @Body() data: { messageId: number; status: OfferStatus },
   ): Promise<void> {
     await this.telegramService.closeOfferInChat(data.messageId, data.status);
   }
+
   @Post('notification')
   async notification(
     @Body()
@@ -83,6 +85,7 @@ export class TelegramController {
       data.outFromOffer,
     );
   }
+
   @Post('orderFromSite')
   async orderFromSite(
     @Body() data: { phone: string; name: string; articul: string },

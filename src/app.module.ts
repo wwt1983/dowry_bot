@@ -11,6 +11,7 @@ import telegramConfig from './telegram/configs/telegram.config';
 import { FirebaseModule } from './firebase/firebase.module';
 import { TelegramController } from './telegram/telegram.controller';
 import { HttpModule } from '@nestjs/axios';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { HttpModule } from '@nestjs/axios';
       useFactory: telegramConfig,
     }),
     FirebaseModule,
+    SmsModule,
   ],
   controllers: [AppController, TelegramController],
   providers: [AppService],

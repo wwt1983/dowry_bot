@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { FIREBASE_URL } from './firebase.constant';
+import { getDatabase, set, ref as refDb, onValue } from 'firebase/database';
 
 @Injectable()
 export class FirebaseService {
@@ -16,6 +17,7 @@ export class FirebaseService {
       storageBucket: this.cofigService.get('FIREBASE_STORAGE_BUCKET'),
       messagingSenderId: this.cofigService.get('FIREBASE_MESSAGE_SENDING_ID'),
       appId: this.cofigService.get('FIREBASE_APP_ID'),
+      databaseURL: this.cofigService.get('FIREBASE_DATABASE'),
     };
     this.app = initializeApp(firebaseConfig);
   }
@@ -47,5 +49,25 @@ export class FirebaseService {
     const snapshot = await uploadBytes(storageRef, file, metadata);
     const url = `${FIREBASE_URL}${snapshot.ref.fullPath}?alt=media`;
     return url;
+  }
+
+  async saveSmsCode(id: string, code: string): Promise<void> {
+    const db = getDatabase(this.app);
+    set(refDb(db, 'sms/' + id), {
+      code: code,
+    });
+  }
+  async checkSmsCode(id: string, code: string): Promise<any> {
+    const db = getDatabase(this.app);
+    return onValue(
+      refDb(db, '/sms/' + id),
+      (snapshot) => {
+        const codeDb = snapshot.val();
+        console.log('code =', codeDb, code);
+      },
+      {
+        onlyOnce: true,
+      },
+    );
   }
 }
