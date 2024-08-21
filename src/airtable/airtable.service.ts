@@ -284,7 +284,7 @@ export class AirtableService {
   async getDistributionTableByNick(
     nick: string,
   ): Promise<IDistribution[] | null> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("@${nick}",{Покупатели})`;
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${nick}", ARRAYJOIN({Ник ТГ}, ","))`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
