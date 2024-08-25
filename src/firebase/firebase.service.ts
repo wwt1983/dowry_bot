@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { FIREBASE_URL } from './firebase.constant';
-import { getDatabase, set, ref as refDb, onValue } from 'firebase/database';
+import { getDatabase, set, ref as refDb, get } from 'firebase/database';
 
 @Injectable()
 export class FirebaseService {
@@ -57,17 +57,10 @@ export class FirebaseService {
       code: code,
     });
   }
-  async checkSmsCode(id: string, code: string): Promise<any> {
+  async checkSmsCode(id: string, code: string): Promise<boolean> {
     const db = getDatabase(this.app);
-    return onValue(
-      refDb(db, '/sms/' + id),
-      (snapshot) => {
-        const codeDb = snapshot.val();
-        console.log('code =', codeDb, code);
-      },
-      {
-        onlyOnce: true,
-      },
-    );
+    const snapshot = await get(refDb(db, '/sms/' + id));
+    const codeDb = snapshot.val();
+    return codeDb?.code === code;
   }
 }

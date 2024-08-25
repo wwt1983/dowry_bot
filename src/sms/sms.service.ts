@@ -43,11 +43,6 @@ export class SmsService {
   }
 
   async checkCode(id: string, code: string): Promise<boolean> {
-    const result = this.firebaseService.checkSmsCode(id, code);
-    console.log(result);
-    if (result) {
-      return true;
-    }
-    return false;
+    return await this.firebaseService.checkSmsCode(id, code);
   }
 }
