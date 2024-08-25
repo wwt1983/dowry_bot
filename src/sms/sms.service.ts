@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom, map } from 'rxjs';
-import { SMS_URL, CHECK, CALL_PASSWORD } from './sms.constants';
-import { CheckResponse, SmsResponse } from './sms.types';
+import { SMS_URL, CALL_PASSWORD } from './sms.constants';
+import { SmsResponse } from './sms.types';
 import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()

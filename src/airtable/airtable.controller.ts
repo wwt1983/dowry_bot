@@ -13,7 +13,13 @@ export class AirtableController {
   @Get('offers')
   async offers(): Promise<any> {
     const result = await this.airtableService.getOffers();
-    console.log('offers =', result)
+    console.log('offers =', result);
     return result;
+  }
+
+  @Post('checkPhone')
+  async checkPhone(@Body() data: { phone: string }): Promise<boolean> {
+    console.log('data ===', data);
+    return await this.airtableService.checkPhone(data.phone);
   }
 }

@@ -8,6 +8,7 @@ import {
   TablesName,
   AIRTABLE_URL,
 } from './airtable.constants';
+
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
@@ -306,5 +307,14 @@ export class AirtableService {
     );
     if (!data || data.records.length === 0) return null;
     return data.records as IBuyer[];
+  }
+
+  async checkPhone(phone: string): Promise<boolean> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Buyer,
+      `&${FILTER_BY_FORMULA}=Find("${phone}",{Номер СБП})`,
+    );
+    if (!data || data.records.length === 0) return false;
+    return true;
   }
 }
