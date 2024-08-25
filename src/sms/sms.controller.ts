@@ -3,10 +3,7 @@ import { SmsService } from './sms.service';
 
 @Controller('sms')
 export class SmsController {
-  constructor(private readonly smsService: SmsService,
-    private readonly firebaseService: FirebaseService
-
-  ) {}
+  constructor(private readonly smsService: SmsService) {}
 
   @Post('sendSms')
   async sendSms(
