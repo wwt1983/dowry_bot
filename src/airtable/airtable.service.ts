@@ -312,8 +312,9 @@ export class AirtableService {
   async checkPhone(phone: string): Promise<boolean> {
     const data = await this.airtableHttpService.get(
       TablesName.Buyer,
-      `&${FILTER_BY_FORMULA}=Find("${phone}",{Номер СБП})`,
+      `&${FILTER_BY_FORMULA}=Find("${phone}",{Телефон})`,
     );
+    console.log('checkPhone =', data);
     if (!data || data.records.length === 0) return false;
     return true;
   }
