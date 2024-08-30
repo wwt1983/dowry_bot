@@ -314,7 +314,6 @@ export class AirtableService {
       TablesName.Buyer,
       `&${FILTER_BY_FORMULA}=Find("${phone}",{Телефон})`,
     );
-    console.log('checkPhone =', data);
     if (!data || data.records.length === 0) return false;
     return true;
   }
