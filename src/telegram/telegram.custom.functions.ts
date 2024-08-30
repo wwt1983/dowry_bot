@@ -606,7 +606,7 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
 };
 
 export const getUserOfferIdsByStatus = (data: IBot[], status = 'Чек') => {
-  return data.map((x) => {
+  return data?.map((x) => {
     if (x.fields.Статус === status) {
       return x.fields.OfferId[0];
     }

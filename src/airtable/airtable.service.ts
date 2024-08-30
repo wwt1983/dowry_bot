@@ -255,7 +255,9 @@ export class AirtableService {
       filter,
     );
   }
-  async getUserOffers(ids: string[]): Promise<IOffers> {
+  async getUserOffers(ids: string[]): Promise<IOffers | null> {
+    if (!ids || !Array.isArray(ids)) return null;
+
     const query = ids.map((id) => `{Id}="${id}"`);
     const filter = `&${FILTER_BY_FORMULA}=OR(${query})`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
