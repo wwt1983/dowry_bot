@@ -15,7 +15,7 @@ export const WEB_APP = 'https://dowrybot-front.vercel.app/';
 export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 180;
 export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 60;
-export const SUBSCRIBE_CHAT_URL = 'https://t.me/+ydq8PI7q1qg2MGEy';
+export const SUBSCRIBE_CHAT_URL = 'https://t.me/dowry_wb';
 
 export const START_NAME = '👉 Dowry раздачи 👈';
 

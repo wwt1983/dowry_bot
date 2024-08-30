@@ -615,7 +615,7 @@ export const getUserOfferIdsByStatus = (data: IBot[], status = 'Чек') => {
 
 export const getTextForSubscriber = (info: ChatMember) => {
   const defaultResult = {
-    text: `✉️ Подпишись в группу <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a> для получения скидок (до 100% кешбэка) и выгодных предложений ТОЛЬКО ДЛЯ СВОИХ `,
+    text: `✉️ Подпишись в группу <a href='${SUBSCRIBE_CHAT_URL}'>DOWRY раздачи</a> для получения скидок (до 100% кешбэка) и выгодных предложений ТОЛЬКО ДЛЯ СВОИХ (вход только по приглашению)`,
     status: false,
   };
   if (!info) return defaultResult;
