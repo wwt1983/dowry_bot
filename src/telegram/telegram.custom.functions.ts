@@ -646,24 +646,29 @@ export const getUserBenefit = (
   userOffers: IOffers,
   sumFromDistributions: number,
 ): { text: string; sum: number } => {
-  if (
-    (!userOffers ||
-      !userOffers?.records ||
-      userOffers?.records?.length === 0) &&
-    sumFromDistributions == 0
-  ) {
+  try {
+    if (
+      (!userOffers ||
+        !userOffers.records ||
+        userOffers?.records?.length === 0) &&
+      sumFromDistributions == 0
+    ) {
+      return { text: 'Начни копить 💰 на покупках', sum: 0 };
+    }
+
+    const benefit = userOffers.records?.reduce(function (sum, record) {
+      return (sum +=
+        parseInt(record.fields['Цена WB']) -
+        parseInt(record.fields['Ваша цена']));
+    }, 0);
+    return {
+      text: `Ваша общая выгода 💰: ${benefit + sumFromDistributions} руб.`,
+      sum: benefit + sumFromDistributions,
+    };
+  } catch (e) {
+    console.log(e);
     return { text: 'Начни копить 💰 на покупках', sum: 0 };
   }
-
-  const benefit = userOffers.records?.reduce(function (sum, record) {
-    return (sum +=
-      parseInt(record.fields['Цена WB']) -
-      parseInt(record.fields['Ваша цена']));
-  }, 0);
-  return {
-    text: `Ваша общая выгода 💰: ${benefit + sumFromDistributions} руб.`,
-    sum: benefit + sumFromDistributions,
-  };
 };
 
 export const itsSubscriber = (member?: ChatMember) => {
