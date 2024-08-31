@@ -13,7 +13,6 @@ export class AirtableController {
   @Get('offers')
   async offers(): Promise<any> {
     const result = await this.airtableService.getOffers();
-    console.log('offers =', result);
     return result;
   }
 

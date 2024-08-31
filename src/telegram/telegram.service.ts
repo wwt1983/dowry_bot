@@ -603,17 +603,17 @@ export class TelegramService {
             userValue.userName || userValue.fio,
           );
 
-          let member;
-          try {
-            member = await this.bot.api.getChatMember(
-              TELEGRAM_CHAT_ID_OFFERS,
-              id,
-            );
-          } catch (e) {
-            console.log(e);
-          }
+          // let member;
+          // try {
+          //   member = await this.bot.api.getChatMember(
+          //     TELEGRAM_CHAT_ID_OFFERS,
+          //     id,
+          //   );
+          // } catch (e) {
+          //   console.log(e);
+          // }
 
-          ctx.session.itsSubscriber = itsSubscriber(member);
+          // ctx.session.itsSubscriber = itsSubscriber(member);
 
           await this.saveToAirtable(ctx.session);
 
