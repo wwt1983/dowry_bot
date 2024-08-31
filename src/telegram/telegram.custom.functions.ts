@@ -656,7 +656,7 @@ export const getUserBenefit = (
       return { text: 'Начни копить 💰 на покупках', sum: 0 };
     }
 
-    const benefit = userOffers.records?.reduce(function (sum, record) {
+    const benefit = userOffers?.records?.reduce(function (sum, record) {
       return (sum +=
         parseInt(record.fields['Цена WB']) -
         parseInt(record.fields['Ваша цена']));
