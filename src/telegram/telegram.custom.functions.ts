@@ -647,7 +647,9 @@ export const getUserBenefit = (
   sumFromDistributions: number,
 ): { text: string; sum: number } => {
   if (
-    (!userOffers || userOffers.records.length === 0) &&
+    (!userOffers ||
+      !userOffers?.records ||
+      userOffers?.records?.length === 0) &&
     sumFromDistributions == 0
   ) {
     return { text: 'Начни копить 💰 на покупках', sum: 0 };
