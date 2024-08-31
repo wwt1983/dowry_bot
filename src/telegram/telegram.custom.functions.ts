@@ -666,7 +666,7 @@ export const getUserBenefit = (
       sum: benefit + sumFromDistributions,
     };
   } catch (e) {
-    console.log(e);
+    console.log(e, userOffers, sumFromDistributions);
     return { text: 'Начни копить 💰 на покупках', sum: 0 };
   }
 };
