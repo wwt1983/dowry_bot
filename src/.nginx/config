@@ -1,15 +1,17 @@
 server {
     listen 80 default_server;
-    listen [::]:80 default_server;
+    server_name dowray.ru www.dowray.ru;
 
     location / {
-        return 301 https://$host$request_uri;
+        return 301 https://dowray.rurequest_uri;
     }
 }
 
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
+
+server_name dowray.ru www.dowray.ru;
 
     ssl_certificate /path/to/signed_cert_plus_intermediates;
     ssl_certificate_key /path/to/private_key;
@@ -18,7 +20,7 @@ server {
     ssl_session_tickets off;
 
     # curl https://ssl-config.mozilla.org/ffdhe2048.txt > /path/to/dhparam
-    ssl_dhparam /path/to/dhparam;
+    #ssl_dhparam /path/to/dhparam;
 
     # intermediate configuration
     ssl_protocols TLSv1.2 TLSv1.3;
