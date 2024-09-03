@@ -144,14 +144,19 @@ export class TelegramService {
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
 
       await this.saveToAirtable(ctx.session);
-      await ctx.reply('⤵️', {
-        reply_markup: helpKeyboard,
-      });
-      await ctx.api.sendMessage(id, FOOTER);
 
       await ctx.reply(sayHi(first_name, userValue.userName), {
         reply_markup: userHistory.orderButtons,
       });
+
+      await ctx.reply(
+        '🤝 Кешбэк будет выплачен только при соблюдении всех условий инструкции.',
+        {
+          reply_markup: helpKeyboard,
+        },
+      );
+
+      //await ctx.api.sendMessage(id, FOOTER);
 
       if (ctx.match) {
         const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
@@ -633,7 +638,7 @@ export class TelegramService {
           if (data.keys === ErrorKeyWord) {
             const msgToSecretChat = await this.saveComment(
               ctx.from,
-              'Написать ключевое слово',
+              `Админское сообщение (написать ключевое слово для  ${getUserName(ctx.from)})`,
               data?.articul || '',
               data?.title || '',
               'Выбор раздачи',
