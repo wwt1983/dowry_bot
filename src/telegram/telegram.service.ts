@@ -84,6 +84,7 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
+import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 //import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -629,6 +630,18 @@ export class TelegramService {
 
           console.log('==== WEB API ====', data, ctx.session);
 
+          if (data.keys === ErrorKeyWord) {
+            const msgToSecretChat = await this.saveComment(
+              ctx.from,
+              'Написать ключевое слово',
+              data?.articul || '',
+              data?.title || '',
+              'Выбор раздачи',
+            );
+
+            await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
+          }
+
           ctx.session = updateSessionByField(ctx.session, 'data', data);
           ctx.session = updateSessionByField(
             ctx.session,
@@ -1014,7 +1027,7 @@ export class TelegramService {
   ): Promise<void> {
     try {
       console.log(
-        'sendNotificationToUser=',
+        'sendNotificationToUser',
         chat_id,
         sessionId,
         botId,
@@ -1051,7 +1064,7 @@ export class TelegramService {
         notifications,
         statisticNotifications,
         status,
-        startTime,
+        getDateWithTz(startTime),
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
@@ -1081,7 +1094,7 @@ export class TelegramService {
       if (
         !scheduleNotification(
           status,
-          stopTime || startTime,
+          getDateWithTz(stopTime) || getDateWithTz(startTime),
           startTime,
           value?.statistic?.fields['Количество отправок'] || 0,
           dateDelivery,
@@ -1119,8 +1132,9 @@ export class TelegramService {
       );
       await this.sendMessageWithKeyboardHistory(chat_id);
     } catch (error: any) {
+      console.log(error);
+
       if (error instanceof Error) {
-        console.log('sendNotificationToUser error=', error);
         if (error.message.includes('403')) {
           await this.airtableService.updateStatusInBotTableAirtable(
             sessionId,
@@ -1267,20 +1281,20 @@ export class TelegramService {
       'chat_id',
     );
     const name = getUserName(from);
-    let sum = 0;
-    let offersFromDistributions = '';
+    const sum = 0;
+    const offersFromDistributions = '';
     if (full && (name.fio || name.userName)) {
       //if (name.userName === 'val_tom') name.userName = 'OxanaWeber';
-      const dataDistributions =
-        await this.airtableService.getDistributionTableByNick(
-          name.userName || name.fio,
-        );
-      const filterDistributions = getFilterDistribution(
-        dataDistributions,
-        dataBuyer,
-      );
-      sum = filterDistributions?.sum;
-      offersFromDistributions = filterDistributions.offers;
+      // const dataDistributions =
+      //   await this.airtableService.getDistributionTableByNick(
+      //     name.userName || name.fio,
+      //   );
+      // const filterDistributions = getFilterDistribution(
+      //   dataDistributions,
+      //   dataBuyer,
+      // );
+      //sum = filterDistributions?.sum;
+      //offersFromDistributions = filterDistributions.offers;
     }
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
     let member: ChatMember;

@@ -21,8 +21,10 @@ const ERROR_TIME = -1000;
 export const getTimeWithTz = (format?: string) =>
   formatInTimeZone(new Date(), TIME_ZONE, format || FORMAT_DATE);
 
-export const getDateWithTz = (date: string, format?: string) =>
-  formatInTimeZone(date, TIME_ZONE, format || FORMAT_DATE);
+export const getDateWithTz = (date: string, format?: string) => {
+  if (!date) return null;
+  return formatInTimeZone(date, TIME_ZONE, format || FORMAT_DATE);
+};
 
 export const getDate = () =>
   formatInTimeZone(new Date(), TIME_ZONE, FORMAT_DATE_NO_TIME);
