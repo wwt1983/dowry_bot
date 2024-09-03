@@ -44,6 +44,7 @@ export interface ISessionData {
   times?: string[];
   isRestore: boolean;
   itsSubscriber?: boolean;
+  articules?: string[];
 }
 
 export type MyContext = HydrateFlavor<

@@ -166,6 +166,12 @@ export const STEPS = {
     erroText: 'написать о своей проблеме',
     textStepCount: '',
   },
+  'Лимит заказов': {
+    step: -5,
+    value: 'Лимит заказов',
+    erroText: 'первышен лимит заказов одного артикула',
+    textStepCount: '',
+  },
 };
 
 export const STEPS_TYPES = {
@@ -187,6 +193,7 @@ export const STEPS_TYPES = {
     STEPS.HELP.step,
     STEPS['Дата доставки'].step,
     STEPS.Финиш.step,
+    STEPS['Лимит заказов'].step,
   ],
 };
 

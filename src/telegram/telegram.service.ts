@@ -56,8 +56,9 @@ import {
   getTextForSubscriber,
   getUserOffersReady,
   getUserBenefit,
-  itsSubscriber,
-  getFilterDistribution,
+  getArticulesByUser,
+  //itsSubscriber,
+  //getFilterDistribution,
 } from './telegram.custom.functions';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { AirtableService } from 'src/airtable/airtable.service';
@@ -142,6 +143,7 @@ export class TelegramService {
 
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
+      ctx.session.articules = userHistory?.articules;
 
       await this.saveToAirtable(ctx.session);
 
@@ -1321,6 +1323,7 @@ export class TelegramService {
         offersReady: '',
         subscribe: subscribe.text,
         itsSubscriber: subscribe.status,
+        articules: getArticulesByUser(dataBuyer),
       };
     }
 
@@ -1340,6 +1343,7 @@ export class TelegramService {
       offersReady: offersReady + offersFromDistributions,
       subscribe: subscribe.text,
       itsSubscriber: subscribe.status,
+      articules: getArticulesByUser(dataBuyer),
     };
   }
 }

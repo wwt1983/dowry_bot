@@ -713,3 +713,13 @@ export const getFilterDistribution = (
     }, '') || '';
   return { sum, offers };
 };
+
+export const getArticulesByUser = (dataBuyer: IBot[]) => {
+  try {
+    if (!dataBuyer || dataBuyer.length === 0) return null;
+    return dataBuyer?.map((x) => x.fields?.Артикул);
+  } catch (error) {
+    console.log('getArticulesByUser', error);
+    return null;
+  }
+};
