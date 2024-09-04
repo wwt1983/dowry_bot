@@ -16,8 +16,8 @@ export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 180;
 export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 60;
 export const SUBSCRIBE_CHAT_URL = 'https://t.me/dowry_wb';
-
-export const START_NAME = '👉 Dowry раздачи 👈';
+export const MESSAGE_LIMIT_ORDER = '❌Превышен лимит заказов одного артикула❌';
+export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
 
 export enum COMMAND_NAMES {
   start = 'start',
@@ -169,7 +169,7 @@ export const STEPS = {
   'Лимит заказов': {
     step: -5,
     value: 'Лимит заказов',
-    erroText: 'первышен лимит заказов одного артикула',
+    erroText: MESSAGE_LIMIT_ORDER,
     textStepCount: '',
   },
 };

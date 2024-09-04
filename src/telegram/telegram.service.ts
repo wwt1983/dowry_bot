@@ -24,8 +24,9 @@ import {
   TELEGRAM_MESSAGE_CHAT_TEST,
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
-  FOOTER,
+  //FOOTER,
   TELEGRAM_CHAT_ID_OFFERS,
+  MESSAGE_LIMIT_ORDER,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -57,6 +58,7 @@ import {
   getUserOffersReady,
   getUserBenefit,
   getArticulesByUser,
+  checkOnExistArticuleByUserOrders,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -143,7 +145,7 @@ export class TelegramService {
 
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
-      ctx.session.articules = userHistory?.articules;
+      ctx.session.userArticules = userHistory?.userArticules;
 
       await this.saveToAirtable(ctx.session);
 
@@ -160,27 +162,48 @@ export class TelegramService {
 
       //await ctx.api.sendMessage(id, FOOTER);
 
+      let existArticleByUser = null;
       if (ctx.match) {
         const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
           ctx.match,
           id.toString(),
         );
 
-        ctx.session.step = STEPS['Выбор раздачи'].step;
-        ctx.session.status = 'Выбор раздачи';
+        existArticleByUser = checkOnExistArticuleByUserOrders(
+          sessionData.articul,
+          ctx.session.userArticules,
+        );
+
+        console.log(
+          'existArticleByUser=',
+          existArticleByUser,
+          ctx.session.userArticules,
+        );
+
+        if (existArticleByUser) {
+          ctx.session.step = STEPS['Лимит заказов'].step;
+          ctx.session.status = 'Лимит заказов';
+        } else {
+          ctx.session.step = STEPS['Выбор раздачи'].step;
+          ctx.session.status = 'Выбор раздачи';
+        }
+
         ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
         ctx.session = updateSessionByField(
           ctx.session,
           'offerId',
           sessionData.offerId,
         );
-        await this.bot.api.sendMediaGroup(
-          ctx.session.chat_id,
-          getTextForFirstStep(sessionData) as any[],
-        );
-        ctx.session = nextStep(ctx.session);
-        await this.updateToAirtable(ctx.session);
-        await this.sendMediaByStep(ctx.session.step, ctx);
+        //продолжаем двигаться только если не было заказов с таким артикулом
+        if (!existArticleByUser) {
+          ctx.session = nextStep(ctx.session);
+          await this.updateToAirtable(ctx.session);
+          await this.sendMediaByStep(ctx.session.step, ctx);
+          await this.bot.api.sendMediaGroup(
+            ctx.session.chat_id,
+            getTextForFirstStep(sessionData) as any[],
+          );
+        }
         ctx.session.lastCommand = null;
       }
 
@@ -192,6 +215,11 @@ export class TelegramService {
           link_preview_options: { is_disabled: true },
         },
       );
+
+      if (existArticleByUser) {
+        await this.updateToAirtable(ctx.session);
+        return await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
+      }
     });
 
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
@@ -639,10 +667,15 @@ export class TelegramService {
 
           console.log('==== WEB API ====', data, ctx.session);
 
+          const existArticulByUser = checkOnExistArticuleByUserOrders(
+            webData.articul,
+            ctx.session.userArticules,
+          );
+
           if (data.keys === ErrorKeyWord) {
             const msgToSecretChat = await this.saveComment(
               ctx.from,
-              `Админское сообщение (написать ключевое слово для  ${getUserName(ctx.from)})`,
+              ` Админское сообщение (написать ключевое слово для ${getUserName(ctx.from).fio}) chat_id=${ctx.from.id}`,
               data?.articul || '',
               data?.title || '',
               'Выбор раздачи',
@@ -660,9 +693,14 @@ export class TelegramService {
           ctx.session = updateSessionByField(
             ctx.session,
             'status',
-            'Выбор раздачи',
+            existArticulByUser ? 'Лимит заказов' : 'Выбор раздачи',
           );
           ctx.session = updateSessionByStep(ctx.session);
+
+          if (existArticulByUser) {
+            await this.updateToAirtable(ctx.session);
+            return await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
+          }
         } else {
           const { step } = ctx.session;
           if (!STEPS_TYPES.text.find((x) => x === step)) {
@@ -1323,7 +1361,7 @@ export class TelegramService {
         offersReady: '',
         subscribe: subscribe.text,
         itsSubscriber: subscribe.status,
-        articules: getArticulesByUser(dataBuyer),
+        userArticules: getArticulesByUser(dataBuyer),
       };
     }
 
@@ -1343,7 +1381,7 @@ export class TelegramService {
       offersReady: offersReady + offersFromDistributions,
       subscribe: subscribe.text,
       itsSubscriber: subscribe.status,
-      articules: getArticulesByUser(dataBuyer),
+      userArticules: getArticulesByUser(dataBuyer),
     };
   }
 }

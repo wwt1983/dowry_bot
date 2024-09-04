@@ -33,7 +33,7 @@ export class TelegramController {
         );
       }
     } catch (e) {
-      console.log(e);
+      console.log('response from web=', e);
     }
   }
 

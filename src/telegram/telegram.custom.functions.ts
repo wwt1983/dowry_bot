@@ -714,12 +714,34 @@ export const getFilterDistribution = (
   return { sum, offers };
 };
 
+/**
+ * выбираем только заказы с положительным step
+ */
 export const getArticulesByUser = (dataBuyer: IBot[]) => {
   try {
     if (!dataBuyer || dataBuyer.length === 0) return null;
-    return dataBuyer?.map((x) => x.fields?.Артикул);
+    return dataBuyer
+      ?.map((x) => {
+        const status = Object.values(STEPS).find(
+          (item) => item.value === x.fields['Статус'],
+        );
+        if (status.step > 0) return x.fields?.Артикул;
+      })
+      ?.filter((x) => x !== undefined);
   } catch (error) {
-    console.log('getArticulesByUser', error);
+    console.log('getArticulesByUser=', error);
     return null;
   }
+};
+
+/**
+проверка на существования заказа у пользователя (сейчас можно заказать одно предложение)  
+ */
+export const checkOnExistArticuleByUserOrders = (
+  articule: string,
+  articules?: string[],
+) => {
+  if (!articules || !Array.isArray(articules)) return false;
+  if (articules.find((x) => x === articule)) return true;
+  return false;
 };
