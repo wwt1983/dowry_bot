@@ -679,7 +679,7 @@ export class TelegramService {
           console.log('==== WEB API ====', data, ctx.session);
 
           const existArticulByUser = checkOnExistArticuleByUserOrders(
-            webData.articul,
+            data.articul,
             ctx.session.userArticules,
           );
 
@@ -707,6 +707,13 @@ export class TelegramService {
             existArticulByUser ? 'Лимит заказов' : 'Выбор раздачи',
           );
           ctx.session = updateSessionByStep(ctx.session);
+
+          console.log(
+            'existArticulByUser=',
+            existArticulByUser,
+            data.articul,
+            ctx.session.userArticules,
+          );
 
           if (existArticulByUser) {
             await this.updateToAirtable(ctx.session);
