@@ -118,6 +118,7 @@ export function createInitialSessionData(
     times: null,
     isRestore: false,
     itsSubscriber: false,
+    userArticules: null,
   };
 }
 
