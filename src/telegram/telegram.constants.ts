@@ -27,6 +27,7 @@ export enum COMMAND_NAMES {
   messageSend = 'message_send',
   saveMessage = 'saveMessage',
   admin = 'admin',
+  offers = 'offers',
 }
 
 export const COMMANDS_TELEGRAM = [
@@ -34,6 +35,7 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
   { command: COMMAND_NAMES.call, description: 'Написать оператору' },
+  { command: COMMAND_NAMES.offers, description: 'Раздачи' },
 ];
 
 export const ADMIN_COMMANDS_TELEGRAM = [

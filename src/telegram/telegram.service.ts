@@ -88,6 +88,7 @@ import {
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
+import { getOffersLink } from 'src/airtable/airtable.custom';
 //import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -171,12 +172,6 @@ export class TelegramService {
 
         existArticleByUser = checkOnExistArticuleByUserOrders(
           sessionData.articul,
-          ctx.session.userArticules,
-        );
-
-        console.log(
-          'existArticleByUser=',
-          existArticleByUser,
           ctx.session.userArticules,
         );
 
@@ -269,6 +264,22 @@ export class TelegramService {
       }
     });
 
+    /*======== Раздачи =======*/
+    this.bot.command(COMMAND_NAMES.offers, async (ctx) => {
+      try {
+        ctx.session.lastCommand = COMMAND_NAMES.offers;
+
+        const { id } = ctx.from;
+        const offers = await this.airtableService.getOffers();
+        return await ctx.api.sendMessage(id, getOffersLink(offers), {
+          parse_mode: 'HTML',
+          link_preview_options: { is_disabled: true },
+        });
+      } catch (e) {
+        console.log('offers=', e);
+        return await ctx.reply('Раздел обновляется');
+      }
+    });
     /*======== LOCATION =======*/
     this.bot.on(':location', async (ctx) => {
       const data = await commandService.get(
