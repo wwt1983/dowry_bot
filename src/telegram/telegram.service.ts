@@ -150,17 +150,25 @@ export class TelegramService {
 
       await this.saveToAirtable(ctx.session);
 
-      await ctx.reply(sayHi(first_name, userValue.userName), {
+      await ctx.reply(sayHi(first_name, userValue.userName, ctx.from.id), {
         reply_markup: userHistory.orderButtons,
       });
 
       await ctx.reply(
-        '🤝 Кешбэк будет выплачен только при соблюдении всех условий инструкции.',
+        '🤝 Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день.',
         {
           reply_markup: helpKeyboard,
         },
       );
 
+      await this.bot.api.sendMessage(
+        id,
+        `${userHistory.benefit}\n${userHistory.subscribe}`,
+        {
+          parse_mode: 'HTML',
+          link_preview_options: { is_disabled: true },
+        },
+      );
       //await ctx.api.sendMessage(id, FOOTER);
 
       let existArticleByUser = null;
@@ -201,15 +209,6 @@ export class TelegramService {
         }
         ctx.session.lastCommand = null;
       }
-
-      await this.bot.api.sendMessage(
-        id,
-        `${userHistory.benefit}\n${userHistory.subscribe}`,
-        {
-          parse_mode: 'HTML',
-          link_preview_options: { is_disabled: true },
-        },
-      );
 
       if (existArticleByUser) {
         await this.updateToAirtable(ctx.session);
@@ -518,6 +517,8 @@ export class TelegramService {
       ctx.session = await this.restoreSession(ctx, sessionId);
       let response = null;
 
+      if (!ctx.session?.status) return;
+
       if (ctx.session.status === 'Выбор раздачи') {
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
@@ -635,9 +636,12 @@ export class TelegramService {
           ctx.session = await this.restoreSession(ctx, lastSession);
           if (!ctx.session.isRestore) {
             const historyButtons = createHistoryKeyboard(dataBuyer, true);
-            await ctx.reply(sayHi(first_name, userValue.userName), {
-              reply_markup: historyButtons,
-            });
+            await ctx.reply(
+              sayHi(first_name, userValue.userName, ctx.from.id),
+              {
+                reply_markup: historyButtons,
+              },
+            );
           }
         }
 

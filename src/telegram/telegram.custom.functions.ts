@@ -2,7 +2,6 @@ import { ISessionData, ITelegramWebApp } from './telegram.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  FIRST_STEP,
   FIRST_STEP_A,
   //FIRST_STEP_B,
   FIRST_STEP_C,
@@ -27,6 +26,7 @@ import {
   STEP_EXAMPLE_TEXT_UP,
   FIRST_STEP_CART,
   SUBSCRIBE_CHAT_URL,
+  FIRST_STEP_KEY_VALUE,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -48,10 +48,15 @@ import {
 } from 'src/common/date/date.methods';
 import { IDistribution } from 'src/airtable/types/IDisturbation.interface';
 
-export function sayHi(first_name: string, username: string): string {
+export function sayHi(
+  first_name: string,
+  username: string,
+  id: number,
+): string {
   return (
     `\n\n\n\n\️Привет, ${first_name || username || 'друг'}!✌️` +
-    '\n\nВ путь ⤵\n'
+    `\nВаш номер для 💰 ${id}\n` +
+    '\nВ путь ⤵\n'
   );
 }
 
@@ -250,13 +255,11 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     `❗️ Кешбэк ~ ${cash}❗️ \n` +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
     '\n' +
-    FIRST_STEP +
-    '➡️ ' +
-    keys +
-    '\n\n' +
+    FIRST_STEP_LINK +
+    FIRST_STEP_KEY_VALUE +
+    `\n🔎 ${keys.toUpperCase()}\n\n` +
     getMessageForTimeOffer(times) +
     //FIRST_STEP_A +
-    FIRST_STEP_LINK +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
 
   return [
