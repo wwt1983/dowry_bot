@@ -30,6 +30,7 @@
     "@nestjs/config": "^3.2.2",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/typeorm": "^10.0.2",
     "axios": "^1.6.8",
     "bluebird": "^3.7.2",
     "braces": "^3.0.3",
@@ -43,9 +44,11 @@
     "jimp": "^0.22.12",
     "jsqr": "^1.4.0",
     "node-fetch": "^3.3.2",
+    "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "tesseract.js": "^5.1.0",
+    "typeorm": "^0.3.20",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

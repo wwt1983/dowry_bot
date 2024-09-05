@@ -711,13 +711,6 @@ export class TelegramService {
           );
           ctx.session = updateSessionByStep(ctx.session);
 
-          console.log(
-            'existArticulByUser=',
-            existArticulByUser,
-            data.articul,
-            ctx.session.userArticules,
-          );
-
           if (existArticulByUser) {
             await this.updateToAirtable(ctx.session);
             return await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);

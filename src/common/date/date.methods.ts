@@ -107,11 +107,7 @@ export const getTimesFromTimesTable = (dates: {
 
 export const getOfferTime = (session: ISessionData) => {
   try {
-    if (
-      session.data.times &&
-      session.data.times?.length &&
-      session.data.times?.length > 0
-    ) {
+    if (session.data?.times?.length > 0) {
       let time = null;
       if (session.data.times[1] === TIME_FULL) {
         time = session.data.times[0];
@@ -131,7 +127,7 @@ export const getOfferTime = (session: ISessionData) => {
       };
     }
   } catch (error) {
-    console.log(error);
+    console.log(error, session);
     return {
       time: session.startTime,
       itsFutureTime: false,

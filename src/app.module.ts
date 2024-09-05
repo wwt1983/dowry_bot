@@ -12,7 +12,9 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { TelegramController } from './telegram/telegram.controller';
 import { HttpModule } from '@nestjs/axios';
 import { SmsModule } from './sms/sms.module';
-
+//import { TypeOrmModule } from '@nestjs/typeorm';
+//import { LogsController } from './logs/logs.controller';
+//import { Log } from './logs/log.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -26,6 +28,17 @@ import { SmsModule } from './sms/sms.module';
     }),
     FirebaseModule,
     SmsModule,
+    // TypeOrmModule.forRoot({
+    //   type: 'postgres',
+    //   host: 'localhost',
+    //   port: 5432,
+    //   username: 'your_username',
+    //   password: 'your_password',
+    //   database: 'your_database',
+    //   entities: [Log],
+    //   synchronize: true, // Включите только для разработки
+    // }),
+    // TypeOrmModule.forFeature([Log]),
   ],
   controllers: [AppController, TelegramController],
   providers: [AppService],

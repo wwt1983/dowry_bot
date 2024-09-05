@@ -13,10 +13,12 @@ export const getFilterById = (keyIds: string[]) => {
 export const getOffersLink = (offers: IOffers) => {
   try {
     if (offers && offers.records && Array.isArray(offers.records)) {
-      const result = offers?.records.map((x) => ({
-        name: x.fields['Name'],
-        link: x.fields['Ссылка'],
-      }));
+      const result = offers?.records
+        .filter((x) => x.fields['Name'] !== undefined)
+        .map((x) => ({
+          name: x.fields['Name'],
+          link: x.fields['Ссылка'],
+        }));
       return result.reduce((acc, currentValue, index) => {
         acc += `${++index}. <a href='${currentValue.link}'>${currentValue.name}</a>\n`;
         return acc;
