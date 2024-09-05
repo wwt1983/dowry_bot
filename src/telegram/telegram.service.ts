@@ -1265,68 +1265,74 @@ export class TelegramService {
     }
   }
 
+  /**
+   * восстановление раздачи по сессии
+   * */
   async restoreSession(ctx: MyContext, sessionId: string) {
-    /*продолжение раздачи*/
-    const { id } = ctx.from;
+    try {
+      const { id } = ctx.from;
 
-    //sort by StopTime - this will be last session
-    const data = await this.airtableService.getBotByFilter(
-      sessionId,
-      'SessionId',
-    );
+      //sort by StopTime - this will be last session
+      const data = await this.airtableService.getBotByFilter(
+        sessionId,
+        'SessionId',
+      );
 
-    if (!data || data.length === 0) {
-      await this.sendMessageWithKeyboardHistory(id);
-      return;
-    }
-    const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
-      data[0].fields;
-    if (STEPS[Статус].step > 3 && (!Images || Images.length === 0)) {
-      await this.sendMessageWithKeyboardHistory(id);
-      return;
-    }
-
-    const userValue = getUserName(ctx.from);
-
-    const value: ISessionData = {
-      sessionId: sessionId,
-      user: userValue.userName || userValue.fio,
-      chat_id: id.toString(),
-      startTime: dateFormat(StartTime, FORMAT_DATE),
-      stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
-      stopTime: dateFormat(StopTime, FORMAT_DATE),
-      step: STEPS[Статус].step as number,
-      images: Images?.map((x) => x.url),
-      offerId: OfferId[0],
-      status: Статус,
-      deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
-      isRestore: true,
-    };
-
-    let session = createContinueSessionData(
-      value,
-      Артикул,
-      Раздача,
-      data[0].fields['Ключевое слово'],
-    );
-
-    const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
-      session.offerId,
-      session.chat_id,
-    );
-
-    session = updateSessionByField(session, 'data', sessionData);
-
-    if (Статус === 'Проблема с артикулом') {
-      session.errorStatus = 'check_articul';
-    } else {
-      if (Статус === 'Заказ') {
-        session = nextStep(session); //пропускаем дату доставки
+      if (!data || data.length === 0) {
+        await this.sendMessageWithKeyboardHistory(id);
+        return;
       }
-      session = nextStep(session);
-    }
+      const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
+        data[0].fields;
+      if (STEPS[Статус].step > 3 && (!Images || Images.length === 0)) {
+        await this.sendMessageWithKeyboardHistory(id);
+        return;
+      }
 
-    return session;
+      const userValue = getUserName(ctx.from);
+
+      const value: ISessionData = {
+        sessionId: sessionId,
+        user: userValue.userName || userValue.fio,
+        chat_id: id.toString(),
+        startTime: dateFormat(StartTime, FORMAT_DATE),
+        stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
+        stopTime: dateFormat(StopTime, FORMAT_DATE),
+        step: STEPS[Статус].step as number,
+        images: Images?.map((x) => x.url),
+        offerId: OfferId[0],
+        status: Статус,
+        deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+        isRestore: true,
+      };
+
+      let session = createContinueSessionData(
+        value,
+        Артикул,
+        Раздача,
+        data[0].fields['Ключевое слово'],
+      );
+
+      const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
+        session.offerId,
+        session.chat_id,
+      );
+
+      session = updateSessionByField(session, 'data', sessionData);
+
+      if (Статус === 'Проблема с артикулом') {
+        session.errorStatus = 'check_articul';
+      } else {
+        if (Статус === 'Заказ') {
+          session = nextStep(session); //пропускаем дату доставки
+        }
+        session = nextStep(session);
+      }
+
+      return session;
+    } catch (error) {
+      console.log(error, sessionId);
+    }
   }
 
   async getInstruction(ctx: MyContext) {

@@ -587,6 +587,9 @@ export const getErrorTextByStep = (
   };
 };
 
+/**
+ последняя сессия
+ */
 export const getLastSession = (dataBuyer: IBot[] | null) => {
   if (!dataBuyer) return null;
 
