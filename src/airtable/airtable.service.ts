@@ -19,7 +19,7 @@ import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import { getUserName } from 'src/telegram/telegram.custom.functions';
 import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
-import { IFilter, IFilters } from './types/IFilters.interface';
+import { IFilters } from './types/IFilters.interface';
 import { getFilterById } from './airtable.custom';
 import { ITime, ITimes } from './types/ITimes.interface';
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
