@@ -652,8 +652,7 @@ export class TelegramService {
         if (ctx.msg?.text?.includes('query_id')) {
           const { id } = ctx.from;
           const userValue = getUserName(ctx.from);
-          const userHistory = await this.getUserHistory(ctx.from, true, true);
-          ctx.session.userArticules = userHistory?.userArticules;
+
           ctx.session = createInitialSessionData(
             id?.toString(),
             userValue.userName || userValue.fio,
@@ -685,9 +684,16 @@ export class TelegramService {
 
           console.log('==== WEB API ====', data, ctx.session);
 
+          const userHistory = await this.getUserHistory(ctx.from, true, true);
+          console.log(
+            'userArticules',
+            data.articul,
+            userHistory?.userArticules,
+          );
+          ctx.session.userArticules = userHistory?.userArticules;
           const existArticulByUser = checkOnExistArticuleByUserOrders(
             data.articul,
-            ctx.session.userArticules,
+            userHistory?.userArticules,
           );
 
           if (data.keys === ErrorKeyWord) {
