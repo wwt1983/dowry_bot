@@ -199,7 +199,7 @@ export const STEPS_TYPES = {
   ],
 };
 
-export const COUNT_TRY_ERROR = 1;
+export const COUNT_TRY_ERROR = 4;
 
 export const HEADER = 'Чтобы получить кешбэк Вам необходимо ⬇️ \n\n';
 export const FIRST_STEP_START_HELP =

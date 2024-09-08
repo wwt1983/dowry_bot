@@ -537,20 +537,29 @@ export const scheduleNotification = (
   }
 };
 
-export const getTextForArticleError = (
+export const getTextForArticulError = (
   positionOnWB: string,
   countTryError: number,
   status: BrokeBotStatus,
+  filter?: string,
 ) => {
   const helpText =
     positionOnWB && countTryError <= COUNT_TRY_ERROR
       ? `\nЭта позиция находится примерно на ${positionOnWB} странице.`
       : '';
-  if (countTryError <= COUNT_TRY_ERROR)
+  if (countTryError <= COUNT_TRY_ERROR) {
+    let filterText = '';
+    if (countTryError === COUNT_TRY_ERROR - 1) {
+      filterText = filter
+        ? '\nПопробуйте найти товар по фильтру: 👉' + filter
+        : '';
+    }
     return (
       'Артикулы не совпадают. Проверьте, пожалуйста, правильно ли вы нашли товар' +
-      helpText
+      helpText +
+      filterText
     );
+  }
 
   switch (status) {
     case 'operator':

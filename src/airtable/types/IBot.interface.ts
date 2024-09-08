@@ -27,6 +27,7 @@ export interface IBot {
     Помощь: string;
     'Ключевое слово': string;
     Подписка: boolean;
+    Фильтр: string;
   };
 }
 interface IPhoto {

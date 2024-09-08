@@ -45,7 +45,7 @@ import {
   getNotificationValue,
   scheduleNotification,
   createContinueSessionData,
-  getTextForArticleError,
+  getTextForArticulError,
   getArticulErrorStatus,
   createCommentForDb,
   getUserName,
@@ -403,10 +403,11 @@ export class TelegramService {
       ctx.session.errorStatus = 'check_articul';
       if (!parseUrl(ctx.callbackQuery.data, ctx.session.data.articul)) {
         await ctx.reply(
-          getTextForArticleError(
+          getTextForArticulError(
             ctx.session.data.positionOnWB,
             ctx.session.countTryError,
             ctx.session.errorStatus,
+            ctx.session.data.filter,
           ),
           getArticulCommand(ctx.session.countTryError, ctx.session.errorStatus),
         );
@@ -780,7 +781,6 @@ export class TelegramService {
           );
           if (!parseUrl(text, ctx.session.data.articul)) {
             const { countTryError } = ctx.session;
-
             if (
               countTryError === COUNT_TRY_ERROR ||
               ctx.session.errorStatus === 'operator'
@@ -819,10 +819,11 @@ export class TelegramService {
             }
 
             await ctx.reply(
-              getTextForArticleError(
+              getTextForArticulError(
                 ctx.session.data.positionOnWB,
                 ctx.session.countTryError,
                 ctx.session.errorStatus,
+                ctx.session.data.filter,
               ),
               getArticulCommand(
                 ctx.session.countTryError,
@@ -937,7 +938,9 @@ export class TelegramService {
       offerId,
       true,
       true,
+      true,
     );
+
     return {
       id: id,
       articul: offerAirtable.fields['Артикул']?.toString(),
@@ -954,6 +957,7 @@ export class TelegramService {
       times: getTimesFromTimesTable(offerAirtable.fields['Время бронь']),
       countTryError: 0,
       errorStatus: null,
+      filter: offerAirtable.fields.Фильтр,
     };
   }
   /*

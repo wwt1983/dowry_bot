@@ -19,6 +19,7 @@ export enum TablesName {
   UserComments = 'Бот сообщения',
   KeyWords = 'Ключевые слова',
   TimeOffer = 'Время раздач',
+  Filters = 'Фильтры раздачи',
 }
 
 export const TablesDowray: IData[] = [
@@ -82,6 +83,11 @@ export const TablesDowray: IData[] = [
     title: TablesName.TimeOffer,
     tableName: 'tblc3PIVK9wiDPVCU',
     view: 'viwUNV2Uq0062fRie',
+  },
+  {
+    title: TablesName.Filters,
+    tableName: 'tblRaEKGIuvhsKp63',
+    view: 'viwTU9UzSNuaJPESx',
   },
 ];
 

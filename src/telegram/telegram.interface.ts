@@ -69,4 +69,5 @@ export interface ITelegramWebApp {
   times?: string[];
   countTryError?: number;
   errorStatus?: string;
+  filter?: string;
 }

@@ -19,6 +19,7 @@ import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import { getUserName } from 'src/telegram/telegram.custom.functions';
 import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
+import { IFilter, IFilters } from './types/IFilters.interface';
 import { getFilterById } from './airtable.custom';
 import { ITime, ITimes } from './types/ITimes.interface';
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
@@ -75,6 +76,7 @@ export class AirtableService {
         'Ключевые слова':
           session.data.keys +
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
+        Фильтр: session.data.filter,
       };
       const tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
@@ -168,6 +170,9 @@ export class AirtableService {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${chat_id}",{chat_id})`;
     return await this.airtableHttpService.get(TablesName.UserComments, filter);
   }
+  /**
+   * список раздач
+   */
   async getOffers(): Promise<IOffers> {
     const filter =
       process.env.NODE_ENV === 'development'
@@ -179,6 +184,7 @@ export class AirtableService {
     id: string,
     needKeys?: boolean,
     needTimes?: boolean,
+    needFilters?: boolean,
   ): Promise<IOffer> {
     const offer = (await this.airtableHttpService.getById(
       TablesName.Offers,
@@ -201,8 +207,8 @@ export class AirtableService {
         if (count >= countOrder && keys.records.length > 0) {
           let allCountKeys = 0;
           for (let i = 0; i < keys.records.length; i++) {
-            const countKye = keys.records[i].fields.Количество;
-            allCountKeys = allCountKeys + countKye;
+            const countKeу = keys.records[i].fields.Количество;
+            allCountKeys = allCountKeys + countKeу;
             const keyValue = (keys.records[i] as IKeyWord).fields.Название;
             if (allCountKeys > countOrder) {
               offer.fields['Ключевые слова'] = keyValue;
@@ -241,6 +247,28 @@ export class AirtableService {
         }
       }
     }
+
+    if (needFilters) {
+      const filterIds = offer.fields.Фильтры;
+      if (filterIds && filterIds.length > 0) {
+        const filters = (await this.airtableHttpService.get(
+          TablesName.Filters,
+          getFilterById(filterIds),
+        )) as IFilters;
+
+        if (filters?.records?.length > 0) {
+          const minUseFilter: IFilter = filters.records.reduce(
+            (minObj, currentObj) => {
+              return currentObj.fields.Использовано < minObj.fields.Использовано
+                ? currentObj
+                : minObj;
+            },
+          );
+          offer.fields.Фильтр = minUseFilter.fields.Название;
+        }
+      }
+    }
+
     return offer as IOffer;
   }
   async getNotifications(): Promise<INotifications> {
