@@ -144,6 +144,7 @@ export function createContinueSessionData(
       id: null,
       articul: articul,
       keys: key,
+      filter: data?.data?.filter,
     },
     sessionId: data.sessionId,
     user: data.user,

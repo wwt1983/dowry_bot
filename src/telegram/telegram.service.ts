@@ -960,21 +960,25 @@ export class TelegramService {
       filter: offerAirtable.fields.Фильтр,
     };
   }
-  /*
-отправляем заполненные данные пользоваетля в airtable
-*/
+  /**
+   *отправляем заполненные данные пользоваетля в airtable
+   */
   async saveToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.saveToAirtable(session);
   }
-  /*
-обновляем данные в airtable
-*/
+
+  /**
+   * обновляем данные в airtable
+   */
+
   async updateToAirtable(session: ISessionData): Promise<void> {
     //console.log('update airtable=', session);
     return await this.airtableService.updateToAirtable(session);
   }
 
-  /*public offer in work chat*/
+  /**
+   *публикация раздачи в чате
+   */
   async sendOfferToChat(id: string): Promise<number> {
     try {
       const offerAirtable = await this.airtableService.getOffer(id);
@@ -997,7 +1001,9 @@ export class TelegramService {
     }
   }
 
-  /*публикация заявки с сайта*/
+  /**
+   * публикация заявки с сайта
+   */
   async sendOrderToChat(
     phone: string,
     name: string,
@@ -1046,9 +1052,9 @@ export class TelegramService {
     }
   }
 
-  /*
-обновляем данные в airtable from notification user таблица "Оповещения статистика"
-*/
+  /**
+   *обновляем данные в airtable from notification user таблица "Оповещения статистика"
+   */
   async updateNotificationStatistic(
     sessionId: string,
     status: NotificationStatisticStatuses,

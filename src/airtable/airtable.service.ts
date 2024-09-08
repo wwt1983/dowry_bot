@@ -257,14 +257,15 @@ export class AirtableService {
         )) as IFilters;
 
         if (filters?.records?.length > 0) {
-          const minUseFilter: IFilter = filters.records.reduce(
-            (minObj, currentObj) => {
-              return currentObj.fields.Использовано < minObj.fields.Использовано
-                ? currentObj
-                : minObj;
-            },
-          );
-          offer.fields.Фильтр = minUseFilter.fields.Название;
+          // const minUseFilter: IFilter = filters.records.reduce(
+          //   (minObj, currentObj) => {
+          //     return currentObj.fields.Использовано < minObj.fields.Использовано
+          //       ? currentObj
+          //       : minObj;
+          //   },
+          // );
+          const nextIndex = (countOrder + 1) % filters.records.length;
+          offer.fields.Фильтр = filters.records[nextIndex].fields.Название;
         }
       }
     }
