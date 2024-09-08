@@ -652,13 +652,12 @@ export class TelegramService {
         if (ctx.msg?.text?.includes('query_id')) {
           const { id } = ctx.from;
           const userValue = getUserName(ctx.from);
-          const userArticules = ctx.session.userArticules;
+          const userHistory = await this.getUserHistory(ctx.from, true, true);
+          ctx.session.userArticules = userHistory?.userArticules;
           ctx.session = createInitialSessionData(
             id?.toString(),
             userValue.userName || userValue.fio,
           );
-
-          ctx.session.userArticules = userArticules;
 
           // let member;
           // try {
