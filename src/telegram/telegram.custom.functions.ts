@@ -118,6 +118,7 @@ export function createInitialSessionData(
     errorStatus: null,
     countTryError: 0,
     deliveryDate: null,
+    recivingDate: null,
     conversation: null,
     lastCommand: null,
     times: null,
@@ -157,6 +158,7 @@ export function createContinueSessionData(
     offerId: data.offerId,
     status: data.status,
     deliveryDate: data.deliveryDate,
+    recivingDate: data.recivingDate,
     isFinish: false,
     location: null,
     comment: null,
@@ -204,6 +206,9 @@ export function updateSessionByStep(
       break;
     case STEPS.Получен.step:
       session.status = 'Получен';
+      break;
+    case STEPS['Дата получения'].step:
+      session.status = 'Дата получения';
       break;
     case STEPS['Отзыв на проверке'].step:
       session.comment = data;
@@ -327,6 +332,8 @@ export function getTextByNextStep(
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
     case STEPS.Получен.step:
       return SECOND_STEP + getNumberText(step, null, name);
+    case STEPS['Дата получения'].step:
+      return 'Введите дату получения (в формате 12.12.2024) 🗓️';
     case STEPS['Отзыв на проверке'].step:
       return THREE_STEP + getNumberText(step, null, name);
     case STEPS.Отзыв.step:

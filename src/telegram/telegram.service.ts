@@ -80,7 +80,6 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import {
   FORMAT_DATE,
-  FORMAT_DATE_SIMPLE,
   FORMAT_DATE_SIMPLE_NO_TIME,
   dateFormat,
   getDateWithTz,
@@ -430,6 +429,19 @@ export class TelegramService {
         ),
       );
       return await this.sendMediaByStep(STEPS.Получен.step, ctx);
+    });
+
+    /*======== Дата получения =======*/
+    this.bot.callbackQuery('date_receiving', async (ctx) => {
+      ctx.session.step = STEPS['Отзыв на проверке'].step;
+      await ctx.callbackQuery.message.editText(
+        getTextByNextStep(
+          ctx.session.step,
+          ctx.session.startTime,
+          ctx.session.data.title,
+        ),
+      );
+      return await this.sendMediaByStep(STEPS['Отзыв на проверке'].step, ctx);
     });
 
     /*======== DEL =======*/
@@ -866,9 +878,15 @@ export class TelegramService {
           }
         } //конец проверки артикула
 
-        //дата доставки
-        if (step === STEPS['Дата доставки'].step) {
-          ctx.session.deliveryDate = dateFormat(text);
+        //дата доставки или дата получения
+        if (
+          step === STEPS['Дата доставки'].step ||
+          step === STEPS['Дата получения'].step
+        ) {
+          step === STEPS['Дата доставки'].step
+            ? (ctx.session.deliveryDate = dateFormat(text))
+            : (ctx.session.recivingDate = dateFormat(text));
+
           ctx.session = nextStep(ctx.session);
           await this.updateToAirtable(ctx.session);
           this.bot.api
@@ -1323,6 +1341,7 @@ export class TelegramService {
         offerId: OfferId[0],
         status: Статус,
         deliveryDate: dateFormat(data[0]?.fields['Дата получения']),
+        recivingDate: dateFormat(data[0]?.fields['Факт дата получения']),
         isRestore: true,
       };
 

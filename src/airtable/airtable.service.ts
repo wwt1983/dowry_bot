@@ -76,8 +76,10 @@ export class AirtableService {
         'Ключевые слова':
           session.data.keys +
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
-        Фильтр: session.data.filter,
+        Фильтр: session?.data?.filter || '',
+        'Факт дата получения': session.recivingDate,
       };
+
       const tableUrl = this.configService.get(
         'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
       );

@@ -43,6 +43,11 @@ export const deliveryDateKeyboard = new InlineKeyboard().text(
   'no_delivery_date',
 );
 
+export const recivingDateKeyboard = new InlineKeyboard().text(
+  STEP_COMMANDS.delivery_date,
+  'date_receiving',
+);
+
 export const shareKeyboard = new Keyboard()
   .requestLocation('Геолокация')
   .placeholder('Я хочу поделиться...')
