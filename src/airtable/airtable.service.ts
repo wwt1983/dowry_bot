@@ -184,7 +184,6 @@ export class AirtableService {
     id: string,
     needKeys?: boolean,
     needTimes?: boolean,
-    needFilters?: boolean,
   ): Promise<IOffer> {
     const offer = (await this.airtableHttpService.getById(
       TablesName.Offers,
@@ -248,6 +247,7 @@ export class AirtableService {
       }
     }
 
+    const needFilters = needKeys && offer.fields['Включить фильтры'];
     if (needFilters) {
       const filterIds = offer.fields.Фильтры;
       if (filterIds && filterIds.length > 0) {

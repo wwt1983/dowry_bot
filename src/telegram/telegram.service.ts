@@ -943,7 +943,6 @@ export class TelegramService {
       offerId,
       true,
       true,
-      true,
     );
 
     return {
