@@ -28,6 +28,8 @@ export interface IBot {
     'Ключевое слово': string;
     Подписка: boolean;
     Фильтр: string;
+    'Отзыв одобрен': boolean;
+    'Дата публикации отзыва': string;
   };
 }
 interface IPhoto {

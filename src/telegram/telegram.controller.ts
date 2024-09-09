@@ -97,4 +97,20 @@ export class TelegramController {
       data.articul,
     );
   }
+  @Post('publishFeedback')
+  async publishFeedback(
+    @Body()
+    data: {
+      sessionId: string;
+      chat_id: string;
+      datePublishFeedback: string;
+    },
+  ): Promise<boolean> {
+    console.log(data);
+    return await this.telegramService.sendFedbackToUser(
+      data.sessionId,
+      data.chat_id,
+      data.datePublishFeedback,
+    );
+  }
 }

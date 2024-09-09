@@ -80,6 +80,8 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
 import {
   FORMAT_DATE,
+  FORMAT_DATE_SIMPLE,
+  FORMAT_DATE_SIMPLE_NO_TIME,
   dateFormat,
   getDateWithTz,
   getTimeWithTz,
@@ -1421,5 +1423,30 @@ export class TelegramService {
       itsSubscriber: subscribe.status,
       userArticules: getArticulesByUser(dataBuyer),
     };
+  }
+
+  /**
+   *сообщение пользователю о публикации отзыва
+   */
+  async sendFedbackToUser(
+    sessionId: string,
+    chat_id: string,
+    datePublishFeedback: string,
+  ): Promise<boolean> {
+    try {
+      if (dateFormat(datePublishFeedback, FORMAT_DATE)) {
+        await this.bot.api.sendMessage(
+          chat_id,
+          `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME)} (с фото).`,
+          {
+            parse_mode: 'HTML',
+          },
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.log('sendFedbackToUser= ', e);
+    }
   }
 }
