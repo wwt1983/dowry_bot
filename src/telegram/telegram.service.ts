@@ -139,6 +139,11 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
       const userValue = getUserName(ctx.from);
+
+      return await ctx.reply(
+        sayHi(first_name, userValue.userName, ctx.from.id) +
+          ' 👷 Ведутся технические работы. В ближайшее время все наладим😉',
+      );
       ctx.session = createInitialSessionData(
         id?.toString(),
         userValue.userName || userValue.fio,
