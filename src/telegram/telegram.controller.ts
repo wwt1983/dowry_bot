@@ -101,14 +101,14 @@ export class TelegramController {
   async publishFeedback(
     @Body()
     data: {
-      sessionId: string;
+      status: string;
       chat_id: string;
       datePublishFeedback: string;
     },
   ): Promise<boolean> {
     console.log(data);
     return await this.telegramService.sendFedbackToUser(
-      data.sessionId,
+      data.status,
       data.chat_id,
       data.datePublishFeedback,
     );

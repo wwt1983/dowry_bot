@@ -1,6 +1,8 @@
 import { IData } from './types/airtable.interfaces';
 
-export const Base: string = 'appVMEtut0NWayq26';
+//export const Base: string = 'appVMEtut0NWayq26';
+export const Base: string = 'appp9AuDEid6XTm7F';
+
 export const AIRTABLE_WEBHOOK_URL =
   'https://hooks.airtable.com/workflows/v1/genericWebhook/';
 export const AIRTABLE_URL = 'https://api.airtable.com/v0/' + Base;
@@ -56,7 +58,8 @@ export const TablesDowray: IData[] = [
   },
   {
     title: TablesName.Offers,
-    tableName: 'tblGUNSCgAEwhxchx',
+    //tableName: 'tblGUNSCgAEwhxchx',
+    tableName: 'tbl4wP2ZKjTLPJIBF',
     view: 'viwyvuNy99P47bMZc',
   },
   {

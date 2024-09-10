@@ -1448,7 +1448,7 @@ export class TelegramService {
    *сообщение пользователю о публикации отзыва
    */
   async sendFedbackToUser(
-    sessionId: string,
+    status: string,
     chat_id: string,
     datePublishFeedback: string,
   ): Promise<boolean> {
@@ -1456,7 +1456,9 @@ export class TelegramService {
       if (dateFormat(datePublishFeedback, FORMAT_DATE)) {
         await this.bot.api.sendMessage(
           chat_id,
-          `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME)} (с фото).`,
+          status === 'Отложить отзыв'
+            ? `Здравствуйте 🤝. Публикацию отзыва пока откладываем. Продолжайте работу в боте.`
+            : `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME)} (${status}).`,
           {
             parse_mode: 'HTML',
           },
