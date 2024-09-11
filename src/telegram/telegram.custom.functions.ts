@@ -1,4 +1,8 @@
-import { ISessionData, ITelegramWebApp } from './telegram.interface';
+import {
+  FeedbackStatus,
+  ISessionData,
+  ITelegramWebApp,
+} from './telegram.interface';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -768,4 +772,25 @@ export const checkOnExistArticuleByUserOrders = (
   if (!articules || !Array.isArray(articules)) return false;
   if (articules.find((x) => x === articule)) return true;
   return false;
+};
+
+/**
+ * Текст для озыва пользователю
+ */
+export const getTextForFeedbackByStatus = (
+  status: FeedbackStatus,
+  date?: string,
+) => {
+  switch (status) {
+    case 'Без фото':
+      return `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${date} (${status.toLocaleLowerCase()})`;
+    case 'Отложить отзыв':
+      return 'Здравствуйте 🤝. Публикацию отзыва пока откладываем. Продолжайте работу в боте.';
+    case 'С фото':
+      return `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${date} (${status.toLocaleLowerCase()})`;
+    case 'Только оценка':
+      return 'Здравствуйте 🤝. Поставьте, пожалуйста, просто оценку 5* без текста.';
+    default:
+      return 'Уточните дату публикации отзыва';
+  }
 };

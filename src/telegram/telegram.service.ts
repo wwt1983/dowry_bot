@@ -7,6 +7,7 @@ import {
   MyApi,
   ISessionData,
   ITelegramWebApp,
+  FeedbackStatus,
 } from './telegram.interface';
 import {
   TELEGRAM_MODULE_OPTIONS,
@@ -59,6 +60,7 @@ import {
   getUserBenefit,
   getArticulesByUser,
   checkOnExistArticuleByUserOrders,
+  getTextForFeedbackByStatus,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -1510,7 +1512,7 @@ export class TelegramService {
    *сообщение пользователю о публикации отзыва
    */
   async sendFedbackToUser(
-    status: string,
+    status: FeedbackStatus,
     chat_id: string,
     datePublishFeedback: string,
   ): Promise<boolean> {
@@ -1518,9 +1520,10 @@ export class TelegramService {
       if (dateFormat(datePublishFeedback, FORMAT_DATE)) {
         await this.bot.api.sendMessage(
           chat_id,
-          status === 'Отложить отзыв'
-            ? `Здравствуйте 🤝. Публикацию отзыва пока откладываем. Продолжайте работу в боте.`
-            : `Здравствуйте 🤝. Спасибо. Отзыв 🔥. Опубликуйте его, пожалуйста, ${dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME)} (${status}).`,
+          getTextForFeedbackByStatus(
+            status,
+            dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME),
+          ),
           {
             parse_mode: 'HTML',
           },

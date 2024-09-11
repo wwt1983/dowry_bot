@@ -72,3 +72,8 @@ export interface ITelegramWebApp {
   errorStatus?: string;
   filter?: string;
 }
+export type FeedbackStatus =
+  | 'С фото'
+  | 'Без фото'
+  | 'Отложить отзыв'
+  | 'Только оценка';
