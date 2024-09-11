@@ -110,7 +110,7 @@ export class AirtableService {
       Статус: status,
       StopTime: getTimeWithTz(),
     });
-    console.log('postWebhook ===>', response);
+    console.log('postWebhook ===>', response, sessionId);
     return response;
   }
   async updateCommentInBotTableAirtable(

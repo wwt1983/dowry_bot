@@ -248,7 +248,7 @@ export class TelegramService {
           },
         );
 
-        return await ctx.reply(
+        await ctx.reply(
           userInfo.orderButtons
             ? 'Продолжите ⤵️'
             : !userInfo || userInfo.sum === 0
@@ -258,6 +258,16 @@ export class TelegramService {
             reply_markup: userInfo.orderButtons,
           },
         );
+        const buttonsForUserStop = await this.getBottonsForStopOfUserOrder(
+          ctx.from,
+          false,
+        );
+
+        if (buttonsForUserStop && buttonsForUserStop.orderButtons) {
+          return await ctx.reply('Доступны для отмены ⤵️', {
+            reply_markup: buttonsForUserStop.orderButtons,
+          });
+        }
       } catch (e) {
         console.log('history=', e);
         return await ctx.reply('Раздел обновляется');
@@ -528,7 +538,17 @@ export class TelegramService {
       if (!ctx.callbackQuery.data.includes('sessionId_'))
         return await ctx.answerCallbackQuery();
 
-      const sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
+      let sessionId = ctx.callbackQuery.data.replace('sessionId_', '').trim();
+
+      //запрос пользователя на отмену заказа
+      if (ctx.callbackQuery.data.includes('del')) {
+        sessionId = ctx.callbackQuery.data
+          .replace('_del', '')
+          .replace('sessionId_', '')
+          .trim();
+        return await this.cancelUserStop(sessionId, ctx.from.id);
+      }
+
       ctx.session = await this.restoreSession(ctx, sessionId);
       let response = null;
 
@@ -1444,6 +1464,48 @@ export class TelegramService {
     };
   }
 
+  /**
+   * кнопки для остановки раздачи пользователем
+   */
+  async getBottonsForStopOfUserOrder(from: User, web?: boolean) {
+    const { id } = from;
+    const dataBuyer = await this.airtableService.getBotByFilter(
+      id.toString(),
+      'chat_id',
+    );
+
+    const orderButtons = createHistoryKeyboard(dataBuyer, web, true);
+    return {
+      orderButtons,
+    };
+  }
+
+  /**
+   * раздача останавливается пользователем
+   */
+  async cancelUserStop(sessionId: string, chat_id: number) {
+    if (!sessionId) {
+      return await this.bot.api.sendMessage(
+        chat_id,
+        `Что-то пошло не так 😟. Напишите нам о проблеме, мы ее обязательно решим.`,
+        {
+          parse_mode: 'HTML',
+        },
+      );
+    }
+
+    await this.airtableService.updateStatusInBotTableAirtable(
+      sessionId,
+      'Отмена пользователем',
+    );
+    return await this.bot.api.sendMessage(
+      chat_id,
+      `Заказ отменен. Выберите новую раздачу.`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
+  }
   /**
    *сообщение пользователю о публикации отзыва
    */

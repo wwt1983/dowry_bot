@@ -55,8 +55,9 @@ export const shareKeyboard = new Keyboard()
 
 export const userMenu = new InlineKeyboard().text('История раздач', 'history');
 
-export const createLabelHistory = (data: IBot[]) => {
+export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
   if (!data || data.length === 0) return [];
+  const txtForDel = isUserStop ? '_del' : '';
   return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
@@ -68,6 +69,7 @@ export const createLabelHistory = (data: IBot[]) => {
       record.fields.Статус !== 'Проблема с локацией' &&
       record.fields.Статус !== 'Чек' &&
       record.fields.Статус !== 'Лимит заказов' &&
+      record.fields.Статус !== 'Отмена пользователем' &&
       !record.fields['Снять с раздачи']
       //record.fields.Статус !== 'Проблема с артикулом' &&
       //record.fields.Статус !== 'Поиск' &&
@@ -78,14 +80,18 @@ export const createLabelHistory = (data: IBot[]) => {
     ) {
       newArr.push([
         record.fields.Раздача,
-        'sessionId_' + record.fields.SessionId,
+        'sessionId_' + record.fields.SessionId + txtForDel,
       ]);
     }
     return newArr;
   }, []);
 };
-export const createHistoryKeyboard = (data: IBot[], web?: boolean) => {
-  const ordersLabel = createLabelHistory(data);
+export const createHistoryKeyboard = (
+  data: IBot[],
+  web?: boolean,
+  isUserStop?: boolean,
+) => {
+  const ordersLabel = createLabelHistory(data, isUserStop);
 
   const keyboard = new InlineKeyboard().row();
   if (web) {

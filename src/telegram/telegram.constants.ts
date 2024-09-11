@@ -180,6 +180,12 @@ export const STEPS = {
     erroText: MESSAGE_LIMIT_ORDER,
     textStepCount: '',
   },
+  'Отмена пользователем': {
+    step: -6,
+    value: 'Отмена пользователем',
+    erroText: 'Отмена пользователем',
+    textStepCount: '',
+  },
 };
 
 export const STEPS_TYPES = {
