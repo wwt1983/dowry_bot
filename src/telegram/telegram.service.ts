@@ -1298,7 +1298,7 @@ export class TelegramService {
 
     return await this.bot.api.sendMessage(
       chatId.toString(),
-      `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : '⤵️'}`,
+      `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : 'Выберите новую раздачу ⤵️'}`,
       {
         reply_markup: historyButtons,
       },
