@@ -440,7 +440,9 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
-      return await this.sendMediaByStep(STEPS.Получен.step, ctx);
+      await this.sendMediaByStep(STEPS.Получен.step, ctx);
+      await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
+      return;
     });
 
     /*======== Дата получения =======*/
@@ -453,7 +455,8 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
-      return await this.sendMediaByStep(STEPS['Отзыв на проверке'].step, ctx);
+      await this.sendMediaByStep(STEPS['Отзыв на проверке'].step, ctx);
+      return await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
     });
 
     /*======== DEL =======*/
@@ -535,8 +538,8 @@ export class TelegramService {
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
-
       await this.sendMediaByStep(ctx.session.step, ctx);
+      await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
 
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       if (ctx.session.step === STEPS.Финиш.step) {
@@ -603,6 +606,7 @@ export class TelegramService {
           );
         }
         await this.sendMediaByStep(ctx.session.step, ctx);
+        await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
       }
 
       ctx.session.lastMessage = response.message_id;
@@ -914,8 +918,8 @@ export class TelegramService {
                 ctx.session.data.title,
               ),
             );
-
             await this.sendMediaByStep(STEPS.Поиск.step, ctx);
+            await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
             return;
           }
         } //конец проверки артикула
@@ -934,12 +938,17 @@ export class TelegramService {
           this.bot.api
             .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
             .catch(() => {});
-          return await ctx.reply(
+
+          await ctx.reply(
             getTextByNextStep(
               ctx.session.step,
               ctx.session.startTime,
               ctx.session.data.title,
             ),
+          );
+          return await this.getKeyboardHistory(
+            ctx.from.id,
+            ctx.session.sessionId,
           );
         }
 
@@ -1286,6 +1295,29 @@ export class TelegramService {
         }
       }
     }
+  }
+  async getKeyboardHistory(chatId: number | string, sessionId: string) {
+    let dataBuyer = await this.airtableService.getBotByFilter(
+      chatId.toString(),
+      'chat_id',
+    );
+    if (!dataBuyer || dataBuyer.length === 0) return;
+    if (sessionId) {
+      dataBuyer = dataBuyer.filter((x) => x.fields.SessionId !== sessionId);
+    }
+    const historyButtons = createHistoryKeyboard(dataBuyer, false);
+    const countWorkLabels = createLabelHistory(dataBuyer).length;
+
+    if (countWorkLabels > 0) {
+      return await this.bot.api.sendMessage(
+        chatId.toString(),
+        'Вы можете продолжить раздачу ⤵️',
+        {
+          reply_markup: historyButtons,
+        },
+      );
+    }
+    return;
   }
 
   async sendMessageWithKeyboardHistory(chatId: number | string) {

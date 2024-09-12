@@ -86,6 +86,10 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
     return newArr;
   }, []);
 };
+
+/**
+ *isUserStop - флаг для создания кнопок для удаления пользователем
+ */
 export const createHistoryKeyboard = (
   data: IBot[],
   web?: boolean,
