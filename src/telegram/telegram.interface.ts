@@ -46,6 +46,7 @@ export interface ISessionData {
   isRestore: boolean;
   itsSubscriber?: boolean;
   userArticules?: string[];
+  dataForCash?: string; //fio bank phone
 }
 
 export type MyContext = HydrateFlavor<
@@ -71,6 +72,7 @@ export interface ITelegramWebApp {
   countTryError?: number;
   errorStatus?: string;
   filter?: string;
+  'Данные для кешбека'?: string;
 }
 export type FeedbackStatus =
   | 'С фото'

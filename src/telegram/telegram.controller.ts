@@ -5,6 +5,7 @@ import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
+import { FeedbackStatus } from './telegram.interface';
 
 @Controller('telegram')
 export class TelegramController {
@@ -101,12 +102,11 @@ export class TelegramController {
   async publishFeedback(
     @Body()
     data: {
-      status: string;
+      status: FeedbackStatus;
       chat_id: string;
       datePublishFeedback: string;
     },
   ): Promise<boolean> {
-    console.log(data);
     return await this.telegramService.sendFedbackToUser(
       data.status,
       data.chat_id,

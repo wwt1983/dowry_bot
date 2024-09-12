@@ -503,7 +503,20 @@ export class TelegramService {
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
         //TEXT MESSAGE
-        ctx.session = nextStep(ctx.session);
+        if (!ctx.session.chat_id) {
+          const dataBuyer = await this.airtableService.getBotByFilter(
+            ctx.from.id.toString(),
+            'chat_id',
+          );
+
+          const lastSession = getLastSession(dataBuyer);
+          if (!lastSession)
+            return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+
+          ctx.session = await this.restoreSession(ctx, lastSession);
+        } else {
+          ctx.session = nextStep(ctx.session);
+        }
       }
 
       await this.updateToAirtable(ctx.session);
@@ -528,9 +541,9 @@ export class TelegramService {
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
       if (ctx.session.step === STEPS.Финиш.step) {
         await ctx.react('🎉');
-        await ctx.reply('👩‍💻', {
-          reply_markup: operatorKeyboard,
-        });
+        await ctx.reply(
+          '💰Напишите данные для перевода вам кешбэка💰.\nБанк, ФИО, телефон.\nНапример, Тинькофф, Балалайкина Лира Рояльевна, 89002716500)\nЖдите поступлений😉',
+        );
       }
     });
 
@@ -636,7 +649,7 @@ export class TelegramService {
 
         if (
           ctx.session.lastCommand === COMMAND_NAMES.call ||
-          ctx.session.step === STEPS.Финиш.step
+          (ctx.session.step === STEPS.Финиш.step && ctx.session.dataForCash)
         ) {
           const msgToSecretChat = await this.saveComment(
             ctx.from,
@@ -651,6 +664,18 @@ export class TelegramService {
           return await ctx.reply(
             'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
           );
+        }
+
+        //сохраняем данные по выплатам
+        if (ctx.session.step === STEPS.Финиш.step && !ctx.session.dataForCash) {
+          ctx.session.dataForCash = text;
+          await this.updateToAirtable(ctx.session);
+
+          await ctx.reply('Принято!✌️');
+          await ctx.reply('👩‍💻', {
+            reply_markup: operatorKeyboard,
+          });
+          return await this.sendMessageWithKeyboardHistory(ctx.from.id);
         }
 
         if (!ctx.session.data && !text?.includes('query_id')) {
@@ -721,11 +746,6 @@ export class TelegramService {
           console.log('==== WEB API ====', data, ctx.session);
 
           const userHistory = await this.getUserHistory(ctx.from, true, true);
-          console.log(
-            'userArticules',
-            data.articul,
-            userHistory?.userArticules,
-          );
           ctx.session.userArticules = userHistory?.userArticules;
           const existArticulByUser = checkOnExistArticuleByUserOrders(
             data.articul,
@@ -947,9 +967,12 @@ export class TelegramService {
 
           await ctx.api.sendMessage(getSecretChatId(), msgToSecretChat);
 
-          return ctx.reply('Если ваш отзыв одобрен, нажмите "Продолжить"', {
-            reply_markup: commentKeyboard,
-          });
+          return ctx.reply(
+            'Вам в бот придет сообщение о дальнейших инструкциях (дата публикации и как именно публиковать (с фото или без.)). Обычно мы отвечаем быстро. Но иногда бывает 🐢.\nЕсли ваш отзыв одобрен, нажмите "Продолжить"',
+            {
+              reply_markup: commentKeyboard,
+            },
+          );
         }
       } catch (e) {
         console.log(e);
@@ -1018,7 +1041,6 @@ export class TelegramService {
    */
 
   async updateToAirtable(session: ISessionData): Promise<void> {
-    //console.log('update airtable=', session);
     return await this.airtableService.updateToAirtable(session);
   }
 
@@ -1337,6 +1359,7 @@ export class TelegramService {
         sessionId,
         'SessionId',
       );
+      console.log('data =', sessionId, data);
 
       if (!data || data.length === 0) {
         await this.sendMessageWithKeyboardHistory(id);

@@ -78,6 +78,7 @@ export class AirtableService {
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': session.recivingDate,
+        'Данные для кешбека': session.dataForCash,
       };
 
       const tableUrl = this.configService.get(
@@ -90,7 +91,7 @@ export class AirtableService {
       console.log('postWebhook update updateToAirtable ok===>', response);
       return response;
     } catch (e) {
-      console.log('updateToAirtable', session, e);
+      console.log('error updateToAirtable=', session, e);
       return null;
     }
   }
@@ -307,6 +308,7 @@ export class AirtableService {
     if (!data) return null;
     return data as IArticle;
   }
+
   async getArticlesInWork(): Promise<IArticle[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Articuls,
