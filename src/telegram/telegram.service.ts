@@ -676,10 +676,9 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
 
           await ctx.reply('Принято!✌️');
-          await ctx.reply('👩‍💻', {
+          return await ctx.reply('👩‍💻', {
             reply_markup: operatorKeyboard,
           });
-          return await this.sendMessageWithKeyboardHistory(ctx.from.id);
         }
 
         if (!ctx.session.data && !text?.includes('query_id')) {
