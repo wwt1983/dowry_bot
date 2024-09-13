@@ -57,7 +57,7 @@ export type MyApi = HydrateApiFlavor<Api>;
 
 export interface ITelegramWebApp {
   id: string;
-  articul: string;
+  articul?: string;
   offerId: string;
   title?: string;
   cash?: string;
