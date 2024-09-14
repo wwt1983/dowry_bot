@@ -105,12 +105,14 @@ export class TelegramController {
       status: FeedbackStatus;
       chat_id: string;
       datePublishFeedback: string;
+      userName: string;
     },
   ): Promise<boolean> {
     return await this.telegramService.sendFedbackToUser(
       data.status,
       data.chat_id,
       data.datePublishFeedback,
+      data.userName,
     );
   }
 }

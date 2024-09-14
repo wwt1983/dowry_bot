@@ -1570,18 +1570,21 @@ export class TelegramService {
     status: FeedbackStatus,
     chat_id: string,
     datePublishFeedback: string,
+    userName: string,
   ): Promise<boolean> {
     try {
       if (dateFormat(datePublishFeedback, FORMAT_DATE)) {
-        await this.bot.api.sendMessage(
-          chat_id,
-          getTextForFeedbackByStatus(
-            status,
-            dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME),
-          ),
-          {
-            parse_mode: 'HTML',
-          },
+        const text = getTextForFeedbackByStatus(
+          status,
+          dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME),
+        );
+        await this.bot.api.sendMessage(chat_id, text, {
+          parse_mode: 'HTML',
+        });
+        await this.airtableService.updateCommentInBotTableAirtable(
+          { id: +chat_id, is_bot: false, first_name: userName },
+          text,
+          true,
         );
         return true;
       }
