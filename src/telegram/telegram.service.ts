@@ -223,7 +223,7 @@ export class TelegramService {
       ctx.session.lastCommand = COMMAND_NAMES.help;
       await this.getInstruction(ctx);
 
-      const response = await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      const response = await this.getKeyboardHistoryWithWeb(ctx.from.id);
       ctx.session.lastMessage = response.message_id;
     });
 
@@ -370,7 +370,7 @@ export class TelegramService {
 
         const lastSession = getLastSession(dataBuyer);
         if (!lastSession)
-          return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+          return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
         ctx.session = await this.restoreSession(ctx, lastSession);
       }
@@ -476,7 +476,7 @@ export class TelegramService {
       for (const value of createHelpText()) {
         await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
       }
-      const response = await this.sendMessageWithKeyboardHistory(ctx.from.id);
+      const response = await this.getKeyboardHistoryWithWeb(ctx.from.id);
       ctx.session.lastMessage = response.message_id;
     });
     /*======== NEXT =======*/
@@ -514,7 +514,7 @@ export class TelegramService {
 
           const lastSession = getLastSession(dataBuyer);
           if (!lastSession)
-            return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+            return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
         } else {
@@ -696,7 +696,7 @@ export class TelegramService {
           );
           const lastSession = getLastSession(dataBuyer);
           if (!lastSession)
-            return await this.sendMessageWithKeyboardHistory(ctx.from.id);
+            return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           //
           ctx.session = await this.restoreSession(ctx, lastSession);
           if (!ctx.session.isRestore) {
@@ -1205,7 +1205,7 @@ export class TelegramService {
           notifications.records.find((x) => x.fields.Название === 'В боте')
             .fields.Сообщение,
         );
-        await this.sendMessageWithKeyboardHistory(chat_id);
+        await this.getKeyboardHistoryWithWeb(chat_id);
         return;
       }
       const statisticNotifications =
@@ -1239,7 +1239,7 @@ export class TelegramService {
           chat_id,
           value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
         );
-        await this.sendMessageWithKeyboardHistory(chat_id);
+        await this.getKeyboardHistoryWithWeb(chat_id);
         return;
       }
       if (
@@ -1281,7 +1281,7 @@ export class TelegramService {
         chat_id,
         value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
       );
-      await this.sendMessageWithKeyboardHistory(chat_id);
+      await this.getKeyboardHistoryWithWeb(chat_id);
     } catch (error: any) {
       console.log(error);
 
@@ -1319,7 +1319,7 @@ export class TelegramService {
     return;
   }
 
-  async sendMessageWithKeyboardHistory(chatId: number | string) {
+  async getKeyboardHistoryWithWeb(chatId: number | string) {
     const dataBuyer = await this.airtableService.getBotByFilter(
       chatId.toString(),
       'chat_id',
@@ -1383,23 +1383,24 @@ export class TelegramService {
    * */
   async restoreSession(ctx: MyContext, sessionId: string) {
     try {
-      const { id } = ctx.from;
-
       //sort by StopTime - this will be last session
       const data = await this.airtableService.getBotByFilter(
         sessionId,
         'SessionId',
       );
+
+      const { id } = ctx.from;
+
       console.log('data =', sessionId, data);
 
       if (!data || data.length === 0) {
-        await this.sendMessageWithKeyboardHistory(id);
+        await this.getKeyboardHistoryWithWeb(id);
         return;
       }
       const { Images, StopTime, StartTime, Статус, OfferId, Артикул, Раздача } =
         data[0].fields;
       if (STEPS[Статус].step > 3 && (!Images || Images.length === 0)) {
-        await this.sendMessageWithKeyboardHistory(id);
+        await this.getKeyboardHistoryWithWeb(id);
         return;
       }
 
