@@ -14,7 +14,9 @@ export const getOffersLink = (offers: IOffers) => {
   try {
     if (offers && offers.records && Array.isArray(offers.records)) {
       const result = offers?.records
-        .filter((x) => x.fields['Name'] !== undefined)
+        .filter(
+          (x) => x.fields['Name'] !== undefined && x.fields['Name'] !== '',
+        )
         .map((x) => ({
           name: x.fields['Name'],
           link: x.fields['Ссылка'],
