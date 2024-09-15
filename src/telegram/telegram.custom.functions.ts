@@ -64,7 +64,10 @@ export function sayHi(
   );
 }
 
-export function sendToSecretChat(
+/**
+ * создаем сообшение для чата сообщений
+ */
+export function getTextToChatMessage(
   from: User,
   comment: string,
   order: string,
@@ -82,7 +85,7 @@ export function sendToSecretChat(
   const userComment = comment
     ? `\n${typeMessage} ${order}\n➡️chat_id=${chatId}\n\nСообщение:${comment}`
     : '';
-  return `❓${getTimeWithTz()}\n${userValue.fio} username=${userValue.userName} 
+  return `❓${getTimeWithTz(FORMAT_DATE_SIMPLE)}\n${userValue.fio} username=${userValue.userName} 
   ${userComment}${instruction}❓`;
 }
 export const createCommentForDb = (comment: string, isAnswer?: boolean) => {
@@ -429,7 +432,7 @@ export const locationCheck = (
       };
 };
 
-export const getSecretChatId = () => {
+export const getMessageChatId = () => {
   return process.env.NODE_ENV === 'development'
     ? TELEGRAM_MESSAGE_CHAT_TEST
     : TELEGRAM_MESSAGE_CHAT_PROD;
@@ -771,7 +774,7 @@ export const getArticulesByUser = (dataBuyer: IBot[]) => {
 export const checkOnExistArticuleByUserOrders = (
   articule: string,
   articules?: string[],
-) => {
+): boolean => {
   if (!articules || !Array.isArray(articules)) return false;
   if (articules.find((x) => x === articule)) return true;
   return false;
@@ -795,5 +798,21 @@ export const getTextForFeedbackByStatus = (
       return 'Здравствуйте 🤝. Поставьте, пожалуйста, просто оценку 5* без текста.';
     default:
       return 'Уточните дату публикации отзыва';
+  }
+};
+
+export const getChatIdFormText = (text: string) => {
+  if (!text) return null;
+
+  const regex = /chat_id=(\d+)/;
+  const match = text.match(regex);
+
+  if (match) {
+    const chatId = match[1];
+    console.log(`Извлеченный chat_id: ${chatId}`);
+    return chatId;
+  } else {
+    console.log('chat_id не найден');
+    return null;
   }
 };
