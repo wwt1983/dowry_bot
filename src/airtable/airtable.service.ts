@@ -114,6 +114,9 @@ export class AirtableService {
     console.log('postWebhook ===>', response, sessionId);
     return response;
   }
+  /**
+   * Пользовательские сообщения
+   */
   async updateCommentInBotTableAirtable(
     from: User,
     comment: string,

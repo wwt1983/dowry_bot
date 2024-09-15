@@ -42,7 +42,7 @@ import {
   parseUrl,
   locationCheck,
   getTextToChatMessage,
-  getMessageChatId,
+  getAdminChatId,
   getNotificationValue,
   scheduleNotification,
   createContinueSessionData,
@@ -355,7 +355,7 @@ export class TelegramService {
             ctx.session.status,
           );
           const responseMsg = await ctx.api.sendMessage(
-            getMessageChatId(),
+            getAdminChatId(),
             msgToChatMessage,
           );
 
@@ -640,7 +640,7 @@ export class TelegramService {
           if (replayResult && replayResult.chat_id) {
             await this.airtableService.updateCommentInBotTableAirtable(
               {
-                id: replayResult.chat_id as any as number,
+                id: +replayResult.chat_id,
                 is_bot: false,
                 first_name: ctx.from.first_name,
               },
@@ -697,7 +697,7 @@ export class TelegramService {
           );
 
           const responseMsg = await ctx.api.sendMessage(
-            getMessageChatId(),
+            getAdminChatId(),
             msgToChatMessage,
           );
 
@@ -801,7 +801,7 @@ export class TelegramService {
             );
 
             const responseMsg = await ctx.api.sendMessage(
-              getMessageChatId(),
+              getAdminChatId(),
               msgToChatMessage,
             );
 
@@ -916,7 +916,7 @@ export class TelegramService {
               );
 
               const responseMsg = await ctx.api.sendMessage(
-                getMessageChatId(),
+                getAdminChatId(),
                 msgToChatMessage,
               );
 
@@ -1025,26 +1025,30 @@ export class TelegramService {
 
           await this.updateToAirtable(ctx.session);
 
-          const msgToChatMessage = await this.saveComment(
+          const msgToFeedback = getTextToChatMessage(
             ctx.from,
             ctx.message.text,
             ctx.session.data.articul,
             ctx.session?.data?.title || '',
             ctx.session.status,
           );
-
           const responseMsg = await ctx.api.sendMessage(
-            getMessageChatId(),
-            msgToChatMessage,
+            getAdminChatId(),
+            msgToFeedback,
+          );
+
+          await this.saveFeedback(
+            ctx.from,
+            `Отзыв [${responseMsg.message_id}_${ctx.session.sessionId}]\n${msgToFeedback}`,
           );
 
           await this.addNumberToMessageInChatMessage(
             responseMsg.message_id,
-            msgToChatMessage,
+            msgToFeedback,
           );
 
           return ctx.reply(
-            'Вам в бот придет сообщение о дальнейших инструкциях (дата публикации и как именно публиковать (с фото или без.)). Обычно мы отвечаем быстро. Но иногда бывает 🐢.\nЕсли ваш отзыв одобрен, нажмите "Продолжить"',
+            'Вам в бот придет сообщение о дальнейших инструкциях о размещении отзыва на wildberries (дата публикации и как именно публиковать (с фото или без.)). Обычно мы отвечаем быстро. Но иногда бывает 🐢.\nЕсли ваш отзыв одобрен, нажмите "Продолжить"',
             {
               reply_markup: commentKeyboard,
             },
@@ -1429,6 +1433,16 @@ export class TelegramService {
     );
     return msgToChat;
   }
+  /**
+   * сохраняем отзыв в базу
+   */
+  async saveFeedback(from: User, comment: string) {
+    await this.airtableService.updateCommentInBotTableAirtable(
+      from,
+      createCommentForDb(comment),
+    );
+    return;
+  }
 
   async sendMediaByStep(step: number, ctx: MyContext, caption?: 'up' | 'down') {
     try {
@@ -1461,8 +1475,6 @@ export class TelegramService {
       );
 
       const { id } = ctx.from;
-
-      console.log('data =', sessionId, data);
 
       if (!data || data.length === 0) {
         await this.getKeyboardHistoryWithWeb(id);
@@ -1642,23 +1654,58 @@ export class TelegramService {
     chat_id: string,
     datePublishFeedback: string,
     userName: string,
+    sessionId: string,
   ): Promise<boolean> {
     try {
       if (dateFormat(datePublishFeedback, FORMAT_DATE)) {
-        const text = getTextForFeedbackByStatus(
+        const textForFeedback = getTextForFeedbackByStatus(
           status,
           dateFormat(datePublishFeedback, FORMAT_DATE_SIMPLE_NO_TIME),
         );
-        await this.bot.api.sendMessage(chat_id, text, {
+        await this.bot.api.sendMessage(chat_id, textForFeedback, {
           parse_mode: 'HTML',
         });
         await this.airtableService.updateCommentInBotTableAirtable(
           { id: +chat_id, is_bot: false, first_name: userName },
-          text,
+          textForFeedback,
           true,
         );
+
+        const comments = await this.airtableService.getCommetByChatId(chat_id);
+        const comment = comments.records.find((x) =>
+          x.fields['Комментарии'].includes(sessionId),
+        );
+
+        const regex = /\[([^\]]+)\]/g;
+        const matches = comment.fields['Комментарии'].match(regex);
+        if (matches) {
+          const originalMessageId = matches
+            .find((x) => x.includes(sessionId))
+            .slice(1, -1)
+            .replace(sessionId, '')
+            .replace('\\', '')
+            .replace('_', '');
+          const message = await this.bot.api.forwardMessage(
+            getAdminChatId(),
+            getAdminChatId(),
+            +originalMessageId,
+          );
+          //console.log('Сообщение:', message.message_id, message.text);
+          await this.bot.api.editMessageText(
+            getAdminChatId(),
+            +originalMessageId,
+            '✅ ' + message.text,
+          );
+          await this.bot.api.deleteMessage(
+            getAdminChatId(),
+            message.message_id,
+          );
+        } else {
+          //console.log('Совпадений не найдено');
+        }
         return true;
       }
+      console.log("sendFedbackToUser do'not send");
       return false;
     } catch (e) {
       console.log('sendFedbackToUser= ', e);
@@ -1674,7 +1721,7 @@ export class TelegramService {
         const originalMessageId = ctx.message.reply_to_message.message_id;
         const replyText = ctx.message.text;
         await this.bot.api.editMessageText(
-          getMessageChatId(),
+          getAdminChatId(),
           originalMessageId,
           '✅ ' + ctx.message.reply_to_message.text,
         );
@@ -1686,11 +1733,11 @@ export class TelegramService {
           );
           return { replyText, chat_id };
         }
-        await ctx.reply(`Проблема с отправкой сообщения 😟 chat_id не найден`);
+        await ctx.reply(`Проблема с отправкой сообщения 😟 chat_id не найден.`);
         return null;
       }
     } catch (error) {
-      await ctx.reply(`Проблема с отправкой сообщения 😟`);
+      await ctx.reply(`Проблема с отправкой сообщения 😟.`);
       return null;
     }
   }
@@ -1706,7 +1753,7 @@ export class TelegramService {
       if (!messageId) return;
 
       await this.bot.api.editMessageText(
-        getMessageChatId(),
+        getAdminChatId(),
         messageId,
         '📌[' + messageId + '] ' + text,
       );
