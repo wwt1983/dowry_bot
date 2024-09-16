@@ -1678,7 +1678,7 @@ export class TelegramService {
         );
 
         const regex = /\[([^\]]+)\]/g;
-        const matches = comment.fields['Комментарии'].match(regex);
+        const matches = comment?.fields['Комментарии']?.match(regex);
         if (matches) {
           const originalMessageId = matches
             .find((x) => x.includes(sessionId))
@@ -1702,13 +1702,33 @@ export class TelegramService {
             message.message_id,
           );
         } else {
-          //console.log('Совпадений не найдено');
+          await this.bot.api.sendMessage(
+            getAdminChatId(),
+            'Admin. Сообщение не отправлено chat_id=' +
+              chat_id +
+              ', sessionId=' +
+              sessionId,
+            {
+              parse_mode: 'HTML',
+            },
+          );
         }
         return true;
       }
       console.log("sendFedbackToUser do'not send");
       return false;
     } catch (e) {
+      await this.bot.api.sendMessage(
+        getAdminChatId(),
+        'Admin. Сообщение не отправлено chat_id=' +
+          chat_id +
+          ', sessionId=' +
+          sessionId +
+          e,
+        {
+          parse_mode: 'HTML',
+        },
+      );
       console.log('sendFedbackToUser= ', e);
     }
   }
