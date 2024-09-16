@@ -794,26 +794,6 @@ export class TelegramService {
           const userHistory = await this.getUserHistory(ctx.from, true, true);
           ctx.session.userArticules = userHistory?.userArticules;
 
-          if (data.keys === ErrorKeyWord) {
-            const msgToChatMessage = await this.saveComment(
-              ctx.from,
-              ` Админское сообщение (написать ключевое слово для ${getUserName(ctx.from).fio}) chat_id=${ctx.from.id}`,
-              data?.articul || '',
-              data?.title || '',
-              'Выбор раздачи',
-            );
-
-            const responseMsg = await ctx.api.sendMessage(
-              getAdminChatId(),
-              msgToChatMessage,
-            );
-
-            await this.addNumberToMessageInChatMessage(
-              responseMsg.message_id,
-              msgToChatMessage,
-            );
-          }
-
           ctx.session = updateSessionByField(ctx.session, 'data', data);
           ctx.session = updateSessionByField(
             ctx.session,
