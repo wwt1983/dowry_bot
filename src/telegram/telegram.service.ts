@@ -265,7 +265,7 @@ export class TelegramService {
         );
 
         if (buttonsForUserStop && buttonsForUserStop.orderButtons) {
-          return await ctx.reply('Доступны для отмены ⤵️', {
+          return await ctx.reply('Доступны для отмены ❌', {
             reply_markup: buttonsForUserStop.orderButtons,
           });
         }
