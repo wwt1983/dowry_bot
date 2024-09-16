@@ -635,24 +635,24 @@ export class TelegramService {
           return ctx.reply(STOP_TEXT);
 
         //REPLAY сообщения из служебного чата
-        if (ctx.message.reply_to_message) {
-          const replayResult = await this.replayMessage(ctx);
-          if (replayResult && replayResult.chat_id) {
-            await this.airtableService.updateCommentInBotTableAirtable(
-              {
-                id: +replayResult.chat_id,
-                is_bot: false,
-                first_name: ctx.from.first_name,
-              },
-              createCommentForDb(
-                `Ответ от ${ctx.from.first_name}\n` + replayResult.replyText,
-                true,
-              ),
-              true,
-            );
-          }
-          return;
-        }
+        // if (ctx.message.reply_to_message) {
+        //   const replayResult = await this.replayMessage(ctx);
+        //   if (replayResult && replayResult.chat_id) {
+        //     await this.airtableService.updateCommentInBotTableAirtable(
+        //       {
+        //         id: +replayResult.chat_id,
+        //         is_bot: false,
+        //         first_name: ctx.from.first_name,
+        //       },
+        //       createCommentForDb(
+        //         `Ответ от ${ctx.from.first_name}\n` + replayResult.replyText,
+        //         true,
+        //       ),
+        //       true,
+        //     );
+        //   }
+        //   return;
+        // }
 
         const { text } = ctx.update.message; //text = chat_id user
         switch (ctx.session.lastCommand) {
