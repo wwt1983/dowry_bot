@@ -135,21 +135,21 @@ export const STEPS = {
   //   image: '/images/4.jpeg',
   // }, //отзыв (photo)
   ['Штрих-код']: {
-    step: 12,
+    step: 10,
     value: 'Штрих-код',
     erroText: 'загрузить скриншот со штрих-кодом',
     textStepCount: `2️⃣ шага\n`,
     image: '/images/5.jpeg',
   }, // штрих-код (photo)
   Чек: {
-    step: 13,
+    step: 11,
     value: 'Чек',
     erroText: 'загрузить скриншот чека',
     textStepCount: `1️⃣ шаг\n`,
     image: '/images/6.jpeg',
   }, //чек
   Финиш: {
-    step: 14,
+    step: 12,
     value: '',
     erroText: '',
     textStepCount: '',
