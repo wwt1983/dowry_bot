@@ -448,13 +448,17 @@ export const getNotificationValue = (
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
-    case 'Корзина':
     case 'Проблема с артикулом':
+      const minutesForChoose =
+        getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+      if (minutesForChoose > 0) {
+        nextStatusNotification = 'Время истекло';
+      }
+      break;
     case 'Поиск':
+    case 'Корзина':
       const minutes =
-        status === 'Артикул правильный' || status === 'Проблема с артикулом'
-          ? getDifferenceInMinutes(getDate()) - LIMIT_TIME_IN_MINUTES_FOR_BUY
-          : getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+        getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_BUY;
 
       console.log('getNotificationValue minutes=', status, startTime, minutes);
 

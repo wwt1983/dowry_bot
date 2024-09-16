@@ -91,7 +91,6 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
-import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 import { getOffersLink } from 'src/airtable/airtable.custom';
 //import { getParseWbInfo } from './puppeteer';
 
