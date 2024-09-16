@@ -290,7 +290,7 @@ export const IMAGES_STEP_FOR_HELP = [
   {
     type: STEPS.Получен.value,
     url: WEB_APP + '/images/2.jpeg',
-    text: SECOND_STEP,
+    text: SECOND_STEP + FIVE_STEP,
   },
   // {
   //   type: STEPS.Отзыв.value,
