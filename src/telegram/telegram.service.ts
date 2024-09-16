@@ -1029,6 +1029,7 @@ export class TelegramService {
             ctx.from,
             ctx.message.text,
             ctx.session.data.articul,
+            ctx.from.id,
             ctx.session?.data?.title || '',
             ctx.session.status,
           );
