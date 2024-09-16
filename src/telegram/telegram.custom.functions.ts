@@ -10,10 +10,10 @@ import {
   //FIRST_STEP_B,
   FIRST_STEP_C,
   SECOND_STEP,
-  THREE_STEP,
-  FOUR_STEP,
-  FOUR_STEP_A,
-  FOUR_STEP_B,
+  //THREE_STEP,
+  //FOUR_STEP,
+  //FOUR_STEP_A,
+  //FOUR_STEP_B,
   FOOTER,
   FIRST_STEP_LINK,
   STEPS,
@@ -218,14 +218,14 @@ export function updateSessionByStep(
     case STEPS['Дата получения'].step:
       session.status = 'Дата получения';
       break;
-    case STEPS['Отзыв на проверке'].step:
-      session.comment = data;
-      session.stopTime = getTimeWithTz();
-      break;
-    case STEPS.Отзыв.step:
-      session.status = 'Отзыв';
-      session.stopTime = getTimeWithTz();
-      break;
+    // case STEPS['Отзыв на проверке'].step:
+    //   session.comment = data;
+    //   session.stopTime = getTimeWithTz();
+    //   break;
+    // case STEPS.Отзыв.step:
+    //   session.status = 'Отзыв';
+    //   session.stopTime = getTimeWithTz();
+    //   break;
     case STEPS['Штрих-код'].step:
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
@@ -342,12 +342,12 @@ export function getTextByNextStep(
       return SECOND_STEP + getNumberText(step, null, name);
     case STEPS['Дата получения'].step:
       return 'Введите дату получения (в формате 12.12.2024) 🗓️';
-    case STEPS['Отзыв на проверке'].step:
-      return THREE_STEP + getNumberText(step, null, name);
-    case STEPS.Отзыв.step:
-      return (
-        FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
-      );
+    // case STEPS['Отзыв на проверке'].step:
+    //   return THREE_STEP + getNumberText(step, null, name);
+    // case STEPS.Отзыв.step:
+    //   return (
+    //     FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
+    //   );
     case STEPS['Штрих-код'].step:
       return FIVE_STEP + getNumberText(step, null, name);
     case STEPS.Чек.step:
@@ -472,12 +472,12 @@ export const getNotificationValue = (
       nextStatusNotification = 'Получен';
       break;
     case 'Получен':
-      nextStatusNotification = 'Отзыв';
-      break;
-    case 'Отзыв':
-    case 'Отзыв на проверке':
       nextStatusNotification = 'Штрих-код';
       break;
+    // case 'Отзыв':
+    // case 'Отзыв на проверке':
+    //   nextStatusNotification = 'Штрих-код';
+    //   break;
     case 'Штрих-код':
       nextStatusNotification = 'Чек';
       break;
@@ -547,8 +547,8 @@ export const scheduleNotification = (
         return days > 2 && days < 4;
       }
     case 'Получен':
-    case 'Отзыв':
-    case 'Отзыв на проверке':
+    // case 'Отзыв':
+    // case 'Отзыв на проверке':
     case 'Штрих-код':
     case 'Чек':
       return days === 1;

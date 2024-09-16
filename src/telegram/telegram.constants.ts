@@ -121,19 +121,19 @@ export const STEPS = {
     erroText: 'ввести дату получения (в формате 12.12.2024)',
     textStepCount: '',
   }, //дата получения фактическая
-  'Отзыв на проверке': {
-    step: 10,
-    value: 'Отзыв на проверке',
-    erroText: 'написать отзыв или ожидать ответа',
-    textStepCount: `4️⃣ шага\n`,
-  }, // отзыв на проверке (text)
-  Отзыв: {
-    step: 11,
-    value: 'Отзыв',
-    erroText: 'загрузить скриншот отзыва с 5 ⭐️',
-    textStepCount: `3️⃣ шага\n`,
-    image: '/images/4.jpeg',
-  }, //отзыв (photo)
+  // 'Отзыв на проверке': {
+  //   step: 10,
+  //   value: 'Отзыв на проверке',
+  //   erroText: 'написать отзыв или ожидать ответа',
+  //   textStepCount: `4️⃣ шага\n`,
+  // }, // отзыв на проверке (text)
+  // Отзыв: {
+  //   step: 11,
+  //   value: 'Отзыв',
+  //   erroText: 'загрузить скриншот отзыва с 5 ⭐️',
+  //   textStepCount: `3️⃣ шага\n`,
+  //   image: '/images/4.jpeg',
+  // }, //отзыв (photo)
   ['Штрих-код']: {
     step: 12,
     value: 'Штрих-код',
@@ -194,7 +194,7 @@ export const STEPS_TYPES = {
     STEPS.Корзина.step,
     STEPS.Заказ.step,
     STEPS.Получен.step,
-    STEPS.Отзыв.step,
+    //STEPS.Отзыв.step,
     STEPS['Штрих-код'].step,
     STEPS.Чек.step,
   ],
@@ -203,7 +203,7 @@ export const STEPS_TYPES = {
     STEPS['Выбор раздачи'].step,
     STEPS['Артикул правильный'].step,
     STEPS['Проблема с артикулом'].step,
-    STEPS['Отзыв на проверке'].step,
+    //STEPS['Отзыв на проверке'].step,
     STEPS.HELP.step,
     STEPS['Дата доставки'].step,
     STEPS.Финиш.step,
@@ -238,13 +238,13 @@ export const SECOND_STEP =
   '4️⃣ ЗАБРАТЬ ТОВАР\n' +
   '✔️Загрузите скриншот о получении товара из «мои покупки» \n' +
   '‼️ ВОЗВРАТ ТОВАРА СДЕЛАТЬ НЕВОЗМОЖНО ‼️ \n\n';
-export const THREE_STEP =
-  '5️⃣ НАПИСАТЬ ОТЗЫВ\n' +
-  '✔️После получения товара пришлите нам отзыв на согласование. Когда отзыв будет согласован, вам в бот придет сообщение. Обычно мы отвечаем в течение дня.\n\n';
-export const FOUR_STEP = '6️⃣ ЗАГРУЗИТЕ\n';
-export const FOUR_STEP_A =
-  'Напишите отзыв с фотографией и поставьте 5 звезд ⭐️\n';
-export const FOUR_STEP_B = '7️⃣ ✔️загрузите скриншот отзыва;\n\n';
+// export const THREE_STEP =
+//   '5️⃣ НАПИСАТЬ ОТЗЫВ\n' +
+//   '✔️После получения товара пришлите нам отзыв на согласование. Когда отзыв будет согласован, вам в бот придет сообщение. Обычно мы отвечаем в течение дня.\n\n';
+// export const FOUR_STEP = '6️⃣ ЗАГРУЗИТЕ\n';
+// export const FOUR_STEP_A =
+//   'Напишите отзыв с фотографией и поставьте 5 звезд ⭐️\n';
+// export const FOUR_STEP_B = '7️⃣ ✔️загрузите скриншот отзыва;\n\n';
 export const FIVE_STEP =
   '8️⃣ ЗАГРУЗИТЕ\n' +
   '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих-кода УПАКОВКИ И БИРКИ \n\n';
@@ -292,16 +292,16 @@ export const IMAGES_STEP_FOR_HELP = [
     url: WEB_APP + '/images/2.jpeg',
     text: SECOND_STEP,
   },
-  {
-    type: STEPS.Отзыв.value,
-    url: WEB_APP + '/images/3.jpeg',
-    text: THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
-  },
-  {
-    type: STEPS['Отзыв на проверке'].value,
-    url: WEB_APP + '/images/4.jpeg',
-    text: FIVE_STEP,
-  },
+  // {
+  //   type: STEPS.Отзыв.value,
+  //   url: WEB_APP + '/images/3.jpeg',
+  //   text: THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
+  // },
+  // {
+  //   type: STEPS['Отзыв на проверке'].value,
+  //   url: WEB_APP + '/images/4.jpeg',
+  //   text: FIVE_STEP,
+  // },
   {
     type: STEPS['Штрих-код'].value,
     url: WEB_APP + '/images/5.jpeg',

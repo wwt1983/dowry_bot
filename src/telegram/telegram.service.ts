@@ -70,7 +70,7 @@ import { AirtableService } from 'src/airtable/airtable.service';
 import { getGeoUrl, parseGeoResponse } from './telegram.geo';
 import { OfferStatus } from 'src/airtable/types/IOffer.interface';
 import {
-  commentKeyboard,
+  //commentKeyboard,
   getArticulCommand,
   stepKeyboard,
   deliveryDateKeyboard,
@@ -228,7 +228,7 @@ export class TelegramService {
 
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
       ctx.session.lastCommand = COMMAND_NAMES.call;
-      return await ctx.reply('Опишите вашу проблему😕');
+      return await ctx.reply('Опишите вашу проблему 😕');
     });
 
     /*======== HISTORY =======*/
@@ -461,7 +461,7 @@ export class TelegramService {
 
     /*======== Дата получения =======*/
     this.bot.callbackQuery('date_receiving', async (ctx) => {
-      ctx.session.step = STEPS['Отзыв на проверке'].step;
+      ctx.session.step = STEPS['Штрих-код'].step;
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(
           ctx.session.step,
@@ -469,7 +469,7 @@ export class TelegramService {
           ctx.session.data.title,
         ),
       );
-      await this.sendMediaByStep(STEPS['Отзыв на проверке'].step, ctx);
+      await this.sendMediaByStep(STEPS['Штрих-код'].step, ctx);
       return await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
     });
 
@@ -993,50 +993,50 @@ export class TelegramService {
         }
 
         //отзыв пользователя
-        if (step === STEPS['Отзыв на проверке'].step) {
-          ctx.session = updateSessionByField(
-            ctx.session,
-            'comment',
-            ctx.message.text,
-          );
-          ctx.session = updateSessionByField(
-            ctx.session,
-            'status',
-            'Отзыв на проверке',
-          );
+        // if (step === STEPS['Отзыв на проверке'].step) {
+        //   ctx.session = updateSessionByField(
+        //     ctx.session,
+        //     'comment',
+        //     ctx.message.text,
+        //   );
+        //   ctx.session = updateSessionByField(
+        //     ctx.session,
+        //     'status',
+        //     'Отзыв на проверке',
+        //   );
 
-          await this.updateToAirtable(ctx.session);
+        //   await this.updateToAirtable(ctx.session);
 
-          const msgToFeedback = getTextToChatMessage(
-            ctx.from,
-            ctx.message.text,
-            ctx.session.data.articul,
-            ctx.from.id,
-            ctx.session?.data?.title || '',
-            ctx.session.status,
-          );
-          const responseMsg = await ctx.api.sendMessage(
-            getAdminChatId(),
-            msgToFeedback,
-          );
+        //   const msgToFeedback = getTextToChatMessage(
+        //     ctx.from,
+        //     ctx.message.text,
+        //     ctx.session.data.articul,
+        //     ctx.from.id,
+        //     ctx.session?.data?.title || '',
+        //     ctx.session.status,
+        //   );
+        //   const responseMsg = await ctx.api.sendMessage(
+        //     getAdminChatId(),
+        //     msgToFeedback,
+        //   );
 
-          await this.saveFeedback(
-            ctx.from,
-            `Отзыв [${responseMsg.message_id}_${ctx.session.sessionId}]\n${msgToFeedback}`,
-          );
+        //   await this.saveFeedback(
+        //     ctx.from,
+        //     `Отзыв [${responseMsg.message_id}_${ctx.session.sessionId}]\n${msgToFeedback}`,
+        //   );
 
-          await this.addNumberToMessageInChatMessage(
-            responseMsg.message_id,
-            msgToFeedback,
-          );
+        //   await this.addNumberToMessageInChatMessage(
+        //     responseMsg.message_id,
+        //     msgToFeedback,
+        //   );
 
-          return ctx.reply(
-            'Вам в бот придет сообщение о дальнейших инструкциях о размещении отзыва на wildberries (дата публикации и как именно публиковать (с фото или без.)). Обычно мы отвечаем быстро. Но иногда бывает 🐢.\nЕсли ваш отзыв одобрен, нажмите "Продолжить"',
-            {
-              reply_markup: commentKeyboard,
-            },
-          );
-        }
+        //   return ctx.reply(
+        //     'Вам в бот придет сообщение о дальнейших инструкциях о размещении отзыва на wildberries (дата публикации и как именно публиковать (с фото или без.)). Обычно мы отвечаем быстро. Но иногда бывает 🐢.\nЕсли ваш отзыв одобрен, нажмите "Продолжить"',
+        //     {
+        //       reply_markup: commentKeyboard,
+        //     },
+        //   );
+        // }
       } catch (e) {
         console.log(e);
       }

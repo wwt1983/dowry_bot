@@ -34,7 +34,7 @@ export interface IDistribution {
     'Деньги от клиента': boolean;
     'Фото товар'?: PhotoDataType[];
     'Фото бирка'?: PhotoDataType[];
-    'Скрин отзыв'?: PhotoDataType[];
+    //'Скрин отзыв'?: PhotoDataType[];
     'Дней до кэшбэка': string;
     Покупатели?: string[];
     'Скрин чека'?: PhotoDataType[];

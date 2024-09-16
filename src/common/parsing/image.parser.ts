@@ -63,9 +63,9 @@ const checkParse = (
         break;
       case 'Заказ':
         break;
-      case 'Отзыв на проверке':
-        result = checkComment(title, text);
-        break;
+      // case 'Отзыв на проверке':
+      //   result = checkComment(title, text);
+      //   break;
       case 'Штрих-код':
         result = checkCheck(title, text);
         break;
