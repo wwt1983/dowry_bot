@@ -117,4 +117,26 @@ export class TelegramController {
       data.sessionId,
     );
   }
+  /**
+   * перенос данных из таблицы Бот в таблицу Раздачи
+   */
+  @Post('transferBotToDistributions')
+  async transferBotToDistributions(
+    @Body()
+    data: {
+      sessionId: string;
+      chat_id: string;
+      userName: string;
+      images: string[];
+      articul: string;
+    },
+  ): Promise<void> {
+    await this.telegramService.transferBotToDistributions(
+      data.sessionId,
+      data.chat_id,
+      data.userName,
+      data.images,
+      data.articul,
+    );
+  }
 }

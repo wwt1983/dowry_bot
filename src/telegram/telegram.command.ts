@@ -4,13 +4,14 @@ import {
   START_NAME,
   STEP_COMMANDS,
   WEB_APP,
+  WEB_APP_TEST,
 } from './telegram.constants';
 import { BrokeBotStatus, IBot } from 'src/airtable/types/IBot.interface';
 
 export const webKeyboard = {
   text: START_NAME,
   web_app: {
-    url: WEB_APP,
+    url: process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
   },
 };
 
@@ -70,6 +71,7 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       record.fields.Статус !== 'Чек' &&
       record.fields.Статус !== 'Лимит заказов' &&
       record.fields.Статус !== 'Отмена пользователем' &&
+      record.fields.Статус !== 'В ожидании' &&
       !record.fields['Снять с раздачи']
       //record.fields.Статус !== 'Проблема с артикулом' &&
       //record.fields.Статус !== 'Поиск' &&
@@ -99,7 +101,14 @@ export const createHistoryKeyboard = (
 
   const keyboard = new InlineKeyboard().row();
   if (web) {
-    keyboard.add(InlineKeyboard.webApp(START_NAME, WEB_APP)).row();
+    keyboard
+      .add(
+        InlineKeyboard.webApp(
+          START_NAME,
+          process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
+        ),
+      )
+      .row();
   }
   if (ordersLabel && ordersLabel.length > 0) {
     ordersLabel.forEach(([label, data]) =>

@@ -88,6 +88,9 @@ export function getTextToChatMessage(
   return `❓${getTimeWithTz(FORMAT_DATE_SIMPLE)}\n${userValue.fio} username=${userValue.userName} 
   ${userComment}${instruction}❓`;
 }
+/**
+ * текст комментария (со статусом отвечен или вопрос)
+ */
 export const createCommentForDb = (comment: string, isAnswer?: boolean) => {
   if (!comment) return '';
   const emoji = isAnswer ? '✅' : '❓';
@@ -219,13 +222,15 @@ export function updateSessionByStep(
       session.status = 'Дата получения';
       break;
     // case STEPS['Отзыв на проверке'].step:
-    //   session.comment = data;
-    //   session.stopTime = getTimeWithTz();
-    //   break;
+    //   //session.comment = data;
+    //   //session.stopTime = getTimeWithTz();
+    //   session.step = STEPS['Штрих-код'].step;
+    // //break;
     // case STEPS.Отзыв.step:
-    //   session.status = 'Отзыв';
-    //   session.stopTime = getTimeWithTz();
-    //   break;
+    //   //session.status = 'Отзыв';
+    //   //session.stopTime = getTimeWithTz();
+    //   session.step = STEPS['Штрих-код'].step;
+    // //break;
     case STEPS['Штрих-код'].step:
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
@@ -343,11 +348,11 @@ export function getTextByNextStep(
     case STEPS['Дата получения'].step:
       return 'Введите дату получения (в формате 12.12.2024) 🗓️';
     // case STEPS['Отзыв на проверке'].step:
-    //   return THREE_STEP + getNumberText(step, null, name);
+    // //return THREE_STEP + getNumberText(step, null, name);
     // case STEPS.Отзыв.step:
-    //   return (
-    //     FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
-    //   );
+    // //   return (
+    // //     FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
+    // //   );
     case STEPS['Штрих-код'].step:
       return FIVE_STEP + getNumberText(step, null, name);
     case STEPS.Чек.step:
@@ -632,6 +637,7 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
       x.fields.Статус !== 'Проблема с локацией' &&
       x.fields.Статус !== 'Лимит заказов' &&
       x.fields.Статус !== 'Отмена пользователем' &&
+      x.fields.Статус !== 'В ожидании' &&
       !x.fields.Финиш,
   );
   if (!filterData || filterData.length === 0) return null;

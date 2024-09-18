@@ -333,6 +333,27 @@ export class AirtableService {
     return data.records;
   }
 
+  async getDistributionByFilterArticulAndNick(
+    articul: string,
+    nick: string,
+  ): Promise<IDistribution | null> {
+    const filter = `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {Ник ТГ}="${nick}")`;
+    const data = await this.airtableHttpService.get(
+      TablesName.Distributions,
+      filter,
+    );
+    if (!data || !data.records) return null;
+    return data as IDistribution;
+  }
+
+  async getDistributionById(id: string): Promise<IDistribution | null> {
+    const data = await this.airtableHttpService.get(
+      `${AIRTABLE_URL}/${TablesName.Distributions}/${id}`,
+    );
+    if (!data) return null;
+    return data as IDistribution;
+  }
+
   async getHelperTable(): Promise<IHelpers | null> {
     const data = await this.airtableHttpService.get(TablesName.Helpers);
     if (!data) return null;
