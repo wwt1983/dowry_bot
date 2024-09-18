@@ -284,10 +284,21 @@ export class TelegramService {
 
         const { id } = ctx.from;
         const offers = await this.airtableService.getOffers();
-        return await ctx.api.sendMessage(id, getOffersLink(offers), {
-          parse_mode: 'HTML',
-          link_preview_options: { is_disabled: true },
-        });
+
+        if (offers?.records?.length > 0) {
+          return await ctx.api.sendMessage(id, getOffersLink(offers), {
+            parse_mode: 'HTML',
+            link_preview_options: { is_disabled: true },
+          });
+        }
+        await this.bot.api.sendMessage(
+          id,
+          'Ждем новых раздач 😉 \n' + getTextForSubscriber(null).text,
+          {
+            parse_mode: 'HTML',
+            link_preview_options: { is_disabled: true },
+          },
+        );
       } catch (e) {
         console.log('offers=', e);
         return await ctx.reply('Раздел обновляется');
