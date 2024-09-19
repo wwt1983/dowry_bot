@@ -335,15 +335,19 @@ export class AirtableService {
 
   async getDistributionByFilterArticulAndNick(
     articul: string,
-    nick: string,
+    nick?: string,
+    chat_id?: string,
   ): Promise<IDistribution | null> {
-    const filter = `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {Ник ТГ}="${nick}")`;
+    const filter = chat_id
+      ? `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {chat_id}="${chat_id}")`
+      : `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {Ник ТГ}="${nick}")`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
     );
+    console.log('data=', data);
     if (!data || !data.records) return null;
-    return data as IDistribution;
+    return data.records[0] as IDistribution;
   }
 
   async getDistributionById(id: string): Promise<IDistribution | null> {
@@ -375,5 +379,13 @@ export class AirtableService {
     );
     if (!data || data.records.length === 0) return false;
     return true;
+  }
+  async updateDistribution(data: any): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
+    console.log('postWebhook ===>', response);
+    return response;
   }
 }

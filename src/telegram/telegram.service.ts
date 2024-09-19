@@ -757,6 +757,7 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
 
           await ctx.reply('Принято!✌️');
+          await ctx.reply('Мы будем рады получить вашу оценку нашей работы 😉');
           return await ctx.reply('👩‍💻', {
             reply_markup: operatorKeyboard,
           });
@@ -1493,6 +1494,8 @@ export class TelegramService {
         'SessionId',
       );
 
+      console.log(sessionId, data);
+
       const { id } = ctx.from;
 
       if (!data || data.length === 0) {
@@ -1811,16 +1814,36 @@ export class TelegramService {
     userName: string,
     images: string[],
     articul: string,
+    dataForCash: string,
   ) {
     try {
-      console.log('session=', sessionId, images);
-      const distribustion =
+      console.log('session=', sessionId, images, dataForCash);
+
+      let distribustion =
         await this.airtableService.getDistributionByFilterArticulAndNick(
           articul,
           userName,
         );
-      if (distribustion) {
-        console.log(distribustion);
+
+      if (!distribustion) {
+        distribustion =
+          await this.airtableService.getDistributionByFilterArticulAndNick(
+            articul,
+            null,
+            chat_id,
+          );
+      }
+
+      console.log('distr = ', distribustion);
+
+      if (distribustion && distribustion.id) {
+        this.airtableService.updateDistribution({
+          id: distribustion.id,
+          images: images,
+          chat_id: chat_id,
+          articul: articul,
+          dataForCash: dataForCash,
+        });
       }
     } catch (error) {
       console.log('transferBotToDistributions', error);
