@@ -757,7 +757,7 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
 
           await ctx.reply('Принято!✌️');
-          await ctx.reply('Мы будем рады получить вашу оценку нашей работы 😉');
+          await ctx.reply('Мы будем рады получить оценку нашей работы 😉');
           return await ctx.reply('👩‍💻', {
             reply_markup: operatorKeyboard,
           });
