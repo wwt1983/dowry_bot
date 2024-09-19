@@ -387,10 +387,9 @@ export class TelegramService {
         }
 
         const { data } = ctx?.session;
-        if (ctx?.session?.step < 0 || !ctx?.session?.step)
-          return await ctx.reply(STOP_TEXT);
+        if (ctx?.session?.step < 0) return await ctx.reply(STOP_TEXT);
 
-        if (!data || !ctx.session) {
+        if (!data || !ctx.session || !ctx.session.step) {
           const dataBuyer = await this.airtableService.getBotByFilter(
             ctx.from.id.toString(),
             'chat_id',
