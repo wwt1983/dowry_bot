@@ -130,6 +130,7 @@ export class TelegramController {
       images: string[];
       articul: string;
       dataForCash: string;
+      key: string;
     },
   ): Promise<void> {
     await this.telegramService.transferBotToDistributions(
@@ -139,6 +140,7 @@ export class TelegramController {
       data.images,
       data.articul,
       data.dataForCash,
+      data.key,
     );
   }
 }

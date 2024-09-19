@@ -336,89 +336,93 @@ export class TelegramService {
 
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
-      const path = await ctx.getFile();
-      const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
-      if (
-        ctx.session.lastCommand === COMMAND_NAMES.call ||
-        ctx.session.errorStatus ||
-        ctx.session.lastCommand === COMMAND_NAMES.saveMessage
-      ) {
-        const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
-        if (ctx.session.lastCommand === COMMAND_NAMES.saveMessage) {
-          const msgToChatMessage = await ctx.api.sendMessage(
-            ctx.session.comment,
-            firebaseUrl,
-          );
-          this.addNumberToMessageInChatMessage(
-            msgToChatMessage.message_id,
-            firebaseUrl,
-          );
-          await this.airtableService.updateCommentInBotTableAirtable(
-            ctx.from,
-            createCommentForDb(firebaseUrl, true),
-            true,
-          );
-        } else {
-          const msgToChatMessage = await this.saveComment(
-            ctx.from,
-            firebaseUrl,
-            ctx.session?.data?.articul || '',
-            ctx.session?.data?.title || '',
-            ctx.session.status,
-          );
-          const responseMsg = await ctx.api.sendMessage(
-            getAdminChatId(),
-            msgToChatMessage,
-          );
+      try {
+        const path = await ctx.getFile();
+        const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+        if (
+          ctx?.session?.lastCommand === COMMAND_NAMES.call ||
+          ctx?.session?.errorStatus ||
+          ctx?.session?.lastCommand === COMMAND_NAMES.saveMessage
+        ) {
+          const firebaseUrl = await this.firebaseService.uploadImageAsync(url);
+          if (ctx?.session?.lastCommand === COMMAND_NAMES.saveMessage) {
+            const msgToChatMessage = await ctx.api.sendMessage(
+              ctx.session.comment,
+              firebaseUrl,
+            );
+            this.addNumberToMessageInChatMessage(
+              msgToChatMessage.message_id,
+              firebaseUrl,
+            );
+            await this.airtableService.updateCommentInBotTableAirtable(
+              ctx.from,
+              createCommentForDb(firebaseUrl, true),
+              true,
+            );
+          } else {
+            const msgToChatMessage = await this.saveComment(
+              ctx.from,
+              firebaseUrl,
+              ctx.session?.data?.articul || '',
+              ctx.session?.data?.title || '',
+              ctx.session.status,
+            );
+            const responseMsg = await ctx.api.sendMessage(
+              getAdminChatId(),
+              msgToChatMessage,
+            );
 
-          await this.addNumberToMessageInChatMessage(
-            responseMsg.message_id,
-            msgToChatMessage,
+            await this.addNumberToMessageInChatMessage(
+              responseMsg.message_id,
+              msgToChatMessage,
+            );
+          }
+          return await ctx.reply(
+            'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
           );
         }
-        return await ctx.reply(
-          'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
-        );
-      }
 
-      if (ctx.session.lastCommand === COMMAND_NAMES.messageSend) {
-        return ctx.reply('📵');
-      }
+        if (ctx?.session?.lastCommand === COMMAND_NAMES.messageSend) {
+          return await ctx.reply('📵');
+        }
 
-      const { data } = ctx.session;
-      if (ctx.session.step < 0 || !ctx.session.step)
-        return ctx.reply(STOP_TEXT);
+        const { data } = ctx?.session;
+        if (ctx?.session?.step < 0 || !ctx?.session?.step)
+          return await ctx.reply(STOP_TEXT);
 
-      if (!data) {
-        const dataBuyer = await this.airtableService.getBotByFilter(
-          ctx.from.id.toString(),
-          'chat_id',
-        );
+        if (!data || !ctx.session) {
+          const dataBuyer = await this.airtableService.getBotByFilter(
+            ctx.from.id.toString(),
+            'chat_id',
+          );
 
-        const lastSession = getLastSession(dataBuyer);
-        if (!lastSession)
-          return await this.getKeyboardHistoryWithWeb(ctx.from.id);
+          const lastSession = getLastSession(dataBuyer);
+          if (!lastSession)
+            return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
-        ctx.session = await this.restoreSession(ctx, lastSession);
-      }
+          ctx.session = await this.restoreSession(ctx, lastSession);
+        }
 
-      if (!STEPS_TYPES.image.includes(ctx.session.step)) {
-        await ctx.api.sendMessage(
-          ctx.from.id,
-          getErrorTextByStep(ctx.session.step)?.error || '⤵️',
-          {
-            link_preview_options: {
-              is_disabled: true,
+        if (!STEPS_TYPES.image.includes(ctx.session.step)) {
+          await ctx.api.sendMessage(
+            ctx.from.id,
+            getErrorTextByStep(ctx.session.step)?.error || '⤵️',
+            {
+              link_preview_options: {
+                is_disabled: true,
+              },
             },
-          },
-        );
-        return;
+          );
+          return;
+        }
+
+        ctx.session.lastMessage = ctx.message.message_id;
+        ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
+
+        return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
+      } catch (e) {
+        console.log('message:photo', e, ctx.from.id, ctx.session);
       }
-
-      ctx.session.lastMessage = ctx.message.message_id;
-      ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
-
-      return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
     });
 
     /*======== CANCEL =======*/
@@ -477,7 +481,6 @@ export class TelegramService {
       console.log('date_receiving', ctx.session);
       ctx.session.step = STEPS['Штрих-код'].step;
       ctx.session.status = STEPS['Штрих-код'].value as BotStatus;
-      console.log('next step', ctx.session.step);
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(
           ctx.session.step,
@@ -512,7 +515,7 @@ export class TelegramService {
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
       //IMAGE
-      if (STEPS_TYPES.image.includes(ctx.session.step)) {
+      if (ctx?.session?.step && STEPS_TYPES.image.includes(ctx.session.step)) {
         if (!ctx.session.lastMessage) {
           return;
         }
@@ -854,7 +857,7 @@ export class TelegramService {
           }
         } else {
           const { step } = ctx.session;
-          if (!STEPS_TYPES.text.find((x) => x === step)) {
+          if (step && !STEPS_TYPES.text.find((x) => x === step)) {
             await ctx.api.sendMessage(
               ctx.from.id,
               getErrorTextByStep(step).error || '⤵️',
@@ -1815,6 +1818,7 @@ export class TelegramService {
     images: string[],
     articul: string,
     dataForCash: string,
+    key: string,
   ) {
     try {
       console.log('session=', sessionId, images, dataForCash);
@@ -1834,15 +1838,21 @@ export class TelegramService {
           );
       }
 
-      console.log('distr = ', distribustion);
+      console.log('distribustion = ', distribustion);
 
       if (distribustion && distribustion.id) {
         this.airtableService.updateDistribution({
           id: distribustion.id,
-          images: images,
+          searchScreen: images[0],
+          cartScreen: images[1],
+          orderScreen: images[2],
+          reciveScreen: images[3],
+          shtrihCodeScreen: images[4],
+          checkScreen: images[5],
           chat_id: chat_id,
           articul: articul,
           dataForCash: dataForCash,
+          key: key,
         });
       }
     } catch (error) {
