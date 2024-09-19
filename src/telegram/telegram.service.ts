@@ -513,6 +513,8 @@ export class TelegramService {
     });
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
+      console.log('next=', ctx.session);
+
       //IMAGE
       if (ctx?.session?.step && STEPS_TYPES.image.includes(ctx.session.step)) {
         if (!ctx.session.lastMessage) {
@@ -549,6 +551,10 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
+          ctx.session = nextStep(ctx.session);
+          ctx.session.status = Object.values(STEPS).find(
+            (x) => x.step === ctx.session.step,
+          ).value as BotStatus;
         } else {
           ctx.session = nextStep(ctx.session);
         }
@@ -574,6 +580,7 @@ export class TelegramService {
       await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
 
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
+
       if (ctx.session.step === STEPS.Финиш.step) {
         await ctx.react('🎉');
         await ctx.reply(
@@ -749,7 +756,7 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
-          await this.sendMediaByStep(STEPS.Поиск.step, ctx);
+          await this.sendMediaByStep(STEPS['Штрих-код'].step, ctx);
           await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
           return;
         }
