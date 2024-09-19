@@ -1827,7 +1827,7 @@ export class TelegramService {
     key: string,
   ) {
     try {
-      console.log('session=', sessionId, images, dataForCash);
+      //console.log('session=', sessionId, images, dataForCash);
 
       let distribustion =
         await this.airtableService.getDistributionByFilterArticulAndNick(
@@ -1860,9 +1860,17 @@ export class TelegramService {
           dataForCash: dataForCash,
           key: key,
         });
+        await this.airtableService.updateStatusTransferInBot(
+          'Успешно перенесены',
+          sessionId,
+        );
       }
     } catch (error) {
       console.log('transferBotToDistributions', error);
+      await this.airtableService.updateStatusTransferInBot(
+        'Ошибка переноса',
+        sessionId,
+      );
     }
   }
 }

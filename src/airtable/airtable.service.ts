@@ -388,4 +388,18 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
+  async updateStatusTransferInBot(
+    status: 'Ошибка переноса' | 'Успешно перенесены',
+    sessionId: string,
+  ): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION_STATUS_UPDATE',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
+      'Перенести в Раздачу': status,
+      SessionId: sessionId,
+    });
+    console.log('postWebhook ===>', response);
+    return response;
+  }
 }
