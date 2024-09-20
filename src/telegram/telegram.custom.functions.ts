@@ -273,10 +273,9 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     image,
     filter,
   } = data;
-  const useFilterForHelpSearch =
-    filter && filter.length > 0
-      ? `Попробуйте найти товар используя фильтр(ы) 👉: ${filter.map((x) => x.toUpperCase()).join(', ')} \n`
-      : '';
+  const useFilterForHelpSearch = filter
+    ? `Попробуйте найти товар используя фильтр(ы) 👉: ${filter.toUpperCase()} \n`
+    : '';
   const caption =
     `🔥${title}🔥` +
     '\n\n' +
@@ -579,7 +578,7 @@ export const getTextForArticulError = (
   positionOnWB: string,
   countTryError: number,
   status: BrokeBotStatus,
-  filter?: string[],
+  filter?: string,
 ) => {
   const helpText =
     positionOnWB && countTryError <= COUNT_TRY_ERROR
@@ -589,8 +588,7 @@ export const getTextForArticulError = (
     let filterText = '';
     if (countTryError === COUNT_TRY_ERROR - 1) {
       filterText = filter
-        ? '\nПопробуйте найти товар по фильтру: 👉' +
-          filter.map((x) => x.toUpperCase()).join(', ')
+        ? '\nПопробуйте найти товар по фильтру: 👉' + filter.toUpperCase()
         : '';
     }
     return (

@@ -271,8 +271,8 @@ export class AirtableService {
           //   },
           // );
           const nextIndex = (countOrder + 1) % filters.records.length;
-          //offer.fields.Фильтр = filters.records[nextIndex].fields.Название;
-          offer.fields.Фильтр = filters.records.map((x) => x.fields.Название);
+          offer.fields.Фильтр = filters.records[nextIndex].fields.Название;
+          //offer.fields.Фильтр = filters.records.map((x) => x.fields.Название);
         }
       }
     }
