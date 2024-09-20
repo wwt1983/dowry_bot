@@ -37,7 +37,7 @@ export interface IOffer {
     Ссылка: string;
     Переход: ['Чат', 'Бот'];
     Фильтры?: string[];
-    Фильтр?: string;
+    Фильтр?: string[];
     'Включить фильтры': boolean;
   };
 }

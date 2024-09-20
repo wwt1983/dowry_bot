@@ -262,8 +262,21 @@ export function nextStep(session: ISessionData): ISessionData {
 }
 
 export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
-  const { title, keys, cash, priceWb, priceForYou, times, location, image } =
-    data;
+  const {
+    title,
+    keys,
+    cash,
+    priceWb,
+    priceForYou,
+    times,
+    location,
+    image,
+    filter,
+  } = data;
+  const useFilterForHelpSearch =
+    filter && filter.length > 0
+      ? `Попробуйте найти товар используя фильтр(ы) 👉: ${filter.map((x) => x.toUpperCase()).join(', ')} \n`
+      : '';
   const caption =
     `🔥${title}🔥` +
     '\n\n' +
@@ -278,9 +291,9 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     FIRST_STEP_KEY_VALUE +
     `\n🔎 ${keys.toUpperCase()}\n\n` +
     getMessageForTimeOffer(times) +
+    useFilterForHelpSearch +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
-
   return [
     {
       type: 'photo',
@@ -566,7 +579,7 @@ export const getTextForArticulError = (
   positionOnWB: string,
   countTryError: number,
   status: BrokeBotStatus,
-  filter?: string,
+  filter?: string[],
 ) => {
   const helpText =
     positionOnWB && countTryError <= COUNT_TRY_ERROR
@@ -576,7 +589,8 @@ export const getTextForArticulError = (
     let filterText = '';
     if (countTryError === COUNT_TRY_ERROR - 1) {
       filterText = filter
-        ? '\nПопробуйте найти товар по фильтру: 👉' + filter
+        ? '\nПопробуйте найти товар по фильтру: 👉' +
+          filter.map((x) => x.toUpperCase()).join(', ')
         : '';
     }
     return (

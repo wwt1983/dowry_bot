@@ -400,6 +400,7 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
+          //console.log('message:photo after restore=', ctx.session);
         }
 
         if (!STEPS_TYPES.image.includes(ctx.session.step)) {
@@ -513,8 +514,6 @@ export class TelegramService {
     });
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
-      console.log('next=', ctx.session);
-
       //IMAGE
       if (ctx?.session?.step && STEPS_TYPES.image.includes(ctx.session.step)) {
         if (!ctx.session.lastMessage) {
@@ -551,6 +550,7 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
+          //console.log('next after restore');
           ctx.session = nextStep(ctx.session);
           ctx.session.status = Object.values(STEPS).find(
             (x) => x.step === ctx.session.step,
@@ -576,6 +576,7 @@ export class TelegramService {
           ? { reply_markup: deliveryDateKeyboard }
           : null,
       );
+      console.log('session step=', ctx.session.step);
       await this.sendMediaByStep(ctx.session.step, ctx);
       await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
 
@@ -607,6 +608,7 @@ export class TelegramService {
       }
 
       ctx.session = await this.restoreSession(ctx, sessionId);
+      //console.log('callback after resore ');
       let response = null;
 
       if (!ctx.session?.status) return;
@@ -790,6 +792,9 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           //
           ctx.session = await this.restoreSession(ctx, lastSession);
+
+          //console.log('message restore', ctx.session);
+
           if (!ctx.session.isRestore) {
             const historyButtons = createHistoryKeyboard(dataBuyer, true);
             await ctx.reply(
@@ -1023,6 +1028,11 @@ export class TelegramService {
           this.bot.api
             .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
             .catch(() => {});
+
+          if (step === STEPS['Дата получения'].step) {
+            ctx.session.step = STEPS['Штрих-код'].step;
+            await this.sendMediaByStep(STEPS['Штрих-код'].step, ctx);
+          }
 
           await ctx.reply(
             getTextByNextStep(
@@ -1503,7 +1513,7 @@ export class TelegramService {
         'SessionId',
       );
 
-      console.log(sessionId, data);
+      console.log('restore=', sessionId, data);
 
       const { id } = ctx.from;
 
@@ -1844,7 +1854,7 @@ export class TelegramService {
           );
       }
 
-      console.log('distribustion = ', distribustion);
+      //console.log('distribustion = ', distribustion);
 
       if (distribustion && distribustion.id) {
         this.airtableService.updateDistribution({

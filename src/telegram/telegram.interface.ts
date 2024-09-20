@@ -71,7 +71,7 @@ export interface ITelegramWebApp {
   times?: string[];
   countTryError?: number;
   errorStatus?: string;
-  filter?: string;
+  filter?: string[];
   'Данные для кешбека'?: string;
 }
 export type FeedbackStatus =
