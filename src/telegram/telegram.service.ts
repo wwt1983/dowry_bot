@@ -1381,7 +1381,7 @@ export class TelegramService {
       } else {
         await this.addNotificationStatistic(
           sessionId,
-          value.notification.fields['Количество попыток'] === 1
+          value.notification?.fields['Количество попыток'] === 1
             ? 'Остановлено'
             : 'Доставлено',
           1,
