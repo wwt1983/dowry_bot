@@ -274,7 +274,7 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     filter,
   } = data;
   const useFilterForHelpSearch = filter
-    ? `Попробуйте найти товар используя фильтр(ы) 👉: ${filter.toUpperCase()} \n`
+    ? `Попробуйте найти товар используя фильтр 👉: ${filter.toUpperCase()} \n`
     : '';
   const caption =
     `🔥${title}🔥` +
