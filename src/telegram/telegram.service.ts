@@ -470,10 +470,10 @@ export class TelegramService {
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
         ctx.session = await this.restoreSession(ctx, lastSession);
-      } else {
-        ctx.session = nextStep(ctx.session, true);
       }
+      ctx.session = nextStep(ctx.session, true);
       ctx.session.step = getNumberStepByStatus(ctx.session.status);
+      await this.updateToAirtable(ctx.session);
 
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(
@@ -567,8 +567,6 @@ export class TelegramService {
 
     /*======== CALBACK_QUERY (продолжение раздачи через кнопку)=======*/
     this.bot.on('callback_query', async (ctx) => {
-      console.log('callback_query', ctx.session.chat_id);
-
       if (!ctx.callbackQuery.data.includes('sessionId_'))
         return await ctx.answerCallbackQuery();
 
@@ -1434,7 +1432,7 @@ export class TelegramService {
         'SessionId',
       );
 
-      console.log('restore', data?.length, sessionId, data);
+      console.log('restore ', sessionId, data);
 
       const { id } = ctx.from;
 
