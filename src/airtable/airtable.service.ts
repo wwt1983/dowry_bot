@@ -13,12 +13,7 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus, IBot } from './types/IBot.interface';
-import {
-  getTimeWithTz,
-  getOfferTime,
-  dateFormat,
-  FORMAT_DATE_SIMPLE_NO_TIME,
-} from 'src/common/date/date.methods';
+import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
