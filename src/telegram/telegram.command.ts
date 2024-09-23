@@ -62,13 +62,11 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
   return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
-      record.fields.StartTime &&
       record.fields.Статус !== 'Бот удален' &&
       record.fields.Статус !== 'Время истекло' &&
       record.fields.Статус !== 'В боте' &&
       record.fields.Статус !== 'Ошибка' &&
       record.fields.Статус !== 'Проблема с локацией' &&
-      record.fields.Статус !== 'Чек' &&
       record.fields.Статус !== 'Лимит заказов' &&
       record.fields.Статус !== 'Отмена пользователем' &&
       record.fields.Статус !== 'В ожидании' &&

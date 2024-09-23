@@ -31,6 +31,7 @@ export interface IBot {
     //'Отзыв одобрен': boolean;
     //'Дата публикации отзыва': string;
     'Факт дата получения': string;
+    Цена: string;
   };
 }
 interface IPhoto {
@@ -68,7 +69,10 @@ export type BotStatus =
   | 'Лимит заказов'
   | 'Дата получения'
   | 'Отмена пользователем'
-  | 'В ожидании';
+  | 'В ожидании'
+  | 'Финиш'
+  | 'Товар'
+  | 'Цена';
 
 export type BrokeBotStatus =
   | 'locationError'

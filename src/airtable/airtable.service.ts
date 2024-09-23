@@ -13,7 +13,12 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus, IBot } from './types/IBot.interface';
-import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
+import {
+  getTimeWithTz,
+  getOfferTime,
+  dateFormat,
+  FORMAT_DATE_SIMPLE_NO_TIME,
+} from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
@@ -69,8 +74,11 @@ export class AirtableService {
         Location: session.location,
         Раздача: session.data.title,
         Images: session.images,
-        StopTime: session.stopTime,
-        ['Дата получения']: session.deliveryDate,
+        StopTime: getTimeWithTz(),
+        ['Дата получения']: dateFormat(
+          session.deliveryDate,
+          FORMAT_DATE_SIMPLE_NO_TIME,
+        ),
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
         'Ключевые слова':
@@ -79,6 +87,7 @@ export class AirtableService {
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': session.recivingDate,
         'Данные для кешбека': session.dataForCash,
+        Цена: session.price,
       };
 
       const tableUrl = this.configService.get(
@@ -300,6 +309,12 @@ export class AirtableService {
   }
   async getBotByFilter(value: string, field: string): Promise<IBot[] | null> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("${value}",{${field}})`;
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records;
+  }
+  async getBotForContinue(chat_id: string): Promise<IBot[] | null> {
+    const filter = `&${FILTER_BY_FORMULA}=AND(NOT({Статус}="В боте"), {chat_id}="${chat_id}")`;
     const data = await this.airtableHttpService.get(TablesName.Bot, filter);
     if (!data || (data.records && data.records.length === 0)) return null;
     return data.records;

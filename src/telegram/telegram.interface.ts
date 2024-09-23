@@ -47,6 +47,7 @@ export interface ISessionData {
   itsSubscriber?: boolean;
   userArticules?: string[];
   dataForCash?: string; //fio bank phone
+  price: string;
 }
 
 export type MyContext = HydrateFlavor<

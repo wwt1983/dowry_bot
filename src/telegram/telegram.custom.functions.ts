@@ -31,6 +31,8 @@ import {
   FIRST_STEP_CART,
   SUBSCRIBE_CHAT_URL,
   FIRST_STEP_KEY_VALUE,
+  STEP_TEXT_NUMBER_EMOJI,
+  SEVEN_STEP,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -116,7 +118,7 @@ export function createInitialSessionData(
     startTime: getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
-    step: STEPS['В боте'].step,
+    step: getNumberStepByStatus('В боте'),
     comment: '',
     images: [],
     lastLoadImage: null,
@@ -136,6 +138,7 @@ export function createInitialSessionData(
     itsSubscriber: false,
     userArticules: null,
     dataForCash: null,
+    price: null,
   };
 }
 
@@ -175,6 +178,7 @@ export function createContinueSessionData(
     comment: null,
     countTryError: 0,
     isRestore: true,
+    price: data.price,
   };
 }
 export function updateSessionByField(
@@ -185,61 +189,76 @@ export function updateSessionByField(
   session[field] = data;
   return session;
 }
-
+/**
+ * обноляем в сессии поля в зависимости от шага (без перехода к следующему шагу)
+ */
 export function updateSessionByStep(
   session: ISessionData,
   data?: string,
   isPhotoMsg?: boolean,
 ): ISessionData {
-  const { step } = session;
+  const { status } = session;
 
-  switch (step) {
-    case STEPS['В боте'].step:
-    case STEPS['Артикул правильный'].step:
+  switch (status) {
+    case 'В боте':
+    case 'Артикул правильный':
       break;
-    case STEPS['Выбор раздачи'].step:
+    case 'Выбор раздачи':
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.Поиск.step:
+    case 'Поиск':
       session.status = 'Поиск';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.Корзина.step:
+    case 'Корзина':
       session.status = 'Корзина';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.Заказ.step:
+    case 'Заказ':
       session.stopBuyTime = getTimeWithTz();
+      session.stopTime = getTimeWithTz();
       session.status = 'Заказ';
       break;
-    case STEPS['Дата доставки'].step:
+    case 'Дата доставки':
+      session.stopTime = getTimeWithTz();
       session.status = 'Дата доставки';
       break;
-    case STEPS.Получен.step:
+    case 'Получен':
+      session.stopTime = getTimeWithTz();
       session.status = 'Получен';
       break;
-    case STEPS['Дата получения'].step:
+    case 'Дата получения':
+      session.stopTime = getTimeWithTz();
       session.status = 'Дата получения';
       break;
-    // case STEPS['Отзыв на проверке'].step:
-    //   //session.comment = data;
-    //   //session.stopTime = getTimeWithTz();
-    //   session.step = STEPS['Штрих-код'].step;
-    // //break;
+    case 'Отзыв на проверке':
+      //session.comment = data;
+      session.status = 'Отзыв на проверке';
+      session.stopTime = getTimeWithTz();
+      break;
     // case STEPS.Отзыв.step:
     //   //session.status = 'Отзыв';
     //   //session.stopTime = getTimeWithTz();
     //   session.step = STEPS['Штрих-код'].step;
     // //break;
-    case STEPS['Штрих-код'].step:
+    case 'Штрих-код':
       session.status = 'Штрих-код';
       session.stopTime = getTimeWithTz();
       break;
-    case STEPS.Чек.step:
+    case 'Товар':
+      session.status = 'Товар';
+      session.stopTime = getTimeWithTz();
+      break;
+    case 'Чек':
       session.stopTime = getTimeWithTz();
       session.status = 'Чек';
-      session.isFinish = true;
       break;
+    case 'Цена':
+      session.stopTime = getTimeWithTz();
+      session.status = 'Цена';
+    case 'Финиш':
+      session.stopTime = getTimeWithTz();
+      session.isFinish = true;
     default:
       break;
   }
@@ -249,15 +268,31 @@ export function updateSessionByStep(
     session.lastLoadImage = data;
   }
 
-  if (step !== STEPS['Дата доставки'].step) {
-    session = nextStep(session);
-  }
-
+  // if (step !== STEPS['Дата доставки'].step) {
+  //   session = nextStep(session);
+  // }
   return session;
 }
-export function nextStep(session: ISessionData): ISessionData {
-  const nextCountStep = session.step + 1;
-  session.step = nextCountStep;
+/**
+ * ищем следующий шаг и обновляем поля step и status
+ */
+export function nextStep(
+  session: ISessionData,
+  onlyActive: boolean,
+): ISessionData {
+  let nextNumberStepsAll;
+  if (!onlyActive) {
+    nextNumberStepsAll = Object.values(STEPS).filter((x) => x.step === 0);
+  } else {
+    nextNumberStepsAll = Object.values(STEPS).filter(
+      (x) => x.isActive && x.step === 0,
+    );
+  }
+  //const maxStep = nextNumberStepsAll.length + 1;
+
+  session.status = nextNumberStepsAll[session.step].value as BotStatus;
+  session.step = session.step + 1;
+
   return session;
 }
 
@@ -334,30 +369,27 @@ export const getMessageForTimeOffer = (times: string[]) => {
 };
 
 export function getTextByNextStep(
-  step: number,
+  status: BotStatus,
   startTime: string,
   name: string,
 ): string {
-  switch (step) {
-    case STEPS['Выбор раздачи'].step:
+  switch (status) {
+    case 'Выбор раздачи':
       return FIRST_STEP_LINK;
-    case STEPS['Проблема с артикулом'].step:
-    case STEPS['Артикул правильный'].step:
-      return (
-        FIRST_STEP_LINK +
-        getNumberText(STEPS['Артикул правильный'].step, null, name)
-      );
-    case STEPS.Поиск.step:
-      return FIRST_STEP_A + getNumberText(step, null, name);
-    case STEPS.Корзина.step:
-      return FIRST_STEP_CART + getNumberText(step, null, name);
-    case STEPS.Заказ.step:
-      return FIRST_STEP_C + getNumberText(step, null, name);
-    case STEPS['Дата доставки'].step:
+    case 'Проблема с артикулом':
+    case 'Артикул правильный':
+      return FIRST_STEP_LINK + getNumberText('Артикул правильный', null, name);
+    case 'Поиск':
+      return FIRST_STEP_A + getNumberText('Поиск', null, name);
+    case 'Корзина':
+      return FIRST_STEP_CART + getNumberText('Корзина', null, name);
+    case 'Заказ':
+      return FIRST_STEP_C + getNumberText('Заказ', null, name);
+    case 'Дата доставки':
       return 'Введите ориентировочную дату доставки (в формате 12.12.2024) 🗓️';
-    case STEPS.Получен.step:
-      return SECOND_STEP + getNumberText(step, null, name);
-    case STEPS['Дата получения'].step:
+    case 'Получен':
+      return SECOND_STEP + getNumberText('Получен', null, name);
+    case 'Дата получения':
       return 'Введите дату получения (в формате 12.12.2024) 🗓️';
     // case STEPS['Отзыв на проверке'].step:
     // //return THREE_STEP + getNumberText(step, null, name);
@@ -365,34 +397,32 @@ export function getTextByNextStep(
     // //   return (
     // //     FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B + getNumberText(step, null, name)
     // //   );
-    case STEPS['Штрих-код'].step:
-      return FIVE_STEP + getNumberText(step, null, name);
-    case STEPS.Чек.step:
-      return SIX_STEP + getNumberText(step, null, name);
+    case 'Штрих-код':
+      return FIVE_STEP + getNumberText('Штрих-код', null, name);
+    case 'Товар':
+      return SEVEN_STEP + getNumberText('Товар', null, name);
+    case 'Чек':
+      return SIX_STEP + getNumberText('Чек', null, name);
+    case 'Цена':
+      return 'напишите цену, которую вы заплатили на wildberries за этот товар';
     default:
       return FOOTER;
   }
 }
 
-function getNumberText(step: number, startTime: string, name: string) {
+function getNumberText(statusName: BotStatus, startTime: string, name: string) {
   const textOffer = `\n→ ${name}\n\n`;
   const finish_txt = `До финиша `;
   const minutes = startTime
     ? LIMIT_TIME_IN_MINUTES_FOR_BUY - getDifferenceInMinutes(startTime)
     : null;
   const waitTime = minutes ? `(осталось ${minutes} мин. для заказа)` : '';
-  const stepValues = Object.values(STEPS);
-  for (let i = 0; i < stepValues.length; i++) {
-    if (step === stepValues[i].step) {
-      return (
-        finish_txt +
-        stepValues[i].textStepCount +
-        (stepValues[i].value === 'Заказ' ? ` ${waitTime}\n` : '') +
-        textOffer
-      );
-    }
-  }
-  return '';
+  const step = getNumberStepByStatus(statusName);
+  return (
+    (finish_txt + STEP_TEXT_NUMBER_EMOJI(step) + statusName === 'Заказ'
+      ? ` ${waitTime}\n`
+      : '') + textOffer
+  );
 }
 
 export function getOffer(data: IOffer) {
@@ -620,22 +650,54 @@ export const getArticulErrorStatus = (
   }
 };
 
+export const getNumberStepByStatus = (stepName: BotStatus): number | null => {
+  let filteredSteps;
+  if (Object.values(STEPS).find((x) => x.value === stepName && x.isActive)) {
+    filteredSteps = Object.values(STEPS)
+      .filter((x) => x.step === 0 && x.isActive)
+      .map((x) => x.value);
+  } else {
+    filteredSteps = Object.values(STEPS)
+      .filter((x) => x.step === 0)
+      .map((x) => x.value);
+  }
+  const index = filteredSteps.indexOf(stepName);
+
+  if (index !== -1) {
+    return index + 1;
+  } else {
+    return -1;
+  }
+};
+
+export const checkTypeStepByName = (
+  stepName: BotStatus,
+  type: 'image' | 'text',
+) => {
+  return (
+    type === Object.values(STEPS).find((x) => x.value === stepName).typeStep
+  );
+};
+
 export const getErrorTextByStep = (
-  step: number,
+  statusName: BotStatus,
 ): { error: string; url?: string } | null => {
-  const stepType = Object.values(STEPS).find((x) => x.step === step);
-  if (!stepType) return null;
+  const stepInfo = getStepInfoByNumber(statusName);
+  if (!stepInfo) return null;
   return {
     error:
       STEP_ERROR_TEXT +
-      stepType.erroText +
-      (STEPS[stepType.value]?.image ? STEP_EXAMPLE_TEXT_DOWN : ''),
-    url: STEPS[stepType.value]?.image
-      ? WEB_APP + STEPS[stepType.value]?.image
+      stepInfo.erroText +
+      (STEPS[stepInfo.value]?.image ? STEP_EXAMPLE_TEXT_DOWN : ''),
+    url: STEPS[stepInfo.value]?.image
+      ? WEB_APP + STEPS[stepInfo.value]?.image
       : null,
   };
 };
-
+export const getStepInfoByNumber = (statusName: BotStatus) => {
+  if (!statusName) return null;
+  return Object.values(STEPS).find((x) => x.value === statusName);
+};
 /**
  последняя сессия
  */
@@ -661,9 +723,12 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
   )[0].fields.SessionId;
 };
 
-export const getUserOfferIdsByStatus = (data: IBot[], status = 'Чек') => {
+/**
+ * поиск раздач, у которых поле Финиш отмечено
+ */
+export const getUserOfferIdsIsFinsih = (data: IBot[]) => {
   return data?.map((x) => {
-    if (x.fields.Статус === status) {
+    if (x.fields.Финиш) {
       return x.fields.OfferId[0];
     }
   });
@@ -691,7 +756,7 @@ export const getTextForSubscriber = (info: ChatMember) => {
 export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
-    if (record.fields.Статус === 'Чек') {
+    if (record.fields.Финиш) {
       return (data += `✔️ ${record.fields.Раздача}\n`);
     }
     return data;
@@ -777,12 +842,16 @@ export const getArticulesByUser = (dataBuyer: IBot[]) => {
   try {
     if (!dataBuyer || dataBuyer.length === 0) return null;
     return dataBuyer
-      ?.map((x) => {
-        const status = Object.values(STEPS).find(
-          (item) => item.value === x.fields['Статус'],
-        );
-        if (status.step > 0) return x.fields?.Артикул;
-      })
+      ?.filter(
+        (x) =>
+          x.fields.Статус !== 'Бот удален' &&
+          x.fields.Статус !== 'В боте' &&
+          x.fields.Статус !== 'В ожидании' &&
+          x.fields.Статус !== 'Время истекло' &&
+          x.fields.Статус !== 'Лимит заказов' &&
+          x.fields.Статус !== 'Отмена пользователем',
+      )
+      ?.map((x) => x.fields.Артикул)
       ?.filter((x) => x !== undefined);
   } catch (error) {
     console.log('getArticulesByUser=', error);
