@@ -75,10 +75,7 @@ export class AirtableService {
         Раздача: session.data.title,
         Images: session.images,
         StopTime: getTimeWithTz(),
-        ['Дата получения']: dateFormat(
-          session.deliveryDate,
-          FORMAT_DATE_SIMPLE_NO_TIME,
-        ),
+        ['Дата получения']: session.deliveryDate,
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
         'Ключевые слова':

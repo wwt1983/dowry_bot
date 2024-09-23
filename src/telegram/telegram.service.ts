@@ -563,14 +563,6 @@ export class TelegramService {
       await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
 
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
-
-      if (ctx.session.step === getNumberStepByStatus('Финиш')) {
-        await ctx.react('🎉');
-        await ctx.reply(
-          '💰Напишите данные для перевода вам кешбэка💰.\n' +
-            'Банк, ФИО, телефон.\nНапример, Тинькофф, Балалайкина Лира Рояльевна, 89002716500)\nЖдите поступлений😉',
-        );
-      }
     });
 
     /*======== CALBACK_QUERY (продолжение раздачи через кнопку)=======*/
@@ -725,8 +717,6 @@ export class TelegramService {
           );
         }
 
-        console.log(ctx.session.step, ctx.session.status);
-
         //сохраняем данные по выплатам
         if (
           ctx.session.step === getNumberStepByStatus('Финиш') &&
@@ -838,12 +828,18 @@ export class TelegramService {
             ctx.session.status === 'Дата получения' ||
             ctx.session.status === 'Цена'
           ) {
-            ctx.session.status === 'Дата доставки'
-              ? (ctx.session.deliveryDate = text)
-              : (ctx.session.recivingDate = text);
-
-            if (ctx.session.status === 'Цена') {
-              ctx.session.price = text;
+            switch (ctx.session.status) {
+              case 'Дата доставки':
+                ctx.session.deliveryDate = text;
+                break;
+              case 'Дата получения':
+                ctx.session.recivingDate = text;
+                break;
+              case 'Цена':
+                ctx.session.price = text;
+                break;
+              default:
+                break;
             }
 
             this.bot.api

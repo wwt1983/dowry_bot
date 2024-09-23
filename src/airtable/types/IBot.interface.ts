@@ -72,7 +72,8 @@ export type BotStatus =
   | 'В ожидании'
   | 'Финиш'
   | 'Товар'
-  | 'Цена';
+  | 'Цена'
+  | 'Кэш';
 
 export type BrokeBotStatus =
   | 'locationError'

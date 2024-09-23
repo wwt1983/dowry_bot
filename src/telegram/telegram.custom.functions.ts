@@ -256,9 +256,11 @@ export function updateSessionByStep(
     case 'Цена':
       session.stopTime = getTimeWithTz();
       session.status = 'Цена';
+      session.isFinish = true;
+      break;
     case 'Финиш':
       session.stopTime = getTimeWithTz();
-      session.isFinish = true;
+
     default:
       break;
   }
@@ -404,9 +406,15 @@ export function getTextByNextStep(
     case 'Чек':
       return SIX_STEP + getNumberText('Чек', null, name);
     case 'Цена':
-      return 'напишите цену, которую вы заплатили на wildberries за этот товар';
+      return 'Напишите цену 💰, которую вы заплатили на wildberries за этот товар 👇';
+    case 'Финиш':
+      return (
+        FOOTER +
+        '💰Напишите данные для перевода вам кешбэка💰.\n' +
+        'Банк, ФИО, телефон.\nНапример, Тинькофф, Балалайкина Лира Рояльевна, 89002716500)\nЖдите поступлений😉'
+      );
     default:
-      return FOOTER;
+      return '';
   }
 }
 
