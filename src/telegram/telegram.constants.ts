@@ -172,12 +172,14 @@ export const STEPS = {
     isActive: false,
     typeStep: TYPE_STEP.text,
   }, // отзыв на проверке (text)
-  // Отзыв: {
-  //   step: 11,
-  //   value: 'Отзыв',
-  //   erroText: 'загрузить скриншот отзыва с 5 ⭐️',
-  //   image: '/images/4.jpeg',
-  // }, //отзыв (photo)
+  Отзыв: {
+    step: 0,
+    value: 'Отзыв',
+    erroText: 'загрузить скриншот отзыва с 5 ⭐️',
+    image: '/images/4.jpeg',
+    typeStep: TYPE_STEP.text,
+    isActive: false,
+  }, //отзыв (photo)
   ['Штрих-код']: {
     step: 0,
     value: 'Штрих-код',

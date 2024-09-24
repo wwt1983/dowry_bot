@@ -915,3 +915,13 @@ export const getChatIdFormText = (text: string) => {
     return null;
   }
 };
+/**
+ * метод-заглушка для старых статусов
+ */
+export const getNewNameForOldStatus = (status: BotStatus) => {
+  if (!status) return null;
+  if (status === 'Отзыв на проверке' || status === 'Отзыв') {
+    return 'Штрих-код';
+  }
+  return status;
+};
