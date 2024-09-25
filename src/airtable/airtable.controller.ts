@@ -12,8 +12,13 @@ export class AirtableController {
 
   @Get('offers')
   async offers(): Promise<any> {
-    const result = await this.airtableService.getOffers();
-    return result;
+    try {
+      const result = await this.airtableService.getOffers();
+      return result;
+    } catch (error) {
+      console.log('offers', error);
+      return null;
+    }
   }
 
   @Post('checkPhone')

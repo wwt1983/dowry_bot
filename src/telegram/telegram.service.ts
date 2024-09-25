@@ -303,7 +303,9 @@ export class TelegramService {
         );
       } catch (e) {
         console.log('offers=', e);
-        return await ctx.reply('Раздел обновляется');
+        return await ctx.reply(
+          'Данные обновляются. Попробуйте обновить позже😿',
+        );
       }
     });
     /*======== LOCATION =======*/
@@ -1297,9 +1299,9 @@ export class TelegramService {
             value.notification.fields['Количество попыток']
             ? 'Доставлено'
             : 'Остановлено',
-          value.statistic.fields['Количество отправок'] + 1,
+          value.statistic?.fields['Количество отправок'] + 1,
           botId,
-          value.notification.fields.Id,
+          value.notification?.fields?.Id,
         );
       } else {
         await this.addNotificationStatistic(
@@ -1309,7 +1311,7 @@ export class TelegramService {
             : 'Доставлено',
           1,
           botId,
-          value.notification.fields.Id,
+          value.notification?.fields?.Id,
         );
       }
 

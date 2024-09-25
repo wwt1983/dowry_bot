@@ -67,7 +67,7 @@ export class AirtableService {
         OfferId: session.offerId,
         Статус: session.status,
         Location: session.location,
-        Раздача: session.data.title,
+        Раздача: session.data?.title,
         Images: session.images,
         StopTime: getTimeWithTz(),
         ['Дата получения']: session.deliveryDate,
