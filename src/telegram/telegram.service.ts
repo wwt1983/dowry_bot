@@ -401,6 +401,7 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
+          ctx.session = nextStep(ctx.session, true);
         }
 
         if (!checkTypeStepByName(ctx.session.status, 'image')) {
@@ -613,6 +614,7 @@ export class TelegramService {
             },
           );
         } else {
+          ctx.session = nextStep(ctx.session, true);
           response = await ctx.reply(
             getTextByNextStep(
               ctx.session.status,
@@ -747,8 +749,9 @@ export class TelegramService {
           const lastSession = getLastSession(dataBuyer);
           if (!lastSession)
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
-          //
+
           ctx.session = await this.restoreSession(ctx, lastSession);
+          ctx.session = nextStep(ctx.session, true);
 
           if (!ctx.session.isRestore) {
             const historyButtons = createHistoryKeyboard(dataBuyer, true);
