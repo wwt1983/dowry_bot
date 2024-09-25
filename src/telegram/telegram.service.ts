@@ -209,8 +209,9 @@ export class TelegramService {
         }
         //продолжаем двигаться только если не было заказов с таким артикулом
         if (!existArticleByUser) {
-          ctx.session = nextStep(ctx.session, true);
           await this.updateToAirtable(ctx.session);
+
+          ctx.session = nextStep(ctx.session, true);
           await this.sendMediaByStep(ctx.session.status, ctx);
           await this.bot.api.sendMediaGroup(
             ctx.session.chat_id,
@@ -525,7 +526,6 @@ export class TelegramService {
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
-        ctx.session = nextStep(ctx.session, true);
       } else {
         //TEXT MESSAGE
         if (!ctx.session.chat_id) {
@@ -538,12 +538,11 @@ export class TelegramService {
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
 
           ctx.session = await this.restoreSession(ctx, lastSession);
-        } else {
-          ctx.session = nextStep(ctx.session, true);
         }
       }
 
       await this.updateToAirtable(ctx.session);
+      ctx.session = nextStep(ctx.session, true);
 
       if (ctx.session.step === getNumberStepByStatus('Дата доставки')) {
         ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
@@ -844,9 +843,9 @@ export class TelegramService {
             this.bot.api
               .deleteMessage(ctx.session.chat_id, ctx.session.lastMessage)
               .catch(() => {});
+            await this.updateToAirtable(ctx.session);
 
             ctx.session = nextStep(ctx.session, true);
-            await this.updateToAirtable(ctx.session);
             await this.nextStepHandler(ctx);
 
             return;
@@ -880,8 +879,9 @@ export class TelegramService {
         //первый шаг
         if ('Выбор раздачи' === status && data) {
           const loader = await ctx.reply('⏳');
-          ctx.session = nextStep(ctx.session, true);
           await this.updateToAirtable(ctx.session);
+
+          ctx.session = nextStep(ctx.session, true);
 
           // const wbScreen = await getParseWbInfo(ctx.session.data.articul);
           // let wbUrl: string;
@@ -988,8 +988,9 @@ export class TelegramService {
             );
             ctx.session.step = getNumberStepByStatus('Артикул правильный');
 
-            ctx.session = nextStep(ctx.session, true);
             await this.updateToAirtable(ctx.session);
+
+            ctx.session = nextStep(ctx.session, true);
 
             await this.nextStepHandler(ctx);
             return;
