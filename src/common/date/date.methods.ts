@@ -5,6 +5,7 @@ import {
   differenceInDays,
   isValid,
   format,
+  parse,
 } from 'date-fns';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { time } from 'console';
@@ -136,4 +137,8 @@ export const getOfferTime = (session: ISessionData) => {
       itsTimeOrder: false,
     };
   }
+};
+export const parsedDate = (date: string) => {
+  if (!date) return null;
+  return parse(date, FORMAT_DATE_SIMPLE_NO_TIME, new Date());
 };

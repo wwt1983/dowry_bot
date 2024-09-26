@@ -27,6 +27,7 @@ import {
   TELEGRAM_CHAT_ID_OFFERS,
   MESSAGE_LIMIT_ORDER,
   MESSAGE_WAITING,
+  WAITING_IMAGE,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -91,6 +92,7 @@ import {
   getDateWithTz,
   getTimeWithTz,
   getTimesFromTimesTable,
+  parsedDate,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
@@ -1060,10 +1062,10 @@ export class TelegramService {
   /**
    * обновляем данные в airtable
    */
-
   async updateToAirtable(session: ISessionData): Promise<void> {
     return await this.airtableService.updateToAirtable(session);
   }
+
   async sendErrorMessageByStatus(ctx: MyContext, status: BotStatus) {
     if (ctx.session.status === 'Проблема с артикулом') {
       const response = await ctx.reply(
@@ -1777,9 +1779,13 @@ export class TelegramService {
     articul: string,
     dataForCash: string,
     key: string,
+    price: string,
+    checkWb: string,
+    dateRecived: string,
+    dateBuy: string,
   ) {
     try {
-      console.log('session=', sessionId, images, dataForCash);
+      console.log('session=', sessionId);
 
       let distribustion =
         await this.airtableService.getDistributionByFilterArticulAndNick(
@@ -1796,8 +1802,6 @@ export class TelegramService {
           );
       }
 
-      //console.log('distribustion = ', distribustion);
-
       if (distribustion && distribustion.id) {
         this.airtableService.updateDistribution({
           id: distribustion.id,
@@ -1807,12 +1811,17 @@ export class TelegramService {
           reciveScreen: images[3],
           shtrihCodeScreen: images[4],
           checkScreen: images[5],
-          goodScreen: images[6],
+          goodScreen: images[5],
           chat_id: chat_id,
           articul: articul,
           dataForCash: dataForCash,
           key: key,
+          price: price,
+          checkWb: checkWb,
+          dateRecived: dateRecived,
+          dateBuy: parsedDate(dateBuy),
         });
+
         await this.airtableService.updateStatusTransferInBot(
           'Успешно перенесены',
           sessionId,
@@ -1826,6 +1835,69 @@ export class TelegramService {
       );
     }
   }
+  /**
+   * перенос данных из таблицы Бот в таблицу Раздачи
+   */
+  async signalToTransferBotToDistributions(
+    chat_id: string,
+    articul: string,
+    id: string,
+  ) {
+    let sessionId;
+    try {
+      const userBotData =
+        await this.airtableService.getBotByFilterArticulAndChatId(
+          articul,
+          chat_id,
+        );
+
+      if (userBotData && userBotData?.fields['SessionId']) {
+        sessionId = userBotData?.fields['SessionId'];
+
+        console.log(
+          'Факт дата получения',
+          userBotData.fields['Факт дата получения'],
+          parsedDate(userBotData.fields['Факт дата получения']),
+        );
+
+        await this.airtableService.updateDistribution({
+          id: id,
+          searchScreen: userBotData.fields['Images'][0].url,
+          cartScreen: userBotData.fields['Images'][1].url,
+          orderScreen: userBotData.fields['Images'][2].url,
+          reciveScreen: userBotData.fields['Images']?.[3]?.url || WAITING_IMAGE,
+          shtrihCodeScreen:
+            userBotData.fields['Images']?.[4]?.url || WAITING_IMAGE,
+          checkScreen: userBotData.fields['Images']?.[5].url || WAITING_IMAGE, //устаревшее поле
+          goodScreen: userBotData.fields['Images']?.[5].url || WAITING_IMAGE,
+          chat_id: chat_id,
+          articul: articul,
+          dataForCash: userBotData.fields['Данные для кешбека'],
+          key: userBotData.fields['Ключевое слово'],
+          dateBuy: userBotData.fields['StartTime'],
+          dateRecived: userBotData.fields['Факт дата получения']
+            ? parsedDate(userBotData.fields['Факт дата получения'])
+            : null,
+          price: userBotData.fields['Цена'],
+          checkWb: userBotData.fields['Чек WB'],
+        });
+        await this.airtableService.updateStatusTransferInBot(
+          'Успешно перенесены',
+          sessionId,
+        );
+        console.log('Данные перенесены');
+      }
+    } catch (error) {
+      console.log('transferBotToDistributions', sessionId, error);
+      if (sessionId) {
+        await this.airtableService.updateStatusTransferInBot(
+          'Ошибка переноса',
+          sessionId,
+        );
+      }
+    }
+  }
+
   /**
    * отправка сообщение пользователю в чат из airtable
    */

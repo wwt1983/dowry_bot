@@ -13,6 +13,7 @@ export const TELEGRAM_BOT_URL = 'https://t.me/@DowryWorkBot';
 export const FILE_FROM_BOT_URL = 'https://api.telegram.org/file/bot';
 export const WEB_APP = 'https://dowrybot-front.vercel.app/';
 export const WEB_APP_TEST = 'https://dowrybot-front-test.vercel.app/';
+export const WAITING_IMAGE = WEB_APP + 'images/wait.jpg';
 export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 30;
 export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 60;

@@ -33,6 +33,7 @@ export interface IBot {
     'Факт дата получения': string;
     Цена: string;
     'Чек WB': string;
+    'Данные для кешбека': string;
   };
 }
 interface IPhoto {

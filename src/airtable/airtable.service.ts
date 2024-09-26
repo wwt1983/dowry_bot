@@ -359,6 +359,19 @@ export class AirtableService {
     return data.records[0] as IDistribution;
   }
 
+  async getBotByFilterArticulAndChatId(
+    articul: string,
+    chat_id: string,
+  ): Promise<IBot | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Артикул}="${articul}", {chat_id}="${chat_id}")`,
+    );
+    console.log('data=', data);
+    if (!data || !data.records) return null;
+    return data.records[0] as IBot;
+  }
+
   async getDistributionById(id: string): Promise<IDistribution | null> {
     const data = await this.airtableHttpService.get(
       `${AIRTABLE_URL}/${TablesName.Distributions}/${id}`,

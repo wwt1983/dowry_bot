@@ -131,6 +131,10 @@ export class TelegramController {
       articul: string;
       dataForCash: string;
       key: string;
+      price: string;
+      checkWb: string;
+      dateRecived: string;
+      dateBuy: string;
     },
   ): Promise<void> {
     await this.telegramService.transferBotToDistributions(
@@ -141,6 +145,29 @@ export class TelegramController {
       data.articul,
       data.dataForCash,
       data.key,
+      data.price,
+      data.checkWb,
+      data.dateRecived,
+      data.dateBuy,
     );
+  }
+  /**
+   * при изменении поля chat_id запускается запрос на перенсо данных из бота в таблицу Раздачи
+   */
+  @Post('signalToTransferBotToDistributions')
+  async signalToTransferBotToDistributions(
+    @Body()
+    data: {
+      chat_id: string;
+      articul: string[];
+      id: string;
+    },
+  ) {
+    await this.telegramService.signalToTransferBotToDistributions(
+      data.chat_id,
+      data.articul[0],
+      data.id,
+    );
+    console.log('signalToTransferBotToDistributions', data);
   }
 }
