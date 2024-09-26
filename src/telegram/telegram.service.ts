@@ -1424,10 +1424,11 @@ export class TelegramService {
   /**
    * сохраняем отзыв в базу
    */
-  async saveFeedback(from: User, comment: string) {
+  async saveFeedback(from: User, comment: string, isAnswer?: boolean) {
     await this.airtableService.updateCommentInBotTableAirtable(
       from,
       createCommentForDb(comment),
+      isAnswer,
     );
     return;
   }
@@ -1833,6 +1834,7 @@ export class TelegramService {
     this.saveFeedback(
       { id: chat_id, is_bot: false, username: '', first_name: '' },
       text,
+      true
     );
   }
 }
