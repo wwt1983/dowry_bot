@@ -916,6 +916,6 @@ export const getCorrectStatus = (status: BotStatus) => {
   if (status === 'Отзыв на проверке' || status === 'Отзыв') {
     return 'Штрих-код';
   }
-  if (status === 'Чек неверный') return 'ЧекWb';
+  if (status === 'Чек неверный' || status === 'Чек') return 'ЧекWb';
   return status;
 };
