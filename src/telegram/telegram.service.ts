@@ -1834,7 +1834,7 @@ export class TelegramService {
     this.saveFeedback(
       { id: chat_id, is_bot: false, username: '', first_name: '' },
       text,
-      true
+      true,
     );
   }
 }
