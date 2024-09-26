@@ -1830,10 +1830,10 @@ export class TelegramService {
    * отправка сообщение пользователю в чат из airtable
    */
   async sendMessageToSubscriberFromDb(chat_id: number, text: string) {
-    this.bot.api.sendMessage(chat_id, text);
-    this.saveFeedback(
+    await this.bot.api.sendMessage(chat_id, text);
+    await this.saveFeedback(
       { id: chat_id, is_bot: false, username: '', first_name: '' },
-      text,
+      'Ответ ✅ ' + text,
       true,
     );
   }
