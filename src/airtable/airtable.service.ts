@@ -78,8 +78,9 @@ export class AirtableService {
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': session.recivingDate,
-        'Данные для кешбека': session.dataForCash,
-        Цена: session.price,
+        'Данные для кешбека': session.dataForCash || '',
+        Цена: session.price || '',
+        'Чек WB': session.checkWb || '',
       };
 
       const tableUrl = this.configService.get(

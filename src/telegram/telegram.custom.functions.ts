@@ -33,6 +33,7 @@ import {
   FIRST_STEP_KEY_VALUE,
   STEP_TEXT_NUMBER_EMOJI,
   SEVEN_STEP,
+  SIX_STEP_LINK,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -220,38 +221,21 @@ export function updateSessionByStep(
       session.status = 'Заказ';
       break;
     case 'Дата доставки':
-      session.stopTime = getTimeWithTz();
-      session.status = 'Дата доставки';
-      break;
     case 'Получен':
-      session.stopTime = getTimeWithTz();
-      session.status = 'Получен';
-      break;
     case 'Дата получения':
-      session.stopTime = getTimeWithTz();
-      session.status = 'Дата получения';
-      break;
     case 'Отзыв на проверке':
-      //session.comment = data;
-      session.status = 'Отзыв на проверке';
-      session.stopTime = getTimeWithTz();
-      break;
     // case STEPS.Отзыв.step:
     //   //session.status = 'Отзыв';
     //   //session.stopTime = getTimeWithTz();
     //   session.step = STEPS['Штрих-код'].step;
     // //break;
     case 'Штрих-код':
-      session.status = 'Штрих-код';
-      session.stopTime = getTimeWithTz();
-      break;
     case 'Товар':
-      session.status = 'Товар';
-      session.stopTime = getTimeWithTz();
-      break;
     case 'Чек':
+    case 'ЧекWb':
+    case 'Чек неверный':
       session.stopTime = getTimeWithTz();
-      session.status = 'Чек';
+      session.status = status;
       break;
     case 'Цена':
       session.stopTime = getTimeWithTz();
@@ -403,6 +387,9 @@ export function getTextByNextStep(
       return FIVE_STEP + getNumberText('Штрих-код', null, name);
     case 'Товар':
       return SEVEN_STEP + getNumberText('Товар', null, name);
+    case 'Чек неверный':
+    case 'ЧекWb':
+      return SIX_STEP_LINK + getNumberText('ЧекWb', null, name);
     case 'Чек':
       return SIX_STEP + getNumberText('Чек', null, name);
     case 'Цена':
@@ -471,6 +458,12 @@ export const parseUrl = (url: string, articul: string): boolean => {
 
   if (!url) return false;
   return url.indexOf(articul.trim()) > 0;
+};
+
+export const parseCheckUrl = (url: string): boolean => {
+  if (!url) return false;
+  if (url.includes('https://receipt.wb.ru/')) return true;
+  return false;
 };
 
 export const locationCheck = (
@@ -916,12 +909,13 @@ export const getChatIdFormText = (text: string) => {
   }
 };
 /**
- * метод-заглушка для старых статусов
+ * метод-заглушка для старых статусов или статусов с ошибками
  */
-export const getNewNameForOldStatus = (status: BotStatus) => {
+export const getCorrectStatus = (status: BotStatus) => {
   if (!status) return null;
   if (status === 'Отзыв на проверке' || status === 'Отзыв') {
     return 'Штрих-код';
   }
+  if (status === 'Чек неверный') return 'ЧекWb';
   return status;
 };

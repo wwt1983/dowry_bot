@@ -38,8 +38,8 @@ export interface ISessionData {
   location?: string;
   countTryError?: number; //количество попыток сделать какое-то действие
   errorStatus?: BrokeBotStatus;
-  deliveryDate: string;
-  recivingDate: string;
+  deliveryDate?: string;
+  recivingDate?: string;
   conversation?: any;
   lastCommand?: COMMAND_NAMES;
   times?: string[];
@@ -47,7 +47,8 @@ export interface ISessionData {
   itsSubscriber?: boolean;
   userArticules?: string[];
   dataForCash?: string; //fio bank phone
-  price: string;
+  price?: string;
+  checkWb?: string;
 }
 
 export type MyContext = HydrateFlavor<

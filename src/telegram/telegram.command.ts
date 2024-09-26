@@ -71,12 +71,6 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       record.fields.Статус !== 'Отмена пользователем' &&
       record.fields.Статус !== 'В ожидании' &&
       !record.fields['Снять с раздачи']
-      //record.fields.Статус !== 'Проблема с артикулом' &&
-      //record.fields.Статус !== 'Поиск' &&
-      //record.fields.Статус !== 'Артикул правильный' &&
-      //record.fields.Статус !== 'Проблема с артикулом'
-      //record.fields.Статус !== 'Выбор раздачи' &&
-      //record.fields.Статус !== 'Вызов'
     ) {
       newArr.push([
         record.fields.Раздача,

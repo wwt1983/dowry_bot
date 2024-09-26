@@ -32,6 +32,7 @@ export interface IBot {
     //'Дата публикации отзыва': string;
     'Факт дата получения': string;
     Цена: string;
+    'Чек WB': string;
   };
 }
 interface IPhoto {
@@ -73,7 +74,9 @@ export type BotStatus =
   | 'Финиш'
   | 'Товар'
   | 'Цена'
-  | 'Кэш';
+  | 'Кэш'
+  | 'Чек неверный'
+  | 'ЧекWb';
 
 export type BrokeBotStatus =
   | 'locationError'

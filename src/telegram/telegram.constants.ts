@@ -193,9 +193,17 @@ export const STEPS = {
     value: 'Чек',
     erroText: 'загрузить скриншот чека',
     image: '/images/6.jpeg',
-    isActive: true,
+    isActive: false,
     typeStep: TYPE_STEP.image,
-  }, //чек
+  }, //чек link wb
+  ЧекWb: {
+    step: 0,
+    value: 'ЧекWb',
+    erroText: 'загрузить ссылку на чек из личного кабинета wildberries',
+    image: '/images/13.jpeg',
+    isActive: true,
+    typeStep: TYPE_STEP.text,
+  }, //чек link wb
   Товар: {
     step: 0,
     value: 'Товар',
@@ -270,6 +278,14 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
   },
+  'Чек неверный': {
+    step: -8,
+    value: 'Чек неверный',
+    erroText: 'ввести правильную ссылку на чек из wildberries',
+    image: '/images/13.jpeg',
+    isActive: true,
+    typeStep: TYPE_STEP.text,
+  }, //
 };
 
 export const COUNT_STEPS = Object.values(STEPS).filter(
@@ -314,6 +330,8 @@ export const FIVE_STEP =
   '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих-кода УПАКОВКИ И БИРКИ \n';
 export const SIX_STEP =
   '7️⃣ ЗАГРУЗИТЕ\n' + '✔️Чек покупки из личного кабинета ВБ\n';
+export const SIX_STEP_LINK =
+  '7️⃣ ЗАГРУЗИТЕ\n' + '✔️Ссылку на чек покупки из личного кабинета ВБ\n';
 export const SEVEN_STEP = '8️⃣ ЗАГРУЗИТЕ\n' + '✔️Фото товара\n';
 export const FOOTER =
   '💰НА 15-17 ДЕНЬ ПОСЛЕ получения товара с ПВЗ получите кешбэк на карту Сбербанк или Тинькофф\n' +
@@ -370,12 +388,12 @@ export const IMAGES_STEP_FOR_HELP = [
   {
     type: STEPS['Штрих-код'].value,
     url: WEB_APP + '/images/5.jpeg',
-    text: SIX_STEP,
+    text: SIX_STEP_LINK,
   },
 
   {
     type: STEPS.Финиш.value,
-    url: WEB_APP + '/images/6.jpeg',
+    url: WEB_APP + '/images/13.jpeg',
     text: SEVEN_STEP,
   },
   {

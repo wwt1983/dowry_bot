@@ -63,7 +63,8 @@ import {
   getChatIdFormText,
   getNumberStepByStatus,
   checkTypeStepByName,
-  getNewNameForOldStatus,
+  getCorrectStatus,
+  parseCheckUrl,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -148,7 +149,7 @@ export class TelegramService {
         id?.toString(),
         userValue.userName || userValue.fio,
       );
-      const userHistory = await this.getUserHistory(ctx.from, true, true);
+      const userHistory = await this.getUserHistory(ctx.from, true);
 
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
@@ -241,7 +242,7 @@ export class TelegramService {
         ctx.session.lastCommand = COMMAND_NAMES.history;
 
         const { id } = ctx.from;
-        const userInfo = await this.getUserHistory(ctx.from, false, true);
+        const userInfo = await this.getUserHistory(ctx.from, false);
 
         await ctx.api.sendMessage(
           id,
@@ -407,15 +408,7 @@ export class TelegramService {
         }
 
         if (!checkTypeStepByName(ctx.session.status, 'image')) {
-          await ctx.api.sendMessage(
-            ctx.from.id,
-            getErrorTextByStep(ctx.session.status)?.error || '⤵️',
-            {
-              link_preview_options: {
-                is_disabled: true,
-              },
-            },
-          );
+          await this.sendErrorMessageByStatus(ctx, ctx.session.status);
           return;
         }
 
@@ -601,19 +594,13 @@ export class TelegramService {
           createMediaForArticul() as any,
         );
       } else {
-        if (ctx.session.status === 'Проблема с артикулом') {
-          response = await ctx.api.sendMessage(
-            ctx.session.chat_id,
-            getTextByNextStep(
-              ctx.session.status,
-              ctx.session.startTime,
-              ctx.session.data.title,
-            ),
-            {
-              link_preview_options: {
-                is_disabled: true,
-              },
-            },
+        if (
+          ctx.session.status === 'Проблема с артикулом' ||
+          ctx.session.status === 'Чек неверный'
+        ) {
+          response = await this.sendErrorMessageByStatus(
+            ctx,
+            ctx.session.status,
           );
         } else {
           ctx.session = nextStep(ctx.session, true);
@@ -768,7 +755,7 @@ export class TelegramService {
 
         let data: ITelegramWebApp = null;
 
-        //ответ от веб-интерфейса с выбором раздачи
+        //ответ от веб с выбором раздачи
         if (ctx.msg?.text?.includes('query_id')) {
           const { id } = ctx.from;
           const userValue = getUserName(ctx.from);
@@ -792,7 +779,7 @@ export class TelegramService {
 
           console.log('==== WEB API ====', data, ctx.session);
 
-          const userHistory = await this.getUserHistory(ctx.from, true, true);
+          const userHistory = await this.getUserHistory(ctx.from, true);
           ctx.session.userArticules = userHistory?.userArticules;
 
           ctx.session = updateSessionByField(ctx.session, 'data', data);
@@ -854,12 +841,13 @@ export class TelegramService {
 
             ctx.session = nextStep(ctx.session, true);
             await this.nextStepHandler(ctx);
-
             return;
           }
 
           if (
             ctx.session.status !== 'Проблема с артикулом' &&
+            ctx.session.status !== 'ЧекWb' &&
+            ctx.session.status !== 'Чек неверный' &&
             checkTypeStepByName(ctx.session.status, 'text')
           ) {
             ctx.session = nextStep(ctx.session, true);
@@ -867,16 +855,7 @@ export class TelegramService {
 
           const { status } = ctx.session;
           if (status && !checkTypeStepByName(ctx.session.status, 'text')) {
-            await ctx.api.sendMessage(
-              ctx.from.id,
-              getErrorTextByStep(status).error || '⤵️',
-              {
-                link_preview_options: {
-                  is_disabled: true,
-                },
-              },
-            );
-            await this.sendMediaByStep(status, ctx);
+            await this.sendErrorMessageByStatus(ctx, status);
             return;
           }
         }
@@ -968,18 +947,7 @@ export class TelegramService {
               }
             }
 
-            await ctx.reply(
-              getTextForArticulError(
-                ctx.session.data.positionOnWB,
-                ctx.session.countTryError,
-                ctx.session.errorStatus,
-                ctx.session.data.filter,
-              ),
-              getArticulCommand(
-                ctx.session.countTryError,
-                ctx.session.errorStatus,
-              ),
-            );
+            await this.sendErrorMessageByStatus(ctx, ctx.session.status);
 
             ctx.session.errorStatus = getArticulErrorStatus(
               ctx.session.errorStatus,
@@ -996,13 +964,38 @@ export class TelegramService {
             ctx.session.step = getNumberStepByStatus('Артикул правильный');
 
             await this.updateToAirtable(ctx.session);
-
             ctx.session = nextStep(ctx.session, true);
-
             await this.nextStepHandler(ctx);
             return;
           }
         } //конец проверки артикула
+
+        //проверка ссылки чека
+        if ('ЧекWb' === status || 'Чек неверный' === status) {
+          ctx.session = updateSessionByField(
+            ctx.session,
+            'stopTime',
+            getTimeWithTz(),
+          );
+          if (!parseCheckUrl(text)) {
+            ctx.session = updateSessionByField(
+              ctx.session,
+              'status',
+              'Чек неверный',
+            );
+
+            await this.updateToAirtable(ctx.session);
+            return await this.sendErrorMessageByStatus(ctx, ctx.session.status);
+          } else {
+            ctx.session = updateSessionByField(ctx.session, 'status', 'ЧекWb');
+            ctx.session.step = getNumberStepByStatus('ЧекWb');
+
+            await this.updateToAirtable(ctx.session);
+            ctx.session = nextStep(ctx.session, true);
+            await this.nextStepHandler(ctx);
+            return;
+          }
+        } //конец проверки ссылки чека
       } catch (e) {
         console.log(e);
       }
@@ -1071,8 +1064,35 @@ export class TelegramService {
   async updateToAirtable(session: ISessionData): Promise<void> {
     return await this.airtableService.updateToAirtable(session);
   }
-
-  async nextStepHandler(ctx: MyContext): Promise<void> {
+  async sendErrorMessageByStatus(ctx: MyContext, status: BotStatus) {
+    if (ctx.session.status === 'Проблема с артикулом') {
+      const response = await ctx.reply(
+        getTextForArticulError(
+          ctx.session.data.positionOnWB,
+          ctx.session.countTryError,
+          ctx.session.errorStatus,
+          ctx.session.data.filter,
+        ),
+        getArticulCommand(ctx.session.countTryError, ctx.session.errorStatus),
+      );
+      return response;
+    }
+    await ctx.api.sendMessage(
+      ctx.from.id,
+      getErrorTextByStep(status).error || '⤵️',
+      {
+        link_preview_options: {
+          is_disabled: true,
+        },
+      },
+    );
+    const response = await this.sendMediaByStep(status, ctx);
+    return response;
+  }
+  async nextStepHandler(
+    ctx: MyContext,
+    showKeyboard: boolean = true,
+  ): Promise<void> {
     try {
       await ctx.reply(
         getTextByNextStep(
@@ -1080,9 +1100,15 @@ export class TelegramService {
           ctx.session.startTime,
           ctx.session.data.title,
         ),
+        {
+          parse_mode: 'HTML',
+          link_preview_options: { is_disabled: true },
+        },
       );
       await this.sendMediaByStep(ctx.session.status, ctx);
-      await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
+      if (showKeyboard) {
+        await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
+      }
     } catch (error) {
       console.log('nextStepHandler', error);
     }
@@ -1461,13 +1487,14 @@ export class TelegramService {
         startTime: dateFormat(StartTime, FORMAT_DATE),
         stopBuyTime: dateFormat(data[0].fields['Время выкупа'], FORMAT_DATE),
         stopTime: dateFormat(StopTime, FORMAT_DATE),
-        step: getNumberStepByStatus(getNewNameForOldStatus(Статус)),
+        step: getNumberStepByStatus(getCorrectStatus(Статус)),
         images: Images?.map((x) => x.url),
         offerId: OfferId[0],
-        status: getNewNameForOldStatus(Статус),
+        status: getCorrectStatus(Статус),
         deliveryDate: data[0]?.fields['Дата получения'],
         recivingDate: data[0]?.fields['Факт дата получения'],
         isRestore: true,
+        checkWb: data[0]?.fields?.['Чек WB'],
         price: data[0].fields?.Цена,
       };
 
@@ -1488,7 +1515,6 @@ export class TelegramService {
       if (Статус === 'Проблема с артикулом') {
         session.errorStatus = 'check_articul';
       } else {
-        //session = nextStep(session, true);
         // с поиска начинаются прикрепляться картинки
         if (
           getNumberStepByStatus(Статус) < 0 ||
@@ -1512,27 +1538,13 @@ export class TelegramService {
     }
   }
   //full - берем данные из таблицы Раздачи и Бот
-  async getUserHistory(from: User, web?: boolean, full?: boolean) {
+  async getUserHistory(from: User, web?: boolean) {
     const { id } = from;
     const dataBuyer = await this.airtableService.getBotForContinue(
       id.toString(),
     );
-    const name = getUserName(from);
     const sum = 0;
     const offersFromDistributions = '';
-    if (full && (name.fio || name.userName)) {
-      //if (name.userName === 'val_tom') name.userName = 'OxanaWeber';
-      // const dataDistributions =
-      //   await this.airtableService.getDistributionTableByNick(
-      //     name.userName || name.fio,
-      //   );
-      // const filterDistributions = getFilterDistribution(
-      //   dataDistributions,
-      //   dataBuyer,
-      // );
-      //sum = filterDistributions?.sum;
-      //offersFromDistributions = filterDistributions.offers;
-    }
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
     let member: ChatMember;
     try {
@@ -1812,5 +1824,15 @@ export class TelegramService {
         sessionId,
       );
     }
+  }
+  /**
+   * отправка сообщение пользователю в чат из airtable
+   */
+  async sendMessageToSubscriberFromDb(chat_id: number, text: string) {
+    this.bot.api.sendMessage(chat_id, text);
+    this.saveFeedback(
+      { id: chat_id, is_bot: false, username: '', first_name: '' },
+      text,
+    );
   }
 }

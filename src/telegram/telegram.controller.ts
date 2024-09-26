@@ -40,8 +40,8 @@ export class TelegramController {
 
   @Post('subscriber')
   subscriber(@Body() subscribeDto: SubscribeDto): void {
-    this.telegramService.bot.api.sendMessage(
-      subscribeDto.chat_id,
+    this.telegramService.sendMessageToSubscriberFromDb(
+      +subscribeDto.chat_id,
       subscribeDto.text,
     );
   }
