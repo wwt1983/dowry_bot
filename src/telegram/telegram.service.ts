@@ -1785,41 +1785,33 @@ export class TelegramService {
     dateBuy: string,
   ) {
     try {
-      console.log('session=', sessionId);
+      console.log('session=', sessionId, key);
 
-      let distribustion =
+      const distribustion =
         await this.airtableService.getDistributionByFilterArticulAndNick(
           articul,
-          userName,
+          null,
+          chat_id,
         );
 
-      if (!distribustion) {
-        distribustion =
-          await this.airtableService.getDistributionByFilterArticulAndNick(
-            articul,
-            null,
-            chat_id,
-          );
-      }
-
       if (distribustion && distribustion.id) {
-        this.airtableService.updateDistribution({
+        await this.airtableService.updateDistribution({
           id: distribustion.id,
           searchScreen: images[0],
           cartScreen: images[1],
           orderScreen: images[2],
           reciveScreen: images[3],
-          shtrihCodeScreen: images[4],
-          checkScreen: images[5],
-          goodScreen: images[5],
+          shtrihCodeScreen: images[4] || WAITING_IMAGE,
+          checkScreen: images[5] || WAITING_IMAGE,
+          goodScreen: images[5] || WAITING_IMAGE,
           chat_id: chat_id,
           articul: articul,
           dataForCash: dataForCash,
           key: key,
           price: price,
           checkWb: checkWb,
-          dateRecived: dateRecived,
-          dateBuy: parsedDate(dateBuy),
+          dateRecived: dateRecived ? parsedDate(dateRecived) : null,
+          dateBuy: dateBuy,
         });
 
         await this.airtableService.updateStatusTransferInBot(
