@@ -59,6 +59,21 @@ export const userMenu = new InlineKeyboard().text('История раздач',
 export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
   if (!data || data.length === 0) return [];
   const txtForDel = isUserStop ? '_del' : '';
+  if (isUserStop) {
+    return data?.reduce(function (newArr, record) {
+      if (
+        record.fields.Статус == 'Выбор раздачи' ||
+        record.fields.Статус == 'Корзина' ||
+        record.fields.Статус == 'Поиск'
+      ) {
+        newArr.push([
+          record.fields.Раздача,
+          'sessionId_' + record.fields.SessionId + txtForDel,
+        ]);
+      }
+      return newArr;
+    }, []);
+  }
   return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
