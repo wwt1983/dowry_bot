@@ -44,6 +44,7 @@ export interface ISessionData {
   lastCommand?: COMMAND_NAMES;
   times?: string[];
   isRestore: boolean;
+  realStatus?: BotStatus; // для восттановленных отрицательных статусов чтобы понимать двигаться можно дальше или оставаться на этом шаге
   itsSubscriber?: boolean;
   userArticules?: string[];
   dataForCash?: string; //fio bank phone

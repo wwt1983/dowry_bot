@@ -605,6 +605,7 @@ export class TelegramService {
       }
 
       ctx.session = await this.restoreSession(ctx, sessionId);
+
       if (!ctx?.session?.status) {
         this.bot.api
           .deleteMessage(ctx.from.id, ctx.callbackQuery.message.message_id)
@@ -625,8 +626,8 @@ export class TelegramService {
         );
       } else {
         if (
-          ctx.session.status === 'Проблема с артикулом' ||
-          ctx.session.status === 'Чек неверный'
+          ctx.session.realStatus === 'Проблема с артикулом' ||
+          ctx.session.realStatus === 'Чек неверный'
         ) {
           response = await this.sendErrorMessageByStatus(
             ctx,
@@ -641,8 +642,9 @@ export class TelegramService {
               ctx.session.data.title,
             ),
           );
+          await this.sendMediaByStep(ctx.session.status, ctx);
         }
-        await this.sendMediaByStep(ctx.session.status, ctx);
+
         await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
       }
 
@@ -1020,7 +1022,7 @@ export class TelegramService {
           } else {
             ctx.session = updateSessionByField(ctx.session, 'status', 'ЧекWb');
             ctx.session.step = getNumberStepByStatus('ЧекWb');
-
+            ctx.session.checkWb = text;
             await this.updateToAirtable(ctx.session);
             ctx.session = nextStep(ctx.session, true);
             await this.nextStepHandler(ctx);
@@ -1526,8 +1528,10 @@ export class TelegramService {
         deliveryDate: data[0]?.fields['Дата получения'],
         recivingDate: data[0]?.fields['Факт дата получения'],
         isRestore: true,
+        realStatus: Статус,
         checkWb: data[0]?.fields?.['Чек WB'],
-        price: data[0].fields?.Цена,
+        price: data[0]?.fields?.Цена,
+        dataForCash: data[0]?.fields['Данные для кешбека'],
       };
 
       let session = createContinueSessionData(

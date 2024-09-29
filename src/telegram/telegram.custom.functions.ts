@@ -140,6 +140,8 @@ export function createInitialSessionData(
     userArticules: null,
     dataForCash: null,
     price: null,
+    realStatus: null,
+    checkWb: null,
   };
 }
 
@@ -180,6 +182,9 @@ export function createContinueSessionData(
     countTryError: 0,
     isRestore: true,
     price: data.price,
+    realStatus: data.realStatus,
+    checkWb: data.checkWb,
+    dataForCash: data.dataForCash,
   };
 }
 export function updateSessionByField(
