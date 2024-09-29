@@ -564,6 +564,17 @@ export class TelegramService {
         }
       }
 
+      const checkOnGoNext = await this.canGoNext(
+        ctx.session.sessionId,
+        ctx.session.status,
+      );
+      if (!checkOnGoNext) {
+        await ctx.reply(
+          `❌${STOP_TEXT}. Время истекло.❌\nВыберите раздачу снова и постарайтесь оформить быстрее 😉`,
+        );
+        return await this.getKeyboardHistoryWithWeb(ctx.from.id);
+      }
+
       await this.updateToAirtable(ctx.session);
       ctx.session = nextStep(ctx.session, true);
 
@@ -657,7 +668,7 @@ export class TelegramService {
     this.bot.on('message', async (ctx) => {
       try {
         if (ctx.session.errorStatus === 'locationError')
-          return ctx.reply(STOP_TEXT);
+          return ctx.reply(`❌${STOP_TEXT} ${ctx.session.status}❌`);
 
         //REPLAY сообщения из служебного чата
         if (
@@ -927,6 +938,17 @@ export class TelegramService {
           'Артикул правильный' === status ||
           'Проблема с артикулом' === status
         ) {
+          const checkOnGoNext = await this.canGoNext(
+            ctx.session.sessionId,
+            ctx.session.status,
+          );
+          if (!checkOnGoNext) {
+            await ctx.reply(
+              `❌${STOP_TEXT}. Время истекло.❌\nВыберите раздачу снова и постарайтесь оформить быстрее 😉`,
+            );
+            return await this.getKeyboardHistoryWithWeb(ctx.from.id);
+          }
+
           ctx.session = updateSessionByField(
             ctx.session,
             'stopTime',
@@ -1970,5 +1992,20 @@ export class TelegramService {
     } catch (error) {
       console.log('clearInstruction', error);
     }
+  }
+  /**
+   * Проверяем можем ли мы двигаться дальше (проверяем тстаус из базы на время истекло , если статуст до Заказа)
+   */
+  async canGoNext(sessionId: string, status: BotStatus): Promise<boolean> {
+    if (!sessionId) return false;
+    if (
+      getNumberStepByStatus(getCorrectStatus(status)) >=
+      getNumberStepByStatus('Заказ')
+    )
+      return true;
+    const statusFromDb =
+      await this.airtableService.getBotStatusByUser(sessionId);
+    if (statusFromDb === 'Время истекло') return false;
+    return true;
   }
 }

@@ -170,9 +170,11 @@ export class AirtableService {
     return response;
   }
 
-  async getUserFromBot(sessionId: string): Promise<any> {
+  async getBotStatusByUser(sessionId: string): Promise<BotStatus | null> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
-    return await this.airtableHttpService.get(TablesName.Bot, filter);
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return (data.records[0] as IBot).fields['Статус'];
   }
   async getCommetByChatId(chat_id: string | number): Promise<IBotComments> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${chat_id}",{chat_id})`;
