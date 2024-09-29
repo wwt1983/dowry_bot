@@ -66,6 +66,8 @@ import {
   checkTypeStepByName,
   getCorrectStatus,
   parseCheckUrl,
+  getTimeoutArticles,
+  getTextForHistoryOrders,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -267,13 +269,14 @@ export class TelegramService {
             link_preview_options: { is_disabled: true },
           },
         );
-
         await ctx.reply(
           userInfo.orderButtons
             ? 'Продолжите ⤵️'
-            : !userInfo || userInfo.sum === 0
-              ? 'Вы пока ничего не купили 😢'
-              : 'Все раздачи завершены ✌️',
+            : getTextForHistoryOrders(
+                userInfo?.sum || 0,
+                userInfo?.timeoutArticles,
+              ),
+
           {
             reply_markup: userInfo.orderButtons,
           },
@@ -602,11 +605,14 @@ export class TelegramService {
       }
 
       ctx.session = await this.restoreSession(ctx, sessionId);
-
-      if (!ctx.session?.status) return;
+      if (!ctx?.session?.status) {
+        this.bot.api
+          .deleteMessage(ctx.from.id, ctx.callbackQuery.message.message_id)
+          .catch(() => {});
+        return;
+      }
 
       let response = null;
-
       if (ctx.session.status === 'Выбор раздачи') {
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
@@ -641,6 +647,7 @@ export class TelegramService {
       }
 
       ctx.session.lastMessage = response.message_id;
+
       await ctx.answerCallbackQuery();
     });
 
@@ -1542,18 +1549,22 @@ export class TelegramService {
       } else {
         // с поиска начинаются прикрепляться картинки
         if (
-          getNumberStepByStatus(Статус) < 0 ||
-          (getNumberStepByStatus(Статус) > getNumberStepByStatus('Поиск') &&
+          getNumberStepByStatus(session.status) < 0 ||
+          (getNumberStepByStatus(session.status) >
+            getNumberStepByStatus('Поиск') &&
             (!Images || Images.length === 0))
         ) {
-          await this.getKeyboardHistoryWithWeb(id);
+          const timeOutOrders = getTimeoutArticles(data);
+          if (timeOutOrders) {
+            await ctx.reply(timeOutOrders);
+          }
           return;
         }
       }
-
       return session;
     } catch (error) {
       console.log(error, sessionId);
+      return null;
     }
   }
 
@@ -1603,6 +1614,7 @@ export class TelegramService {
         subscribe: subscribe.text,
         itsSubscriber: subscribe.status,
         userArticules: getArticulesByUser(dataBuyer),
+        timeoutArticles: getTimeoutArticles(dataBuyer),
       };
     }
 
@@ -1623,6 +1635,7 @@ export class TelegramService {
       subscribe: subscribe.text,
       itsSubscriber: subscribe.status,
       userArticules: getArticulesByUser(dataBuyer),
+      timeoutArticles: getTimeoutArticles(dataBuyer),
     };
   }
 

@@ -919,3 +919,32 @@ export const getCorrectStatus = (status: BotStatus) => {
   if (status === 'Чек неверный' || status === 'Чек') return 'ЧекWb';
   return status;
 };
+
+/**
+ * раздачи со статусом 'Время истекло'
+ */
+export const getTimeoutArticles = (data: IBot[]) => {
+  try {
+    if (!data || !data?.length) return null;
+    const result = data
+      .filter((x) => x.fields.Статус === 'Время истекло')
+      ?.map((x) => '😿' + x.fields.Раздача)
+      ?.join('\n\n');
+    if (result) return '👉Ваши устаревшие раздачи.\n' + result;
+    return result;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * информацинный текст для истории покупок
+ */
+export const getTextForHistoryOrders = (
+  sum: number,
+  timeOutOrders?: string,
+) => {
+  if (sum === 0 && !timeOutOrders) return 'Вы пока ничего не купили 😢';
+  if (sum > 0 && !timeOutOrders) return 'Все раздачи завершены ✌️';
+  return timeOutOrders;
+};
