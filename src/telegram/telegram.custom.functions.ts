@@ -462,7 +462,7 @@ export const parseUrl = (url: string, articul: string): boolean => {
 
 export const parseCheckUrl = (url: string): boolean => {
   if (!url) return false;
-  if (url.includes('https://receipt.wb.ru/')) return true;
+  if (url.includes('receipt.wb')) return true;
   return false;
 };
 

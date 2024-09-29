@@ -122,10 +122,10 @@ const checkSearch = (data: string, text: string): ResponseParse => {
   }
 };
 
-/* проверка фото чека */
+/* проверка ссылки чека */
 const checkCheck = (data: string, text: string): ResponseParse => {
   try {
-    const count = (text.match(/receipt.wb.ru/g) || []).length;
+    const count = (text.match(/receipt/g) || []).length;
     if (count > 0) {
       const re = new RegExp(data, 'gi');
       return {
