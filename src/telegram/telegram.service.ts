@@ -534,14 +534,17 @@ export class TelegramService {
     /*======== NEXT =======*/
     this.bot.callbackQuery('next', async (ctx) => {
       //IMAGE
+      let firebaseUrl: string;
+
       if (checkTypeStepByName(ctx.session.status, 'image')) {
         if (!ctx.session.lastMessage) {
           return;
         }
+
         ctx.session.lastMessage = null;
         const statusMessage = await ctx.reply('⏳');
 
-        const firebaseUrl = await this.firebaseService.uploadImageAsync(
+        firebaseUrl = await this.firebaseService.uploadImageAsync(
           ctx.session.lastLoadImage,
         );
 
@@ -573,6 +576,13 @@ export class TelegramService {
           `❌${STOP_TEXT}. Время истекло.❌\nВыберите раздачу снова и постарайтесь оформить быстрее 😉`,
         );
         return await this.getKeyboardHistoryWithWeb(ctx.from.id);
+      }
+
+      //пока проверки фото нет -- картинка чека всегда будет верной
+      if (ctx.session.status === 'Чек неверный') {
+        ctx.session.status = 'ЧекWb';
+        ctx.session.step = getNumberStepByStatus('ЧекWb');
+        ctx.session.checkWb = firebaseUrl;
       }
 
       await this.updateToAirtable(ctx.session);
@@ -1052,7 +1062,7 @@ export class TelegramService {
           }
         } //конец проверки ссылки чека
       } catch (e) {
-        console.log(e);
+        console.log('message=', e);
       }
     });
     this.bot.catch((err) => {

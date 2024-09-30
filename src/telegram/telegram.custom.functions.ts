@@ -238,6 +238,7 @@ export function updateSessionByStep(
     case 'Товар':
     case 'Чек':
     case 'ЧекWb':
+      session.checkWb = data;
     case 'Чек неверный':
       session.stopTime = getTimeWithTz();
       session.status = status;
@@ -254,7 +255,7 @@ export function updateSessionByStep(
       break;
   }
 
-  if (isPhotoMsg) {
+  if (isPhotoMsg && session.status !== 'ЧекWb') {
     session.images = !session.images ? [data] : [...session.images, data];
     session.lastLoadImage = data;
   }
@@ -680,9 +681,9 @@ export const checkTypeStepByName = (
   stepName: BotStatus,
   type: 'image' | 'text',
 ) => {
-  return (
-    type === Object.values(STEPS).find((x) => x.value === stepName).typeStep
-  );
+  return Object.values(STEPS)
+    .find((x) => x.value === stepName)
+    .typeStep.includes(type);
 };
 
 export const getErrorTextByStep = (
