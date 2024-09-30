@@ -1862,6 +1862,11 @@ export class TelegramService {
     try {
       console.log('session=', sessionId, key);
 
+      if (!sessionId) {
+        console.log('transferBotToDistributions session=', sessionId);
+        return;
+      }
+
       const distribustion =
         await this.airtableService.getDistributionByFilterArticulAndNick(
           articul,
@@ -1891,6 +1896,11 @@ export class TelegramService {
 
         await this.airtableService.updateStatusTransferInBot(
           'Успешно перенесены',
+          sessionId,
+        );
+      } else {
+        await this.airtableService.updateStatusTransferInBot(
+          'Ошибка переноса',
           sessionId,
         );
       }
