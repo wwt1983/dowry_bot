@@ -81,6 +81,12 @@ export class AirtableService {
         'Данные для кешбека': session.dataForCash || '',
         Цена: session.price || '',
         'Чек WB': session.checkWb || '',
+        'Поиск скрин': session?.imgSearch || '',
+        'Корзина скрин': session?.imgCart || '',
+        'Заказ скрин': session?.imgOrder || '',
+        'Получен скрин': session?.imgRecieved || '',
+        'Штрих-код скрин': session?.imgShtrihCode || '',
+        'Товар скрин': session?.imgGood || '',
       };
 
       const tableUrl = this.configService.get(
@@ -90,7 +96,7 @@ export class AirtableService {
         tableUrl,
         data,
       );
-      console.log('postWebhook update updateToAirtable ok===>', response);
+      console.log('postWebhook update updateToAirtable ok===> ', response);
       return response;
     } catch (e) {
       console.log('error updateToAirtable=', session, e);

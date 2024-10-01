@@ -34,6 +34,12 @@ export interface IBot {
     Цена: string;
     'Чек WB': string;
     'Данные для кешбека': string;
+    'Поиск скрин': string;
+    'Корзина скрин': string;
+    'Заказ скрин': string;
+    'Получен скрин': string;
+    'Штрих-код скрин': string;
+    'Товар скрин': string;
   };
 }
 interface IPhoto {

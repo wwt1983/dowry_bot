@@ -51,6 +51,12 @@ export interface ISessionData {
   price?: string;
   checkWb?: string;
   instructionMessages?: number[];
+  imgSearch?: string; // поиск
+  imgCart?: string; // корзина
+  imgOrder?: string; // заказ
+  imgRecieved?: string; // получен
+  imgShtrihCode?: string; // штрих-код
+  imgGood?: string; //товар
 }
 
 export type MyContext = HydrateFlavor<

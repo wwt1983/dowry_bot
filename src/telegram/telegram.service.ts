@@ -496,9 +496,10 @@ export class TelegramService {
 
         ctx.session = await this.restoreSession(ctx, lastSession);
       }
+      await this.updateToAirtable(ctx.session);
+
       ctx.session = nextStep(ctx.session, true);
       ctx.session.step = getNumberStepByStatus(ctx.session.status);
-      await this.updateToAirtable(ctx.session);
 
       await ctx.callbackQuery.message.editText(
         getTextByNextStep(
@@ -678,7 +679,7 @@ export class TelegramService {
     this.bot.on('message', async (ctx) => {
       try {
         if (ctx.session.errorStatus === 'locationError')
-          return ctx.reply(`❌${STOP_TEXT} ${ctx.session.status}❌`);
+          return ctx.reply(`❌${STOP_TEXT}❌`);
 
         //REPLAY сообщения из служебного чата
         if (
@@ -765,9 +766,8 @@ export class TelegramService {
           ctx.session.step === getNumberStepByStatus('Финиш') &&
           !ctx.session.dataForCash
         ) {
-          ctx.session.dataForCash = text;
+          ctx.session = updateSessionByStep(ctx.session, text);
           await this.updateToAirtable(ctx.session);
-
           await ctx.reply('Принято!✌️');
           await ctx.reply(
             'Если Вам понравился наш товар, Вы можете оставить отзыв 🩷 😉',
@@ -1564,6 +1564,12 @@ export class TelegramService {
         checkWb: data[0]?.fields?.['Чек WB'],
         price: data[0]?.fields?.Цена,
         dataForCash: data[0]?.fields['Данные для кешбека'],
+        imgCart: data[0]?.fields['Корзина скрин'] || '',
+        imgSearch: data[0]?.fields['Поиск скрин'] || '',
+        imgGood: data[0]?.fields['Товар скрин'] || '',
+        imgOrder: data[0]?.fields['Заказ скрин'] || '',
+        imgRecieved: data[0]?.fields['Получен скрин'] || '',
+        imgShtrihCode: data[0]?.fields['Штрих-код скрин'] || '',
       };
 
       let session = createContinueSessionData(
@@ -1599,7 +1605,7 @@ export class TelegramService {
       }
       return session;
     } catch (error) {
-      console.log(error, sessionId);
+      console.log('restoreSession= ', error, sessionId);
       return null;
     }
   }

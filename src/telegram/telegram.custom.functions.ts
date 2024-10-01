@@ -185,6 +185,12 @@ export function createContinueSessionData(
     realStatus: data.realStatus,
     checkWb: data.checkWb,
     dataForCash: data.dataForCash,
+    imgCart: data.imgCart,
+    imgGood: data.imgGood,
+    imgRecieved: data.imgRecieved,
+    imgOrder: data.imgOrder,
+    imgSearch: data.imgSearch,
+    imgShtrihCode: data.imgShtrihCode,
   };
 }
 export function updateSessionByField(
@@ -207,50 +213,83 @@ export function updateSessionByStep(
 
   switch (status) {
     case 'В боте':
+      break;
     case 'Артикул правильный':
+      session.stopTime = getTimeWithTz();
       break;
     case 'Выбор раздачи':
       session.stopTime = getTimeWithTz();
       break;
     case 'Поиск':
-      session.status = 'Поиск';
+      session.status = status;
+      session.imgSearch = data;
       session.stopTime = getTimeWithTz();
       break;
     case 'Корзина':
-      session.status = 'Корзина';
+      session.status = status;
+      session.imgCart = data;
       session.stopTime = getTimeWithTz();
       break;
     case 'Заказ':
       session.stopBuyTime = getTimeWithTz();
       session.stopTime = getTimeWithTz();
-      session.status = 'Заказ';
+      session.imgOrder = data;
+      session.status = status;
       break;
     case 'Дата доставки':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      break;
     case 'Получен':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      session.imgRecieved = data;
+      break;
+
     case 'Дата получения':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      break;
     case 'Отзыв на проверке':
-    // case STEPS.Отзыв.step:
-    //   //session.status = 'Отзыв';
-    //   //session.stopTime = getTimeWithTz();
-    //   session.step = STEPS['Штрих-код'].step;
-    // //break;
+      // case STEPS.Отзыв.step:
+      //   //session.status = 'Отзыв';
+      //   //session.stopTime = getTimeWithTz();
+      //   session.step = STEPS['Штрих-код'].step;
+      // //break;
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      break;
     case 'Штрих-код':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      session.imgShtrihCode = data;
+      break;
     case 'Товар':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      session.imgGood = data;
+      break;
     case 'Чек':
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      break;
     case 'ЧекWb':
       session.checkWb = data;
+      session.stopTime = getTimeWithTz();
+      session.status = status;
+      break;
     case 'Чек неверный':
       session.stopTime = getTimeWithTz();
       session.status = status;
       break;
     case 'Цена':
       session.stopTime = getTimeWithTz();
-      session.status = 'Цена';
-      session.isFinish = true;
+      session.status = status;
       break;
     case 'Финиш':
       session.stopTime = getTimeWithTz();
-
+      session.isFinish = true;
+      session.dataForCash = data;
     default:
       break;
   }
