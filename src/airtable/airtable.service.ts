@@ -356,14 +356,14 @@ export class AirtableService {
     chat_id?: string,
   ): Promise<IDistribution | null> {
     const filter = chat_id
-      ? `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {chat_id}="${chat_id}")`
-      : `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul}", {Ник ТГ}="${nick}")`;
+      ? `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul.trim()}", {chat_id}="${chat_id.trim()}")`
+      : `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul.trim()}", {Ник ТГ}="${nick.trim()}")`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
     );
-    console.log('data=', data);
-    if (!data || !data.records) return null;
+    console.log('data=', data, chat_id, articul);
+    if (!data || !data.records || data?.records?.length === 0) return null;
     return data.records[0] as IDistribution;
   }
 

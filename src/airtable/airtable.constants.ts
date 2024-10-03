@@ -44,6 +44,7 @@ export const TablesDowray: IData[] = [
     title: TablesName.Distributions,
     tableName: 'tbl1U4a3Tl2W4qbk3',
     view: 'viwZ3ao7eTO3Ljeu5',
+    specialView: 'viwjJW7elp3HU2Yas',
   },
   {
     title: TablesName.Buyer,
