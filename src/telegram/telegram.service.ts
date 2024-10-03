@@ -1883,16 +1883,46 @@ export class TelegramService {
         return;
       }
 
-      const distribustion =
+      const distribustions =
         await this.airtableService.getDistributionByFilterArticulAndNick(
-          articul,
+          articul?.trim(),
           null,
-          chat_id,
+          chat_id.trim(),
         );
 
-      if (distribustion && distribustion.id) {
+      console.log(distribustions);
+
+      if (!distribustions) {
+        await this.airtableService.updateStatusTransferInBot(
+          'Chat_id не найден',
+          sessionId,
+        );
+        return;
+      }
+
+      const distribution = distribustions.records.find((x) => {
+        if (x.fields['Артикул WB'][0] === +articul.trim()) {
+          console.log('search articule = ', x.fields['Артикул WB'][0]);
+          return x;
+        } else {
+          console.log('not for us articule= ', x.fields['Артикул WB'][0]);
+        }
+      });
+      if (!distribution) {
+        await this.airtableService.updateStatusTransferInBot(
+          'Артикул в раздаче не найден',
+          sessionId,
+        );
+        return;
+      }
+
+      if (
+        distribution &&
+        distribution.id &&
+        distribution.fields['Артикул WB'][0] === +articul.trim()
+      ) {
         await this.airtableService.updateDistribution({
-          id: distribustion.id,
+          id: distribution.id,
           searchScreen: images[0],
           cartScreen: images[1],
           orderScreen: images[2],
@@ -1912,11 +1942,6 @@ export class TelegramService {
 
         await this.airtableService.updateStatusTransferInBot(
           'Успешно перенесены',
-          sessionId,
-        );
-      } else {
-        await this.airtableService.updateStatusTransferInBot(
-          'Ошибка переноса',
           sessionId,
         );
       }

@@ -23,7 +23,10 @@ import { IFilters } from './types/IFilters.interface';
 import { getFilterById } from './airtable.custom';
 import { ITime, ITimes } from './types/ITimes.interface';
 import { IBuyer } from 'src/airtable/types/IBuyer.interface';
-import { IDistribution } from '../airtable/types/IDisturbation.interface';
+import {
+  IDistribution,
+  IDistributions,
+} from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 
@@ -354,9 +357,9 @@ export class AirtableService {
     articul: string,
     nick?: string,
     chat_id?: string,
-  ): Promise<IDistribution | null> {
+  ): Promise<IDistributions | null> {
     const filter = chat_id
-      ? `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul.trim()}", {chat_id}="${chat_id.trim()}")`
+      ? `&${FILTER_BY_FORMULA}=SEARCH("${chat_id.trim()}", {chat_id})`
       : `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul.trim()}", {Ник ТГ}="${nick.trim()}")`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
@@ -364,7 +367,7 @@ export class AirtableService {
     );
     console.log('data=', data, chat_id, articul);
     if (!data || !data.records || data?.records?.length === 0) return null;
-    return data.records[0] as IDistribution;
+    return data as IDistributions;
   }
 
   async getBotByFilterArticulAndChatId(
@@ -419,7 +422,11 @@ export class AirtableService {
     return response;
   }
   async updateStatusTransferInBot(
-    status: 'Ошибка переноса' | 'Успешно перенесены',
+    status:
+      | 'Ошибка переноса'
+      | 'Успешно перенесены'
+      | 'Chat_id не найден'
+      | 'Артикул в раздаче не найден',
     sessionId: string,
   ): Promise<any> {
     const tableUrl = this.configService.get(
