@@ -161,9 +161,21 @@ export class TelegramService {
 
       await this.saveToAirtable(ctx.session);
 
-      await ctx.reply(sayHi(first_name, userValue.userName, ctx.from.id), {
+      await ctx.reply(sayHi(first_name, userValue.userName, id), {
         reply_markup: userHistory.orderButtons,
       });
+      const offers = await this.airtableService.getOffers();
+
+      if (!offers || !offers?.records || offers?.records?.length === 0) {
+        await this.bot.api.sendMessage(
+          id,
+          '⏰ Сейчас раздачи только в закрытой группе👇. Ждем новых раздач 😉 \n',
+          {
+            parse_mode: 'HTML',
+            link_preview_options: { is_disabled: true },
+          },
+        );
+      }
 
       await ctx.reply(
         '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉',
