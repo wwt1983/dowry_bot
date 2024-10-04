@@ -82,7 +82,7 @@ export class AirtableService {
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': session.recivingDate,
         'Данные для кешбека': session.dataForCash || '',
-        Цена: session.price || '',
+        Цена: session.price ? session.price.replace(/\D/g, '') : '',
         'Чек WB': session.checkWb || '',
         'Поиск скрин': session?.imgSearch || '',
         'Корзина скрин': session?.imgCart || '',

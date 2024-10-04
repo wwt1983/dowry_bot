@@ -1946,7 +1946,7 @@ export class TelegramService {
           articul: articul,
           dataForCash: dataForCash,
           key: key,
-          price: price,
+          price: price ? price.replace(/\D/g, '') : '',
           checkWb: checkWb,
           dateRecived: dateRecived ? parsedDate(dateRecived) : null,
           dateBuy: dateBuy,
@@ -1974,6 +1974,7 @@ export class TelegramService {
     id: string,
   ) {
     let sessionId;
+    
     try {
       const userBotData =
         await this.airtableService.getBotByFilterArticulAndChatId(
@@ -2008,7 +2009,7 @@ export class TelegramService {
           dateRecived: userBotData.fields['Факт дата получения']
             ? parsedDate(userBotData.fields['Факт дата получения'])
             : null,
-          price: userBotData.fields['Цена'],
+          price: userBotData.fields['Цена'] ? userBotData.fields['Цена']? userBotData.fields['Цена'].replace(/\D/g, '') : '',
           checkWb: userBotData.fields['Чек WB'],
         });
         await this.airtableService.updateStatusTransferInBot(
