@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AirtableService } from './airtable.service';
 
 @Controller('airtable')
@@ -11,9 +11,10 @@ export class AirtableController {
   }
 
   @Get('offers')
-  async offers(): Promise<any> {
+  async offers(@Query('type') type?: 'stop' | 'schedule'): Promise<any> {
     try {
-      const result = await this.airtableService.getOffers();
+      console.log('type', type);
+      const result = await this.airtableService.getOffers(type);
       return result;
     } catch (error) {
       console.log('offers', error);

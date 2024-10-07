@@ -192,13 +192,21 @@ export class AirtableService {
   /**
    * список раздач
    */
-  async getOffers(): Promise<IOffers> {
-    const filter =
-      process.env.NODE_ENV === 'development'
-        ? `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Test")`
-        : `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
+  async getOffers(type?: 'stop' | 'schedule'): Promise<IOffers> {
+    let filter;
+    if (process.env.NODE_ENV === 'development' && !type) {
+      filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Test")`;
+    } else if (process.env.NODE_ENV !== 'development' && !type) {
+      filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
+    } else {
+      filter =
+        type === 'schedule'
+          ? `&${FILTER_BY_FORMULA}=SEARCH("Scheduled", {Status})`
+          : `&${FILTER_BY_FORMULA}=SEARCH("Stop", {Status})`;
+    }
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
+
   async getOffer(
     id: string,
     needKeys?: boolean,
