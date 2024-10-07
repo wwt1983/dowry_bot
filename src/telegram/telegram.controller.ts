@@ -43,6 +43,7 @@ export class TelegramController {
     this.telegramService.sendMessageToSubscriberFromDb(
       +subscribeDto.chat_id,
       subscribeDto.text,
+      subscribeDto.button,
     );
   }
 

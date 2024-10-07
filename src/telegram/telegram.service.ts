@@ -2034,8 +2034,14 @@ export class TelegramService {
   /**
    * отправка сообщение пользователю в чат из airtable
    */
-  async sendMessageToSubscriberFromDb(chat_id: number, text: string) {
-    await this.bot.api.sendMessage(chat_id, text);
+  async sendMessageToSubscriberFromDb(
+    chat_id: number,
+    text: string,
+    button: string,
+  ) {
+    const message =
+      button === 'Отправить сообщение' ? text : button + '\n' + text;
+    await this.bot.api.sendMessage(chat_id, '⁉️' + message);
     await this.saveFeedback(
       { id: chat_id, is_bot: false, username: '', first_name: '' },
       'Ответ ✅ ' + text,
