@@ -34,6 +34,8 @@ import {
   STEP_TEXT_NUMBER_EMOJI,
   SEVEN_STEP,
   SIX_STEP_LINK,
+  LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER,
+  LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -536,6 +538,7 @@ export const getNotificationValue = (
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
   startTime: string,
+  filter: string,
 ) => {
   let nextStatusNotification: BotStatus;
   switch (status) {
@@ -543,7 +546,10 @@ export const getNotificationValue = (
     case 'Артикул правильный':
     case 'Проблема с артикулом':
       const minutesForChoose =
-        getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_ORDER;
+        getDifferenceInMinutes(startTime) -
+        (filter
+          ? LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER
+          : LIMIT_TIME_IN_MINUTES_FOR_ORDER);
       if (minutesForChoose > 0) {
         nextStatusNotification = 'Время истекло';
       }
@@ -551,7 +557,10 @@ export const getNotificationValue = (
     case 'Поиск':
     case 'Корзина':
       const minutes =
-        getDifferenceInMinutes(startTime) - LIMIT_TIME_IN_MINUTES_FOR_BUY;
+        getDifferenceInMinutes(startTime) -
+        (filter
+          ? LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER
+          : LIMIT_TIME_IN_MINUTES_FOR_BUY);
 
       console.log('getNotificationValue minutes=', status, startTime, minutes);
 

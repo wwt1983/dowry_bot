@@ -1326,6 +1326,7 @@ export class TelegramService {
     offerName: string,
     dateDelivery: string,
     outFromOffer: boolean,
+    filter: string,
   ): Promise<void> {
     try {
       console.log(
@@ -1367,6 +1368,7 @@ export class TelegramService {
         statisticNotifications,
         status,
         getDateWithTz(startTime),
+        filter,
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
