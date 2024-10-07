@@ -12,12 +12,15 @@ import {
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
-import { BotStatus, IBot } from './types/IBot.interface';
+import { BotStatus, IBot, IBots } from './types/IBot.interface';
 import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
-import { getUserName } from 'src/telegram/telegram.custom.functions';
+import {
+  getNumberStepByStatus,
+  getUserName,
+} from 'src/telegram/telegram.custom.functions';
 import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
 import { IFilters } from './types/IFilters.interface';
 import { getFilterById } from './airtable.custom';
@@ -384,11 +387,13 @@ export class AirtableService {
   ): Promise<IBot | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Артикул}="${articul}", {chat_id}="${chat_id}")`,
+      `&${FILTER_BY_FORMULA}=AND(SUBSTITUTE({Артикул}, " ", "")="${articul}", {chat_id}="${chat_id}")`,
     );
-    console.log('data=', data);
+
     if (!data || !data.records) return null;
-    return data.records[0] as IBot;
+    return (data as IBots).records.filter(
+      (x) => getNumberStepByStatus(x.fields['Статус']) > 4,
+    )[0] as IBot;
   }
 
   async getDistributionById(id: string): Promise<IDistribution | null> {
@@ -442,6 +447,16 @@ export class AirtableService {
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, {
       'Перенести в Раздачу': status,
+      SessionId: sessionId,
+    });
+    console.log('postWebhook ===>', response);
+    return response;
+  }
+  async updateStatusCacheInBot(sessionId: string): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_UPDATE_STATUS_CASHE',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
       SessionId: sessionId,
     });
     console.log('postWebhook ===>', response);

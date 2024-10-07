@@ -144,7 +144,10 @@ export class TelegramService {
       await ctx.reply('Введите номер пользователя (поле chat_id)');
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
     });
-
+    this.bot.command(COMMAND_NAMES.messageForCache, async (ctx) => {
+      await ctx.reply('Введите текст для пользователей с задержкой кеша');
+      ctx.session.lastCommand = COMMAND_NAMES.messageForCache;
+    });
     /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
@@ -421,7 +424,10 @@ export class TelegramService {
           );
         }
 
-        if (ctx?.session?.lastCommand === COMMAND_NAMES.messageSend) {
+        if (
+          ctx?.session?.lastCommand === COMMAND_NAMES.messageSend ||
+          ctx?.session?.lastCommand === COMMAND_NAMES.messageForCache
+        ) {
           return await ctx.reply('📵');
         }
 
@@ -743,6 +749,10 @@ export class TelegramService {
               true,
             );
             await ctx.reply(`Ваше сообщение отправлено!`);
+            return;
+          case COMMAND_NAMES.messageForCache:
+            console.log('!!!!!' + text);
+            ctx.session.lastCommand = COMMAND_NAMES.messageForCache;
             return;
         }
 
@@ -2079,5 +2089,28 @@ export class TelegramService {
       await this.airtableService.getBotStatusByUser(sessionId);
     if (statusFromDb === 'Время истекло') return false;
     return true;
+  }
+
+  /**
+   * при нажатии галочки о выплате кешбека обновляем статус в таблице Бот
+   */
+  async updateStatusByCache(chat_id: string, articul: string) {
+    let sessionId;
+
+    try {
+      const userBotData =
+        await this.airtableService.getBotByFilterArticulAndChatId(
+          articul,
+          chat_id,
+        );
+
+      if (userBotData && userBotData?.fields['SessionId']) {
+        sessionId = userBotData?.fields['SessionId'];
+
+        await this.airtableService.updateStatusCacheInBot(sessionId);
+      }
+    } catch (error) {
+      console.log('updateStatusByCache', sessionId, error);
+    }
   }
 }

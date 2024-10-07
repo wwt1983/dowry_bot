@@ -29,6 +29,7 @@ export enum COMMAND_NAMES {
   history = 'history',
   call = 'call',
   messageSend = 'message_send',
+  messageForCache = 'message_for_cache',
   saveMessage = 'saveMessage',
   admin = 'admin',
   offers = 'offers',
@@ -46,6 +47,10 @@ export const ADMIN_COMMANDS_TELEGRAM = [
   {
     command: COMMAND_NAMES.messageSend,
     description: 'Отправить сообщение пользователю',
+  },
+  {
+    command: COMMAND_NAMES.messageForCache,
+    description: 'Отправить сообщение пользователям с задержкой кеша',
   },
 ];
 

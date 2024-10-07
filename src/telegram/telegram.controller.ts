@@ -153,7 +153,7 @@ export class TelegramController {
     );
   }
   /**
-   * при изменении поля chat_id запускается запрос на перенсо данных из бота в таблицу Раздачи
+   * при изменении поля chat_id запускается запрос на перенос данных из бота в таблицу Раздачи
    */
   @Post('signalToTransferBotToDistributions')
   async signalToTransferBotToDistributions(
@@ -170,5 +170,23 @@ export class TelegramController {
       data.id,
     );
     console.log('signalToTransferBotToDistributions', data);
+  }
+
+  /**
+   * при нажатии галочки о выплате кешбека обновляем статус в таблице Бот
+   */
+  @Post('updateStatusByCache')
+  async updateStatusByCache(
+    @Body()
+    data: {
+      chat_id: string;
+      articul: string[];
+    },
+  ) {
+    await this.telegramService.updateStatusByCache(
+      data.chat_id,
+      data.articul[0],
+    );
+    console.log('updateStatusByCache', data);
   }
 }
