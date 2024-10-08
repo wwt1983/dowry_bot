@@ -7,6 +7,7 @@ import {
   WEB_APP_TEST,
 } from './telegram.constants';
 import { BrokeBotStatus, IBot } from 'src/airtable/types/IBot.interface';
+import { removeEmojis } from './telegram.custom.functions';
 
 export const webKeyboard = {
   text: START_NAME,
@@ -67,7 +68,7 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
         record.fields.Статус == 'Поиск'
       ) {
         newArr.push([
-          record.fields.Раздача,
+          removeEmojis(record.fields.Раздача),
           'sessionId_' + record.fields.SessionId + txtForDel,
         ]);
       }
@@ -88,7 +89,7 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       !record.fields['Снять с раздачи']
     ) {
       newArr.push([
-        record.fields.Раздача,
+        removeEmojis(record.fields.Раздача),
         'sessionId_' + record.fields.SessionId + txtForDel,
       ]);
     }

@@ -351,7 +351,7 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     ? `Попробуйте найти товар используя фильтр 👉: ${filter.toUpperCase()} \n`
     : '';
   const caption =
-    `🔥${title}🔥` +
+    `${title}` +
     '\n\n' +
     '❌Цена на WB ~' +
     priceWb +
@@ -997,4 +997,11 @@ export const getTextForHistoryOrders = (
   if (sum === 0 && !timeOutOrders) return 'Вы пока ничего не купили 😢';
   if (sum > 0 && !timeOutOrders) return 'Все раздачи завершены ✌️';
   return timeOutOrders;
+};
+
+export const removeEmojis = (text: string) => {
+  if (!text) return '';
+  const regex = /[\u{1F525}]/gu;
+
+  return text.replace(regex, '');
 };
