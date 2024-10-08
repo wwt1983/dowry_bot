@@ -13,7 +13,6 @@ export class AirtableController {
   @Get('offers')
   async offers(@Query('type') type?: 'stop' | 'schedule'): Promise<any> {
     try {
-      console.log('type', type);
       const result = await this.airtableService.getOffers(type);
       return result;
     } catch (error) {

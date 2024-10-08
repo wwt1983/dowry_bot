@@ -68,6 +68,7 @@ import {
   parseCheckUrl,
   getTimeoutArticles,
   getTextForHistoryOrders,
+  filterNotificationValue,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -2067,7 +2068,7 @@ export class TelegramService {
     }
   }
   /**
-   * Проверяем можем ли мы двигаться дальше (проверяем тстаус из базы на время истекло , если статуст до Заказа)
+   * Проверяем можем ли мы двигаться дальше (проверяем статус из базы на время истекло , если статуст до Заказа)
    */
   async canGoNext(sessionId: string, status: BotStatus): Promise<boolean> {
     if (!sessionId) return false;
@@ -2110,5 +2111,52 @@ export class TelegramService {
     } catch (error) {
       console.log('updateStatusByCache', sessionId, error);
     }
+  }
+  /**
+   * отправляем сообщения всем у кого просрочка и есть chat_id
+   */
+  async sendMessageToNoCachedDistributions(articul: string, chat_id: string) {
+    try {
+      const status = 'Кэш задержка';
+      const bot = await this.airtableService.getBotFinish(articul, chat_id);
+
+      if (bot?.fields['Финиш']) {
+        const statisticNotifications =
+          await this.airtableService.getNotificationStatistics(
+            bot.fields['SessionId'],
+          );
+        const notifications = await this.airtableService.getNotifications();
+
+        const value = filterNotificationValue(
+          notifications,
+          statisticNotifications,
+          status,
+        );
+
+        if (!value || value?.statistic?.fields?.Статус === 'Остановлено') {
+          return;
+        }
+
+        await this.addNotificationStatistic(
+          bot.fields['SessionId'],
+          value.notification?.fields['Количество попыток'] === 1
+            ? 'Остановлено'
+            : 'Доставлено',
+          1,
+          bot.id,
+          value.notification?.fields?.Id,
+        );
+
+        await this.bot.api.sendMessage(
+          chat_id,
+          value.notification.fields.Сообщение,
+        );
+        console.log('send message ', chat_id);
+      }
+    } catch (error) {
+      console.log('sendMessageToNoCachedDistributions', error);
+    }
+
+    //await this.airtableService.getNoCachedDistributions();
   }
 }

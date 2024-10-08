@@ -191,4 +191,23 @@ export class TelegramController {
     );
     console.log('updateStatusByCache', data);
   }
+
+  @Post('noCached')
+  async noCached(
+    @Body()
+    data: {
+      chat_id: string;
+      articul: string[];
+    },
+  ): Promise<void> {
+    try {
+      console.log(data.articul);
+      await this.telegramService.sendMessageToNoCachedDistributions(
+        data.articul[0],
+        data.chat_id,
+      );
+    } catch (error) {
+      console.log('noCached', error);
+    }
+  }
 }

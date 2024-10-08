@@ -83,7 +83,8 @@ export type BotStatus =
   | 'Цена'
   | 'Кэш'
   | 'Чек неверный'
-  | 'ЧекWb';
+  | 'ЧекWb'
+  | 'Кэш задержка';
 
 export type BrokeBotStatus =
   | 'locationError'

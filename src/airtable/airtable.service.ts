@@ -381,6 +381,32 @@ export class AirtableService {
     return data as IDistributions;
   }
 
+  /**
+   * не выплаченные кешбеки из таблицы Раздача
+   */
+  async getNoCachedDistributions(): Promise<IDistribution[] | null> {
+    let allRecords: IDistribution[] = [];
+    let offset = '';
+
+    do {
+      const nextPage = offset ? `&offset=${offset}` : '';
+      const filter = `&${FILTER_BY_FORMULA}=AND({Дата выплаты} < TODAY(), {БОТ} = TRUE(), {Кэш выплачен}=FALSE(), {Деньги от клиента}=TRUE(), NOT({chat_id} = BLANK())
+)${nextPage}`;
+      const data = await this.airtableHttpService.get(
+        TablesName.Distributions,
+        filter,
+      );
+      if (!data || !data.records || data?.records?.length === 0) return null;
+
+      offset = data.offset;
+      allRecords = allRecords.concat(data.records);
+    } while (offset);
+
+    console.log('length=', allRecords.length);
+
+    return allRecords;
+  }
+
   async getBotByFilterArticulAndChatId(
     articul: string,
     chat_id: string,
@@ -394,6 +420,15 @@ export class AirtableService {
     return (data as IBots).records.filter(
       (x) => getNumberStepByStatus(x.fields['Статус']) > 4,
     )[0] as IBot;
+  }
+  async getBotFinish(articul: string, chat_id: string): Promise<IBot | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND(SUBSTITUTE({Артикул}, " ", "")="${articul}", {chat_id}="${chat_id}", {Финиш}=TRUE())`,
+    );
+
+    if (!data || !data.records || data.records.length === 0) return null;
+    return data.records[0] as IBot;
   }
 
   async getDistributionById(id: string): Promise<IDistribution | null> {

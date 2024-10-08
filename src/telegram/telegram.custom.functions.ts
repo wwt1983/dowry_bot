@@ -590,7 +590,7 @@ export const getNotificationValue = (
   );
 };
 
-const filterNotificationValue = (
+export const filterNotificationValue = (
   notifications: INotifications,
   statisticNotifications: INotificationStatistics,
   status: BotStatus,
