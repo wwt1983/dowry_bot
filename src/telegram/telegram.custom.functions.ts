@@ -649,10 +649,9 @@ export const scheduleNotification = (
         return days > 2 && days < 4;
       }
     case 'Получен':
-    // case 'Отзыв':
-    // case 'Отзыв на проверке':
     case 'Штрих-код':
-    case 'Чек':
+    case 'ЧекWb':
+    case 'Товар':
       return days === 1;
     default:
       return false;

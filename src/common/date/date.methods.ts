@@ -8,7 +8,6 @@ import {
   parse,
 } from 'date-fns';
 import { ISessionData } from 'src/telegram/telegram.interface';
-import { time } from 'console';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_SIMPLE = 'dd.MM.yyyy HH:mm';
@@ -58,7 +57,7 @@ export const getDifferenceInHours = (date: string) => {
 
 export const getDifferenceInDays = (date: string) => {
   try {
-    if (!time || !isValid(date)) return ERROR_TIME;
+    if (!isValid(new Date(date))) return ERROR_TIME;
     return differenceInDays(
       getTimeWithTz(),
       formatInTimeZone(date, TIME_ZONE, FORMAT_DATE),
