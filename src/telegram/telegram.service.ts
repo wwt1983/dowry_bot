@@ -2099,6 +2099,13 @@ export class TelegramService {
         sessionId = userBotData?.fields['SessionId'];
 
         await this.airtableService.updateStatusCacheInBot(sessionId);
+        await this.bot.api.sendMessage(
+          chat_id,
+          `🎉 Здравствуйте! Мы отправили вам 💰💰💰 за участие в раздаче ${userBotData.fields['Раздача']} Спасибо за сотрудничество 🎉`,
+          {
+            parse_mode: 'HTML',
+          },
+        );
       }
     } catch (error) {
       console.log('updateStatusByCache', sessionId, error);

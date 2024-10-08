@@ -306,13 +306,11 @@ export function updateSessionByStep(
   // }
   return session;
 }
-/**
- * ищем следующий шаг и обновляем поля step и status
- */
-export function nextStep(
-  session: ISessionData,
+
+export function getNextStepStatusByNumber(
+  currentStep: number,
   onlyActive: boolean,
-): ISessionData {
+): BotStatus {
   let nextNumberStepsAll;
   if (!onlyActive) {
     nextNumberStepsAll = Object.values(STEPS).filter((x) => x.step === 0);
@@ -321,9 +319,17 @@ export function nextStep(
       (x) => x.isActive && x.step === 0,
     );
   }
-  //const maxStep = nextNumberStepsAll.length + 1;
+  return nextNumberStepsAll[currentStep].value as BotStatus;
+}
 
-  session.status = nextNumberStepsAll[session.step].value as BotStatus;
+/**
+ * ищем следующий шаг и обновляем поля step и status
+ */
+export function nextStep(
+  session: ISessionData,
+  onlyActive: boolean,
+): ISessionData {
+  session.status = getNextStepStatusByNumber(session.step, onlyActive);
   session.step = session.step + 1;
 
   return session;
@@ -570,22 +576,13 @@ export const getNotificationValue = (
         nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
       }
       break;
-    case 'Заказ':
-      nextStatusNotification = 'Получен';
-      break;
-    case 'Получен':
-      nextStatusNotification = 'Штрих-код';
-      break;
-    // case 'Отзыв':
-    // case 'Отзыв на проверке':
-    //   nextStatusNotification = 'Штрих-код';
-    //   break;
-    case 'Штрих-код':
-      nextStatusNotification = 'Чек';
-      break;
     default:
-      return null;
+      nextStatusNotification = getNextStepStatusByNumber(
+        getNumberStepByStatus(status),
+        true,
+      );
   }
+
   return filterNotificationValue(
     notifications,
     statisticNotifications,
