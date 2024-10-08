@@ -808,7 +808,7 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
     if (record.fields.Финиш) {
-      return (data += `✔️ ${record.fields.Раздача}\n`);
+      return (data += `✔️ ${removeEmojis(record.fields.Раздача)}\n`);
     }
     return data;
   }, '');
