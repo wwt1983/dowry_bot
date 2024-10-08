@@ -24,7 +24,7 @@ import {
   TELEGRAM_MESSAGE_CHAT_PROD,
   STEP_EXAMPLE_TEXT_DOWN,
   //FOOTER,
-  TELEGRAM_CHAT_ID_OFFERS,
+  //TELEGRAM_CHAT_ID_OFFERS,
   MESSAGE_LIMIT_ORDER,
   MESSAGE_WAITING,
   WAITING_IMAGE,
@@ -55,7 +55,7 @@ import {
   getLastSession,
   getLinkForOffer,
   getUserOfferIdsIsFinsih,
-  getTextForSubscriber,
+  //getTextForSubscriber,
   getUserOffersReady,
   getUserBenefit,
   getArticulesByUser,
@@ -97,7 +97,7 @@ import {
   parsedDate,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
-import { ChatMember, User } from '@grammyjs/types';
+import { User } from '@grammyjs/types';
 import { getOffersLink } from 'src/airtable/airtable.custom';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 //import { getParseWbInfo } from './puppeteer';
@@ -167,18 +167,6 @@ export class TelegramService {
       await ctx.reply(sayHi(first_name, userValue.userName, id), {
         reply_markup: userHistory.orderButtons,
       });
-      const offers = await this.airtableService.getOffers();
-
-      if (!offers || !offers?.records || offers?.records?.length === 0) {
-        await this.bot.api.sendMessage(
-          id,
-          '⏰ Сейчас раздачи только в закрытой группе👇. Ждем новых раздач 😉 \n',
-          {
-            parse_mode: 'HTML',
-            link_preview_options: { is_disabled: true },
-          },
-        );
-      }
 
       await ctx.reply(
         '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉',
@@ -333,7 +321,8 @@ export class TelegramService {
         }
         await this.bot.api.sendMessage(
           id,
-          'Ждем новых раздач 😉 \n' + getTextForSubscriber(null).text,
+          'Ждем новых раздач 😉 \n',
+          // getTextForSubscriber(null).text
           {
             parse_mode: 'HTML',
             link_preview_options: { is_disabled: true },
@@ -1662,13 +1651,13 @@ export class TelegramService {
     const sum = 0;
     const offersFromDistributions = '';
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
-    let member: ChatMember;
+    // let member: ChatMember;
     try {
-      member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
+      //member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
     } catch (e) {
       //console.log(e);
     }
-    const subscribe = getTextForSubscriber(member);
+    //const subscribe = getTextForSubscriber(member);
 
     if (!dataBuyer && sum === 0) {
       const benefit = getUserBenefit(null, sum);
@@ -1677,8 +1666,8 @@ export class TelegramService {
         benefit: benefit.text,
         sum: benefit.sum + sum,
         offersReady: '',
-        subscribe: subscribe.text,
-        itsSubscriber: subscribe.status,
+        subscribe: '',
+        itsSubscriber: false,
         userArticules: getArticulesByUser(dataBuyer),
         timeoutArticles: getTimeoutArticles(dataBuyer),
       };
@@ -1698,8 +1687,8 @@ export class TelegramService {
       benefit: benefit.text,
       sum: benefit.sum + sum,
       offersReady: offersReady + offersFromDistributions,
-      subscribe: subscribe.text,
-      itsSubscriber: subscribe.status,
+      subscribe: '',
+      itsSubscriber: false,
       userArticules: getArticulesByUser(dataBuyer),
       timeoutArticles: getTimeoutArticles(dataBuyer),
     };
