@@ -31,7 +31,6 @@ export enum COMMAND_NAMES {
   history = 'history',
   call = 'call',
   messageSend = 'message_send',
-  messageForCache = 'message_for_cache',
   saveMessage = 'saveMessage',
   admin = 'admin',
   offers = 'offers',
@@ -39,20 +38,16 @@ export enum COMMAND_NAMES {
 
 export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
+  { command: COMMAND_NAMES.offers, description: 'Раздачи' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
   { command: COMMAND_NAMES.history, description: 'Ваша история' },
   { command: COMMAND_NAMES.call, description: 'Написать оператору' },
-  { command: COMMAND_NAMES.offers, description: 'Раздачи' },
 ];
 
 export const ADMIN_COMMANDS_TELEGRAM = [
   {
     command: COMMAND_NAMES.messageSend,
     description: 'Отправить сообщение пользователю',
-  },
-  {
-    command: COMMAND_NAMES.messageForCache,
-    description: 'Отправить сообщение пользователям с задержкой кеша',
   },
 ];
 

@@ -145,10 +145,7 @@ export class TelegramService {
       await ctx.reply('Введите номер пользователя (поле chat_id)');
       ctx.session.lastCommand = COMMAND_NAMES.messageSend;
     });
-    this.bot.command(COMMAND_NAMES.messageForCache, async (ctx) => {
-      await ctx.reply('Введите текст для пользователей с задержкой кеша');
-      ctx.session.lastCommand = COMMAND_NAMES.messageForCache;
-    });
+
     /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
@@ -414,10 +411,7 @@ export class TelegramService {
           );
         }
 
-        if (
-          ctx?.session?.lastCommand === COMMAND_NAMES.messageSend ||
-          ctx?.session?.lastCommand === COMMAND_NAMES.messageForCache
-        ) {
+        if (ctx?.session?.lastCommand === COMMAND_NAMES.messageSend) {
           return await ctx.reply('📵');
         }
 
@@ -739,10 +733,6 @@ export class TelegramService {
               true,
             );
             await ctx.reply(`Ваше сообщение отправлено!`);
-            return;
-          case COMMAND_NAMES.messageForCache:
-            console.log('!!!!!' + text);
-            ctx.session.lastCommand = COMMAND_NAMES.messageForCache;
             return;
         }
 
