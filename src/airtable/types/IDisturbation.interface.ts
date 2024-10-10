@@ -34,6 +34,9 @@ export interface IDistribution {
     'Деньги от клиента': boolean;
     'Фото товар'?: PhotoDataType[];
     'Фото бирка'?: PhotoDataType[];
+    'Скрин поиска'?: PhotoDataType[];
+    'Скрин корзины'?: PhotoDataType[];
+    'Скрин заказа'?: PhotoDataType[];
     //'Скрин отзыв'?: PhotoDataType[];
     'Дней до кэшбэка': string;
     Покупатели?: string[];
@@ -44,6 +47,7 @@ export interface IDistribution {
     'Дата выплаты'?: Date;
     'Ник ТГ': string[];
     'Выплаченный кешбек'?: string;
+    chat_id?: string;
   };
 }
 

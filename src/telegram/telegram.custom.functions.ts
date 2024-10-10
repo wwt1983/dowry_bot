@@ -36,6 +36,7 @@ import {
   SIX_STEP_LINK,
   LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER,
   LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
+  CASH_STOP_WORDS,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -598,13 +599,13 @@ export const filterNotificationValue = (
   let notification = null;
   let statistic = null;
   try {
-    notification = notifications.records.find(
+    notification = notifications?.records.find(
       (x) => x.fields.Название === status,
     );
     statistic =
-      statisticNotifications.records.length === 0
+      statisticNotifications?.records.length === 0
         ? null
-        : statisticNotifications.records.find(
+        : statisticNotifications?.records.find(
             (x) =>
               x.fields.Шаблон &&
               x.fields.Шаблон.length &&
@@ -1005,3 +1006,10 @@ export const removeEmojis = (text: string) => {
 
   return text.replace(regex, '');
 };
+
+/**
+ * проверяем это сообщение о кэше?
+ */
+
+export const itRequestWithCachQuestion = (message: string) =>
+  CASH_STOP_WORDS.find((x) => message.includes(x));

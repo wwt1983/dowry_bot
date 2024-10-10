@@ -32,6 +32,7 @@ import {
 } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
+import { STEPS } from 'src/telegram/telegram.constants';
 
 @Injectable()
 export class AirtableService {
@@ -303,6 +304,10 @@ export class AirtableService {
 
     return offer as IOffer;
   }
+
+  /**
+   *данные из таблицы Оповещения
+   */
   async getNotifications(): Promise<INotifications> {
     return await this.airtableHttpService.get(TablesName.Notifications);
   }
@@ -496,5 +501,25 @@ export class AirtableService {
     });
     console.log('postWebhook ===>', response);
     return response;
+  }
+  async getUsersWithStatusOnlyTimeout(): Promise<IBot[] | null> {
+    const filterByStatus = Object.values(STEPS)
+      .filter(
+        (x) =>
+          x.value !== 'В боте' &&
+          x.value !== 'Время истекло' &&
+          x.isActive &&
+          x.step === 0,
+      )
+      .map((x) => `NOT(FIND('${x.value}', ARRAYJOIN({Статус}, '|')))`)
+      .join(', ');
+    console.log(filterByStatus);
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Статус} = 'Время истекло', ${filterByStatus})`,
+    );
+    console.log(data.records.length, data.records);
+    if (!data || !data.records) return null;
+    return data.records;
   }
 }

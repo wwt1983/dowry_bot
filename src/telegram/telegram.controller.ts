@@ -6,6 +6,7 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
+import { NotificatonType } from 'src/airtable/types/INotification.interface';
 
 @Controller('telegram')
 export class TelegramController {
@@ -208,6 +209,41 @@ export class TelegramController {
       );
     } catch (error) {
       console.log('noCached', error);
+    }
+  }
+
+  /**
+   * обрабатывается таблица Оповещения
+   */
+
+  @Post('alerts')
+  async alerts(
+    @Body()
+    data: {
+      typeField: NotificatonType;
+      message: string;
+      activity: string;
+      count: string;
+      name: string;
+    },
+  ): Promise<void> {
+    try {
+      console.log(
+        data.typeField,
+        data.name,
+        data.activity,
+        data.count,
+        data.message,
+      );
+      await this.telegramService.alerts(
+        data.typeField,
+        data.name,
+        data.activity,
+        data.count,
+        data.message,
+      );
+    } catch (error) {
+      console.log('alerts', error);
     }
   }
 }

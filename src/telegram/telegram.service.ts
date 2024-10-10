@@ -28,6 +28,7 @@ import {
   MESSAGE_LIMIT_ORDER,
   MESSAGE_WAITING,
   WAITING_IMAGE,
+  CACHE_WAIT_STATUS,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -69,6 +70,7 @@ import {
   getTimeoutArticles,
   getTextForHistoryOrders,
   filterNotificationValue,
+  itRequestWithCachQuestion,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -101,6 +103,7 @@ import {
 import { User } from '@grammyjs/types';
 import { getOffersLink } from 'src/airtable/airtable.custom';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
+import { NotificatonType } from 'src/airtable/types/INotification.interface';
 //import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -749,6 +752,8 @@ export class TelegramService {
             ctx.session.status,
           );
 
+          await this.sendMessageAboutCache(ctx.from.id, text);
+
           const responseMsg = await ctx.api.sendMessage(
             getAdminChatId(),
             msgToChatMessage,
@@ -757,9 +762,6 @@ export class TelegramService {
           await this.addNumberToMessageInChatMessage(
             responseMsg.message_id,
             msgToChatMessage,
-          );
-          return await ctx.reply(
-            'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
           );
         }
 
@@ -1934,14 +1936,20 @@ export class TelegramService {
           shtrihCodeScreen: images[4] || WAITING_IMAGE,
           checkScreen: images[5] || WAITING_IMAGE,
           goodScreen: images[5] || WAITING_IMAGE,
-          chat_id: chat_id,
+          chat_id: distribution.fields['chat_id'] || chat_id,
           articul: articul,
           dataForCash: dataForCash,
-          key: key,
-          price: price ? price.replace(/\D/g, '') : '',
+          key: distribution.fields['Ключевой запрос'] || key,
+          price:
+            distribution.fields['Цена товара'] || price
+              ? price.replace(/\D/g, '')
+              : '',
           checkWb: checkWb,
-          dateRecived: dateRecived ? parsedDate(dateRecived) : null,
-          dateBuy: dateBuy,
+          dateRecived:
+            distribution.fields['Дата выкупа'] || dateRecived
+              ? parsedDate(dateRecived)
+              : null,
+          dateBuy: distribution.fields['Дата заказа'] || dateBuy,
         });
 
         await this.airtableService.updateStatusTransferInBot(
@@ -2107,7 +2115,6 @@ export class TelegramService {
    */
   async sendMessageToNoCachedDistributions(articul: string, chat_id: string) {
     try {
-      const status = 'Кэш задержка';
       const bot = await this.airtableService.getBotFinish(articul, chat_id);
 
       if (bot?.fields['Финиш']) {
@@ -2120,7 +2127,7 @@ export class TelegramService {
         const value = filterNotificationValue(
           notifications,
           statisticNotifications,
-          status,
+          CACHE_WAIT_STATUS,
         );
 
         if (!value || value?.statistic?.fields?.Статус === 'Остановлено') {
@@ -2148,5 +2155,53 @@ export class TelegramService {
     }
 
     //await this.airtableService.getNoCachedDistributions();
+  }
+
+  /**
+   * Сообщение-заглушка для пользователей с вопросом о кеше
+   */
+
+  async sendMessageAboutCache(chat_id: number, message: string) {
+    if (itRequestWithCachQuestion(message)) {
+      const allOrders = await this.airtableService.getBotByFilter(
+        chat_id.toString(),
+        'chat_id',
+      );
+      const order = allOrders.find(
+        (x) => x.fields['Статус'] === 'Финиш' || x.fields['Статус'] === 'Чек',
+      );
+      if (order) {
+        const statisticNotifications =
+          await this.airtableService.getNotificationStatistics(
+            order.fields['SessionId'],
+          );
+        const notifications = await this.airtableService.getNotifications();
+
+        const value = filterNotificationValue(
+          notifications,
+          statisticNotifications,
+          CACHE_WAIT_STATUS,
+        );
+        await this.bot.api.sendMessage(
+          chat_id,
+          value.notification.fields.Сообщение,
+        );
+      } else {
+        await this.bot.api.sendMessage(
+          chat_id,
+          'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
+        );
+      }
+    }
+  }
+
+  async alerts(
+    typeField: NotificatonType,
+    name: string,
+    activity: string,
+    count: string,
+    message: string,
+  ) {
+    await this.airtableService.getUsersWithStatusOnlyTimeout();
   }
 }

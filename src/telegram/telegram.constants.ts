@@ -419,3 +419,13 @@ export const createHelpText = () => {
   }
   return medias;
 };
+
+export const CASH_STOP_WORDS = [
+  'кешбэк',
+  'кеш',
+  'кэшбэк',
+  'кэшбек',
+  'кэш',
+  'деньги',
+];
+export const CACHE_WAIT_STATUS = 'Кэш задержка';
