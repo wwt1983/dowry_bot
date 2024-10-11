@@ -10,7 +10,7 @@ import {
 } from './airtable.constants';
 
 import { IOffer, IOffers } from './types/IOffer.interface';
-import { INotifications } from './types/INotification.interface';
+import { INotification, INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus, IBot, IBots } from './types/IBot.interface';
 import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
@@ -389,7 +389,7 @@ export class AirtableService {
   /**
    * не выплаченные кешбеки из таблицы Раздача
    */
-  async getNoCachedDistributions(): Promise<IDistribution[] | null> {
+  async getNoCachedDistributions(): Promise<number[] | null> {
     let allRecords: IDistribution[] = [];
     let offset = '';
 
@@ -407,9 +407,16 @@ export class AirtableService {
       allRecords = allRecords.concat(data.records);
     } while (offset);
 
-    console.log('length=', allRecords.length);
+    const uniqChatIds = allRecords.reduce((acc, order) => {
+      if (!acc.find((x) => x === order.fields['chat_id'])) {
+        acc.push(order.fields['chat_id']);
+      }
+      return acc;
+    }, []);
 
-    return allRecords;
+    console.log('length=', uniqChatIds.length);
+
+    return uniqChatIds;
   }
 
   async getBotByFilterArticulAndChatId(
@@ -502,17 +509,37 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
-  async getUsersWithStatusOnlyTimeout(): Promise<number[] | null> {
-    const filterByStatus = Object.values(STEPS)
-      .filter(
-        (x) =>
-          x.value !== 'В боте' &&
-          x.value !== 'Время истекло' &&
-          x.isActive &&
-          x.step === 0,
-      )
-      .map((x) => `NOT(FIND('${x.value}', ARRAYJOIN({Статус}, '|')))`)
-      .join(', ');
+  async getUsersWithStatus(
+    status: 'new' | 'regular',
+  ): Promise<number[] | null> {
+    let filterByStatus;
+    let filterQuery;
+    if (status === 'new') {
+      filterByStatus = Object.values(STEPS)
+        .filter(
+          (x) =>
+            x.value !== 'В боте' &&
+            x.value !== 'Время истекло' &&
+            x.isActive &&
+            x.step === 0,
+        )
+        .map((x) => `NOT(FIND('${x.value}', ARRAYJOIN({Статус}, '|')))`)
+        .join(', ');
+      filterQuery = `=AND({Статус} = 'Время истекло', ${filterByStatus})`;
+    }
+    if (status === 'regular') {
+      filterByStatus = Object.values(STEPS)
+        .filter(
+          (x) =>
+            x.value !== 'В боте' &&
+            x.value !== 'Время истекло' &&
+            x.isActive &&
+            x.step === 0,
+        )
+        .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
+        .join(', ');
+      filterQuery = `=AND(${filterByStatus})`;
+    }
     //console.log(filterByStatus);
 
     let allRecords: IBot[] = [];
@@ -520,7 +547,7 @@ export class AirtableService {
 
     do {
       const nextPage = offset ? `&offset=${offset}` : '';
-      const filter = `&${FILTER_BY_FORMULA}=AND({Статус} = 'Время истекло', ${filterByStatus})${nextPage}`;
+      const filter = `&${FILTER_BY_FORMULA} ${filterQuery}${nextPage}`;
       const data = await this.airtableHttpService.get(TablesName.Bot, filter);
       if (!data || !data.records || data?.records?.length === 0) return null;
 
@@ -538,5 +565,35 @@ export class AirtableService {
     console.log('length=', uniqChatIds.length);
 
     return uniqChatIds;
+  }
+
+  async updateNotification(
+    name: string,
+    time: string,
+    status: string,
+  ): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_UPDATE_NOTIFICATION_TABLE',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
+      name,
+      time,
+      status,
+    });
+    console.log('postWebhook ===>', response);
+    return response;
+  }
+
+  async getNotificationByField(
+    value: string,
+    field: string,
+  ): Promise<INotification | null> {
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${value}",{${field}})`;
+    const data = await this.airtableHttpService.get(
+      TablesName.Notifications,
+      filter,
+    );
+    if (!data || !data.records?.length) return null;
+    return data.records[0];
   }
 }

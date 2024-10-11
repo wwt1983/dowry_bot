@@ -429,5 +429,7 @@ export const CASH_STOP_WORDS = [
   'кэшбек',
   'кэш',
   'деньги',
+  'оплаты',
+  'оплата',
 ];
 export const CACHE_WAIT_STATUS = 'Кэш задержка';

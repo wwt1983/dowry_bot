@@ -6,7 +6,10 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
-import { NotificatonType } from 'src/airtable/types/INotification.interface';
+import {
+  NotificationName,
+  NotificatonType,
+} from 'src/airtable/types/INotification.interface';
 
 @Controller('telegram')
 export class TelegramController {
@@ -224,7 +227,8 @@ export class TelegramController {
       message: string;
       activity: string;
       count: string;
-      name: string;
+      name: NotificationName;
+      time: string;
     },
   ): Promise<void> {
     try {
@@ -235,12 +239,17 @@ export class TelegramController {
         data.count,
         data.message,
       );
-      await this.telegramService.alerts(
+      const result = await this.telegramService.alerts(
         data.typeField,
         data.name,
         data.activity,
         data.count,
         data.message,
+      );
+      await this.telegramService.updateNotification(
+        result,
+        data.name,
+        data.time,
       );
     } catch (error) {
       console.log('alerts', error);

@@ -55,12 +55,12 @@ export const getDifferenceInHours = (date: string) => {
   }
 };
 
-export const getDifferenceInDays = (date: string) => {
+export const getDifferenceInDays = (date: string, format?: string) => {
   try {
     if (!isValid(new Date(date))) return ERROR_TIME;
     return differenceInDays(
       getTimeWithTz(),
-      formatInTimeZone(date, TIME_ZONE, FORMAT_DATE),
+      formatInTimeZone(date, TIME_ZONE, format || FORMAT_DATE),
     );
   } catch (e) {
     console.log('getDifferenceInDays', date, e);
@@ -69,15 +69,13 @@ export const getDifferenceInDays = (date: string) => {
 };
 
 export const dateFormat = (date: string, format?: string) => {
-  if (!date) return null;
-  if (isValid(new Date(date))) {
-    return formatInTimeZone(
-      new Date(date),
-      TIME_ZONE,
-      format || FORMAT_DATE_NO_TIME,
-    );
-  }
-  return null;
+  if (!date || !isValid(new Date(date))) return null;
+
+  return formatInTimeZone(
+    new Date(date),
+    TIME_ZONE,
+    format || FORMAT_DATE_NO_TIME,
+  );
 };
 
 export const dateFormatNoTZ = (date: string, formatType?: string) => {
