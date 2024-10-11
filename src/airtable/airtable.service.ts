@@ -502,7 +502,7 @@ export class AirtableService {
     console.log('postWebhook ===>', response);
     return response;
   }
-  async getUsersWithStatusOnlyTimeout(): Promise<IBot[] | null> {
+  async getUsersWithStatusOnlyTimeout(): Promise<number[] | null> {
     const filterByStatus = Object.values(STEPS)
       .filter(
         (x) =>
@@ -513,13 +513,30 @@ export class AirtableService {
       )
       .map((x) => `NOT(FIND('${x.value}', ARRAYJOIN({Статус}, '|')))`)
       .join(', ');
-    console.log(filterByStatus);
-    const data = await this.airtableHttpService.get(
-      TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Статус} = 'Время истекло', ${filterByStatus})`,
-    );
-    console.log(data.records.length, data.records);
-    if (!data || !data.records) return null;
-    return data.records;
+    //console.log(filterByStatus);
+
+    let allRecords: IBot[] = [];
+    let offset = '';
+
+    do {
+      const nextPage = offset ? `&offset=${offset}` : '';
+      const filter = `&${FILTER_BY_FORMULA}=AND({Статус} = 'Время истекло', ${filterByStatus})${nextPage}`;
+      const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+      if (!data || !data.records || data?.records?.length === 0) return null;
+
+      offset = data.offset;
+      allRecords = allRecords.concat(data.records);
+    } while (offset);
+
+    const uniqChatIds = allRecords.reduce((acc, order) => {
+      if (!acc.find((x) => x === order.fields['chat_id'])) {
+        acc.push(order.fields['chat_id']);
+      }
+      return acc;
+    }, []);
+
+    console.log('length=', uniqChatIds.length);
+
+    return uniqChatIds;
   }
 }

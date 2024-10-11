@@ -1896,8 +1896,6 @@ export class TelegramService {
           chat_id.trim(),
         );
 
-      console.log(distribustions);
-
       if (!distribustions) {
         await this.airtableService.updateStatusTransferInBot(
           'Chat_id не найден',
@@ -2195,6 +2193,9 @@ export class TelegramService {
     }
   }
 
+  /**
+   * оповещения пользователям
+   */
   async alerts(
     typeField: NotificatonType,
     name: string,
@@ -2202,6 +2203,25 @@ export class TelegramService {
     count: string,
     message: string,
   ) {
-    await this.airtableService.getUsersWithStatusOnlyTimeout();
+    switch (name) {
+      case 'Новые раздачи для новых клиентов':
+        if (activity) {
+          const noPayUsers =
+            await this.airtableService.getUsersWithStatusOnlyTimeout();
+          if (noPayUsers && noPayUsers.length > 0) {
+            //   for (let i = 0; i < noPayUsers.length; i++) {
+            //     await this.bot.api.sendMessage(noPayUsers[i], message);
+            //     await new Promise((resolve) => setTimeout(resolve, 1000));
+            //   }
+            // }
+
+            for (let i = 0; i < 1; i++) {
+              await this.bot.api.sendMessage(193250152, message);
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        break;
+    }
   }
 }
