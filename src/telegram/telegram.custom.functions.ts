@@ -574,7 +574,7 @@ export const getNotificationValue = (
       if (minutes > 0) {
         nextStatusNotification = 'Время истекло';
       } else {
-        nextStatusNotification = status === 'Поиск' ? 'Заказ' : 'Поиск';
+        nextStatusNotification = status === 'Поиск' ? 'Корзина' : 'Заказ';
       }
       break;
     default:
