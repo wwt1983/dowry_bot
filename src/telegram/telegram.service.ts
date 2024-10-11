@@ -2203,21 +2203,40 @@ export class TelegramService {
     count: string,
     message: string,
   ) {
+    console.log(name);
     switch (name) {
       case 'Новые раздачи для новых клиентов':
         if (activity) {
           const noPayUsers =
             await this.airtableService.getUsersWithStatusOnlyTimeout();
           if (noPayUsers && noPayUsers.length > 0) {
-            //   for (let i = 0; i < noPayUsers.length; i++) {
-            //     await this.bot.api.sendMessage(noPayUsers[i], message);
-            //     await new Promise((resolve) => setTimeout(resolve, 1000));
-            //   }
-            // }
+            const offers = await this.airtableService.getOffers();
 
-            for (let i = 0; i < 1; i++) {
-              await this.bot.api.sendMessage(193250152, message);
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+            if (offers?.records?.length > 0) {
+              const offersMessage = getOffersLink(offers);
+              //   for (let i = 0; i < noPayUsers.length; i++) {
+              //     await this.bot.api.sendMessage(noPayUsers[i],
+              //   message + '\n' + offersMessage,
+              //   {
+              //     parse_mode: 'HTML',
+              //     link_preview_options: { is_disabled: true },
+              //   },
+              // );
+              //     await new Promise((resolve) => setTimeout(resolve, 1000));
+              //   }
+              // }
+
+              for (let i = 0; i < 1; i++) {
+                await this.bot.api.sendMessage(
+                  193250152,
+                  message + '\n' + offersMessage,
+                  {
+                    parse_mode: 'HTML',
+                    link_preview_options: { is_disabled: true },
+                  },
+                );
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              }
             }
           }
         }
