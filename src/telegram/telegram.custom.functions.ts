@@ -551,6 +551,10 @@ export const getNotificationValue = (
   switch (status) {
     case 'Выбор раздачи':
     case 'Артикул правильный':
+      nextStatusNotification = getNextStepStatusByNumber(
+        getNumberStepByStatus(status),
+        true,
+      );
     case 'Проблема с артикулом':
       const minutesForChoose =
         getDifferenceInMinutes(startTime) -
@@ -568,8 +572,6 @@ export const getNotificationValue = (
         (filter
           ? LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER
           : LIMIT_TIME_IN_MINUTES_FOR_BUY);
-
-      console.log('getNotificationValue minutes=', status, startTime, minutes);
 
       if (minutes > 0) {
         nextStatusNotification = 'Время истекло';
