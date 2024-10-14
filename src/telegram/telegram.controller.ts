@@ -223,29 +223,19 @@ export class TelegramController {
   async alerts(
     @Body()
     data: {
-      typeField: NotificatonType;
       message: string;
       activity: string;
-      count: string;
       name: NotificationName;
       time: string;
     },
   ): Promise<void> {
     try {
-      console.log(
-        data.typeField,
-        data.name,
-        data.activity,
-        data.count,
-        data.message,
-      );
       const result = await this.telegramService.alerts(
-        data.typeField,
         data.name,
         data.activity,
-        data.count,
         data.message,
       );
+
       await this.telegramService.updateNotification(
         result,
         data.name,

@@ -108,10 +108,7 @@ import {
   getOffersLinkForNotification,
 } from 'src/airtable/airtable.custom';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
-import {
-  NotificationName,
-  NotificatonType,
-} from 'src/airtable/types/INotification.interface';
+import { NotificationName } from 'src/airtable/types/INotification.interface';
 //import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -178,7 +175,8 @@ export class TelegramService {
       });
 
       await ctx.reply(
-        '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉',
+        '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉' +
+          '‼️ Срок действия раздачи 1 месяц с момента заказа товара ‼️ \n',
         {
           reply_markup: helpKeyboard,
         },
@@ -2204,76 +2202,79 @@ export class TelegramService {
   /**
    * оповещения пользователям
    */
-  async alerts(
-    typeField: NotificatonType,
-    name: NotificationName,
-    activity: string,
-    count: string,
-    message: string,
-  ) {
-    console.log(name);
+  async alerts(name: NotificationName, activity: string, message: string) {
     if (!activity) return false;
+    console.log('natification name = ', name, activity, message);
+
     const notification = await this.airtableService.getNotificationByField(
       name,
       'Название',
     );
-    console.log(
-      'последнее обновление',
-      notification,
-      getDifferenceInDays(notification?.fields['Последнее обновление']),
-    );
+
+    if (
+      notification?.fields['Последнее обновление'] &&
+      getDifferenceInDays(notification?.fields['Последнее обновление']) < 3
+    ) {
+      return false;
+    }
 
     let offersMessage = '';
-    switch (name) {
-      case 'Новые раздачи для новых клиентов':
-      case 'Новые раздачи для постоянных клиентов':
-        const offers = await this.airtableService.getOffers();
-        if (!offers || !offers.records || offers?.records?.length === 0)
-          return false;
-        offersMessage = getOffersLinkForNotification(offers);
-      case 'Кэш задержка':
-        if (
-          notification?.fields['Последнее обновление'] &&
-          getDifferenceInDays(notification.fields['Последнее обновление']) < 3
-        ) {
-          return false;
-        }
-        let data;
-        if (name === 'Новые раздачи для новых клиентов') {
-          data = await this.airtableService.getUsersWithStatus('new');
-        } else if (name === 'Кэш задержка') {
-          data = await this.airtableService.getNoCachedDistributions();
-        } else {
-          data = await this.airtableService.getUsersWithStatus('regular');
-        }
-        if (process.env.NODE_ENV !== 'development') {
-          for (let i = 0; i < data.length; i++) {
-            await this.bot.api.sendMessage(
-              data[i],
-              message + '\n' + offersMessage,
-              {
-                parse_mode: 'HTML',
-                link_preview_options: { is_disabled: true },
-              },
-            );
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-        } else {
-          for (let i = 0; i < 1; i++) {
-            await this.bot.api.sendMessage(
-              193250152,
-              message + '\n' + offersMessage,
-              {
-                parse_mode: 'HTML',
-                link_preview_options: { is_disabled: true },
-              },
-            );
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-        }
 
-        return true;
+    if (
+      name === 'Новые раздачи для новых клиентов' ||
+      name === 'Новые раздачи для постоянных клиентов' ||
+      name === 'Новая раздача'
+    ) {
+      const offers = await this.airtableService.getOffers();
+      if (!offers || !offers.records || offers?.records?.length === 0)
+        return false;
+      offersMessage = getOffersLinkForNotification(
+        offers,
+        name === 'Новая раздача' ? message : null,
+      );
     }
+
+    let data;
+    switch (name) {
+      case 'Новая раздача':
+        data = await this.airtableService.getUsersWithStatus('all');
+        break;
+      case 'Новые раздачи для новых клиентов':
+        data = await this.airtableService.getUsersWithStatus('new');
+        break;
+      case 'Новые раздачи для постоянных клиентов':
+        data = await this.airtableService.getUsersWithStatus('regular');
+        break;
+      case 'Кэш задержка':
+        data = await this.airtableService.getNoCachedDistributions();
+        break;
+    }
+
+    if (process.env.NODE_ENV !== 'development') {
+      for (let i = 0; i < data.length; i++) {
+        await this.bot.api.sendMessage(
+          data[i],
+          message + '\n' + offersMessage,
+          {
+            parse_mode: 'HTML',
+            link_preview_options: { is_disabled: true },
+          },
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    } else {
+      await this.bot.api.sendMessage(
+        193250152,
+        message + '\n' + offersMessage,
+        {
+          parse_mode: 'HTML',
+          link_preview_options: { is_disabled: true },
+        },
+      );
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    return true;
   }
   async updateNotification(flag: boolean, name: string, time: string) {
     if (flag) {

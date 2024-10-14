@@ -35,16 +35,29 @@ export const getOffersLink = (offers: IOffers) => {
 /**
  * Получаем список раздач с полем ссылки и название
  */
-export const getOffersLinkForNotification = (offers: IOffers) => {
+export const getOffersLinkForNotification = (
+  offers: IOffers,
+  onlyCurrent?: string,
+) => {
   try {
     const result = offers?.records
-      .filter((x) => x.fields['Name'] !== undefined && x.fields['Name'] !== '')
+      .filter((x) =>
+        onlyCurrent
+          ? x.fields['Name'] === onlyCurrent
+          : x.fields['Name'] !== undefined && x.fields['Name'] !== '',
+      )
       .map((x) => ({
         name:
-          x.fields['Name'] + ' (💰💰💰 кэшбэк 👉' + x.fields['Кешбэк'] + ')',
+          x.fields['Name'] +
+          (x.fields['Кешбэк'] && x.fields['Кешбэк'] !== undefined
+            ? ' (💰💰💰 кэшбэк 👉' + x.fields['Кешбэк'] + ')'
+            : ''),
         link: x.fields['Ссылка'],
       }));
-    return result.reduce((acc, currentValue, index) => {
+    return result.reduce((acc, currentValue) => {
+      if (onlyCurrent) {
+        return `\n\n😉 Здравствуйте. У нас новая раздача <a href='${currentValue.link}'>${currentValue.name}</a>`;
+      }
       acc += `😉 <a href='${currentValue.link}'>${currentValue.name}</a>\n`;
       return acc;
     }, '');

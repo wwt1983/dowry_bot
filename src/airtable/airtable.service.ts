@@ -510,56 +510,66 @@ export class AirtableService {
     return response;
   }
   async getUsersWithStatus(
-    status: 'new' | 'regular',
+    status: 'new' | 'regular' | 'all',
   ): Promise<number[] | null> {
-    const filterByStatus = Object.values(STEPS)
-      .filter(
-        (x) =>
-          x.value !== 'В боте' &&
-          x.value !== 'Время истекло' &&
-          x.isActive &&
-          x.step === 0,
-      )
-      .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
-      .join(', ');
-    const filterQuery = `=AND(${filterByStatus})`;
+    try {
+      const filterByStatus = Object.values(STEPS)
+        .filter(
+          (x) =>
+            x.value === 'В боте' ||
+            x.value === 'Время истекло' ||
+            (x.isActive && x.step === 0),
+        )
+        .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
+        .join(', ');
+      const filterQuery = `=AND(${filterByStatus})`;
 
-    //console.log(filterByStatus);
+      //console.log(filterByStatus);
 
-    let allRecords: IBot[] = [];
-    let offset = '';
+      let allRecords: IBot[] = [];
 
-    do {
-      const nextPage = offset ? `&offset=${offset}` : '';
-      const filter = `&${FILTER_BY_FORMULA} ${filterQuery}${nextPage}`;
-      const data = await this.airtableHttpService.get(TablesName.Bot, filter);
-      if (!data || !data.records || data?.records?.length === 0) return null;
+      let offset = '';
 
-      offset = data.offset;
-      allRecords = allRecords.concat(data.records);
-    } while (offset);
+      do {
+        const nextPage = offset ? `&offset=${offset}` : '';
+        const filter = `&${FILTER_BY_FORMULA} ${filterQuery}${nextPage}`;
+        const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+        if (!data || !data.records || data?.records?.length === 0) return null;
 
-    const uniqChatIds = allRecords.reduce((acc, order) => {
-      if (
-        (status === 'new' &&
-          (order.fields['Статус'] === 'В боте' ||
-            order.fields['Статус'] === 'Время истекло') &&
-          !acc.find((x) => x === order.fields['chat_id'])) ||
-        (status === 'regular' &&
-          order.fields['Статус'] !== 'В боте' &&
-          order.fields['Статус'] !== 'Время истекло' &&
-          order.fields['Статус'] !== 'Бот удален' &&
-          !acc.find((x) => x === order.fields['chat_id']))
-      ) {
-        acc.push(order.fields['chat_id']);
-      }
+        offset = data.offset;
+        allRecords = allRecords.concat(data.records);
+      } while (offset);
 
-      return acc;
-    }, []);
+      const uniqChatIds = allRecords.reduce((acc, order) => {
+        if (
+          (status === 'new' &&
+            (order.fields['Статус'] === 'В боте' ||
+              order.fields['Статус'] === 'Время истекло') &&
+            !acc.find((x) => x === order.fields['chat_id'])) ||
+          (status === 'regular' &&
+            order.fields['Статус'] !== 'В боте' &&
+            order.fields['Статус'] !== 'Время истекло' &&
+            order.fields['Статус'] !== 'Бот удален' &&
+            !acc.find((x) => x === order.fields['chat_id']))
+        ) {
+          acc.push(order.fields['chat_id']);
+        }
 
-    console.log('notifications length=', uniqChatIds.length);
+        if (
+          status === 'all' &&
+          !acc.find((x) => x === order.fields['chat_id'])
+        ) {
+          acc.push(order.fields['chat_id']);
+        }
+        return acc;
+      }, []);
 
-    return uniqChatIds;
+      console.log('notifications length=', uniqChatIds.length);
+
+      return uniqChatIds;
+    } catch (error) {
+      console.log('getUsersWithStatus', error);
+    }
   }
 
   async updateNotification(
