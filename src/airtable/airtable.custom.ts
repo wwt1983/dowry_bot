@@ -32,3 +32,24 @@ export const getOffersLink = (offers: IOffers) => {
     return 'Произошла ошибка в запросе. Попробуйте посмотреть предложения позже.';
   }
 };
+/**
+ * Получаем список раздач с полем ссылки и название
+ */
+export const getOffersLinkForNotification = (offers: IOffers) => {
+  try {
+    const result = offers?.records
+      .filter((x) => x.fields['Name'] !== undefined && x.fields['Name'] !== '')
+      .map((x) => ({
+        name:
+          x.fields['Name'] + ' (💰💰💰 кэшбэк 👉' + x.fields['Кешбэк'] + ')',
+        link: x.fields['Ссылка'],
+      }));
+    return result.reduce((acc, currentValue, index) => {
+      acc += `😉 <a href='${currentValue.link}'>${currentValue.name}</a>\n`;
+      return acc;
+    }, '');
+  } catch (e) {
+    console.log(e);
+    return 'Произошла ошибка в запросе. Попробуйте посмотреть предложения позже.';
+  }
+};

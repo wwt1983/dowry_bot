@@ -103,7 +103,10 @@ import {
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
-import { getOffersLink } from 'src/airtable/airtable.custom';
+import {
+  getOffersLink,
+  getOffersLinkForNotification,
+} from 'src/airtable/airtable.custom';
 import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 import {
   NotificationName,
@@ -2103,7 +2106,7 @@ export class TelegramService {
         await this.airtableService.updateStatusCacheInBot(sessionId);
         await this.bot.api.sendMessage(
           chat_id,
-          `🎉 Здравствуйте! Мы отправили вам 💰💰💰 за участие в раздаче ${userBotData.fields['Раздача']} Спасибо за сотрудничество 🎉`,
+          `🎉 Здравствуйте! Мы отправили вам 💰💰💰 за участие в раздаче ${userBotData.fields['Раздача']} Ждем вас в новых раздачах 🎉`,
           {
             parse_mode: 'HTML',
           },
@@ -2227,7 +2230,7 @@ export class TelegramService {
         const offers = await this.airtableService.getOffers();
         if (!offers || !offers.records || offers?.records?.length === 0)
           return false;
-        offersMessage = getOffersLink(offers);
+        offersMessage = getOffersLinkForNotification(offers);
       case 'Кэш задержка':
         if (
           notification?.fields['Последнее обновление'] &&
@@ -2243,30 +2246,32 @@ export class TelegramService {
         } else {
           data = await this.airtableService.getUsersWithStatus('regular');
         }
-
-        //   for (let i = 0; i < data.length; i++) {
-        //     await this.bot.api.sendMessage(data[i],
-        //   message + '\n' + offersMessage,
-        //   {
-        //     parse_mode: 'HTML',
-        //     link_preview_options: { is_disabled: true },
-        //   },
-        // );
-        //     await new Promise((resolve) => setTimeout(resolve, 1000));
-        //   }
-        // }
-
-        for (let i = 0; i < 1; i++) {
-          await this.bot.api.sendMessage(
-            193250152,
-            message + '\n' + offersMessage,
-            {
-              parse_mode: 'HTML',
-              link_preview_options: { is_disabled: true },
-            },
-          );
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (process.env.NODE_ENV !== 'development') {
+          for (let i = 0; i < data.length; i++) {
+            await this.bot.api.sendMessage(
+              data[i],
+              message + '\n' + offersMessage,
+              {
+                parse_mode: 'HTML',
+                link_preview_options: { is_disabled: true },
+              },
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        } else {
+          for (let i = 0; i < 1; i++) {
+            await this.bot.api.sendMessage(
+              193250152,
+              message + '\n' + offersMessage,
+              {
+                parse_mode: 'HTML',
+                link_preview_options: { is_disabled: true },
+              },
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
         }
+
         return true;
     }
   }

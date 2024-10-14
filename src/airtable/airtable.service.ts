@@ -512,34 +512,18 @@ export class AirtableService {
   async getUsersWithStatus(
     status: 'new' | 'regular',
   ): Promise<number[] | null> {
-    let filterByStatus;
-    let filterQuery;
-    if (status === 'new') {
-      filterByStatus = Object.values(STEPS)
-        .filter(
-          (x) =>
-            x.value !== 'В боте' &&
-            x.value !== 'Время истекло' &&
-            x.isActive &&
-            x.step === 0,
-        )
-        .map((x) => `NOT(FIND('${x.value}', ARRAYJOIN({Статус}, '|')))`)
-        .join(', ');
-      filterQuery = `=AND({Статус} = 'Время истекло', ${filterByStatus})`;
-    }
-    if (status === 'regular') {
-      filterByStatus = Object.values(STEPS)
-        .filter(
-          (x) =>
-            x.value !== 'В боте' &&
-            x.value !== 'Время истекло' &&
-            x.isActive &&
-            x.step === 0,
-        )
-        .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
-        .join(', ');
-      filterQuery = `=AND(${filterByStatus})`;
-    }
+    const filterByStatus = Object.values(STEPS)
+      .filter(
+        (x) =>
+          x.value !== 'В боте' &&
+          x.value !== 'Время истекло' &&
+          x.isActive &&
+          x.step === 0,
+      )
+      .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
+      .join(', ');
+    const filterQuery = `=AND(${filterByStatus})`;
+
     //console.log(filterByStatus);
 
     let allRecords: IBot[] = [];
@@ -556,13 +540,24 @@ export class AirtableService {
     } while (offset);
 
     const uniqChatIds = allRecords.reduce((acc, order) => {
-      if (!acc.find((x) => x === order.fields['chat_id'])) {
+      if (
+        (status === 'new' &&
+          (order.fields['Статус'] === 'В боте' ||
+            order.fields['Статус'] === 'Время истекло') &&
+          !acc.find((x) => x === order.fields['chat_id'])) ||
+        (status === 'regular' &&
+          order.fields['Статус'] !== 'В боте' &&
+          order.fields['Статус'] !== 'Время истекло' &&
+          order.fields['Статус'] !== 'Бот удален' &&
+          !acc.find((x) => x === order.fields['chat_id']))
+      ) {
         acc.push(order.fields['chat_id']);
       }
+
       return acc;
     }, []);
 
-    console.log('length=', uniqChatIds.length);
+    console.log('notifications length=', uniqChatIds.length);
 
     return uniqChatIds;
   }
