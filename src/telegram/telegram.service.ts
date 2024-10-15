@@ -373,6 +373,45 @@ export class TelegramService {
       });
     });
 
+    /*======== VIDEO =======*/
+    this.bot.on('message:video', async (ctx) => {
+      try {
+        const path = await ctx.getFile();
+        const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
+        const firebaseUrl = await this.firebaseService.uploadVideoAsync(url);
+        const msgToChat = await this.saveComment(
+          ctx.from,
+          firebaseUrl,
+          ctx.session?.data?.articul || '',
+          ctx.session?.data?.title || '',
+          ctx.session.status,
+        );
+        const responseMsg = await ctx.api.sendMessage(
+          getAdminChatId(),
+          msgToChat,
+        );
+
+        await this.addNumberToMessageInChatMessage(
+          responseMsg.message_id,
+          msgToChat,
+        );
+        return await ctx.reply(
+          'Ваше видео сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
+        );
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message.includes('Bad Request: file is too big')) {
+            await ctx.api.sendMessage(
+              ctx.from.id,
+              'Файл слишком тяжелый. Надо уменьшить 🥹',
+            );
+          }
+        }
+      }
+
+      return;
+    });
+
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       try {
