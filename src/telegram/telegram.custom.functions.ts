@@ -1015,3 +1015,5 @@ export const removeEmojis = (text: string) => {
 
 export const itRequestWithCachQuestion = (message: string) =>
   CASH_STOP_WORDS.find((x) => message.includes(x));
+
+export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

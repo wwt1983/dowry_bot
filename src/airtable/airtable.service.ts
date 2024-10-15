@@ -81,7 +81,7 @@ export class AirtableService {
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
         'Ключевые слова':
-          session.data.keys +
+          session?.data?.keys +
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': session.recivingDate,

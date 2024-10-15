@@ -71,6 +71,7 @@ import {
   getTextForHistoryOrders,
   filterNotificationValue,
   itRequestWithCachQuestion,
+  sleep,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -1420,7 +1421,7 @@ export class TelegramService {
 
       await this.bot.api.sendMessage(
         chat_id,
-        value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
+        value?.notification?.fields?.Сообщение + `\n➡️Раздача: ${offerName}`,
       );
       await this.getKeyboardHistoryWithWeb(chat_id);
     } catch (error: any) {
@@ -2251,17 +2252,23 @@ export class TelegramService {
     }
 
     if (process.env.NODE_ENV !== 'development') {
-      for (let i = 0; i < data.length; i++) {
-        await this.bot.api.sendMessage(
-          data[i],
-          message + '\n' + offersMessage,
-          {
+      const dataTest = [1841828301, 193250152];
+      console.log('боевая рассылка', data.length);
+      const promises = dataTest.map(async (item) => {
+        try {
+          await this.bot.api.sendMessage(item, message + '\n' + offersMessage, {
             parse_mode: 'HTML',
             link_preview_options: { is_disabled: true },
-          },
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+          });
+          await sleep(1000);
+        } catch (error) {
+          console.error(
+            `chat_id ${item} Ошибка при отправке сообщения: ${error}`,
+          );
+        }
+      });
+
+      await Promise.all(promises);
     } else {
       await this.bot.api.sendMessage(
         193250152,

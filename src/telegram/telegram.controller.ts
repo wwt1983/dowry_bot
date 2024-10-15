@@ -6,10 +6,7 @@ import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
-import {
-  NotificationName,
-  NotificatonType,
-} from 'src/airtable/types/INotification.interface';
+import { NotificationName } from 'src/airtable/types/INotification.interface';
 
 @Controller('telegram')
 export class TelegramController {
