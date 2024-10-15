@@ -217,6 +217,7 @@ export function updateSessionByStep(
   switch (status) {
     case 'В боте':
       break;
+    case 'Проблема с артикулом':
     case 'Артикул правильный':
       session.stopTime = getTimeWithTz();
       break;
@@ -330,6 +331,7 @@ export function nextStep(
   session: ISessionData,
   onlyActive: boolean,
 ): ISessionData {
+  if (session.status === 'Проблема с артикулом') return session;
   session.status = getNextStepStatusByNumber(session.step, onlyActive);
   session.step = session.step + 1;
 

@@ -788,7 +788,7 @@ export class TelegramService {
           });
         }
 
-        if (!ctx.session.data && !text?.includes('query_id')) {
+        if (!ctx?.session?.data && !text?.includes('query_id')) {
           if (
             ctx.message.chat.id.toString() === TELEGRAM_MESSAGE_CHAT_TEST ||
             ctx.message.chat.id.toString() === TELEGRAM_MESSAGE_CHAT_PROD
@@ -807,7 +807,7 @@ export class TelegramService {
           ctx.session = await this.restoreSession(ctx, lastSession);
           ctx.session = nextStep(ctx.session, true);
 
-          if (!ctx.session.isRestore) {
+          if (!ctx?.session?.isRestore) {
             const historyButtons = createHistoryKeyboard(dataBuyer, true);
             await ctx.reply(
               sayHi(first_name, userValue.userName, ctx.from.id),
