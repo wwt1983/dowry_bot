@@ -1325,6 +1325,7 @@ export class TelegramService {
         botId,
         status,
         getDateWithTz(startTime),
+        startTime,
       );
       if (
         status === 'Бот удален' ||
@@ -1332,6 +1333,7 @@ export class TelegramService {
         status === 'Время истекло'
       )
         return;
+
       if (outFromOffer) {
         await this.bot.api.sendMessage(
           chat_id,
@@ -1340,15 +1342,15 @@ export class TelegramService {
         return;
       }
       const notifications = await this.airtableService.getNotifications();
-      if (status === 'В боте') {
-        await this.bot.api.sendMessage(
-          chat_id,
-          notifications.records.find((x) => x.fields.Название === 'В боте')
-            .fields.Сообщение,
-        );
-        await this.getKeyboardHistoryWithWeb(chat_id);
-        return;
-      }
+      // if (status === 'В боте') {
+      //   await this.bot.api.sendMessage(
+      //     chat_id,
+      //     notifications.records.find((x) => x.fields.Название === 'В боте')
+      //       .fields.Сообщение,
+      //   );
+      //   await this.getKeyboardHistoryWithWeb(chat_id);
+      //   return;
+      // }
       const statisticNotifications =
         await this.airtableService.getNotificationStatistics(sessionId);
 
@@ -1360,7 +1362,12 @@ export class TelegramService {
         filter,
       );
 
-      if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
+      if (
+        !value ||
+        !value?.statistic?.fields?.Статус ||
+        value?.statistic?.fields?.Статус === 'Остановлено'
+      )
+        return;
 
       if (value.status === 'Время истекло') {
         await this.airtableService.updateStatusInBotTableAirtable(
@@ -1396,7 +1403,9 @@ export class TelegramService {
         return;
       }
 
-      if (value.statistic && value.statistic.fields) {
+      if (!value.notification?.fields?.Id) return;
+
+      if (value?.statistic?.fields) {
         await this.updateNotificationStatistic(
           sessionId,
           value.statistic.fields['Количество отправок'] + 1 <

@@ -550,11 +550,6 @@ export const getNotificationValue = (
   let nextStatusNotification: BotStatus;
   switch (status) {
     case 'Выбор раздачи':
-    case 'Артикул правильный':
-      nextStatusNotification = getNextStepStatusByNumber(
-        getNumberStepByStatus(status),
-        true,
-      );
     case 'Проблема с артикулом':
       const minutesForChoose =
         getDifferenceInMinutes(startTime) -
@@ -563,10 +558,13 @@ export const getNotificationValue = (
           : LIMIT_TIME_IN_MINUTES_FOR_ORDER);
       if (minutesForChoose > 0) {
         nextStatusNotification = 'Время истекло';
+        break;
       }
-      break;
+      if (status === 'Проблема с артикулом') status = 'Выбор раздачи';
+
     case 'Поиск':
     case 'Корзина':
+    case 'Артикул правильный':
       const minutes =
         getDifferenceInMinutes(startTime) -
         (filter
@@ -575,10 +573,8 @@ export const getNotificationValue = (
 
       if (minutes > 0) {
         nextStatusNotification = 'Время истекло';
-      } else {
-        nextStatusNotification = status === 'Поиск' ? 'Корзина' : 'Заказ';
+        break;
       }
-      break;
     default:
       nextStatusNotification = getNextStepStatusByNumber(
         getNumberStepByStatus(status),
