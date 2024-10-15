@@ -1432,7 +1432,7 @@ export class TelegramService {
         chat_id,
         value?.notification?.fields?.Сообщение + `\n➡️Раздача: ${offerName}`,
       );
-      await this.getKeyboardHistoryWithWeb(chat_id);
+      //await this.getKeyboardHistoryWithWeb(chat_id);
     } catch (error: any) {
       console.log(error);
 
