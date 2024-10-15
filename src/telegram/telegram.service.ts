@@ -2252,11 +2252,9 @@ export class TelegramService {
     }
 
     if (process.env.NODE_ENV !== 'development') {
-      const dataTest = [1841828301, 193250152, 268815178];
-
       console.log('боевая рассылка', data.length);
 
-      dataTest.map(async (item) => {
+      data.map(async (item) => {
         try {
           await this.bot.api.sendMessage(item, message + '\n' + offersMessage, {
             parse_mode: 'HTML',
@@ -2273,6 +2271,7 @@ export class TelegramService {
 
       //await Promise.all(promises);
     } else {
+      //const dataTest = [1841828301, 193250152, 268815178];
       await this.bot.api.sendMessage(
         193250152,
         message + '\n' + offersMessage,
