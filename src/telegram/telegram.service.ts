@@ -2252,15 +2252,18 @@ export class TelegramService {
     }
 
     if (process.env.NODE_ENV !== 'development') {
-      const dataTest = [1841828301, 193250152];
+      const dataTest = [1841828301, 193250152, 268815178];
+
       console.log('боевая рассылка', data.length);
-      const promises = dataTest.map(async (item) => {
+
+      dataTest.map(async (item) => {
         try {
           await this.bot.api.sendMessage(item, message + '\n' + offersMessage, {
             parse_mode: 'HTML',
             link_preview_options: { is_disabled: true },
           });
           await sleep(1000);
+          console.log(`рассылка прошла для ${item}`);
         } catch (error) {
           console.error(
             `chat_id ${item} Ошибка при отправке сообщения: ${error}`,
@@ -2268,7 +2271,7 @@ export class TelegramService {
         }
       });
 
-      await Promise.all(promises);
+      //await Promise.all(promises);
     } else {
       await this.bot.api.sendMessage(
         193250152,
