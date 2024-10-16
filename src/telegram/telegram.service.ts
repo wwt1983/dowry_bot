@@ -1401,12 +1401,7 @@ export class TelegramService {
         filter,
       );
 
-      if (
-        !value ||
-        !value?.statistic?.fields?.Статус ||
-        value?.statistic?.fields?.Статус === 'Остановлено'
-      )
-        return;
+      if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
 
       if (value.status === 'Время истекло') {
         await this.airtableService.updateStatusInBotTableAirtable(
@@ -1417,7 +1412,7 @@ export class TelegramService {
           sessionId,
           'Остановлено',
           value?.statistic?.fields
-            ? value.statistic.fields['Количество отправок']
+            ? value.statistic?.fields['Количество отправок']
             : 1,
           botId,
           value.notification.fields.Id,
@@ -1427,7 +1422,7 @@ export class TelegramService {
           chat_id,
           value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
         );
-        await this.getKeyboardHistoryWithWeb(chat_id);
+        await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
         return;
       }
       if (
@@ -1508,12 +1503,20 @@ export class TelegramService {
     return;
   }
 
-  async getKeyboardHistoryWithWeb(chatId: number | string) {
+  async getKeyboardHistoryWithWeb(
+    chatId: number | string,
+    timeoutSession?: string,
+  ) {
     const dataBuyer = await this.airtableService.getBotForContinue(
       chatId.toString(),
     );
 
-    const historyButtons = createHistoryKeyboard(dataBuyer, true);
+    const historyButtons = createHistoryKeyboard(
+      (dataBuyer?.length ?? 0) > 0 && timeoutSession
+        ? dataBuyer?.filter((x) => x.fields['SessionId'] !== timeoutSession)
+        : dataBuyer,
+      true,
+    );
     const countWorkLabels = createLabelHistory(dataBuyer).length;
 
     return await this.bot.api.sendMessage(
