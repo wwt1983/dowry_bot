@@ -2013,10 +2013,10 @@ export class TelegramService {
           chat_id: distribution.fields['chat_id'] || chat_id,
           articul: articul,
           dataForCash: dataForCash,
-          key: distribution.fields['Ключевой запрос'] || key,
+          key: distribution?.fields['Ключевой запрос'] || key,
           price:
-            distribution.fields['Цена товара'] || price
-              ? price.replace(/\D/g, '')
+            distribution?.fields['Цена товара'] || price
+              ? price?.replace(/\D/g, '')
               : '',
           checkWb: checkWb,
           dateRecived:
