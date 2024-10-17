@@ -154,12 +154,12 @@ export const addMinutesToInterval = (date: string, interval: number) => {
 };
 
 export const getLastIntervalData = (data: IBot[], interval: string) => {
-  if (!data) return null;
+  if (!data) return getTimeWithTz();
   const today = new Date(); // Сегодняшняя дата
   const filteredData = data.filter((event) =>
     isSameDay(new Date(event.fields.StartTime), today),
   );
-  if (!filteredData || filteredData.length === 0) return null;
+  if (!filteredData || filteredData.length === 0) return getTimeWithTz();
 
   const lastInterval = filteredData.sort((a, b) =>
     compareAsc(

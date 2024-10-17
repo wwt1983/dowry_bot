@@ -255,7 +255,7 @@ export class TelegramController {
   ): Promise<void> {
     try {
       console.log('cloaseWaitings', data.articul);
-      await this.telegramService.cloaseWaitings(data.articul);
+      await this.telegramService.closeWaitings(data.articul);
     } catch (error) {
       console.log('cloaseWaitings', error);
     }

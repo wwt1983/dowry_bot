@@ -233,7 +233,7 @@ export class TelegramService {
           ctx.session = updateSessionByField(
             ctx.session,
             'startTime',
-            lastInterval || getTimeWithTz(),
+            lastInterval,
           );
 
           console.log('lastInterval=', id, lastInterval);
@@ -2362,7 +2362,7 @@ export class TelegramService {
     }
   }
 
-  async cloaseWaitings(articul: string) {
+  async closeWaitings(articul: string) {
     const data = await this.airtableService.getWaitingsForClose(articul);
     if (!data || data.length === 0) return;
     data.map(async (item) => {
@@ -2381,7 +2381,7 @@ export class TelegramService {
         console.log(`close waitings ${articul}`);
       } catch (error) {
         console.error(
-          `chat_id ${item} Ошибка при отправке сообщения: ${error}`,
+          `chat_id ${item.fields.chat_id} Ошибка при отправке сообщения: ${error}`,
         );
       }
     });

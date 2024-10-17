@@ -612,8 +612,8 @@ export class AirtableService {
     );
 
     //console.log('count filter', articul, data?.records.length);
-
-    if (!data?.records?.length || data?.records?.length === 0) return null;
+    if (!data?.records?.length || data?.records?.length === 0)
+      return getTimeWithTz();
 
     return getLastIntervalData((data as IBots).records, interval);
   }
