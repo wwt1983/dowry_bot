@@ -153,7 +153,7 @@ export const addMinutesToInterval = (date: string, interval: number) => {
   return getDateWithTz(nextInterval, FORMAT_DATE);
 };
 
-export const getLastIntervalData = (data: IBot[]) => {
+export const getLastIntervalData = (data: IBot[], interval: string) => {
   if (!data) return null;
   const today = new Date(); // Сегодняшняя дата
   const filteredData = data.filter((event) =>
@@ -170,11 +170,17 @@ export const getLastIntervalData = (data: IBot[]) => {
 
   const nextInterval = addMinutesToInterval(
     lastInterval[0].fields['StartTime'],
-    INTERVAL_FOR_NEXT_CHOOSE,
+    +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
+  // console.log(
+  //   'next ===>  ',
+  //   lastInterval[0].fields.StartTime,
+  //   nextInterval,
+  //   isFuture(new Date(nextInterval)),
+  // );
+
   if (isFuture(new Date(nextInterval))) {
-    //console.log('next ===>  ', lastInterval[0].fields.StartTime, nextInterval);
     return nextInterval;
   } else {
     return getTimeWithTz();

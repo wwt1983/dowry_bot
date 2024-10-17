@@ -601,17 +601,37 @@ export class AirtableService {
   /**
    * метод выбирает последний по времени заказ
    */
-  async getLastIntervalTime(articul: string): Promise<string | null> {
+  async getLastIntervalTime(
+    articul: string,
+    interval: string,
+  ): Promise<string | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
       `&${FILTER_BY_FORMULA}=AND({Артикул} = ${articul}, OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
       {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
     );
 
-    console.log('count filter', articul, data?.records.length);
+    //console.log('count filter', articul, data?.records.length);
 
     if (!data?.records?.length || data?.records?.length === 0) return null;
 
-    return getLastIntervalData((data as IBots).records);
+    return getLastIntervalData((data as IBots).records, interval);
+  }
+
+  /**
+   * метод выбирает все раздачи пользователей по артикулу для закрытия раздачи
+   */
+  async getWaitingsForClose(articul: string): Promise<IBot[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Артикул} = ${articul}, OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
+    );
+
+    //console.log('count filter', articul, data?.records.length);
+
+    if (!data?.records?.length || data?.records?.length === 0) return null;
+
+    return (data as IBots).records;
   }
 }

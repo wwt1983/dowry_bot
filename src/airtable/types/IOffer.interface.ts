@@ -39,6 +39,7 @@ export interface IOffer {
     Фильтры?: string[];
     Фильтр?: string;
     'Включить фильтры': boolean;
+    Интервал: string;
   };
 }
 

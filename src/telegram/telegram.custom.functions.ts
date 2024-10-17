@@ -377,7 +377,7 @@ export function getTextForFirstStep(data: ITelegramWebApp, startTime: string) {
     `\n🔎 ${keys.toUpperCase()}\n\n` +
     //getMessageForTimeOffer(times) +
     useFilterForHelpSearch +
-    `‼️ Время начала вашей раздачи ${formatSimple(startTime)} ‼️` +
+    `‼️ Начало вашей раздачи ${formatSimple(startTime)} (время московское) ‼️` +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
   return [

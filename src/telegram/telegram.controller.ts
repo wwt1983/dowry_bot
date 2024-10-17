@@ -242,4 +242,22 @@ export class TelegramController {
       console.log('alerts', error);
     }
   }
+
+  /**
+   * закрытие всех раздач если раздача заканчивается
+   */
+  @Post('closeWaitings')
+  async closeWaitings(
+    @Body()
+    data: {
+      articul: string;
+    },
+  ): Promise<void> {
+    try {
+      console.log('cloaseWaitings', data.articul);
+      await this.telegramService.cloaseWaitings(data.articul);
+    } catch (error) {
+      console.log('cloaseWaitings', error);
+    }
+  }
 }

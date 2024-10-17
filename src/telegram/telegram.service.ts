@@ -174,7 +174,7 @@ export class TelegramService {
       });
 
       await ctx.reply(
-        '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉' +
+        '💰Кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф.😉\n' +
           '‼️ Срок действия раздачи 1 месяц с момента заказа товара ‼️ \n',
         {
           reply_markup: helpKeyboard,
@@ -227,6 +227,7 @@ export class TelegramService {
         if (!existArticleByUser) {
           const lastInterval = await this.airtableService.getLastIntervalTime(
             sessionData.articul,
+            sessionData.interval,
           );
 
           ctx.session = updateSessionByField(
@@ -699,21 +700,9 @@ export class TelegramService {
 
       let response = null;
       if (ctx.session.status === 'Выбор раздачи') {
-        const lastInterval = await this.airtableService.getLastIntervalTime(
-          ctx.session.offerId,
-        );
-
-        ctx.session = updateSessionByField(
-          ctx.session,
-          'startTime',
-          lastInterval || getTimeWithTz(),
-        );
-
-        console.log('callback_query lastInterval=', lastInterval);
-
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
-          getTextForFirstStep(ctx.session.data, lastInterval) as any[],
+          getTextForFirstStep(ctx.session.data, ctx.session.startTime) as any[],
         );
         await this.sendMediaByStep(ctx.session.status, ctx);
         response = await this.bot.api.sendMediaGroup(
@@ -900,6 +889,7 @@ export class TelegramService {
 
           lastInterval = await this.airtableService.getLastIntervalTime(
             webData.offerId,
+            webData.interval,
           );
 
           console.log('lastInterval=', id, lastInterval);
@@ -1190,6 +1180,7 @@ export class TelegramService {
       countTryError: 0,
       errorStatus: null,
       filter: offerAirtable.fields.Фильтр,
+      interval: offerAirtable.fields.Интервал,
     };
   }
   /**
@@ -2369,5 +2360,30 @@ export class TelegramService {
     } else {
       await this.airtableService.updateNotification(name, time, 'Не успешно');
     }
+  }
+
+  async cloaseWaitings(articul: string) {
+    const data = await this.airtableService.getWaitingsForClose(articul);
+    if (!data || data.length === 0) return;
+    data.map(async (item) => {
+      try {
+        await this.bot.api.sendMessage(
+          process.env.NODE_ENV === 'development'
+            ? 193250152
+            : item.fields.chat_id,
+          `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, на сегодня все 🙁\n Следите за нашими раздачами.😉`,
+        );
+        await this.airtableService.updateStatusInBotTableAirtable(
+          item.fields.SessionId,
+          'Время истекло',
+        );
+        await sleep(600);
+        console.log(`close waitings ${articul}`);
+      } catch (error) {
+        console.error(
+          `chat_id ${item} Ошибка при отправке сообщения: ${error}`,
+        );
+      }
+    });
   }
 }
