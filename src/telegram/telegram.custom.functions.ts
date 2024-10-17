@@ -37,6 +37,7 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER,
   LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
   CASH_STOP_WORDS,
+  INTERVAL_FOR_NEXT_CHOOSE,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -55,7 +56,10 @@ import {
   getTimeWithTz,
   dateFormatNoTZ,
   getDate,
+  addMinutesToInterval,
+  formatSimple,
 } from 'src/common/date/date.methods';
+
 import { IDistribution } from 'src/airtable/types/IDisturbation.interface';
 
 export function sayHi(
@@ -114,12 +118,15 @@ export const getUserName = (from: User) => {
 export function createInitialSessionData(
   id?: string,
   user?: string,
+  startTime?: string,
 ): ISessionData {
   return {
     sessionId: uuidv4(),
     user: user,
     chat_id: id || null,
-    startTime: getTimeWithTz(),
+    startTime: startTime
+      ? addMinutesToInterval(startTime, INTERVAL_FOR_NEXT_CHOOSE)
+      : getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
     step: getNumberStepByStatus('В боте'),
@@ -145,6 +152,7 @@ export function createInitialSessionData(
     price: null,
     realStatus: null,
     checkWb: null,
+    timeOfEntry: getTimeWithTz(),
   };
 }
 
@@ -194,6 +202,7 @@ export function createContinueSessionData(
     imgOrder: data.imgOrder,
     imgSearch: data.imgSearch,
     imgShtrihCode: data.imgShtrihCode,
+    timeOfEntry: data.timeOfEntry,
   };
 }
 export function updateSessionByField(
@@ -338,7 +347,7 @@ export function nextStep(
   return session;
 }
 
-export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
+export function getTextForFirstStep(data: ITelegramWebApp, startTime: string) {
   const {
     title,
     keys,
@@ -366,14 +375,15 @@ export function getTextForFirstStep(data: ITelegramWebApp, wbScreen?: string) {
     FIRST_STEP_LINK +
     FIRST_STEP_KEY_VALUE +
     `\n🔎 ${keys.toUpperCase()}\n\n` +
-    getMessageForTimeOffer(times) +
+    //getMessageForTimeOffer(times) +
     useFilterForHelpSearch +
+    `‼️ Время начала вашей раздачи ${formatSimple(startTime)} ‼️` +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
   return [
     {
       type: 'photo',
-      media: wbScreen || image,
+      media: image,
       caption: caption,
     },
   ];
@@ -763,7 +773,6 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
       x.fields.Статус !== 'Проблема с локацией' &&
       x.fields.Статус !== 'Лимит заказов' &&
       x.fields.Статус !== 'Отмена пользователем' &&
-      x.fields.Статус !== 'В ожидании' &&
       !x.fields.Финиш,
   );
   if (!filterData || filterData.length === 0) return null;
@@ -898,7 +907,6 @@ export const getArticulesByUser = (dataBuyer: IBot[]) => {
         (x) =>
           x.fields.Статус !== 'Бот удален' &&
           x.fields.Статус !== 'В боте' &&
-          x.fields.Статус !== 'В ожидании' &&
           x.fields.Статус !== 'Время истекло' &&
           x.fields.Статус !== 'Лимит заказов' &&
           x.fields.Статус !== 'Отмена пользователем',

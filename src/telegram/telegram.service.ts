@@ -159,17 +159,15 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
       const userValue = getUserName(ctx.from);
+
+      const userHistory = await this.getUserHistory(ctx.from, true);
       ctx.session = createInitialSessionData(
         id?.toString(),
         userValue.userName || userValue.fio,
       );
-      const userHistory = await this.getUserHistory(ctx.from, true);
-
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
       ctx.session.userArticules = userHistory?.userArticules;
-
-      await this.saveToAirtable(ctx.session);
 
       await ctx.reply(sayHi(first_name, userValue.userName, id), {
         reply_markup: userHistory.orderButtons,
@@ -192,6 +190,8 @@ export class TelegramService {
         },
       );
       //await ctx.api.sendMessage(id, FOOTER);
+
+      await this.saveToAirtable(ctx.session);
 
       let existArticleByUser: boolean = false;
       if (ctx.match) {
@@ -225,13 +225,24 @@ export class TelegramService {
         }
         //продолжаем двигаться только если не было заказов с таким артикулом
         if (!existArticleByUser) {
+          const lastInterval = await this.airtableService.getLastIntervalTime(
+            sessionData.articul,
+          );
+
+          ctx.session = updateSessionByField(
+            ctx.session,
+            'startTime',
+            lastInterval || getTimeWithTz(),
+          );
+
+          console.log('lastInterval=', id, lastInterval);
           await this.updateToAirtable(ctx.session);
 
           ctx.session = nextStep(ctx.session, true);
           await this.sendMediaByStep(ctx.session.status, ctx);
           await this.bot.api.sendMediaGroup(
             ctx.session.chat_id,
-            getTextForFirstStep(sessionData) as any[],
+            getTextForFirstStep(sessionData, lastInterval) as any[],
           );
         }
         ctx.session.lastCommand = null;
@@ -688,9 +699,21 @@ export class TelegramService {
 
       let response = null;
       if (ctx.session.status === 'Выбор раздачи') {
+        const lastInterval = await this.airtableService.getLastIntervalTime(
+          ctx.session.offerId,
+        );
+
+        ctx.session = updateSessionByField(
+          ctx.session,
+          'startTime',
+          lastInterval || getTimeWithTz(),
+        );
+
+        console.log('callback_query lastInterval=', lastInterval);
+
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
-          getTextForFirstStep(ctx.session.data) as any[],
+          getTextForFirstStep(ctx.session.data, lastInterval) as any[],
         );
         await this.sendMediaByStep(ctx.session.status, ctx);
         response = await this.bot.api.sendMediaGroup(
@@ -858,18 +881,12 @@ export class TelegramService {
         }
 
         let data: ITelegramWebApp = null;
+        let lastInterval = null;
 
         //ответ от веб с выбором раздачи
         if (ctx.msg?.text?.includes('query_id')) {
           const { id } = ctx.from;
           const userValue = getUserName(ctx.from);
-
-          ctx.session = createInitialSessionData(
-            id?.toString(),
-            userValue.userName || userValue.fio,
-          );
-
-          await this.saveToAirtable(ctx.session);
 
           const webData = JSON.parse(text) as ITelegramWebApp;
           /*Удаляем первый ответ от сайта он формате объекта*/
@@ -880,6 +897,20 @@ export class TelegramService {
             webData.id,
             webData.title,
           );
+
+          lastInterval = await this.airtableService.getLastIntervalTime(
+            webData.offerId,
+          );
+
+          console.log('lastInterval=', id, lastInterval);
+
+          ctx.session = createInitialSessionData(
+            id?.toString(),
+            userValue.userName || userValue.fio,
+            lastInterval,
+          );
+
+          await this.saveToAirtable(ctx.session);
 
           console.log('==== WEB API ====', data, ctx.session);
 
@@ -900,11 +931,7 @@ export class TelegramService {
           ctx.session = updateSessionByField(
             ctx.session,
             'status',
-            existArticulByUser
-              ? 'Лимит заказов'
-              : data.keys === ErrorKeyWord
-                ? 'В ожидании'
-                : 'Выбор раздачи',
+            existArticulByUser ? 'Лимит заказов' : 'Выбор раздачи',
           );
 
           if (existArticulByUser || data.keys === ErrorKeyWord) {
@@ -982,7 +1009,7 @@ export class TelegramService {
 
           let response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
-            getTextForFirstStep(data) as any[],
+            getTextForFirstStep(data, lastInterval) as any[],
           );
 
           response = await this.bot.api.sendMediaGroup(

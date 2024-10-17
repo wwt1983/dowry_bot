@@ -13,7 +13,11 @@ import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotification, INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus, IBot, IBots } from './types/IBot.interface';
-import { getTimeWithTz, getOfferTime } from 'src/common/date/date.methods';
+import {
+  getTimeWithTz,
+  getOfferTime,
+  getLastIntervalData,
+} from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
@@ -94,6 +98,7 @@ export class AirtableService {
         'Получен скрин': session?.imgRecieved || '',
         'Штрих-код скрин': session?.imgShtrihCode || '',
         'Товар скрин': session?.imgGood || '',
+        'Время входа': session?.timeOfEntry || '',
       };
 
       const tableUrl = this.configService.get(
@@ -234,18 +239,9 @@ export class AirtableService {
           getFilterById(keyIds),
         )) as IKeyWords;
 
-        if (count >= countOrder && keys.records.length > 0) {
-          let allCountKeys = 0;
-          for (let i = 0; i < keys.records.length; i++) {
-            const countKeу = keys.records[i].fields.Количество;
-            allCountKeys = allCountKeys + countKeу;
-            const keyValue = (keys.records[i] as IKeyWord).fields.Название;
-            if (allCountKeys > countOrder) {
-              offer.fields['Ключевые слова'] = keyValue;
-              break;
-            }
-          }
-        }
+        const nextKeyIndex = (countOrder + 1) % keys.records.length;
+        offer.fields['Ключевые слова'] =
+          keys.records[nextKeyIndex].fields.Название;
       }
     }
 
@@ -600,5 +596,22 @@ export class AirtableService {
     );
     if (!data || !data.records?.length) return null;
     return data.records[0];
+  }
+
+  /**
+   * метод выбирает последний по времени заказ
+   */
+  async getLastIntervalTime(articul: string): Promise<string | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Артикул} = ${articul}, OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
+    );
+
+    console.log('count filter', articul, data?.records.length);
+
+    if (!data?.records?.length || data?.records?.length === 0) return null;
+
+    return getLastIntervalData((data as IBots).records);
   }
 }

@@ -57,6 +57,7 @@ export interface ISessionData {
   imgRecieved?: string; // получен
   imgShtrihCode?: string; // штрих-код
   imgGood?: string; //товар
+  timeOfEntry?: string; //время входа
 }
 
 export type MyContext = HydrateFlavor<

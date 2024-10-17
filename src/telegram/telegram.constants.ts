@@ -25,6 +25,8 @@ export const MESSAGE_WAITING =
   'Это популярная раздача. Сейчас все места заняты. Попробуйте оформить раздачу позже. Места могут периодически освобождаться или появляться новые😉';
 export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
 
+export const INTERVAL_FOR_NEXT_CHOOSE = 30;
+
 export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
@@ -272,13 +274,6 @@ export const STEPS = {
     step: -6,
     value: 'Отмена пользователем',
     erroText: 'Отмена пользователем',
-    isActive: true,
-    typeStep: TYPE_STEP.text,
-  },
-  'В ожидании': {
-    step: -7,
-    value: 'В ожидании',
-    erroText: 'В ожидании',
     isActive: true,
     typeStep: TYPE_STEP.text,
   },

@@ -6,8 +6,14 @@ import {
   isValid,
   format,
   parse,
+  addMinutes,
+  compareAsc,
+  isSameDay,
+  isFuture,
 } from 'date-fns';
 import { ISessionData } from 'src/telegram/telegram.interface';
+import { IBot } from 'src/airtable/types/IBot.interface';
+import { INTERVAL_FOR_NEXT_CHOOSE } from 'src/telegram/telegram.constants';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_SIMPLE = 'dd.MM.yyyy HH:mm';
@@ -22,7 +28,7 @@ const ERROR_TIME = -1000;
 export const getTimeWithTz = (format?: string) =>
   formatInTimeZone(new Date(), TIME_ZONE, format || FORMAT_DATE);
 
-export const getDateWithTz = (date: string, format?: string) => {
+export const getDateWithTz = (date: string | Date, format?: string) => {
   if (!date) return null;
   return formatInTimeZone(date, TIME_ZONE, format || FORMAT_DATE);
 };
@@ -139,3 +145,40 @@ export const parsedDate = (date: string) => {
   if (!date) return null;
   return parse(date, FORMAT_DATE_SIMPLE_NO_TIME, new Date());
 };
+
+export const addMinutesToInterval = (date: string, interval: number) => {
+  if (!date) return null;
+  //const time = formatInTimeZone(date, TIME_ZONE, FORMAT_DATE);
+  const nextInterval = addMinutes(date, interval);
+  return getDateWithTz(nextInterval, FORMAT_DATE);
+};
+
+export const getLastIntervalData = (data: IBot[]) => {
+  if (!data) return null;
+  const today = new Date(); // Сегодняшняя дата
+  const filteredData = data.filter((event) =>
+    isSameDay(new Date(event.fields.StartTime), today),
+  );
+  if (!filteredData || filteredData.length === 0) return null;
+
+  const lastInterval = filteredData.sort((a, b) =>
+    compareAsc(
+      new Date(b.fields['StartTime']),
+      new Date(a.fields['StartTime']),
+    ),
+  );
+
+  const nextInterval = addMinutesToInterval(
+    lastInterval[0].fields['StartTime'],
+    INTERVAL_FOR_NEXT_CHOOSE,
+  );
+
+  if (isFuture(new Date(nextInterval))) {
+    //console.log('next ===>  ', lastInterval[0].fields.StartTime, nextInterval);
+    return nextInterval;
+  } else {
+    return getTimeWithTz();
+  }
+};
+
+export const formatSimple = (date: string) => format(date, FORMAT_DATE_SIMPLE);
