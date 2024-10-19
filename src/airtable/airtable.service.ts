@@ -602,12 +602,12 @@ export class AirtableService {
    * метод выбирает последний по времени заказ
    */
   async getLastIntervalTime(
-    articul: string,
+    offerId: string,
     interval: string,
   ): Promise<string | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Артикул} = ${articul}, OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
       {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
     );
 
@@ -621,10 +621,10 @@ export class AirtableService {
   /**
    * метод выбирает все раздачи пользователей по артикулу для закрытия раздачи
    */
-  async getWaitingsForClose(articul: string): Promise<IBot[] | null> {
+  async getWaitingsForClose(offerId: string): Promise<IBot[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Артикул} = ${articul}, OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
         {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
     );
 

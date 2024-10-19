@@ -226,9 +226,10 @@ export class TelegramService {
         //продолжаем двигаться только если не было заказов с таким артикулом
         if (!existArticleByUser) {
           const lastInterval = await this.airtableService.getLastIntervalTime(
-            sessionData.articul,
+            sessionData.offerId,
             sessionData.interval,
           );
+          //console.log('lastInterval=', sessionData.offerId, id, lastInterval);
 
           ctx.session = updateSessionByField(
             ctx.session,
@@ -892,7 +893,7 @@ export class TelegramService {
             webData.interval,
           );
 
-          console.log('lastInterval=', id, lastInterval);
+          //console.log('lastInterval=', webData.offerId, id, lastInterval);
 
           ctx.session = createInitialSessionData(
             id?.toString(),
@@ -2362,8 +2363,8 @@ export class TelegramService {
     }
   }
 
-  async closeWaitings(articul: string) {
-    const data = await this.airtableService.getWaitingsForClose(articul);
+  async closeWaitings(offerId: string) {
+    const data = await this.airtableService.getWaitingsForClose(offerId);
     if (!data || data.length === 0) return;
     data.map(async (item) => {
       try {
@@ -2378,7 +2379,7 @@ export class TelegramService {
           'Время истекло',
         );
         await sleep(600);
-        console.log(`close waitings ${articul}`);
+        console.log(`close waitings ${offerId}`);
       } catch (error) {
         console.error(
           `chat_id ${item.fields.chat_id} Ошибка при отправке сообщения: ${error}`,

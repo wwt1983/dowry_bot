@@ -250,12 +250,12 @@ export class TelegramController {
   async closeWaitings(
     @Body()
     data: {
-      articul: string;
+      offerId: string;
     },
   ): Promise<void> {
     try {
-      console.log('cloaseWaitings', data.articul);
-      await this.telegramService.closeWaitings(data.articul);
+      console.log('cloaseWaitings', data.offerId);
+      await this.telegramService.closeWaitings(data.offerId);
     } catch (error) {
       console.log('cloaseWaitings', error);
     }

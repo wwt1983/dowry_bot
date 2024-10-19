@@ -40,6 +40,7 @@ export interface IOffer {
     Фильтр?: string;
     'Включить фильтры': boolean;
     Интервал: string;
+    'Id (from OfferId)': string;
   };
 }
 
