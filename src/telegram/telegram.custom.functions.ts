@@ -124,9 +124,7 @@ export function createInitialSessionData(
     sessionId: uuidv4(),
     user: user,
     chat_id: id || null,
-    startTime: startTime
-      ? addMinutesToInterval(startTime, INTERVAL_FOR_NEXT_CHOOSE)
-      : getTimeWithTz(),
+    startTime: startTime || getTimeWithTz(),
     stopBuyTime: null,
     stopTime: null,
     step: getNumberStepByStatus('В боте'),
