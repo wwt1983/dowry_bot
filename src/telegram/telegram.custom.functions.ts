@@ -37,7 +37,6 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER,
   LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
   CASH_STOP_WORDS,
-  INTERVAL_FOR_NEXT_CHOOSE,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -56,7 +55,6 @@ import {
   getTimeWithTz,
   dateFormatNoTZ,
   getDate,
-  addMinutesToInterval,
   formatSimple,
 } from 'src/common/date/date.methods';
 
