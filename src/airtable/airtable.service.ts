@@ -25,7 +25,7 @@ import {
   getNumberStepByStatus,
   getUserName,
 } from 'src/telegram/telegram.custom.functions';
-import { IKeyWord, IKeyWords } from './types/IKeyWords.interface';
+import { IKeyWords } from './types/IKeyWords.interface';
 import { IFilters } from './types/IFilters.interface';
 import { getFilterById } from './airtable.custom';
 import { ITime, ITimes } from './types/ITimes.interface';
@@ -204,14 +204,14 @@ export class AirtableService {
   async getOffers(type?: 'stop' | 'schedule'): Promise<IOffers> {
     let filter;
     if (process.env.NODE_ENV === 'development' && !type) {
-      filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Test")`;
+      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Test"))`;
     } else if (process.env.NODE_ENV !== 'development' && !type) {
-      filter = `&${FILTER_BY_FORMULA}=OR({Status}="In progress", {Status}="Scheduled")`;
+      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Scheduled"))`;
     } else {
       filter =
         type === 'schedule'
-          ? `&${FILTER_BY_FORMULA}=SEARCH("Scheduled", {Status})`
-          : `&${FILTER_BY_FORMULA}=SEARCH("Stop", {Status})`;
+          ? `&${FILTER_BY_FORMULA}=AND(AND({Артикул} !='' , {Status} = "Scheduled")`
+          : `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , {Status} = "Stop")`;
     }
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
