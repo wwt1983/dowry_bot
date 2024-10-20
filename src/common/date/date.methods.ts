@@ -10,12 +10,15 @@ import {
   compareAsc,
   isFuture,
 } from 'date-fns';
+import { ru } from 'date-fns/locale';
+
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBot } from 'src/airtable/types/IBot.interface';
 import { INTERVAL_FOR_NEXT_CHOOSE } from 'src/telegram/telegram.constants';
 
 export const FORMAT_DATE = 'yyyy-MM-dd HH:mm';
 export const FORMAT_DATE_SIMPLE = 'dd.MM.yyyy HH:mm';
+
 export const FORMAT_DATE_SIMPLE_NO_TIME = 'dd.MM.yyyy';
 export const FORMAT_DATE_NO_TIME = 'yyyy-MM-dd';
 export const FORMAT_DATE_NO_DATE = 'HH:mm';
@@ -166,12 +169,12 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
-  console.log(
-    'next ===>  ',
-    lastInterval[0].fields.StartTime,
-    nextInterval,
-    isFuture(new Date(nextInterval)),
-  );
+  // console.log(
+  //   'next ===>  ',
+  //   lastInterval[0].fields.StartTime,
+  //   nextInterval,
+  //   isFuture(new Date(nextInterval)),
+  // );
 
   if (isFuture(new Date(nextInterval))) {
     return nextInterval;
@@ -180,4 +183,5 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
   }
 };
 
-export const formatSimple = (date: string) => format(date, FORMAT_DATE_SIMPLE);
+export const formatSimple = (date: string) =>
+  format(date, 'HH:mm d MMMM', { locale: ru });

@@ -46,7 +46,7 @@ export interface ISessionData {
   isRestore: boolean;
   realStatus?: BotStatus; // для восттановленных отрицательных статусов чтобы понимать двигаться можно дальше или оставаться на этом шаге
   itsSubscriber?: boolean;
-  userArticules?: string[];
+  userOffers?: string[];
   dataForCash?: string; //fio bank phone
   price?: string;
   checkWb?: string;

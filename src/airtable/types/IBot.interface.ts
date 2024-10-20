@@ -15,7 +15,7 @@ export interface IBot {
     ['Время выкупа']: string;
     CommentsLink: string;
     OfferId: string[];
-    ['Id (from OfferId)']: [];
+    'Id (from OfferId)': [];
     ['Оповещения стаститка']: [];
     ['Статусы оповещения']: [];
     ['Статус (from Оповещения стаститка)']: [];

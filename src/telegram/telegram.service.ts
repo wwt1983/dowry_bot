@@ -59,8 +59,8 @@ import {
   //getTextForSubscriber,
   getUserOffersReady,
   getUserBenefit,
-  getArticulesByUser,
-  checkOnExistArticuleByUserOrders,
+  getOffersByUser,
+  checkOnExistOfferByUserOrders,
   getTextForFeedbackByStatus,
   getChatIdFormText,
   getNumberStepByStatus,
@@ -72,6 +72,7 @@ import {
   filterNotificationValue,
   itRequestWithCachQuestion,
   sleep,
+  getTextForIntervalTime,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -167,7 +168,7 @@ export class TelegramService {
       );
       ctx.session.lastCommand = COMMAND_NAMES.start;
       ctx.session.itsSubscriber = userHistory.itsSubscriber;
-      ctx.session.userArticules = userHistory?.userArticules;
+      ctx.session.userOffers = userHistory?.userOffers;
 
       await ctx.reply(sayHi(first_name, userValue.userName, id), {
         reply_markup: userHistory.orderButtons,
@@ -200,9 +201,9 @@ export class TelegramService {
           id.toString(),
         );
 
-        existArticleByUser = checkOnExistArticuleByUserOrders(
-          sessionData.articul,
-          ctx.session.userArticules,
+        existArticleByUser = checkOnExistOfferByUserOrders(
+          sessionData.offerId,
+          ctx.session.userOffers,
         );
 
         ctx.session = updateSessionByField(
@@ -229,7 +230,6 @@ export class TelegramService {
             sessionData.offerId,
             sessionData.interval,
           );
-          //console.log('lastInterval=', sessionData.offerId, id, lastInterval);
 
           ctx.session = updateSessionByField(
             ctx.session,
@@ -237,15 +237,18 @@ export class TelegramService {
             lastInterval,
           );
 
-          console.log('lastInterval=', id, lastInterval);
           await this.updateToAirtable(ctx.session);
 
           ctx.session = nextStep(ctx.session, true);
           await this.sendMediaByStep(ctx.session.status, ctx);
           await this.bot.api.sendMediaGroup(
             ctx.session.chat_id,
-            getTextForFirstStep(sessionData, lastInterval) as any[],
+            getTextForFirstStep(sessionData) as any[],
           );
+
+          await ctx.reply(getTextForIntervalTime(lastInterval), {
+            parse_mode: 'HTML',
+          });
         }
         ctx.session.lastCommand = null;
       }
@@ -703,8 +706,11 @@ export class TelegramService {
       if (ctx.session.status === 'Выбор раздачи') {
         response = await this.bot.api.sendMediaGroup(
           ctx.session.chat_id,
-          getTextForFirstStep(ctx.session.data, ctx.session.startTime) as any[],
+          getTextForFirstStep(ctx.session.data) as any[],
         );
+        await ctx.reply(getTextForIntervalTime(ctx.session.startTime), {
+          parse_mode: 'HTML',
+        });
         await this.sendMediaByStep(ctx.session.status, ctx);
         response = await this.bot.api.sendMediaGroup(
           ctx.from.id,
@@ -906,7 +912,7 @@ export class TelegramService {
           console.log('==== WEB API ====', data, ctx.session);
 
           const userHistory = await this.getUserHistory(ctx.from, true);
-          ctx.session.userArticules = userHistory?.userArticules;
+          ctx.session.userOffers = userHistory?.userOffers;
 
           ctx.session = updateSessionByField(ctx.session, 'data', data);
           ctx.session = updateSessionByField(
@@ -915,9 +921,9 @@ export class TelegramService {
             data.offerId,
           );
 
-          const existArticulByUser = checkOnExistArticuleByUserOrders(
-            data.articul,
-            userHistory?.userArticules,
+          const existArticulByUser = checkOnExistOfferByUserOrders(
+            data.offerId,
+            userHistory?.userOffers,
           );
           ctx.session = updateSessionByField(
             ctx.session,
@@ -1000,8 +1006,12 @@ export class TelegramService {
 
           let response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
-            getTextForFirstStep(data, lastInterval) as any[],
+            getTextForFirstStep(data) as any[],
           );
+
+          await ctx.reply(getTextForIntervalTime(lastInterval), {
+            parse_mode: 'HTML',
+          });
 
           response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
@@ -1738,7 +1748,7 @@ export class TelegramService {
         offersReady: '',
         subscribe: '',
         itsSubscriber: false,
-        userArticules: getArticulesByUser(dataBuyer),
+        userOffers: getOffersByUser(dataBuyer),
         timeoutArticles: getTimeoutArticles(dataBuyer),
       };
     }
@@ -1759,7 +1769,7 @@ export class TelegramService {
       offersReady: offersReady + offersFromDistributions,
       subscribe: '',
       itsSubscriber: false,
-      userArticules: getArticulesByUser(dataBuyer),
+      userOffers: getOffersByUser(dataBuyer),
       timeoutArticles: getTimeoutArticles(dataBuyer),
     };
   }

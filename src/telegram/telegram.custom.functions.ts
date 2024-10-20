@@ -143,7 +143,7 @@ export function createInitialSessionData(
     times: null,
     isRestore: false,
     itsSubscriber: false,
-    userArticules: null,
+    userOffers: null,
     dataForCash: null,
     price: null,
     realStatus: null,
@@ -343,7 +343,7 @@ export function nextStep(
   return session;
 }
 
-export function getTextForFirstStep(data: ITelegramWebApp, startTime: string) {
+export function getTextForFirstStep(data: ITelegramWebApp) {
   const {
     title,
     keys,
@@ -373,7 +373,6 @@ export function getTextForFirstStep(data: ITelegramWebApp, startTime: string) {
     `\n🔎 ${keys.toUpperCase()}\n\n` +
     //getMessageForTimeOffer(times) +
     useFilterForHelpSearch +
-    `‼️ Начало вашей раздачи ${formatSimple(startTime)} (время московское) ‼️` +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
   return [
@@ -785,7 +784,11 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
  */
 export const getUserOfferIdsIsFinsih = (data: IBot[]) => {
   return data?.map((x) => {
-    if (x.fields.Финиш) {
+    if (
+      x.fields.Финиш &&
+      x.fields?.OfferId?.length &&
+      x.fields?.OfferId?.length > 0
+    ) {
       return x.fields.OfferId[0];
     }
   });
@@ -895,7 +898,7 @@ export const getFilterDistribution = (
 /**
  * выбираем только заказы с положительным step
  */
-export const getArticulesByUser = (dataBuyer: IBot[]) => {
+export const getOffersByUser = (dataBuyer: IBot[]) => {
   try {
     if (!dataBuyer || dataBuyer.length === 0) return null;
     return dataBuyer
@@ -907,10 +910,10 @@ export const getArticulesByUser = (dataBuyer: IBot[]) => {
           x.fields.Статус !== 'Лимит заказов' &&
           x.fields.Статус !== 'Отмена пользователем',
       )
-      ?.map((x) => x.fields.Артикул)
-      ?.filter((x) => x !== undefined);
+      ?.map((x) => x.fields.OfferId?.[0] ?? null)
+      .filter((id) => id !== null); // Опционально: отфильтровать null значени
   } catch (error) {
-    console.log('getArticulesByUser=', error);
+    console.log('getOffersByUser=', error);
     return null;
   }
 };
@@ -918,12 +921,12 @@ export const getArticulesByUser = (dataBuyer: IBot[]) => {
 /**
 проверка на существования заказа у пользователя (сейчас можно заказать одно предложение)  
  */
-export const checkOnExistArticuleByUserOrders = (
-  articule: string,
-  articules?: string[],
+export const checkOnExistOfferByUserOrders = (
+  orderId: string,
+  offers?: string[],
 ): boolean => {
-  if (!articules || !Array.isArray(articules)) return false;
-  if (articules.find((x) => x === articule)) return true;
+  if (!offers || !Array.isArray(offers)) return false;
+  if (offers.find((x) => x === orderId)) return true;
   return false;
 };
 
@@ -1019,3 +1022,7 @@ export const itRequestWithCachQuestion = (message: string) =>
   CASH_STOP_WORDS.find((x) => message.includes(x));
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const getTextForIntervalTime = (startTime) => {
+  return `‼️<b>Начало раздачи ${formatSimple(startTime)}</b> (время московское)‼️\n\n‼️<b>Если время вашего выкупа в wildberries будет раньше, кэшбек 💰 выплачен не будет</b>‼️`.toUpperCase();
+};
