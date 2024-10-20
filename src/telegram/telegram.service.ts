@@ -194,14 +194,14 @@ export class TelegramService {
 
       await this.saveToAirtable(ctx.session);
 
-      let existArticleByUser: boolean = false;
+      let existOfferByUser: boolean = false;
       if (ctx.match) {
         const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
           ctx.match,
           id.toString(),
         );
 
-        existArticleByUser = checkOnExistOfferByUserOrders(
+        existOfferByUser = checkOnExistOfferByUserOrders(
           sessionData.offerId,
           ctx.session.userOffers,
         );
@@ -209,7 +209,7 @@ export class TelegramService {
         ctx.session = updateSessionByField(
           ctx.session,
           'status',
-          existArticleByUser ? 'Лимит заказов' : 'Выбор раздачи',
+          existOfferByUser ? 'Лимит заказов' : 'Выбор раздачи',
         );
         ctx.session = updateSessionByStep(ctx.session);
         ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
@@ -219,13 +219,13 @@ export class TelegramService {
           sessionData.offerId,
         );
 
-        if (existArticleByUser) {
+        if (existOfferByUser) {
           await this.updateToAirtable(ctx.session);
           await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
         }
         //продолжаем двигаться только если не было заказов с таким артикулом
-        if (!existArticleByUser) {
+        if (!existOfferByUser) {
           const lastInterval = await this.airtableService.getLastIntervalTime(
             sessionData.offerId,
             sessionData.interval,
@@ -921,21 +921,21 @@ export class TelegramService {
             data.offerId,
           );
 
-          const existArticulByUser = checkOnExistOfferByUserOrders(
+          const existOfferByUser = checkOnExistOfferByUserOrders(
             data.offerId,
             userHistory?.userOffers,
           );
           ctx.session = updateSessionByField(
             ctx.session,
             'status',
-            existArticulByUser ? 'Лимит заказов' : 'Выбор раздачи',
+            existOfferByUser ? 'Лимит заказов' : 'Выбор раздачи',
           );
 
-          if (existArticulByUser || data.keys === ErrorKeyWord) {
+          if (existOfferByUser || data.keys === ErrorKeyWord) {
             await this.updateToAirtable(ctx.session);
             await ctx.api.sendMessage(
               ctx.from.id,
-              existArticulByUser ? MESSAGE_LIMIT_ORDER : MESSAGE_WAITING,
+              existOfferByUser ? MESSAGE_LIMIT_ORDER : MESSAGE_WAITING,
             );
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           }
