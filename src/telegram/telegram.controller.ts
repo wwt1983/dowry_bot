@@ -73,7 +73,7 @@ export class TelegramController {
       stopTime: string;
       offerName: string;
       dateDelivery: string;
-      outFromOffer: boolean;
+      close: boolean;
       filter: string;
     },
   ): Promise<void> {
@@ -86,7 +86,7 @@ export class TelegramController {
       data.stopTime,
       data.offerName,
       data.dateDelivery,
-      data.outFromOffer,
+      data.close,
       data.filter,
     );
   }

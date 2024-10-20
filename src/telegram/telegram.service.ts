@@ -1382,7 +1382,7 @@ export class TelegramService {
     stopTime: string,
     offerName: string,
     dateDelivery: string,
-    outFromOffer: boolean,
+    close: boolean,
     filter: string,
   ): Promise<void> {
     try {
@@ -1402,7 +1402,11 @@ export class TelegramService {
       )
         return;
 
-      if (outFromOffer) {
+      if (close) {
+        await this.airtableService.updateStatusInBotTableAirtable(
+          sessionId,
+          'Отмена',
+        );
         await this.bot.api.sendMessage(
           chat_id,
           `\n❌ Раздача: ${offerName} закрыта для продолжения ❌`,
