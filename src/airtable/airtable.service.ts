@@ -625,7 +625,7 @@ export class AirtableService {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
       `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
+        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Корзина", {Статус} = "Поиск"))`,
     );
 
     //console.log('count filter', articul, data?.records.length);
