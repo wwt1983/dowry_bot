@@ -153,7 +153,7 @@ export const addMinutesToInterval = (date: string, interval: number) => {
 };
 
 export const getLastIntervalData = (data: IBot[], interval: string) => {
-  //console.log(data.map((x) => x.fields.StartTime));
+  console.log(data.map((x) => x.fields.StartTime));
   const lastInterval = data.sort((a, b) =>
     compareAsc(
       new Date(b.fields['StartTime']),
@@ -166,12 +166,12 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
-  // console.log(
-  //   'next ===>  ',
-  //   lastInterval[0].fields.StartTime,
-  //   nextInterval,
-  //   isFuture(new Date(nextInterval)),
-  // );
+  console.log(
+    'next ===>  ',
+    lastInterval[0].fields.StartTime,
+    nextInterval,
+    isFuture(new Date(nextInterval)),
+  );
 
   if (isFuture(new Date(nextInterval))) {
     return nextInterval;
