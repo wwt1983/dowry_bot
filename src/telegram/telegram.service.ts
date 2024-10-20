@@ -640,9 +640,7 @@ export class TelegramService {
         ctx.session.status,
       );
       if (!checkOnGoNext) {
-        await ctx.reply(
-          `❌${STOP_TEXT}. Время истекло.❌\nВыберите раздачу снова и постарайтесь оформить быстрее 😉`,
-        );
+        await ctx.reply(`❌${STOP_TEXT}❌`);
         return await this.getKeyboardHistoryWithWeb(ctx.from.id);
       }
 
@@ -1031,9 +1029,7 @@ export class TelegramService {
             ctx.session.status,
           );
           if (!checkOnGoNext) {
-            await ctx.reply(
-              `❌${STOP_TEXT}. Время истекло.❌\nВыберите раздачу снова и постарайтесь оформить быстрее 😉`,
-            );
+            await ctx.reply(`❌${STOP_TEXT}❌`);
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           }
 
@@ -2155,7 +2151,7 @@ export class TelegramService {
     }
   }
   /**
-   * Проверяем можем ли мы двигаться дальше (проверяем статус из базы на время истекло , если статуст до Заказа)
+   * Проверяем можем ли мы двигаться дальше (проверяем статус из базы на время истекло или отмену, если статуст до Заказа)
    */
   async canGoNext(sessionId: string, status: BotStatus): Promise<boolean> {
     if (!sessionId) return false;
@@ -2164,9 +2160,16 @@ export class TelegramService {
       getNumberStepByStatus('Заказ')
     )
       return true;
+
     const statusFromDb =
       await this.airtableService.getBotStatusByUser(sessionId);
-    if (statusFromDb === 'Время истекло') return false;
+    if (
+      statusFromDb === 'Время истекло' ||
+      statusFromDb === 'Лимит заказов' ||
+      statusFromDb === 'Отмена' ||
+      statusFromDb === 'Отмена пользователем'
+    )
+      return false;
     return true;
   }
 

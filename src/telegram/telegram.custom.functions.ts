@@ -768,6 +768,7 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
       x.fields.Статус !== 'Проблема с локацией' &&
       x.fields.Статус !== 'Лимит заказов' &&
       x.fields.Статус !== 'Отмена пользователем' &&
+      x.fields.Статус !== 'Отмена' &&
       !x.fields.Финиш,
   );
   if (!filterData || filterData.length === 0) return null;
@@ -908,7 +909,8 @@ export const getOffersByUser = (dataBuyer: IBot[]) => {
           x.fields.Статус !== 'В боте' &&
           x.fields.Статус !== 'Время истекло' &&
           x.fields.Статус !== 'Лимит заказов' &&
-          x.fields.Статус !== 'Отмена пользователем',
+          x.fields.Статус !== 'Отмена пользователем' &&
+          x.fields.Статус !== 'Отмена',
       )
       ?.map((x) => x.fields.OfferId?.[0] ?? null)
       .filter((id) => id !== null); // Опционально: отфильтровать null значени

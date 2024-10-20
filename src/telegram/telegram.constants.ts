@@ -286,6 +286,13 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text + TYPE_STEP.image,
   }, //
+  Отмена: {
+    step: -9,
+    value: 'Отмена администратором',
+    erroText: 'Отмена администратором',
+    isActive: true,
+    typeStep: TYPE_STEP.text,
+  },
 };
 
 export const COUNT_STEPS = Object.values(STEPS).filter(
