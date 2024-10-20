@@ -57,7 +57,7 @@ export class AirtableService {
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===>', response);
+    console.log('postWebhook ===> ', response);
     return response;
   }
   async updateToAirtable(session: ISessionData): Promise<any> {
