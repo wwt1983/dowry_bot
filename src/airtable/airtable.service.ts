@@ -63,7 +63,7 @@ export class AirtableService {
   async updateToAirtable(session: ISessionData): Promise<any> {
     try {
       if (!session.sessionId) {
-        console.log('empty session=', session);
+        console.log('empty session= ', session);
         return null;
       }
       const correctTime = getOfferTime(session);
