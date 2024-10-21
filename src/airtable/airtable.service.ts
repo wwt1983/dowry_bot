@@ -514,6 +514,8 @@ export class AirtableService {
           (x) =>
             x.value === 'В боте' ||
             x.value === 'Время истекло' ||
+            x.value === 'Отмена' ||
+            x.value === 'Отмена пользователем' ||
             (x.isActive && x.step === 0),
         )
         .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
