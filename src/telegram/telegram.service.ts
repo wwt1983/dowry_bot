@@ -2393,7 +2393,7 @@ export class TelegramService {
         );
         await this.airtableService.updateStatusInBotTableAirtable(
           item.fields.SessionId,
-          'Время истекло',
+          'Отмена',
         );
         await sleep(600);
         console.log(`close waitings ${offerId}`);
