@@ -75,6 +75,7 @@ import {
   sleep,
   getTextForIntervalTime,
   checkOnStopStatus,
+  getTextForQueue,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -111,7 +112,6 @@ import {
   getOffersLink,
   getOffersLinkForNotification,
 } from 'src/airtable/airtable.custom';
-import { ErrorKeyWord } from 'src/airtable/airtable.constants';
 import { NotificationName } from 'src/airtable/types/INotification.interface';
 //import { getParseWbInfo } from './puppeteer';
 
@@ -192,18 +192,19 @@ export class TelegramService {
           link_preview_options: { is_disabled: true },
         },
       );
-      //await ctx.api.sendMessage(id, FOOTER);
 
       await this.saveToAirtable(ctx.session);
 
-      let existOfferByUser: boolean = false;
+      let checkOnLimitUserOffer: boolean = false;
+
+      //запрос через ссылку
       if (ctx.match) {
         const sessionData: ITelegramWebApp = await this.getOfferFromWeb(
           ctx.match,
           id.toString(),
         );
 
-        existOfferByUser = checkOnExistOfferByUserOrders(
+        checkOnLimitUserOffer = checkOnExistOfferByUserOrders(
           sessionData.offerId,
           ctx.session.userOffers,
         );
@@ -211,7 +212,7 @@ export class TelegramService {
         ctx.session = updateSessionByField(
           ctx.session,
           'status',
-          existOfferByUser ? 'Лимит заказов' : 'Выбор раздачи',
+          checkOnLimitUserOffer ? 'Лимит заказов' : 'Выбор раздачи',
         );
         ctx.session = updateSessionByStep(ctx.session);
         ctx.session = updateSessionByField(ctx.session, 'data', sessionData);
@@ -221,37 +222,44 @@ export class TelegramService {
           sessionData.offerId,
         );
 
-        if (existOfferByUser) {
+        if (checkOnLimitUserOffer) {
           await this.updateToAirtable(ctx.session);
           await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
         }
         //продолжаем двигаться только если не было заказов с таким артикулом
-        if (!existOfferByUser) {
-          const lastInterval = await this.airtableService.getLastIntervalTime(
-            sessionData.offerId,
-            sessionData.interval,
-          );
+        const lastInterval = await this.airtableService.getLastIntervalTime(
+          sessionData.offerId,
+          sessionData.interval,
+        );
 
-          ctx.session = updateSessionByField(
-            ctx.session,
-            'startTime',
-            lastInterval,
-          );
+        ctx.session = updateSessionByField(
+          ctx.session,
+          'startTime',
+          lastInterval,
+        );
 
-          await this.updateToAirtable(ctx.session);
+        await this.updateToAirtable(ctx.session);
 
-          ctx.session = nextStep(ctx.session, true);
-          await this.sendMediaByStep(ctx.session.status, ctx);
-          await this.bot.api.sendMediaGroup(
-            ctx.session.chat_id,
-            getTextForFirstStep(sessionData) as any[],
-          );
+        ctx.session = nextStep(ctx.session, true);
+        await this.sendMediaByStep(ctx.session.status, ctx);
+        await this.bot.api.sendMediaGroup(
+          ctx.session.chat_id,
+          getTextForFirstStep(sessionData) as any[],
+        );
 
-          await ctx.reply(getTextForIntervalTime(lastInterval), {
+        await ctx.reply(
+          getTextForIntervalTime(lastInterval) +
+            getTextForQueue(
+              sessionData.offerCount,
+              sessionData.offerOrderToday,
+              sessionData.queueLength,
+            ),
+          {
             parse_mode: 'HTML',
-          });
-        }
+          },
+        );
+
         ctx.session.lastCommand = null;
       }
     });
@@ -921,22 +929,19 @@ export class TelegramService {
             data.offerId,
           );
 
-          const existOfferByUser = checkOnExistOfferByUserOrders(
+          const checkOnLimitUserOffer = checkOnExistOfferByUserOrders(
             data.offerId,
             userHistory?.userOffers,
           );
           ctx.session = updateSessionByField(
             ctx.session,
             'status',
-            existOfferByUser ? 'Лимит заказов' : 'Выбор раздачи',
+            checkOnLimitUserOffer ? 'Лимит заказов' : 'Выбор раздачи',
           );
 
-          if (existOfferByUser || data.keys === ErrorKeyWord) {
+          if (checkOnLimitUserOffer) {
             await this.updateToAirtable(ctx.session);
-            await ctx.api.sendMessage(
-              ctx.from.id,
-              existOfferByUser ? MESSAGE_LIMIT_ORDER : MESSAGE_WAITING,
-            );
+            await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           }
         } else {
@@ -1009,9 +1014,17 @@ export class TelegramService {
             getTextForFirstStep(data) as any[],
           );
 
-          await ctx.reply(getTextForIntervalTime(lastInterval), {
-            parse_mode: 'HTML',
-          });
+          await ctx.reply(
+            getTextForIntervalTime(lastInterval) +
+              getTextForQueue(
+                data.offerCount,
+                data.offerOrderToday,
+                data.queueLength,
+              ),
+            {
+              parse_mode: 'HTML',
+            },
+          );
 
           response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
@@ -1190,6 +1203,9 @@ export class TelegramService {
       errorStatus: null,
       filter: offerAirtable.fields.Фильтр,
       interval: offerAirtable.fields.Интервал,
+      offerCount: offerAirtable.fields.Количество,
+      offerOrderToday: offerAirtable.fields['Количество заказов сегодня'],
+      queueLength: offerAirtable.fields['Длина очереди'],
     };
   }
   /**
@@ -1543,7 +1559,7 @@ export class TelegramService {
         : dataBuyer,
       true,
     );
-    const countWorkLabels = createLabelHistory(dataBuyer).length;
+    const countWorkLabels = createLabelHistory(dataBuyer)?.length;
 
     return await this.bot.api.sendMessage(
       chatId.toString(),

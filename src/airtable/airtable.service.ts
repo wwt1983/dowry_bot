@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
 import {
-  ErrorKeyWord,
   FILTER_BY_FORMULA,
   TablesName,
   AIRTABLE_URL,
@@ -226,7 +225,6 @@ export class AirtableService {
       id,
     )) as IOffer;
 
-    offer.fields['Ключевые слова'] = ErrorKeyWord;
     const count = offer.fields.Количество;
     const countOrder = offer.fields['Количество заказов сегодня'];
     offer.fields['Время бронь'] = null;
@@ -549,8 +547,7 @@ export class AirtableService {
             !acc.find((x) => x === order.fields['chat_id'])) ||
           (status === 'regular' &&
             order.fields['Статус'] !== 'В боте' &&
-            order.fields['Статус'] !== 'Время истекло' &&
-            order.fields['Статус'] !== 'Бот удален' &&
+            !IGNORED_STATUSES.includes(order.fields['Статус']) &&
             !acc.find((x) => x === order.fields['chat_id']))
         ) {
           acc.push(order.fields['chat_id']);
@@ -630,7 +627,7 @@ export class AirtableService {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
       `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Корзина", {Статус} = "Поиск"))`,
+        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
     );
 
     //console.log('count filter', articul, data?.records.length);

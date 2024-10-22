@@ -38,6 +38,7 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
   CASH_STOP_WORDS,
   IGNORED_STATUSES,
+  MESSAGE_WAITING,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -1028,4 +1029,18 @@ export const checkOnStopStatus = (status: BotStatus) => {
 
   if (IGNORED_STATUSES.includes(status)) return true;
   return false;
+};
+
+/**
+ * возвращает текст для переполненной раздачи
+ */
+export const getTextForQueue = (
+  count: number,
+  countOrderToday: number,
+  queueLength: number,
+) => {
+  if (count < countOrderToday + queueLength) {
+    return '\n\n' + MESSAGE_WAITING;
+  }
+  return '';
 };

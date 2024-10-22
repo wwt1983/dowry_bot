@@ -85,6 +85,9 @@ export interface ITelegramWebApp {
   filter?: string;
   'Данные для кешбека'?: string;
   interval?: string;
+  offerCount?: number;
+  offerOrderToday?: number;
+  queueLength?: number;
 }
 export type FeedbackStatus =
   | 'С фото'
