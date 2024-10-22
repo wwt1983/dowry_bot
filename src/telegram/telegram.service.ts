@@ -29,6 +29,7 @@ import {
   MESSAGE_WAITING,
   WAITING_IMAGE,
   CACHE_WAIT_STATUS,
+  IGNORED_STATUSES,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -73,6 +74,7 @@ import {
   itRequestWithCachQuestion,
   sleep,
   getTextForIntervalTime,
+  checkOnStopStatus,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -1391,12 +1393,7 @@ export class TelegramService {
         getDateWithTz(startTime),
         startTime,
       );
-      if (
-        status === 'Бот удален' ||
-        status === 'Ошибка' ||
-        status === 'Время истекло'
-      )
-        return;
+      if (checkOnStopStatus(status)) return;
 
       if (close) {
         await this.airtableService.updateStatusInBotTableAirtable(
@@ -2163,13 +2160,7 @@ export class TelegramService {
 
     const statusFromDb =
       await this.airtableService.getBotStatusByUser(sessionId);
-    if (
-      statusFromDb === 'Время истекло' ||
-      statusFromDb === 'Лимит заказов' ||
-      statusFromDb === 'Отмена' ||
-      statusFromDb === 'Отмена пользователем'
-    )
-      return false;
+    if (IGNORED_STATUSES.includes(statusFromDb)) return false;
     return true;
   }
 

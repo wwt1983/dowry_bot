@@ -1,6 +1,7 @@
 import { InlineKeyboard, Keyboard } from 'grammy';
 import {
   COUNT_TRY_ERROR,
+  IGNORED_STATUSES,
   START_NAME,
   STEP_COMMANDS,
   WEB_APP,
@@ -75,17 +76,12 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       return newArr;
     }, []);
   }
-  return data?.reduce(function (newArr, record) {
+
+  data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
-      record.fields.Статус !== 'Бот удален' &&
-      record.fields.Статус !== 'Время истекло' &&
+      !IGNORED_STATUSES.includes(record.fields.Статус) &&
       record.fields.Статус !== 'В боте' &&
-      record.fields.Статус !== 'Ошибка' &&
-      record.fields.Статус !== 'Проблема с локацией' &&
-      record.fields.Статус !== 'Лимит заказов' &&
-      record.fields.Статус !== 'Отмена пользователем' &&
-      record.fields.Статус !== 'Отмена' &&
       !record.fields['Снять с раздачи']
     ) {
       newArr.push([

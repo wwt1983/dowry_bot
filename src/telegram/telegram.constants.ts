@@ -108,6 +108,7 @@ export const STEPS = {
     erroText: 'выбрать раздачу',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, //в боте
   'Выбор раздачи': {
     step: 0,
@@ -115,6 +116,7 @@ export const STEPS = {
     erroText: 'поделиться сюда ссылкой найденного товара с wildberries',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, // выбор раздачи (web)
   'Артикул правильный': {
     step: 0,
@@ -123,6 +125,7 @@ export const STEPS = {
     image: '/images/11.jpg',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, // проверка артикул (text)
   Поиск: {
     step: 0,
@@ -131,6 +134,7 @@ export const STEPS = {
     image: '/images/10.jpg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, //поиск (photo)
   Корзина: {
     step: 0,
@@ -139,6 +143,7 @@ export const STEPS = {
     image: '/images/1.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, //поиск (photo)
   Заказ: {
     step: 0,
@@ -147,6 +152,7 @@ export const STEPS = {
     image: '/images/2.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, //заказ (photo)
   'Дата доставки': {
     step: 0,
@@ -154,6 +160,7 @@ export const STEPS = {
     erroText: 'ввести дату доставки (в формате 12.12.2024)',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, //дата получения ориентировочная
   Получен: {
     step: 0,
@@ -162,6 +169,7 @@ export const STEPS = {
     image: '/images/3.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, // получен (photo)
   'Дата получения': {
     step: 0,
@@ -169,6 +177,7 @@ export const STEPS = {
     erroText: 'ввести дату получения (в формате 12.12.2024)',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, //дата получения фактическая
   'Отзыв на проверке': {
     step: 0,
@@ -176,6 +185,7 @@ export const STEPS = {
     erroText: 'написать отзыв или ожидать ответа',
     isActive: false,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, // отзыв на проверке (text)
   Отзыв: {
     step: 0,
@@ -184,6 +194,7 @@ export const STEPS = {
     image: '/images/4.jpeg',
     typeStep: TYPE_STEP.text,
     isActive: false,
+    stop: false,
   }, //отзыв (photo)
   ['Штрих-код']: {
     step: 0,
@@ -192,6 +203,7 @@ export const STEPS = {
     image: '/images/5.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, // штрих-код (photo)
   Чек: {
     step: 0,
@@ -200,6 +212,7 @@ export const STEPS = {
     image: '/images/6.jpeg',
     isActive: false,
     typeStep: TYPE_STEP.image,
+    stop: false,
   }, //чек link wb
   ЧекWb: {
     step: 0,
@@ -209,6 +222,7 @@ export const STEPS = {
     image: '/images/13.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.text + TYPE_STEP.image,
+    stop: false,
   }, //чек link wb
   Товар: {
     step: 0,
@@ -217,6 +231,7 @@ export const STEPS = {
     image: '/images/12.jpg',
     isActive: true,
     typeStep: TYPE_STEP.image,
+    stop: false,
   },
   Цена: {
     step: 0,
@@ -226,6 +241,7 @@ export const STEPS = {
     image: '',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   },
   Финиш: {
     step: 0,
@@ -233,6 +249,7 @@ export const STEPS = {
     erroText: 'написать данные для кешбэка (банк, ФИО, телефон)',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, // finish
   'Проблема с локацией': {
     step: -1,
@@ -240,6 +257,7 @@ export const STEPS = {
     erroText: '',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: true,
   }, //геолокация не совпадает с раздачей
   'Проблема с артикулом': {
     step: -2,
@@ -248,6 +266,7 @@ export const STEPS = {
     image: '/images/11.jpg',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   }, // артикул не совпадает с раздачей
   HELP: {
     step: -3,
@@ -255,6 +274,7 @@ export const STEPS = {
     erroText: '',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: false,
   },
   'Время истекло': {
     step: -4,
@@ -262,6 +282,7 @@ export const STEPS = {
     erroText: 'написать о своей проблеме',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: true,
   },
   'Лимит заказов': {
     step: -5,
@@ -269,6 +290,7 @@ export const STEPS = {
     erroText: MESSAGE_LIMIT_ORDER,
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: true,
   },
   'Отмена пользователем': {
     step: -6,
@@ -276,6 +298,7 @@ export const STEPS = {
     erroText: 'Отмена пользователем',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: true,
   },
   'Чек неверный': {
     step: -8,
@@ -285,6 +308,7 @@ export const STEPS = {
     image: '/images/13.jpeg',
     isActive: true,
     typeStep: TYPE_STEP.text + TYPE_STEP.image,
+    stop: false,
   }, //
   Отмена: {
     step: -9,
@@ -292,6 +316,7 @@ export const STEPS = {
     erroText: 'Отмена администратором',
     isActive: true,
     typeStep: TYPE_STEP.text,
+    stop: true,
   },
 };
 
@@ -434,5 +459,15 @@ export const CASH_STOP_WORDS = [
   'деньги',
   'оплаты',
   'оплата',
+  'выплат',
 ];
 export const CACHE_WAIT_STATUS = 'Кэш задержка';
+
+export const IGNORED_STATUSES = [
+  'Бот удален',
+  'Время истекло',
+  'Проблема с локацией',
+  'Лимит заказов',
+  'Отмена пользователем',
+  'Отмена',
+];

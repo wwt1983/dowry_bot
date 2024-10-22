@@ -36,7 +36,7 @@ import {
 } from '../airtable/types/IDisturbation.interface';
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
-import { STEPS } from 'src/telegram/telegram.constants';
+import { IGNORED_STATUSES, STEPS } from 'src/telegram/telegram.constants';
 
 @Injectable()
 export class AirtableService {
@@ -454,16 +454,23 @@ export class AirtableService {
   }
   async findBuyer(nick: string): Promise<IBuyer[] | null> {
     const data = await this.airtableHttpService.get(
-      TablesName.Buyer,
+      TablesName.Buyers,
       `&${FILTER_BY_FORMULA}=Find("${nick}",{Ник ТГ})`,
     );
     if (!data || data.records.length === 0) return null;
     return data.records as IBuyer[];
   }
-
+  async findBuyersWithChatId(): Promise<IBuyer[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Buyers,
+      `&${FILTER_BY_FORMULA}={chat_id} != ""`,
+    );
+    if (!data || data.records.length === 0) return null;
+    return data.records as IBuyer[];
+  }
   async checkPhone(phone: string): Promise<boolean> {
     const data = await this.airtableHttpService.get(
-      TablesName.Buyer,
+      TablesName.Buyers,
       `&${FILTER_BY_FORMULA}=Find("${phone}",{Телефон})`,
     );
     if (!data || data.records.length === 0) return false;
@@ -512,11 +519,7 @@ export class AirtableService {
       const filterByStatus = Object.values(STEPS)
         .filter(
           (x) =>
-            x.value === 'В боте' ||
-            x.value === 'Время истекло' ||
-            x.value === 'Отмена' ||
-            x.value === 'Отмена пользователем' ||
-            (x.isActive && x.step === 0),
+            IGNORED_STATUSES.includes(x.value) || (x.isActive && x.step === 0),
         )
         .map((x) => `FIND('${x.value}', ARRAYJOIN({Статус}, '|'))`)
         .join(', ');

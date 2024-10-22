@@ -37,6 +37,7 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER,
   LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER,
   CASH_STOP_WORDS,
+  IGNORED_STATUSES,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
 import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
@@ -763,14 +764,11 @@ export const getLastSession = (dataBuyer: IBot[] | null) => {
 
   const filterData = dataBuyer.filter(
     (x) =>
-      x.fields.Статус !== 'В боте' &&
-      x.fields.Статус !== 'Время истекло' &&
-      x.fields.Статус !== 'Проблема с локацией' &&
-      x.fields.Статус !== 'Лимит заказов' &&
-      x.fields.Статус !== 'Отмена пользователем' &&
-      x.fields.Статус !== 'Отмена' &&
-      !x.fields.Финиш,
+      !IGNORED_STATUSES.includes(x.fields.Статус) &&
+      !x.fields.Финиш &&
+      x.fields.Статус !== 'В боте',
   );
+
   if (!filterData || filterData.length === 0) return null;
   if (filterData.length === 1) return filterData[0].fields.SessionId;
   return filterData.sort(
@@ -905,15 +903,11 @@ export const getOffersByUser = (dataBuyer: IBot[]) => {
     return dataBuyer
       ?.filter(
         (x) =>
-          x.fields.Статус !== 'Бот удален' &&
-          x.fields.Статус !== 'В боте' &&
-          x.fields.Статус !== 'Время истекло' &&
-          x.fields.Статус !== 'Лимит заказов' &&
-          x.fields.Статус !== 'Отмена пользователем' &&
-          x.fields.Статус !== 'Отмена',
+          !IGNORED_STATUSES.includes(x.fields.Статус) &&
+          x.fields.Статус !== 'В боте',
       )
       ?.map((x) => x.fields.OfferId?.[0] ?? null)
-      .filter((id) => id !== null); // Опционально: отфильтровать null значени
+      .filter((id) => id !== null); // отфильтровать null значения
   } catch (error) {
     console.log('getOffersByUser=', error);
     return null;
@@ -1027,4 +1021,11 @@ export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getTextForIntervalTime = (startTime) => {
   return `‼️<b>Начало раздачи ${formatSimple(startTime)}</b> (время московское)‼️\n\n‼️<b>Если время вашего выкупа в wildberries будет раньше, кэшбек 💰 выплачен не будет</b>‼️`.toUpperCase();
+};
+
+export const checkOnStopStatus = (status: BotStatus) => {
+  if (!status) return null;
+
+  if (IGNORED_STATUSES.includes(status)) return true;
+  return false;
 };

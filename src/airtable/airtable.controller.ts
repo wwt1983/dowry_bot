@@ -26,4 +26,15 @@ export class AirtableController {
     console.log('data ===', data);
     return await this.airtableService.checkPhone(data.phone);
   }
+
+  @Get('buyers')
+  async buyers(): Promise<any> {
+    try {
+      const result = await this.airtableService.findBuyersWithChatId();
+      return result;
+    } catch (error) {
+      console.log('buyers', error);
+      return null;
+    }
+  }
 }
