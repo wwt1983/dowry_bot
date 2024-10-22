@@ -210,7 +210,7 @@ export class AirtableService {
       filter =
         type === 'schedule'
           ? `&${FILTER_BY_FORMULA}=AND(AND({Артикул} !='' , {Status} = "Scheduled")`
-          : `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , {Status} = "Stop")`;
+          : `&${FILTER_BY_FORMULA}=AND({Артикул} != '', OR({Status} = "Архив", {Status} = "Stop"))`;
     }
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }

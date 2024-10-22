@@ -6,7 +6,8 @@ export type OfferStatus =
   | 'In progress'
   | 'Stop'
   | 'Public in chat'
-  | 'Test';
+  | 'Test'
+  | 'Архив';
 export interface IOffer {
   id: string;
   createdTime: Date;
