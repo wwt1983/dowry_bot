@@ -26,7 +26,6 @@ import {
   //FOOTER,
   //TELEGRAM_CHAT_ID_OFFERS,
   MESSAGE_LIMIT_ORDER,
-  MESSAGE_WAITING,
   WAITING_IMAGE,
   CACHE_WAIT_STATUS,
   IGNORED_STATUSES,
@@ -1253,6 +1252,7 @@ export class TelegramService {
     const response = await this.sendMediaByStep(status, ctx);
     return response;
   }
+
   async nextStepHandler(
     ctx: MyContext,
     showKeyboard: boolean = true,
