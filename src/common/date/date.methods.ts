@@ -149,14 +149,14 @@ export const parsedDate = (date: string) => {
 };
 
 export const addMinutesToInterval = (date: string, interval: number) => {
-  if (!date) return null;
+  if (!date) return getTimeWithTz();
   //const time = formatInTimeZone(date, TIME_ZONE, FORMAT_DATE);
   const nextInterval = addMinutes(date, interval);
   return getDateWithTz(nextInterval, FORMAT_DATE);
 };
 
 export const getLastIntervalData = (data: IBot[], interval: string) => {
-  console.log(data.map((x) => x.fields.StartTime));
+  //console.log(data.map((x) => x.fields.StartTime));
   const lastInterval = data.sort((a, b) =>
     compareAsc(
       new Date(b.fields['StartTime']),
