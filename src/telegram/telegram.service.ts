@@ -2111,7 +2111,7 @@ export class TelegramService {
           reciveScreen: userBotData.fields['Получен скрин'] || WAITING_IMAGE,
           shtrihCodeScreen:
             userBotData.fields['Штрих-код скрин'] || WAITING_IMAGE,
-          checkScreen: userBotData.fields. || WAITING_IMAGE,
+          checkScreen: userBotData.fields['Чек WB'] || WAITING_IMAGE,
           goodScreen: userBotData.fields['Товар скрин'] || WAITING_IMAGE,
           chat_id: chat_id,
           articul: articul,
