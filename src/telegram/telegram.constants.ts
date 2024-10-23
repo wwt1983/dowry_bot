@@ -359,7 +359,7 @@ export const SECOND_STEP =
 //export const FOUR_STEP_B = '7️⃣ ✔️загрузите скриншот отзыва;\n\n';
 export const FIVE_STEP =
   '6️⃣ ЗАГРУЗИТЕ\n' +
-  '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного) штрих-кода УПАКОВКИ И БИРКИ \n';
+  '✔️ фотографию порванного на 4 части (не разрезанного, а именно порванного или закрашенного) штрих-кода \n';
 export const SIX_STEP =
   '7️⃣ ЗАГРУЗИТЕ\n' + '✔️Чек покупки из личного кабинета ВБ\n';
 export const SIX_STEP_LINK =
@@ -422,7 +422,7 @@ export const IMAGES_STEP_FOR_HELP = [
   // },
   {
     type: STEPS['Штрих-код'].value,
-    url: WEB_APP + '/images/5.jpeg',
+    url: WEB_APP + '/images/shtrih_code.jpg',
     text: SIX_STEP_LINK,
   },
 
