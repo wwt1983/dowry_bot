@@ -148,6 +148,13 @@ export const parsedDate = (date: string) => {
   return parse(date, FORMAT_DATE_SIMPLE_NO_TIME, new Date());
 };
 
+export const addMinutesToInterval = (date: string, interval: number) => {
+  if (!date) date = getTimeWithTz();
+  const time = formatInTimeZone(date, TIME_ZONE, FORMAT_DATE);
+  const nextInterval = addMinutes(time, interval);
+  return getDateWithTz(nextInterval, FORMAT_DATE);
+};
+
 export const getLastIntervalData = (data: IBot[], interval: string) => {
   //console.log(data.map((x) => x.fields.StartTime));
   const lastInterval = data.sort((a, b) =>
@@ -157,28 +164,20 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     ),
   );
 
-  const nextInterval = addMinutes(
-    new Date(lastInterval[0].fields['StartTime']),
+  const nextInterval = addMinutesToInterval(
+    lastInterval[0].fields['StartTime'],
     +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
-  // Преобразуем даты в московское время
-  const moscowOffset = 3 * 60; // Московское время UTC+3 в минутах
-  const nextIntervalMoscow = new Date(
-    nextInterval.getTime() + moscowOffset * 60 * 1000,
-  );
+  // console.log(
+  //   'next ===>  ',
+  //   lastInterval[0].fields.StartTime,
+  //   nextInterval,
+  //   isFuture(new Date(nextInterval)),
+  // );
 
-  console.log(
-    'next ===>  ',
-    lastInterval[0].fields.StartTime,
-    nextIntervalMoscow,
-    isFuture(nextIntervalMoscow),
-  );
-
-  if (isFuture(nextIntervalMoscow)) {
-    return nextIntervalMoscow.toLocaleString('ru-RU', {
-      timeZone: 'Europe/Moscow',
-    });
+  if (isFuture(new Date(nextInterval))) {
+    return nextInterval;
   } else {
     return getTimeWithTz();
   }
