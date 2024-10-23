@@ -1531,7 +1531,7 @@ export class TelegramService {
       dataBuyer = dataBuyer.filter((x) => x.fields.SessionId !== sessionId);
     }
     const historyButtons = createHistoryKeyboard(dataBuyer, false);
-    const countWorkLabels = createLabelHistory(dataBuyer)?.length;
+    const countWorkLabels = createLabelHistory(dataBuyer)?.length || 0;
 
     if (countWorkLabels > 0) {
       return await this.bot.api.sendMessage(
