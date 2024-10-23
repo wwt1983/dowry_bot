@@ -244,6 +244,11 @@ export class TelegramService {
           getTextForFirstStep(sessionData) as any[],
         );
 
+        await this.bot.api.sendMediaGroup(
+          ctx.message.from.id,
+          createMediaForArticul() as any,
+        );
+
         await ctx.reply(
           getTextForIntervalTime(lastInterval) +
             getTextForQueue(
@@ -755,7 +760,7 @@ export class TelegramService {
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
 
-        //REPLAY сообщения из служебного чата 
+        //REPLAY сообщения из служебного чата
         if (
           ctx.message.reply_to_message &&
           !ctx.message?.text?.includes('query_id')
@@ -1033,7 +1038,7 @@ export class TelegramService {
           );
 
           ctx.session.lastMessage = response[response.length - 1].message_id;
-          return response;
+          return;
         }
         //проверка артикула
         if (
