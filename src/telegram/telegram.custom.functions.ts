@@ -320,15 +320,19 @@ export function getNextStepStatusByNumber(
   currentStep: number,
   onlyActive: boolean,
 ): BotStatus {
-  let nextNumberStepsAll;
-  if (!onlyActive) {
-    nextNumberStepsAll = Object.values(STEPS).filter((x) => x.step === 0);
-  } else {
-    nextNumberStepsAll = Object.values(STEPS).filter(
-      (x) => x.isActive && x.step === 0,
-    );
+  try {
+    let nextNumberStepsAll;
+    if (!onlyActive) {
+      nextNumberStepsAll = Object.values(STEPS).filter((x) => x.step === 0);
+    } else {
+      nextNumberStepsAll = Object.values(STEPS).filter(
+        (x) => x.isActive && x.step === 0,
+      );
+    }
+    return nextNumberStepsAll[currentStep].value as BotStatus;
+  } catch (error) {
+    console.log('getNextStepStatusByNumber=', currentStep, error);
   }
-  return nextNumberStepsAll[currentStep].value as BotStatus;
 }
 
 /**
