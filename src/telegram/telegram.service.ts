@@ -836,6 +836,11 @@ export class TelegramService {
             responseMsg.message_id,
             msgToChatMessage,
           );
+          if (ctx.session.lastCommand === COMMAND_NAMES.call) {
+            return await ctx.reply(
+              'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
+            );
+          }
         }
 
         //сохраняем данные по выплатам
