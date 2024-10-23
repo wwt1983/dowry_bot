@@ -150,9 +150,7 @@ export const parsedDate = (date: string) => {
 
 export const addMinutesToInterval = (date: string, interval: number) => {
   if (!date) date = getTimeWithTz();
-  const time = formatInTimeZone(date, TIME_ZONE, FORMAT_DATE);
-  const nextInterval = addMinutes(time, interval);
-  return getDateWithTz(nextInterval, FORMAT_DATE);
+  return formatInTimeZone(addMinutes(date, interval), TIME_ZONE, FORMAT_DATE);
 };
 
 export const getLastIntervalData = (data: IBot[], interval: string) => {
@@ -176,10 +174,10 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     'next ===>  ',
     lastInterval[0].fields.StartTime,
     nextInterval,
-    isFuture(new Date(nextInterval)),
+    getDifferenceInMinutes(nextInterval),
   );
 
-  if (isFuture(new Date(nextInterval))) {
+  if (getDifferenceInMinutes(nextInterval) < 0) {
     return nextInterval;
   } else {
     return getTimeWithTz();
