@@ -172,12 +172,12 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
-  // console.log(
-  //   'next ===>  ',
-  //   lastInterval[0].fields.StartTime,
-  //   nextInterval,
-  //   isFuture(new Date(nextInterval)),
-  // );
+  console.log(
+    'next ===>  ',
+    lastInterval[0].fields.StartTime,
+    nextInterval,
+    isFuture(new Date(nextInterval)),
+  );
 
   if (isFuture(new Date(nextInterval))) {
     return nextInterval;
