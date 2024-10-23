@@ -179,12 +179,14 @@ export class TelegramController {
       chat_id: string;
       articul: string[];
       id: string;
+      price: string;
     },
   ) {
     await this.telegramService.signalToTransferBotToDistributions(
       data.chat_id,
       data.articul[0],
       data.id,
+      data.price,
     );
     console.log('signalToTransferBotToDistributions', data);
   }

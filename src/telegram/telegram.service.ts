@@ -2079,20 +2079,11 @@ export class TelegramService {
     chat_id: string,
     articul: string,
     id: string,
+    price: string,
   ) {
     let sessionId;
 
     try {
-      const distribustion = await this.airtableService.getDistributionById(id);
-
-      if (!distribustion) {
-        console.log('не найден distribustion=', id);
-        await this.airtableService.updateStatusTransferInBot(
-          'Ошибка переноса',
-          sessionId,
-        );
-        return;
-      }
       const userBotData =
         await this.airtableService.getBotByFilterArticulAndChatId(
           articul,
@@ -2126,9 +2117,7 @@ export class TelegramService {
           dateRecived: userBotData.fields['Факт дата получения']
             ? parsedDate(userBotData.fields['Факт дата получения'])
             : null,
-          price: userBotData.fields['Цена']
-            ? userBotData.fields['Цена'].replace(/\D/g, '')
-            : null,
+          price: price ? price : userBotData.fields['Цена'].replace(/\D/g, ''),
           checkWb: userBotData.fields['Чек WB'],
         });
         await this.airtableService.updateStatusTransferInBot(
