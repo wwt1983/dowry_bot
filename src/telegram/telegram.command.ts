@@ -77,7 +77,7 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
     }, []);
   }
 
-  data?.reduce(function (newArr, record) {
+  return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
       !IGNORED_STATUSES.includes(record.fields.Статус) &&
