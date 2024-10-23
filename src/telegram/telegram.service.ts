@@ -1995,10 +1995,10 @@ export class TelegramService {
     goodScreen: string,
   ) {
     try {
-      console.log('session=', sessionId, key);
+      console.log('transferBotToDistributions session=', sessionId, key);
 
       if (!sessionId) {
-        console.log('transferBotToDistributions session=', sessionId);
+        console.log('transferBotToDistributions no session=', sessionId);
         return;
       }
 
