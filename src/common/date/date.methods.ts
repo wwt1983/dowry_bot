@@ -157,12 +157,15 @@ export const addMinutesToInterval = (date: string, interval: number) => {
 
 export const getLastIntervalData = (data: IBot[], interval: string) => {
   //console.log(data.map((x) => x.fields.StartTime));
-  const lastInterval = data.sort((a, b) =>
-    compareAsc(
-      new Date(b.fields['StartTime']),
-      new Date(a.fields['StartTime']),
-    ),
-  );
+  const lastInterval =
+    data.length === 1
+      ? data
+      : data.sort((a, b) =>
+          compareAsc(
+            new Date(b.fields['StartTime']),
+            new Date(a.fields['StartTime']),
+          ),
+        );
 
   const nextInterval = addMinutesToInterval(
     lastInterval[0].fields['StartTime'],
