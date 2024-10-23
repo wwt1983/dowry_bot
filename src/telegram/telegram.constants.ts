@@ -42,7 +42,7 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.offers, description: 'Раздачи' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
-  { command: COMMAND_NAMES.history, description: 'Ваша история' },
+  { command: COMMAND_NAMES.history, description: 'История покупок' },
   { command: COMMAND_NAMES.call, description: 'Написать оператору' },
 ];
 
@@ -200,7 +200,7 @@ export const STEPS = {
     step: 0,
     value: 'Штрих-код',
     erroText: 'загрузить скриншот со штрих-кодом',
-    image: '/images/5.jpeg',
+    image: '/images/shtrih_code.jpg',
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
