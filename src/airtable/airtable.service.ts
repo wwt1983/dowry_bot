@@ -363,14 +363,11 @@ export class AirtableService {
     return data.records;
   }
 
-  async getDistributionByFilterArticulAndNick(
+  async getDistributionByFilter(
     articul: string,
-    nick?: string,
     chat_id?: string,
   ): Promise<IDistributions | null> {
-    const filter = chat_id
-      ? `&${FILTER_BY_FORMULA}=SEARCH("${chat_id.trim()}", {chat_id})`
-      : `&${FILTER_BY_FORMULA}=AND({Артикул WB}="${articul.trim()}", {Ник ТГ}="${nick.trim()}")`;
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${chat_id.trim()}", {chat_id})`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
@@ -442,7 +439,7 @@ export class AirtableService {
       `${AIRTABLE_URL}/${TablesName.Distributions}/${id}`,
     );
     if (!data) return null;
-    return data as IDistribution;
+    return data.records as IDistribution;
   }
 
   async getHelperTable(): Promise<IHelpers | null> {

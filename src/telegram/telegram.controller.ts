@@ -139,6 +139,13 @@ export class TelegramController {
       checkWb: string;
       dateRecived: string;
       dateBuy: string;
+      searchScreen: string;
+      cartScreen: string;
+      orderScreen: string;
+      reciveScreen: string;
+      shtrihCodeScreen: string;
+      checkScreen: string;
+      goodScreen: string;
     },
   ): Promise<void> {
     await this.telegramService.transferBotToDistributions(
@@ -153,10 +160,17 @@ export class TelegramController {
       data.checkWb,
       data.dateRecived,
       data.dateBuy,
+      data.searchScreen,
+      data.cartScreen,
+      data.orderScreen,
+      data.reciveScreen,
+      data.shtrihCodeScreen,
+      data.checkScreen,
+      data.goodScreen,
     );
   }
   /**
-   * при изменении поля chat_id запускается запрос на перенос данных из бота в таблицу Раздачи
+   * при изменении поля chat_id в таблице Раздачи запускается запрос на перенос данных из таблицы Бота в таблицу Раздачи
    */
   @Post('signalToTransferBotToDistributions')
   async signalToTransferBotToDistributions(
