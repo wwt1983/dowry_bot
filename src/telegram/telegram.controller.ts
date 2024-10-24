@@ -288,7 +288,11 @@ export class TelegramController {
       url: string;
     },
   ) {
-    await this.telegramService.notificationToClosedOffersUsers(data.offerId, data.name, data.url);
+    await this.telegramService.notificationToClosedOffersUsers(
+      data.offerId,
+      data.name,
+      data.url,
+    );
     console.log('notificationToClosedOffersUsers', data);
   }
 }
