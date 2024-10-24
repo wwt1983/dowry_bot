@@ -321,7 +321,10 @@ export class AirtableService {
     const filter = `&${FILTER_BY_FORMULA}=OR(${query})`;
     return await this.airtableHttpService.get(TablesName.Offers, filter);
   }
-  async getBotByFilter(value: string, field: string): Promise<IBot[] | null> {
+  async getBotByFilter(
+    value: string | number,
+    field: string,
+  ): Promise<IBot[] | null> {
     const filter = `&${FILTER_BY_FORMULA}=SEARCH("${value}",{${field}})`;
     const data = await this.airtableHttpService.get(TablesName.Bot, filter);
     if (!data || (data.records && data.records.length === 0)) return null;

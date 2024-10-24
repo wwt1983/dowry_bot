@@ -2095,6 +2095,7 @@ export class TelegramService {
     articul: string,
     id: string,
     price: string,
+    dateRecived: string,
   ) {
     let sessionId;
 
@@ -2129,9 +2130,11 @@ export class TelegramService {
           dataForCash: userBotData.fields['Данные для кешбека'],
           key: userBotData.fields['Ключевое слово'],
           dateBuy: userBotData.fields['StartTime'],
-          dateRecived: userBotData.fields['Факт дата получения']
-            ? parsedDate(userBotData.fields['Факт дата получения'])
-            : null,
+          dateRecived:
+            dateRecived ||
+            (userBotData.fields['Факт дата получения']
+              ? parsedDate(userBotData.fields['Факт дата получения'])
+              : null),
           price: price ? price : userBotData.fields['Цена'].replace(/\D/g, ''),
           checkWb: userBotData.fields['Чек WB'],
         });

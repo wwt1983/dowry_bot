@@ -180,6 +180,7 @@ export class TelegramController {
       articul: string[];
       id: string;
       price: string;
+      dateRecieved: string;
     },
   ) {
     await this.telegramService.signalToTransferBotToDistributions(
@@ -187,6 +188,7 @@ export class TelegramController {
       data.articul[0],
       data.id,
       data.price,
+      data.dateRecieved,
     );
     console.log('signalToTransferBotToDistributions', data);
   }
