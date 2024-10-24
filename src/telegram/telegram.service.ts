@@ -2429,4 +2429,64 @@ export class TelegramService {
       }
     });
   }
+  async notificationToClosedOffersUsers(
+    offerId: string,
+    name: string,
+    url: string,
+  ) {
+    const users = await this.airtableService.getClosedOfferUsers(offerId);
+    if (!users || users.length === 0) return;
+
+    const data = users?.map((x) => ({
+      chatId: x.fields.chat_id,
+      sessionId: x.fields.SessionId,
+      botId: x.fields.Id,
+    }));
+
+    console.log(data);
+    const notifications = await this.airtableService.getNotifications();
+
+    data.map(async (item) => {
+      try {
+        const statisticNotifications =
+          await this.airtableService.getNotificationStatistics(item.sessionId);
+
+        const value = filterNotificationValue(
+          notifications,
+          statisticNotifications,
+          'Отмена',
+        );
+
+        if (!value || value?.statistic?.fields?.Статус === 'Остановлено') {
+          return;
+        }
+
+        await this.addNotificationStatistic(
+          item.sessionId,
+          value.notification?.fields['Количество попыток'] === 1
+            ? 'Остановлено'
+            : 'Доставлено',
+          1,
+          item.botId,
+          value.notification?.fields?.Id,
+        );
+
+        await this.bot.api.sendMessage(
+          item.chatId,
+          `🙋‍♀️${value.notification.fields.Сообщение} <a href='${url}'>${name}</a>`,
+          {
+            parse_mode: 'HTML',
+          },
+        );
+        await sleep(1000);
+        console.log(
+          `рассылка notificationToClosedOffersUsers прошла для ${item.chatId}`,
+        );
+      } catch (error) {
+        console.error(
+          `chat_id ${item} Ошибка при отправке сообщения notificationToClosedOffersUsers: ${error}`,
+        );
+      }
+    });
+  }
 }

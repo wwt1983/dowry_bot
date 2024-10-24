@@ -633,4 +633,20 @@ export class AirtableService {
 
     return (data as IBots).records;
   }
+
+  /**
+   * выбираем все раздачи пользователей по артикулу со статусом Отмена для приглашения в открытую раздачу
+   */
+  async getClosedOfferUsers(offerId: string): Promise<IBot[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}",{Статус} = "Отмена")`,
+    );
+
+    //console.log('count filter', articul, data?.records.length);
+
+    if (!data?.records?.length || data?.records?.length === 0) return null;
+
+    return (data as IBots).records;
+  }
 }

@@ -276,4 +276,19 @@ export class TelegramController {
       console.log('cloaseWaitings', error);
     }
   }
+  /**
+   * при публикации раздачи в таблице Offers ищем всех пользователей этой раздачи которые были в статусе Отмена и отправляем им оповещение 1 раз об открытии раздачи снова
+   */
+  @Post('notificationToClosedOffersUsers')
+  async notificationToClosedOffersUsers(
+    @Body()
+    data: {
+      offerId: string;
+      name: string;
+      url: string;
+    },
+  ) {
+    await this.telegramService.notificationToClosedOffersUsers(data.offerId, data.name, data.url);
+    console.log('notificationToClosedOffersUsers', data);
+  }
 }
