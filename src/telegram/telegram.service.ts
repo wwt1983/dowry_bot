@@ -199,6 +199,8 @@ export class TelegramService {
           id.toString(),
         );
 
+        if (sessionData.errorStatus) return sessionData.errorStatus;
+
         checkOnLimitUserOffer = checkOnExistOfferByUserOrders(
           sessionData.offerId,
           ctx.session.userOffers,
@@ -907,6 +909,8 @@ export class TelegramService {
             webData.title,
           );
 
+          if (data.errorStatus) return data.errorStatus;
+
           lastInterval = await this.airtableService.getLastIntervalTime(
             webData.offerId,
             webData.interval,
@@ -1205,7 +1209,12 @@ export class TelegramService {
       positionOnWB: offerAirtable.fields['Позиция в WB'],
       times: getTimesFromTimesTable(offerAirtable.fields['Время бронь']),
       countTryError: 0,
-      errorStatus: null,
+      errorStatus:
+        offerAirtable.fields.Status === 'Done' ||
+        offerAirtable.fields.Status === 'Stop' ||
+        offerAirtable.fields.Status === 'Архив'
+          ? STOP_TEXT + ' В данный момент раздача завершена 😿'
+          : null,
       filter: offerAirtable.fields.Фильтр,
       interval: offerAirtable.fields.Интервал,
       offerCount: offerAirtable.fields.Количество,
