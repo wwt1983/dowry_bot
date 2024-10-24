@@ -2443,7 +2443,7 @@ export class TelegramService {
       botId: x.fields.Id,
     }));
 
-    console.log(data);
+    //console.log(data);
     const notifications = await this.airtableService.getNotifications();
 
     data.map(async (item) => {
