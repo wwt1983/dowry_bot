@@ -680,9 +680,9 @@ export class TelegramService {
           ctx.session.startTime,
           ctx.session.data.title,
         ),
-        ctx.session.step === getNumberStepByStatus('Дата доставки')
-          ? { reply_markup: deliveryDateKeyboard }
-          : null,
+        // ctx.session.step === getNumberStepByStatus('Дата доставки')
+        //   ? { reply_markup: deliveryDateKeyboard }
+        //   : null,
       );
 
       await this.sendMediaByStep(ctx.session.status, ctx);

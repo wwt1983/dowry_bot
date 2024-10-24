@@ -8,7 +8,6 @@ import {
   parse,
   addMinutes,
   compareAsc,
-  isFuture,
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -186,3 +185,33 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
 
 export const formatSimple = (date: string) =>
   format(date, 'HH:mm d MMMM', { locale: ru });
+
+export const convertDateFromString = (date: string) => {
+  if (!date) return null;
+  const regex = /[,\-\s\/]/g;
+  date = date.replace(regex, '.');
+
+  // Функция для форматирования даты в DD.MM.YYYY
+  const format = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
+  const regex2 = /^\d{2}\.\d{2}\.\d{4}$/; // DD.MM.YYYY
+  const regex3 = /^\d{2}\.\d{2}$/; // DD.MM
+  const regex4 = /^\d{2}\.\d{2}.\d{2}$/; // DD.MM.YY
+
+  const currentYear = new Date().getFullYear();
+  if (regex2.test(date)) {
+    // Если дата в формате DD.MM.YYYY, возвращаем её как есть
+    return date;
+  } else if (regex3.test(date) || regex4.test(date)) {
+    // Если дата в формате DD.MM или DD/MM, добавляем текущий год
+    const [day, month] = date.split(/[\.\/]/);
+    return format(new Date(`${currentYear}-${month}-${day}`));
+  } else {
+    return null;
+  }
+};

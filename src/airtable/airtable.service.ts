@@ -16,6 +16,7 @@ import {
   getTimeWithTz,
   getOfferTime,
   getLastIntervalData,
+  convertDateFromString,
 } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
@@ -80,14 +81,14 @@ export class AirtableService {
         Раздача: session.data?.title,
         Images: session.images,
         StopTime: getTimeWithTz(),
-        ['Дата получения']: session.deliveryDate,
+        ['Дата получения']: convertDateFromString(session.deliveryDate),
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
         'Ключевые слова':
           session?.data?.keys +
           (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
         Фильтр: session?.data?.filter || '',
-        'Факт дата получения': session.recivingDate,
+        'Факт дата получения': convertDateFromString(session.recivingDate),
         'Данные для кешбека': session.dataForCash || '',
         Цена: session.price ? session.price.replace(/\D/g, '') : '',
         'Чек WB': session.checkWb || '',
