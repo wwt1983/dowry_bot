@@ -467,6 +467,12 @@ export class AirtableService {
     if (!data || data.records.length === 0) return null;
     return data.records as IBuyer[];
   }
+  async findBuyerById(id: string): Promise<IBuyer> {
+    const data = await this.airtableHttpService.getById(TablesName.Buyers, id);
+    console.log('buyer', data);
+    if (!data) return null;
+    return data as IBuyer;
+  }
   async checkPhone(phone: string): Promise<boolean> {
     const data = await this.airtableHttpService.get(
       TablesName.Buyers,

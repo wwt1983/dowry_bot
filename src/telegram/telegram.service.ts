@@ -86,7 +86,7 @@ import {
   //commentKeyboard,
   getArticulCommand,
   stepKeyboard,
-  deliveryDateKeyboard,
+  //deliveryDateKeyboard,
   createHistoryKeyboard,
   createLabelHistory,
   operatorKeyboard,
@@ -101,7 +101,6 @@ import {
   getDateWithTz,
   getTimeWithTz,
   getTimesFromTimesTable,
-  parsedDate,
   getDate,
   getDifferenceInDays,
   convertDateFromString,
@@ -2051,6 +2050,11 @@ export class TelegramService {
         distribution.id &&
         distribution.fields['Артикул WB'][0] === +articul.trim()
       ) {
+        if (!chat_id) {
+          chat_id = (await this.airtableService.findBuyerById(distribution.id))
+            ?.fields.chat_id;
+          console.log('chat_id', chat_id);
+        }
         await this.airtableService.updateDistribution({
           id: distribution.id,
           searchScreen: searchScreen,
@@ -2096,10 +2100,16 @@ export class TelegramService {
     id: string,
     price: string,
     dateRecived: string,
+    userId: string,
   ) {
     let sessionId;
 
     try {
+      if (!chat_id) {
+        chat_id = (await this.airtableService.findBuyerById(userId))?.fields
+          .chat_id;
+        console.log('chat_id', chat_id);
+      }
       const userBotData =
         await this.airtableService.getBotByFilterArticulAndChatId(
           articul,
@@ -2143,6 +2153,11 @@ export class TelegramService {
           sessionId,
         );
         console.log('Данные перенесены');
+      } else {
+        await this.airtableService.updateStatusTransferInBot(
+          'Ошибка переноса',
+          sessionId,
+        );
       }
     } catch (error) {
       console.log('transferBotToDistributions', sessionId, error);

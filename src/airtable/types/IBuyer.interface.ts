@@ -8,6 +8,7 @@ export interface IBuyer {
     Банк?: string[];
     'Идентификация ФИО': string;
     Раздачи?: string[];
+    chat_id: string;
   };
 }
 
