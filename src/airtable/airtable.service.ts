@@ -368,15 +368,14 @@ export class AirtableService {
   }
 
   async getDistributionByFilter(
-    articul: string,
-    chat_id?: string,
+    buyerId?: string,
   ): Promise<IDistributions | null> {
-    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${chat_id.trim()}", {chat_id})`;
+    const filter = `&${FILTER_BY_FORMULA}=SEARCH("${buyerId}", ARRAYJOIN({Покупатели}, ","))`;
     const data = await this.airtableHttpService.get(
       TablesName.Distributions,
       filter,
     );
-    console.log('data=', data, chat_id, articul);
+    console.log('data=', data, buyerId);
     if (!data || !data.records || data?.records?.length === 0) return null;
     return data as IDistributions;
   }
@@ -439,11 +438,12 @@ export class AirtableService {
   }
 
   async getDistributionById(id: string): Promise<IDistribution | null> {
-    const data = await this.airtableHttpService.get(
-      `${AIRTABLE_URL}/${TablesName.Distributions}/${id}`,
+    const data = await this.airtableHttpService.getById(
+      TablesName.Distributions,
+      id,
     );
     if (!data) return null;
-    return data.records as IDistribution;
+    return data as IDistribution;
   }
 
   async getHelperTable(): Promise<IHelpers | null> {
@@ -472,6 +472,14 @@ export class AirtableService {
     console.log('buyer', data);
     if (!data) return null;
     return data as IBuyer;
+  }
+  async findBuyerByChatId(chat_id: string): Promise<IBuyer | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Buyers,
+      `&${FILTER_BY_FORMULA}=FIND(${chat_id}, {chat_id})`,
+    );
+    if (!data || data.records.length === 0) return null;
+    return data.records[0] as IBuyer;
   }
   async checkPhone(phone: string): Promise<boolean> {
     const data = await this.airtableHttpService.get(
