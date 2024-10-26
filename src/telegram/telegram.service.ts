@@ -2023,7 +2023,7 @@ export class TelegramService {
 
       if (!distribustions) {
         await this.airtableService.updateStatusTransferInBot(
-          'Chat_id не найден',
+          'Ошибка переноса',
           sessionId,
         );
         return;
