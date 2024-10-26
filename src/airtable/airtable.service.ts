@@ -445,7 +445,17 @@ export class AirtableService {
     if (!data) return null;
     return data as IDistribution;
   }
-
+  async getDistributionByIds(
+    values: string[],
+  ): Promise<IDistribution[] | null> {
+    const conditions = values.map((id) => `{id}="${id}"`).join(', ');
+    const data = await this.airtableHttpService.get(
+      TablesName.Distributions,
+      `&${FILTER_BY_FORMULA}=OR(${conditions})`,
+    );
+    if (!data || data.records.length === 0) return null;
+    return data.records as IDistribution[];
+  }
   async getHelperTable(): Promise<IHelpers | null> {
     const data = await this.airtableHttpService.get(TablesName.Helpers);
     if (!data) return null;

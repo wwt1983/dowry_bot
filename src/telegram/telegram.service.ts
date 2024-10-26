@@ -2017,7 +2017,7 @@ export class TelegramService {
       }
       const buyer = await this.airtableService.findBuyerByChatId(chat_id);
 
-      //console.log('buyerId', buyer);
+      //console.log('buyerId=', buyer);
 
       if (!buyer) {
         await this.airtableService.updateStatusTransferInBot(
@@ -2026,53 +2026,69 @@ export class TelegramService {
         );
         return;
       }
-      const promisesResult = buyer.fields.Раздачи?.map(async (item) => {
-        const distribution =
-          await this.airtableService.getDistributionById(item);
 
-        if (
-          distribution &&
-          distribution.fields['Артикул WB'][0] === +articul.trim()
-        ) {
-          await this.airtableService.updateDistribution({
-            id: distribution.id,
-            searchScreen: searchScreen,
-            cartScreen: cartScreen,
-            orderScreen: orderScreen,
-            reciveScreen: reciveScreen,
-            shtrihCodeScreen: shtrihCodeScreen || WAITING_IMAGE,
-            checkScreen: checkScreen || WAITING_IMAGE,
-            goodScreen: goodScreen || WAITING_IMAGE,
-            chat_id: distribution.fields['chat_id'] || chat_id,
-            articul: articul,
-            dataForCash: dataForCash,
-            key: distribution?.fields['Ключевой запрос'] || key,
-            price:
-              distribution?.fields['Цена товара'] ||
-              (price ? price?.replace(/\D/g, '') : ''),
-            checkWb: checkWb,
-            dateRecived:
-              distribution.fields['Дата выкупа'] ||
-              (dateRecived ? convertDateFromString(dateRecived) : null),
-            dateBuy: distribution.fields['Дата заказа'] || dateBuy,
-          });
+      const distributions = await this.airtableService.getDistributionByIds(
+        buyer.fields.Раздачи,
+      );
 
-          await this.airtableService.updateStatusTransferInBot(
-            'Успешно перенесены',
-            sessionId,
-          );
-          return true;
-        }
-        return false;
-      });
-      const resolvedValues = await Promise.all(promisesResult);
+      //console.log('distributions =', distributions);
 
-      if (!resolvedValues.includes(true)) {
+      if (
+        !distributions ||
+        distributions.length === 0 ||
+        !distributions.find(
+          (x) => x?.fields['Артикул WB'][0] === +articul.trim(),
+        )
+      ) {
         await this.airtableService.updateStatusTransferInBot(
           'Артикул в раздаче не найден',
           sessionId,
         );
-        return;
+        return false;
+      }
+
+      const distribution = distributions.find(
+        (x) => x?.fields['Артикул WB'][0] === +articul.trim(),
+      );
+      //console.log('distribution =', distribution);
+
+      if (
+        distribution &&
+        distribution?.fields['Артикул WB'][0] === +articul.trim()
+      ) {
+        await this.airtableService.updateDistribution({
+          id: distribution.id,
+          searchScreen: searchScreen,
+          cartScreen: cartScreen,
+          orderScreen: orderScreen,
+          reciveScreen: reciveScreen,
+          shtrihCodeScreen: shtrihCodeScreen || WAITING_IMAGE,
+          checkScreen: checkScreen || WAITING_IMAGE,
+          goodScreen: goodScreen || WAITING_IMAGE,
+          chat_id: distribution?.fields['chat_id'] || chat_id,
+          articul: articul,
+          dataForCash: dataForCash,
+          key: distribution?.fields['Ключевой запрос'] || key,
+          price:
+            distribution?.fields['Цена товара'] ||
+            (price ? price?.replace(/\D/g, '') : ''),
+          checkWb: checkWb,
+          dateRecived:
+            distribution?.fields['Дата выкупа'] ||
+            (dateRecived ? convertDateFromString(dateRecived) : null),
+          dateBuy: distribution?.fields['Дата заказа'] || dateBuy,
+        });
+        await this.airtableService.updateStatusTransferInBot(
+          'Успешно перенесены',
+          sessionId,
+        );
+        return true;
+      } else {
+        await this.airtableService.updateStatusTransferInBot(
+          'Артикул в раздаче не найден',
+          sessionId,
+        );
+        return false;
       }
     } catch (error) {
       console.log('transferBotToDistributions', error);
@@ -2080,6 +2096,13 @@ export class TelegramService {
         'Ошибка переноса',
         sessionId,
       );
+      return false;
+    } finally {
+      await this.airtableService.updateStatusTransferInBot(
+        'Артикул в раздаче не найден',
+        sessionId,
+      );
+      return false;
     }
   }
   /**
