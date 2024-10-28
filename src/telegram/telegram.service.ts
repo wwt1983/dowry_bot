@@ -2031,31 +2031,23 @@ export class TelegramService {
         buyer.fields.Раздачи,
       );
 
-      //console.log('distributions =', distributions);
-
-      if (
-        !distributions ||
-        distributions.length === 0 ||
-        !distributions.find(
-          (x) => x?.fields['Артикул WB'][0] === +articul.trim(),
-        )
-      ) {
-        await this.airtableService.updateStatusTransferInBot(
-          'Артикул в раздаче не найден',
-          sessionId,
-        );
-        return false;
+      if (!distributions || distributions.length === 0) {
+        const articules = distributions?.map((x) => x.fields['Артикул WB'][0]);
+        if (!articules.includes(+articul.trim())) {
+          await this.airtableService.updateStatusTransferInBot(
+            'Артикул в раздаче не найден',
+            sessionId,
+          );
+          return false;
+        }
       }
 
       const distribution = distributions.find(
-        (x) => x?.fields['Артикул WB'][0] === +articul.trim(),
+        (x) => x.fields['Артикул WB'][0] === +articul.trim(),
       );
       //console.log('distribution =', distribution);
 
-      if (
-        distribution &&
-        distribution?.fields['Артикул WB'][0] === +articul.trim()
-      ) {
+      if (distribution) {
         await this.airtableService.updateDistribution({
           id: distribution.id,
           searchScreen: searchScreen,
@@ -2091,15 +2083,9 @@ export class TelegramService {
         return false;
       }
     } catch (error) {
-      console.log('transferBotToDistributions', error);
+      console.log('transferBotToDistributions error=', error);
       await this.airtableService.updateStatusTransferInBot(
         'Ошибка переноса',
-        sessionId,
-      );
-      return false;
-    } finally {
-      await this.airtableService.updateStatusTransferInBot(
-        'Артикул в раздаче не найден',
         sessionId,
       );
       return false;
