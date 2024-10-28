@@ -24,7 +24,7 @@ import {
   FIVE_STEP,
   SIX_STEP,
   LIMIT_TIME_IN_MINUTES_FOR_BUY,
-  STEP_ERROR_TEXT,
+  //STEP_ERROR_TEXT,
   WEB_APP,
   STEP_EXAMPLE_TEXT_DOWN,
   STEP_EXAMPLE_TEXT_UP,
@@ -758,7 +758,6 @@ export const getErrorTextByStep = (
   if (!stepInfo) return null;
   return {
     error:
-      STEP_ERROR_TEXT +
       stepInfo.erroText +
       (STEPS[stepInfo.value]?.image ? STEP_EXAMPLE_TEXT_DOWN : ''),
     url: STEPS[stepInfo.value]?.image
@@ -1034,7 +1033,11 @@ export const itRequestWithCachQuestion = (message: string) =>
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getTextForIntervalTime = (startTime) => {
-  return `‼️<b>Начало раздачи ${formatSimple(startTime)}</b> (время московское)‼️\n\n‼️<b>Если время вашего выкупа в wildberries будет раньше, кэшбек 💰 выплачен не будет</b>‼️`.toUpperCase();
+  return (
+    `‼️<b>Начало раздачи ${formatSimple(startTime)}</b> (время московское)‼️\n
+  <b>‼️Если время вашего выкупа в wildberries будет раньше, кэшбек 💰 выплачен не будет</b>‼️\n`.toUpperCase() +
+    '\n<b>Оформить заказ нужно в течение 20-30 минут</b>\n'
+  );
 };
 
 export const checkOnStopStatus = (status: BotStatus) => {
