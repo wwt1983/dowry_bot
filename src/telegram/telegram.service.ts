@@ -2021,11 +2021,10 @@ export class TelegramService {
       //console.log('buyerId=', buyer);
 
       if (!buyer) {
-        await this.airtableService.updateStatusTransferInBot(
+        return await this.airtableService.updateStatusTransferInBot(
           'Chat_id не найден',
           sessionId,
         );
-        return;
       }
 
       const distributions = await this.airtableService.getDistributionByIds(
@@ -2062,7 +2061,7 @@ export class TelegramService {
           shtrihCodeScreen: shtrihCodeScreen || WAITING_IMAGE,
           checkScreen: checkScreen || WAITING_IMAGE,
           goodScreen: goodScreen || WAITING_IMAGE,
-          chat_id: distribution?.fields['chat_id'] || chat_id,
+          chat_id: chat_id,
           articul: articul,
           dataForCash: dataForCash,
           key: distribution?.fields['Ключевой запрос'] || key,
@@ -2133,7 +2132,7 @@ export class TelegramService {
         );
 
         await this.airtableService.updateDistribution({
-          id: id,
+          id,
           searchScreen: userBotData.fields['Поиск скрин'],
           cartScreen: userBotData.fields['Корзина скрин'],
           orderScreen: userBotData.fields['Заказ скрин'],
@@ -2142,8 +2141,8 @@ export class TelegramService {
             userBotData.fields['Штрих-код скрин'] || WAITING_IMAGE,
           checkScreen: userBotData.fields['Чек WB'] || WAITING_IMAGE,
           goodScreen: userBotData.fields['Товар скрин'] || WAITING_IMAGE,
-          chat_id: chat_id,
-          articul: articul,
+          chat_id,
+          articul,
           dataForCash: userBotData.fields['Данные для кешбека'],
           key: userBotData.fields['Ключевое слово'],
           dateBuy: userBotData.fields['StartTime'],
