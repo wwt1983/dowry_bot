@@ -362,6 +362,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     location,
     image,
     filter,
+    description,
   } = data;
   const useFilterForHelpSearch = filter
     ? `Попробуйте найти товар используя фильтр 👉: ${filter.toUpperCase()} \n`
@@ -376,11 +377,15 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     `❗️ Кешбэк ~ ${cash}❗️ \n` +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
     '\n' +
-    FIRST_STEP_LINK +
+    description +
+    '\n' +
     FIRST_STEP_KEY_VALUE +
     `\n🔎 ${keys.toUpperCase()}\n\n` +
     //getMessageForTimeOffer(times) +
     useFilterForHelpSearch +
+    '\n' +
+    '👉 ' +
+    FIRST_STEP_LINK +
     //FIRST_STEP_A +
     (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
   return [
