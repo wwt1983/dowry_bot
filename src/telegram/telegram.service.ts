@@ -2123,7 +2123,7 @@ export class TelegramService {
           chat_id,
         );
 
-      if (userBotData && userBotData?.fields['SessionId']) {
+      if (userBotData?.fields['SessionId']) {
         sessionId = userBotData?.fields['SessionId'];
 
         console.log(
@@ -2150,7 +2150,11 @@ export class TelegramService {
           dateRecived:
             dateRecived ||
             (userBotData.fields['Факт дата получения']
-              ? convertDateFromString(userBotData.fields['Факт дата получения'])
+              ? parsedDate(
+                  convertDateFromString(
+                    userBotData.fields['Факт дата получения'],
+                  ),
+                )
               : null),
           price: price ? price : userBotData.fields['Цена'].replace(/\D/g, ''),
           checkWb: userBotData.fields['Чек WB'],
