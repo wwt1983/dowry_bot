@@ -8,6 +8,7 @@ import {
   parse,
   addMinutes,
   compareAsc,
+  formatISO,
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -88,7 +89,7 @@ export const dateFormat = (date: string, format?: string) => {
 export const dateFormatNoTZ = (date: string, formatType?: string) => {
   if (!date) return null;
   if (isValid(new Date(date))) {
-    return format(date, formatType || FORMAT_DATE_NO_TIME);
+    return formatISO(format(date, formatType || FORMAT_DATE_NO_TIME));
   }
   return null;
 };

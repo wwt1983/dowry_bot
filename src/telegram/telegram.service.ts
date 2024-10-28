@@ -104,6 +104,7 @@ import {
   getDate,
   getDifferenceInDays,
   convertDateFromString,
+  parsedDate,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
@@ -2045,7 +2046,11 @@ export class TelegramService {
       const distribution = distributions.find(
         (x) => x.fields['Артикул WB'][0] === +articul.trim(),
       );
-      //console.log('distribution =', distribution);
+      console.log(
+        'Дата выкупа =',
+        distribution?.fields['Дата выкупа'],
+        parsedDate(convertDateFromString(dateRecived)),
+      );
 
       if (distribution) {
         await this.airtableService.updateDistribution({
@@ -2067,7 +2072,9 @@ export class TelegramService {
           checkWb: checkWb,
           dateRecived:
             distribution?.fields['Дата выкупа'] ||
-            (dateRecived ? convertDateFromString(dateRecived) : null),
+            (dateRecived
+              ? parsedDate(convertDateFromString(dateRecived))
+              : null),
           dateBuy: distribution?.fields['Дата заказа'] || dateBuy,
         });
         await this.airtableService.updateStatusTransferInBot(
