@@ -1419,6 +1419,7 @@ export class TelegramService {
     dateDelivery: string,
     close: boolean,
     filter: string,
+    video: boolean,
   ): Promise<void> {
     try {
       console.log(
@@ -1465,6 +1466,22 @@ export class TelegramService {
       );
 
       if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
+
+      if (video) {
+        const message = notifications.records.find(
+          (x) => x.fields.Название === 'Видеопереход',
+        )?.fields.Сообщение;
+        await this.bot.api.sendMessage(
+          process.env.NODE_ENV === 'development' ? 193250152 : chat_id,
+          '📌' +
+            message +
+            ` для раздачи 👉 ${offerName}.\n<a href="https://dowrybot-front.vercel.app/images/file_1730145280794.mp4">Образец ⤵️</a>`,
+          {
+            parse_mode: 'HTML',
+          },
+        );
+        return;
+      }
 
       if (value.status === 'Время истекло') {
         await this.airtableService.updateStatusInBotTableAirtable(

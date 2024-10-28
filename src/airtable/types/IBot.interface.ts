@@ -41,6 +41,7 @@ export interface IBot {
     'Штрих-код скрин': string;
     'Товар скрин': string;
     'Время входа': string;
+    'Запросить видеопереход': boolean;
   };
 }
 interface IPhoto {
