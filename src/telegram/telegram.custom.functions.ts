@@ -380,7 +380,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     description +
     '\n' +
     FIRST_STEP_KEY_VALUE +
-    `\n🔎 ${keys.toUpperCase()}\n\n` +
+    `\n🔎 ${keys.toUpperCase()}\n` +
     //getMessageForTimeOffer(times) +
     useFilterForHelpSearch +
     '\n' +
@@ -528,6 +528,8 @@ export const getLinkForOffer = (data: IOffer) => {
 };
 
 export const parseUrl = (url: string, articul: string): boolean => {
+  if (!url || !articul) return false;
+
   if (url.trim() === articul.trim()) return true;
 
   if (!url) return false;
@@ -741,7 +743,9 @@ export const getNumberStepByStatus = (stepName: BotStatus): number | null => {
     return -1;
   }
 };
-
+/**
+ * проверяем соответстует ли название шага типу (например шаг Корзина - тип image)
+ */
 export const checkTypeStepByName = (
   stepName: BotStatus,
   type: 'image' | 'text',

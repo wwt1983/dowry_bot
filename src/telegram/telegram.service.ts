@@ -633,6 +633,11 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
+        const parseImageData = await this.commandService.get(
+          `https://api.ocr.space/parse/imageurl?apikey=K87126672788957&url=${firebaseUrl}&language=rus&isOverlayRequired=true`,
+        );
+        console.log(parseImageData);
+
         await statusMessage.editText('Фото загружено! ');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
 
