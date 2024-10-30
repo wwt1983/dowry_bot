@@ -153,6 +153,7 @@ export function createInitialSessionData(
     realStatus: null,
     checkWb: null,
     timeOfEntry: getTimeWithTz(),
+    checkParseImages: [],
   };
 }
 
@@ -203,6 +204,7 @@ export function createContinueSessionData(
     imgSearch: data.imgSearch,
     imgShtrihCode: data.imgShtrihCode,
     timeOfEntry: data.timeOfEntry,
+    checkParseImages: data.checkParseImages,
   };
 }
 export function updateSessionByField(

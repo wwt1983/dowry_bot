@@ -1,3 +1,5 @@
+import { ISteps } from './telegram.interface';
+
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_TEST_ID = '7145649314';
@@ -143,7 +145,7 @@ export const FOOTER =
   '👉 Для проверки факта невозврата товара менеджер дополнительно может запросить видео переход из чата в раздел Покупки\n' +
   '👉 Кешбэк будет выплачен только при соблюдении всех условий инструкции\n\n';
 
-export const STEPS = {
+export const STEPS: ISteps = {
   'В боте': {
     step: 0,
     value: 'В боте',
@@ -151,6 +153,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, //в боте
   'Выбор раздачи': {
     step: 0,
@@ -159,6 +162,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, // выбор раздачи (web)
   'Артикул правильный': {
     step: 0,
@@ -168,6 +172,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, // проверка артикул (text)
   Поиск: {
     step: 0,
@@ -177,6 +182,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: [], //здесь будет пусто но проверка будет по ключевому слову
   }, //поиск (photo)
   Корзина: {
     step: 0,
@@ -186,6 +192,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: ['корзина', 'купить'],
   }, //поиск (photo)
   Заказ: {
     step: 0,
@@ -195,6 +202,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: ['доставки'],
   }, //заказ (photo)
   'Дата доставки': {
     step: 0,
@@ -203,6 +211,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, //дата получения ориентировочная
   Получен: {
     step: 0,
@@ -212,6 +221,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: [],
   }, // получен (photo)
   'Дата получения': {
     step: 0,
@@ -220,6 +230,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, //дата получения фактическая
   'Отзыв на проверке': {
     step: 0,
@@ -228,6 +239,7 @@ export const STEPS = {
     isActive: false,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, // отзыв на проверке (text)
   Отзыв: {
     step: 0,
@@ -237,6 +249,7 @@ export const STEPS = {
     typeStep: TYPE_STEP.text,
     isActive: false,
     stop: false,
+    textCheck: false,
   }, //отзыв (photo)
   ['Штрих-код']: {
     step: 0,
@@ -246,6 +259,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: [],
   }, // штрих-код (photo)
   Чек: {
     step: 0,
@@ -255,6 +269,7 @@ export const STEPS = {
     isActive: false,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: [],
   }, //чек link wb
   ЧекWb: {
     step: 0,
@@ -265,6 +280,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text + TYPE_STEP.image,
     stop: false,
+    textCheck: [],
   }, //чек link wb
   Товар: {
     step: 0,
@@ -274,6 +290,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
+    textCheck: false,
   },
   Цена: {
     step: 0,
@@ -284,6 +301,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   },
   Финиш: {
     step: 0,
@@ -292,6 +310,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, // finish
   'Проблема с локацией': {
     step: -1,
@@ -300,6 +319,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: true,
+    textCheck: false,
   }, //геолокация не совпадает с раздачей
   'Проблема с артикулом': {
     step: -2,
@@ -309,6 +329,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   }, // артикул не совпадает с раздачей
   HELP: {
     step: -3,
@@ -317,6 +338,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
+    textCheck: false,
   },
   'Время истекло': {
     step: -4,
@@ -325,6 +347,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: true,
+    textCheck: false,
   },
   'Лимит заказов': {
     step: -5,
@@ -333,6 +356,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: true,
+    textCheck: false,
   },
   'Отмена пользователем': {
     step: -6,
@@ -341,6 +365,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: true,
+    textCheck: false,
   },
   'Чек неверный': {
     step: -8,
@@ -351,6 +376,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text + TYPE_STEP.image,
     stop: false,
+    textCheck: false,
   }, //
   Отмена: {
     step: -9,
@@ -359,6 +385,7 @@ export const STEPS = {
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: true,
+    textCheck: false,
   },
 };
 

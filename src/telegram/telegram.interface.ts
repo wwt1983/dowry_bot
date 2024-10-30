@@ -44,7 +44,7 @@ export interface ISessionData {
   lastCommand?: COMMAND_NAMES;
   times?: string[];
   isRestore: boolean;
-  realStatus?: BotStatus; // для восттановленных отрицательных статусов чтобы понимать двигаться можно дальше или оставаться на этом шаге
+  realStatus?: BotStatus; // для восcтановленных отрицательных статусов чтобы понимать двигаться можно дальше или оставаться на этом шаге
   itsSubscriber?: boolean;
   userOffers?: string[];
   dataForCash?: string; //fio bank phone
@@ -57,7 +57,8 @@ export interface ISessionData {
   imgRecieved?: string; // получен
   imgShtrihCode?: string; // штрих-код
   imgGood?: string; //товар
-  timeOfEntry?: string; //время входа
+  timeOfEntry?: string; //время входа,
+  checkParseImages?: string[]; //результат парсинга текста из фото
 }
 
 export type MyContext = HydrateFlavor<
@@ -94,3 +95,18 @@ export type FeedbackStatus =
   | 'Без фото'
   | 'Отложить отзыв'
   | 'Только оценка';
+
+export interface IStep {
+  step: number;
+  value: string;
+  erroText: string;
+  image?: string;
+  isActive: boolean;
+  typeStep: string;
+  stop: boolean;
+  textCheck: string[] | boolean;
+}
+
+export interface ISteps {
+  [key: string]: IStep;
+}

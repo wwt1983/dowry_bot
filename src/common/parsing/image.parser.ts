@@ -1,135 +1,74 @@
 import { BotStatus } from 'src/airtable/types/IBot.interface';
+import { IOCRResponse } from './image.interface';
+import { STEPS } from 'src/telegram/telegram.constants';
 
-type ResponseParse = {
-  check: boolean;
-  count?: number;
-  data?: string;
-};
-
-const DEFAULT_RESPONSE_TEXT = '\nПроверка: ❌';
-const DEFAULT_RESPONSE: ResponseParse = {
-  check: false,
-  count: 0,
-  data: null,
-};
-
-const checkParse = (
-  text: string,
-  status: BotStatus,
-  articul: string,
-  title: string,
+export const checkParseImage = (
+  text: IOCRResponse,
+  stepName: BotStatus,
+  keyword?: string,
 ) => {
   try {
-    if (!text) return DEFAULT_RESPONSE_TEXT;
+    //console.log('checkParseImage', stepName, keyword, text);
 
-    text = text.replace(/\s/gi, ' ');
-    let result: ResponseParse = null;
-    switch (status) {
-      case 'Артикул правильный':
-        result = checkSearch(articul, text);
-        break;
+    if (
+      !text ||
+      !text?.ParsedResults ||
+      text.IsErroredOnProcessing ||
+      text?.ParsedResults?.length === 0
+    )
+      return false;
+
+    const step = STEPS[stepName];
+
+    if (!step) return false;
+
+    switch (stepName) {
       case 'Поиск':
-        result = checkAddress(articul, text);
-        break;
+        return checkSearch(
+          text.ParsedResults[0].ParsedText,
+          keyword.substring(0, 23),
+        );
+      case 'Корзина':
       case 'Заказ':
-        break;
-      // case 'Отзыв на проверке':
-      //   result = checkComment(title, text);
-      //   break;
-      case 'Штрих-код':
-        result = checkCheck(title, text);
-        break;
+        return check(
+          text.ParsedResults[0].ParsedText,
+          step.textCheck as string[],
+        );
       default:
-        break;
+        return false;
     }
-
-    return result ? getMessage(result) : DEFAULT_RESPONSE_TEXT;
   } catch (error) {
-    console.log('checkParse=', error);
-    return DEFAULT_RESPONSE_TEXT;
+    console.log('checkParseImage error=', error);
+    return false;
   }
 };
 
-const getMessage = (result: ResponseParse) => {
-  if (!result) return DEFAULT_RESPONSE_TEXT;
-  const data = result.data ? ` ➡️ ${result.data}` : '';
-  return `\nПроверка: ${result.check ? '✅' : '❌'} ${data}`;
-};
-
-/* проверка фото поиска */
-const checkSearch = (data: string, text: string): ResponseParse => {
+/**
+ * проверка фото поиска
+ **/
+function checkSearch(text: string, keyword: string): boolean {
   try {
-    const count = (text.match(/Артикул/g) || []).length;
-    if (count > 0) {
-      return {
-        check: text.includes(data),
-        count: count,
-      };
-    } else {
-      const count = (text.match(/Кошельком/g) || []).length;
-      return {
-        check: count > 1,
-        count: count,
-      };
-    }
+    return text.toLowerCase().includes(keyword.toLowerCase());
   } catch (error) {
     console.log('checkSearch=', error);
-    return DEFAULT_RESPONSE;
+    return false;
   }
-};
+}
 
-/* проверка ссылки чека */
-const checkCheck = (data: string, text: string): ResponseParse => {
+/**
+ * проверка корзины заказа
+ **/
+function check(text: string, keywords: string[]): boolean {
   try {
-    const count = (text.match(/receipt/g) || []).length;
-    if (count > 0) {
-      const re = new RegExp(data, 'gi');
-      return {
-        check: (text.match(re) || []).length > 0,
-      };
-    } else {
-      return DEFAULT_RESPONSE;
-    }
+    return keywords.every((keyword) => text.toLowerCase().includes(keyword));
   } catch (error) {
-    console.log('checkCheck=', error);
-    return DEFAULT_RESPONSE;
+    console.log('check=', error);
+    return false;
   }
-};
-
-/* проверка фото отзыв */
-const checkComment = (data: string, text: string): ResponseParse => {
-  try {
-    const re = new RegExp(data, 'gi');
-    const countTitle = (text.match(re) || []).length;
-    return {
-      check: countTitle > 0,
-    };
-  } catch (error) {
-    console.log('checkComment=', error);
-    return DEFAULT_RESPONSE;
-  }
-};
-
-/* проверка фото адрес пвз */
-const checkAddress = (data: string, text: string): ResponseParse => {
-  try {
-    const isPageBuy = (text.match(/ПУНКТ ВЫДАЧИ ЗАКАЗОВ/) || []).length > 0;
-
-    return {
-      check: isPageBuy,
-      data: isPageBuy
-        ? text
-            .split('ПУНКТ ВЫДАЧИ ЗАКАЗОВ')[1]
-            .split('Ежедневно')[0]
-            .replace('[ 7)', '')
-        : '',
-    };
-  } catch (error) {
-    console.log('checkAddress=', error);
-    return DEFAULT_RESPONSE;
-  }
-};
+}
 
 /*
+https://ocr.space/OCRAPI
+25000 - запросов бесплатно
 https://api.ocr.space/parse/imageurl?apikey=K87126672788957&url=https://firebasestorage.googleapis.com/v0/b/dowry-332af.appspot.com/o/file_1730211664350?alt=media&language=rus&isOverlayRequired=true
 */

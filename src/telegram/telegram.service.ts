@@ -113,6 +113,8 @@ import {
   getOffersLinkForNotification,
 } from 'src/airtable/airtable.custom';
 import { NotificationName } from 'src/airtable/types/INotification.interface';
+import { IOCRResponse } from 'src/common/parsing/image.interface';
+import { checkParseImage } from 'src/common/parsing/image.parser';
 //import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
@@ -633,10 +635,26 @@ export class TelegramService {
           ctx.session.lastLoadImage,
         );
 
-        const parseImageData = await this.commandService.get(
-          `https://api.ocr.space/parse/imageurl?apikey=K87126672788957&url=${firebaseUrl}&language=rus&isOverlayRequired=true`,
-        );
-        console.log(parseImageData);
+        /* проверка изображений по шагам*/
+        try {
+          const parseImageData = (await this.commandService.get(
+            `https://api.ocr.space/parse/imageurl?apikey=K87126672788957&url=${firebaseUrl}&language=rus&isOverlayRequired=true`,
+          )) as IOCRResponse;
+
+          const resultCheckImage = checkParseImage(
+            parseImageData,
+            ctx.session?.status,
+            ctx.session?.data?.keys,
+          );
+          if (resultCheckImage) {
+            ctx.session.checkParseImages = [
+              ...ctx.session.checkParseImages,
+              ctx.session.status,
+            ];
+          }
+
+          console.log('resultCheckImage', resultCheckImage);
+        } catch (error) {}
 
         await statusMessage.editText('Фото загружено! ');
         setTimeout(() => statusMessage.delete().catch(() => {}), 500);
@@ -1480,7 +1498,7 @@ export class TelegramService {
           process.env.NODE_ENV === 'development' ? 193250152 : chat_id,
           '📌' +
             message +
-            ` для раздачи 👉 ${offerName}.\n<a href="https://dowrybot-front.vercel.app/images/file_1730145280794.mp4">Образец ⤵️</a>`,
+            ` для раздачи 👉 ${offerName}.\n<a href="https://dowrybot-front.vercel.app/images/file_1730145280794.mp4">Образец ⤵️</a>\nДля отправки сообщения зайдите в Меню 'Написать оператору'👩‍💻`,
           {
             parse_mode: 'HTML',
           },

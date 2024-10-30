@@ -99,6 +99,7 @@ export class AirtableService {
         'Штрих-код скрин': session?.imgShtrihCode || '',
         'Товар скрин': session?.imgGood || '',
         'Время входа': session?.timeOfEntry || '',
+        'Фото проверка': session?.checkParseImages,
       };
 
       const tableUrl = this.configService.get(
