@@ -214,7 +214,20 @@ export class AirtableService {
           ? `&${FILTER_BY_FORMULA}=AND(AND({Артикул} !='' , {Status} = "Scheduled")`
           : `&${FILTER_BY_FORMULA}=AND({Артикул} != '', OR({Status} = "Архив", {Status} = "Stop"))`;
     }
-    return await this.airtableHttpService.get(TablesName.Offers, filter);
+    const response = await this.airtableHttpService.get(
+      TablesName.Offers,
+      filter,
+    );
+    if (type === 'stop') {
+      const offersUniq = (response as IOffers).records?.reduce((acc, offer) => {
+        if (!acc.find((p) => p.ar === offer.fields.Артикул)) {
+          acc.push(offer);
+        }
+        return acc;
+      }, []);
+      return { records: offersUniq };
+    }
+    return response;
   }
 
   async getOffer(
