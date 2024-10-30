@@ -220,7 +220,7 @@ export class AirtableService {
     );
     if (type === 'stop') {
       const offersUniq = (response as IOffers).records?.reduce((acc, offer) => {
-        if (!acc.find((p) => p.ar === offer.fields.Артикул)) {
+        if (!acc.find((x) => x.fields.Артикул === offer.fields.Артикул)) {
           acc.push(offer);
         }
         return acc;
