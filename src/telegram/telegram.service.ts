@@ -29,6 +29,7 @@ import {
   WAITING_IMAGE,
   CACHE_WAIT_STATUS,
   IGNORED_STATUSES,
+  WEB_APP,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -362,15 +363,13 @@ export class TelegramService {
             link_preview_options: { is_disabled: true },
           });
         }
-        await this.bot.api.sendMessage(
-          id,
-          'Ждем новых раздач 😉 \n',
-          // getTextForSubscriber(null).text
+        await this.bot.api.sendMediaGroup(id, [
           {
-            parse_mode: 'HTML',
-            link_preview_options: { is_disabled: true },
+            type: 'photo',
+            media: WEB_APP + 'images/waiting.webp',
+            caption: 'Ждем новых раздач 😉',
           },
-        );
+        ]);
       } catch (e) {
         console.log('offers=', e);
         return await ctx.reply(
@@ -1498,7 +1497,7 @@ export class TelegramService {
           process.env.NODE_ENV === 'development' ? 193250152 : chat_id,
           '📌' +
             message +
-            ` для раздачи 👉 ${offerName}.\n<a href="https://dowrybot-front.vercel.app/images/file_1730145280794.mp4">Образец ⤵️</a>\nДля отправки сообщения зайдите в Меню 'Написать оператору'👩‍💻`,
+            ` для раздачи 👉 ${offerName}.\n<a href="${WEB_APP}images/file_1730145280794.mp4">Образец ⤵️</a>\nДля отправки сообщения зайдите в Меню 'Написать оператору'👩‍💻`,
           {
             parse_mode: 'HTML',
           },
