@@ -623,6 +623,10 @@ export class TelegramService {
       let firebaseUrl: string;
 
       if (checkTypeStepByName(ctx.session.status, 'image')) {
+        await ctx.editMessageReplyMarkup({
+          reply_markup: { inline_keyboard: [] },
+        });
+
         if (!ctx.session.lastMessage) {
           return;
         }
@@ -653,10 +657,12 @@ export class TelegramService {
           }
 
           console.log('resultCheckImage', resultCheckImage);
-        } catch (error) {}
+        } catch (error) {
+          console.log('parseImageData error=', error);
+        }
 
         await statusMessage.editText('Фото загружено! ');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 500);
+        setTimeout(() => statusMessage.delete().catch(() => {}), 100);
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -714,7 +720,7 @@ export class TelegramService {
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
     });
 
-    /*======== CALBACK_QUERY (продолжение раздачи через кнопку)=======*/
+    /*======== CALBACK_QUERY (продолжение раздачи через нажатие кнопки)=======*/
     this.bot.on('callback_query', async (ctx) => {
       if (!ctx.callbackQuery.data.includes('sessionId_'))
         return await ctx.answerCallbackQuery();

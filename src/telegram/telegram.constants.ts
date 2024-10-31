@@ -202,7 +202,7 @@ export const STEPS: ISteps = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
-    textCheck: ['доставки'],
+    textCheck: ['доставки|заказ'],
   }, //заказ (photo)
   'Дата доставки': {
     step: 0,
@@ -221,7 +221,7 @@ export const STEPS: ISteps = {
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
-    textCheck: [],
+    textCheck: ['покупки'],
   }, // получен (photo)
   'Дата получения': {
     step: 0,

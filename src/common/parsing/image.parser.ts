@@ -26,11 +26,15 @@ export const checkParseImage = (
       case 'Поиск':
         return checkSearch(
           text.ParsedResults[0].ParsedText,
-          keyword.substring(0, 23),
+          keyword.substring(0, 16).trim(),
         );
       case 'Корзина':
+        return checkCart(
+          text.ParsedResults[0].ParsedText,
+          step.textCheck as string[],
+        );
       case 'Заказ':
-        return check(
+        return checkOrder(
           text.ParsedResults[0].ParsedText,
           step.textCheck as string[],
         );
@@ -56,17 +60,29 @@ function checkSearch(text: string, keyword: string): boolean {
 }
 
 /**
- * проверка корзины заказа
+ * проверка заказа
  **/
-function check(text: string, keywords: string[]): boolean {
+function checkCart(text: string, keywords: string[]): boolean {
   try {
     return keywords.every((keyword) => text.toLowerCase().includes(keyword));
   } catch (error) {
-    console.log('check=', error);
+    console.log('checkCart=', error);
     return false;
   }
 }
 
+/**
+ * проверка заказа
+ **/
+function checkOrder(text: string, keywords: string[]): boolean {
+  try {
+    const regex = new RegExp(keywords.join('|').split('|').join('|'), 'gi');
+    return regex.test(text.toLowerCase());
+  } catch (error) {
+    console.log('checkOrder=', error);
+    return false;
+  }
+}
 /*
 https://ocr.space/OCRAPI
 25000 - запросов бесплатно
