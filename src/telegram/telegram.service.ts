@@ -1632,11 +1632,13 @@ export class TelegramService {
         : dataBuyer,
       true,
     );
-    //const countWorkLabels = createLabelHistory(dataBuyer)?.length;
+    const countWorkLabels = createLabelHistory(dataBuyer)?.length;
 
     return await this.bot.api.sendMessage(
       chatId.toString(),
-      `Выбор новой или продолжение старой раздачи👇`,
+      countWorkLabels > 1
+        ? `Выбор новой или продолжение старой раздачи👇`
+        : 'Выбор новой раздачи👇',
       {
         reply_markup: historyButtons,
       },
