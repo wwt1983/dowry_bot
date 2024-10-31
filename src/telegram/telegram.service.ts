@@ -522,7 +522,11 @@ export class TelegramService {
         ctx.session.lastMessage = ctx.message.message_id;
         ctx.session = updateSessionByField(ctx.session, 'lastLoadImage', url);
 
-        return ctx.reply('Это точное фото?', { reply_markup: stepKeyboard });
+        const responseMsg = await ctx.reply('Это точное фото?', {
+          reply_markup: stepKeyboard,
+        });
+
+        ctx.session.lastMessage = responseMsg.message_id;
       } catch (e) {
         console.log('message:photo', e, ctx.from.id, ctx.session);
       }
@@ -623,16 +627,19 @@ export class TelegramService {
       let firebaseUrl: string;
 
       if (checkTypeStepByName(ctx.session.status, 'image')) {
-        await ctx.editMessageReplyMarkup({
-          reply_markup: { inline_keyboard: [] },
-        });
+        // await ctx.editMessageReplyMarkup({
+        //   reply_markup: { inline_keyboard: [] },
+        // });
 
         if (!ctx.session.lastMessage) {
           return;
         }
 
-        ctx.session.lastMessage = null;
-        const statusMessage = await ctx.reply('⏳');
+        await ctx.api.editMessageText(
+          ctx.session.chat_id,
+          ctx.session.lastMessage,
+          '⏳',
+        );
 
         firebaseUrl = await this.firebaseService.uploadImageAsync(
           ctx.session.lastLoadImage,
@@ -655,14 +662,14 @@ export class TelegramService {
               ctx.session.status,
             ];
           }
-
-          console.log('resultCheckImage', resultCheckImage);
         } catch (error) {
-          console.log('parseImageData error=', error);
+          console.log('parseImageData error= ', error);
         }
-
-        await statusMessage.editText('Фото загружено! ');
-        setTimeout(() => statusMessage.delete().catch(() => {}), 100);
+        await ctx.api.editMessageText(
+          ctx.session.chat_id,
+          ctx.session.lastMessage,
+          'Фото загружено!',
+        );
 
         ctx.session = updateSessionByStep(ctx.session, firebaseUrl, true);
       } else {
@@ -715,7 +722,7 @@ export class TelegramService {
       );
 
       await this.sendMediaByStep(ctx.session.status, ctx);
-      await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
+      await this.getKeyboardHistoryWithWeb(ctx.from.id, ctx.session.sessionId);
 
       ctx.session.lastMessage = ctx.callbackQuery.message.message_id;
     });
@@ -1625,11 +1632,11 @@ export class TelegramService {
         : dataBuyer,
       true,
     );
-    const countWorkLabels = createLabelHistory(dataBuyer)?.length;
+    //const countWorkLabels = createLabelHistory(dataBuyer)?.length;
 
     return await this.bot.api.sendMessage(
       chatId.toString(),
-      `${countWorkLabels > 0 ? 'Выберите новую раздачу или продолжите ⤵️' : 'Выберите новую раздачу ⤵️'}`,
+      `Выбор новой или продолжение старой раздачи👇`,
       {
         reply_markup: historyButtons,
       },
@@ -1742,6 +1749,7 @@ export class TelegramService {
         imgOrder: data[0]?.fields['Заказ скрин'] || '',
         imgRecieved: data[0]?.fields['Получен скрин'] || '',
         imgShtrihCode: data[0]?.fields['Штрих-код скрин'] || '',
+        checkParseImages: data[0]?.fields['Фото проверка'] || [],
       };
 
       let session = createContinueSessionData(

@@ -58,7 +58,7 @@ export interface ISessionData {
   imgShtrihCode?: string; // штрих-код
   imgGood?: string; //товар
   timeOfEntry?: string; //время входа,
-  checkParseImages?: string[]; //результат парсинга текста из фото
+  checkParseImages: string[]; //результат парсинга текста из фото
 }
 
 export type MyContext = HydrateFlavor<
