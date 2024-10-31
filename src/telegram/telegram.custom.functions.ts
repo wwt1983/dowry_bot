@@ -752,9 +752,14 @@ export const checkTypeStepByName = (
   stepName: BotStatus,
   type: 'image' | 'text',
 ) => {
-  return Object.values(STEPS)
-    .find((x) => x.value === stepName)
-    .typeStep.includes(type);
+  try {
+    return Object.values(STEPS)
+      .find((x) => x.value === stepName)
+      .typeStep.includes(type);
+  } catch (error) {
+    console.log('checkTypeStepByName error=', error);
+    return false;
+  }
 };
 
 export const getErrorTextByStep = (
