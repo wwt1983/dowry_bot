@@ -30,6 +30,7 @@ import {
   CACHE_WAIT_STATUS,
   IGNORED_STATUSES,
   WEB_APP,
+  ERROR_DATE_MESSAGE,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -801,6 +802,8 @@ export class TelegramService {
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
 
+        if (ctx.message.text === '') return;
+
         //REPLAY сообщения из служебного чата
         if (
           ctx.message.reply_to_message &&
@@ -1005,9 +1008,13 @@ export class TelegramService {
           ) {
             switch (ctx.session.status) {
               case 'Дата доставки':
+                if (!convertDateFromString(text))
+                  return await ctx.reply(ERROR_DATE_MESSAGE);
                 ctx.session.deliveryDate = text;
                 break;
               case 'Дата получения':
+                if (!convertDateFromString(text))
+                  return await ctx.reply(ERROR_DATE_MESSAGE);
                 ctx.session.recivingDate = text;
                 break;
               case 'Цена':
