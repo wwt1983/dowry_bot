@@ -802,8 +802,6 @@ export class TelegramService {
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
 
-        if (ctx.message.text === '') return;
-
         //REPLAY сообщения из служебного чата
         if (
           ctx.message.reply_to_message &&
