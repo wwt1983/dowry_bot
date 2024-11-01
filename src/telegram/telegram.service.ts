@@ -1604,7 +1604,7 @@ export class TelegramService {
     let dataBuyer = await this.airtableService.getBotForContinue(
       chatId.toString(),
     );
-    if (!dataBuyer || dataBuyer.length === 0) return;
+    if (!dataBuyer || !dataBuyer.length || dataBuyer?.length === 0) return;
     if (sessionId) {
       dataBuyer = dataBuyer.filter((x) => x.fields.SessionId !== sessionId);
     }
