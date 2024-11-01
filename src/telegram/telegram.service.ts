@@ -2215,7 +2215,9 @@ export class TelegramService {
                   ),
                 )
               : null),
-          price: price ? price : userBotData.fields['Цена'].replace(/\D/g, ''),
+          price: price
+            ? price
+            : userBotData?.fields['Цена']?.replace(/\D/g, ''),
           checkWb: userBotData.fields['Чек WB'],
         });
         await this.airtableService.updateStatusTransferInBot(
