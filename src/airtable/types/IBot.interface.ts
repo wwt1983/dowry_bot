@@ -89,6 +89,8 @@ export type BotStatus =
   | 'Кэш задержка'
   | 'Отмена';
 
+export type OldStatus = 'Вызов';
+
 export type BrokeBotStatus =
   | 'locationError'
   | 'check_articul'

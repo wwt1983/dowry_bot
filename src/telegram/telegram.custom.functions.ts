@@ -46,6 +46,7 @@ import {
   BotStatus,
   BrokeBotStatus,
   IBot,
+  OldStatus,
 } from 'src/airtable/types/IBot.interface';
 import { INotifications } from 'src/airtable/types/INotification.interface';
 import { INotificationStatistics } from 'src/airtable/types/INotificationStatistic.interface';
@@ -376,7 +377,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     priceWb +
     ' ₽ (это примерная цена, зависит от вашей скидки)' +
     '\n' +
-    `❗️ Кешбэк ~ ${cash}❗️ \n` +
+    (cash ? `❗️ Кешбэк ~ ${cash}❗️ \n` : '') +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
     '\n' +
     description +
@@ -989,8 +990,10 @@ export const getChatIdFormText = (text: string) => {
 /**
  * метод-заглушка для старых статусов или статусов с ошибками
  */
-export const getCorrectStatus = (status: BotStatus) => {
+export const getCorrectStatus = (status: BotStatus | OldStatus) => {
   if (!status) return null;
+  if (status === 'Вызов') return 'Отмена';
+
   if (status === 'Отзыв на проверке' || status === 'Отзыв') {
     return 'Штрих-код';
   }
