@@ -1070,7 +1070,7 @@ export const getTextForQueue = (
   queueLength: number,
 ) => {
   if (count < countOrderToday + queueLength) {
-    return '\n\n' + MESSAGE_WAITING;
+    return '\n' + MESSAGE_WAITING;
   }
   return '';
 };
