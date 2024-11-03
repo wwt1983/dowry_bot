@@ -203,6 +203,9 @@ export const convertDateFromString = (date: string) => {
   const regex2 = /^\d{2}\.\d{2}\.\d{4}$/; // DD.MM.YYYY
   const regex3 = /^\d{2}\.\d{2}$/; // DD.MM
   const regex4 = /^\d{2}\.\d{2}.\d{2}$/; // DD.MM.YY
+  const regex5 = /^\d{1}\.\d{2}.\d{4}$/; // D.MM.YYYY
+  const regex6 = /^\d{2}\.\d{1}.\d{4}$/; // DD.M.YYYY
+  const regex7 = /^\d{1}\.\d{1}.\d{4}$/; // D.M.YYYY
 
   const currentYear = new Date().getFullYear();
   if (regex2.test(date)) {
@@ -212,6 +215,13 @@ export const convertDateFromString = (date: string) => {
     // Если дата в формате DD.MM или DD/MM, добавляем текущий год
     const [day, month] = date.split(/[\.\/]/);
     return format(new Date(`${currentYear}-${month}-${day}`));
+  } else if (regex5 || regex6 || regex7) {
+    const [day, month, currentYear] = date.split('.');
+
+    // Добавляем ведущие нули, если необходимо
+    const formattedDay = day.padStart(2, '0');
+    const formattedMonth = month.padStart(2, '0');
+    return format(new Date(`${currentYear}-${formattedMonth}-${formattedDay}`));
   } else {
     return null;
   }
