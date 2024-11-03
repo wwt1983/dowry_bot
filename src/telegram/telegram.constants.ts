@@ -28,7 +28,7 @@ export const MESSAGE_WAITING =
 export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
 
 export const INTERVAL_FOR_NEXT_CHOOSE = 30;
-
+export const ADMIN_CHAT_ID = 193250152;
 export const ERROR_DATE_MESSAGE = 'Дата должна быть в формате 12.11.2024';
 
 export enum COMMAND_NAMES {

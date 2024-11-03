@@ -370,6 +370,24 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
   const useFilterForHelpSearch = filter
     ? `Попробуйте найти товар используя фильтр 👉: ${filter.toUpperCase()} \n`
     : '';
+
+  function getText(keys: string) {
+    if (keys && keys !== '') {
+      return (
+        FIRST_STEP_KEY_VALUE +
+        `\n🔎 ${keys.toUpperCase()}\n` +
+        useFilterForHelpSearch +
+        '\n' +
+        '👉 ' +
+        FIRST_STEP_LINK +
+        //FIRST_STEP_A +
+        (location ? `❗️Раздача только для региона: ${location}❗️\n` : '')
+      );
+    } else {
+      return '‼️Ключевое слово для поиска и точное время вам придет отдельным сообщением, если кто-то перед вами не успеет оформить или добавят новые предложения‼️';
+    }
+  }
+
   const caption =
     `${title}` +
     '\n\n' +
@@ -382,15 +400,8 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '\n' +
     description +
     '\n' +
-    FIRST_STEP_KEY_VALUE +
-    `\n🔎 ${keys.toUpperCase()}\n` +
-    //getMessageForTimeOffer(times) +
-    useFilterForHelpSearch +
-    '\n' +
-    '👉 ' +
-    FIRST_STEP_LINK +
-    //FIRST_STEP_A +
-    (location ? `❗️Раздача только для региона: ${location}❗️\n` : '');
+    getText(keys);
+
   return [
     {
       type: 'photo',
@@ -399,6 +410,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     },
   ];
 }
+
 export const createMediaForArticul = (url?: string, caption?: string) => {
   return [
     {

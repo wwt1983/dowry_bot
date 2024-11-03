@@ -76,6 +76,9 @@ export class TelegramController {
       close: boolean;
       filter: string;
       video: boolean;
+      offerId: string;
+      key: string;
+      interval: string;
     },
   ): Promise<void> {
     await this.telegramService.sendNotificationToUser(
@@ -90,6 +93,9 @@ export class TelegramController {
       data.close,
       data.filter,
       data.video,
+      data.offerId,
+      data.key,
+      data.interval,
     );
   }
 

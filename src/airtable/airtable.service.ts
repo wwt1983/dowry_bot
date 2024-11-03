@@ -135,6 +135,27 @@ export class AirtableService {
     console.log('postWebhook ===>', response, sessionId);
     return response;
   }
+
+  async updateUserWithEmptyKeyInBotTableAirtable(
+    sessionId: string,
+    key: string,
+    newStartTime: string,
+  ): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_UPDATE_FOR_USER_WITH_EMPTY_KEY',
+    );
+    if (!sessionId) {
+      console.log('empty session=', sessionId);
+      return null;
+    }
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
+      SessionId: sessionId,
+      'Ключевое слово': key,
+      StartTime: newStartTime,
+    });
+    console.log('postWebhook ===>', response, sessionId);
+    return response;
+  }
   /**
    * Пользовательские сообщения
    */
@@ -229,7 +250,9 @@ export class AirtableService {
     }
     return response;
   }
-
+  /**
+   * Получаем всю информацию о раздаче с ключевым словом, количеством заказов, временем и фильтрами
+   */
   async getOffer(
     id: string,
     needKeys?: boolean,
@@ -242,19 +265,39 @@ export class AirtableService {
 
     const count = offer.fields.Количество;
     const countOrder = offer.fields['Количество заказов сегодня'];
+    const countWaiting = offer.fields['Длина очереди'];
+
     offer.fields['Время бронь'] = null;
 
     if (needKeys) {
       const keyIds = offer.fields.Ключи;
+
       if (keyIds && keyIds.length > 0) {
         const keys = (await this.airtableHttpService.get(
           TablesName.KeyWords,
           getFilterById(keyIds),
         )) as IKeyWords;
-
-        const nextKeyIndex = (countOrder + 1) % keys.records.length;
-        offer.fields['Ключевые слова'] =
-          keys.records[nextKeyIndex].fields.Название;
+        if (keyIds.length === 1) {
+          offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
+        } else {
+          const totalKeysOffers = keys.records.reduce(
+            (sum, kw) => sum + kw.fields.Количество,
+            0,
+          );
+          if (totalKeysOffers < countOrder + countWaiting) {
+            console.log('Не хватает предложений для заказа');
+            offer.fields['Ключевые слова'] = '';
+          } else {
+            keys.records.forEach((kw) => {
+              if (kw.fields.Количество <= countOrder + countWaiting) {
+                offer.fields['Ключевые слова'] = kw.fields.Название;
+                return;
+              }
+            });
+          }
+        }
+        // const nextKeyIndex = (countOrder + 1) % keys.records.length;
+        // offer.fields['Ключевые слова'] = keys.records[nextKeyIndex].fields.Название;
       }
     }
 
@@ -640,7 +683,7 @@ export class AirtableService {
   }
 
   /**
-   * метод выбирает последний по времени заказ
+   * метод выбирает последний по времени заказ (у кого есть ключевое слово)
    */
   async getLastIntervalTime(
     offerId: string,
@@ -648,24 +691,59 @@ export class AirtableService {
   ): Promise<string | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки")))`,
     );
 
-    //console.log('count filter', articul, data?.records.length);
     if (!data?.records?.length || data?.records?.length === 0)
       return getTimeWithTz();
 
     return getLastIntervalData((data as IBots).records, interval);
   }
-
   /**
-   * метод выбирает все раздачи пользователей по артикулу для закрытия раздачи
+   *  находим кто первый встал в ожидание на получение ключевого слова раздачи
+   */
+  async findFirstUserWithEmptyKey(offerId: string): Promise<IBot | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", {Ключевое слово} = '', ))`,
+    );
+
+    if (!data?.records?.length || data?.records?.length === 0) return null;
+
+    const dataWaiting: IBot[] = (data as IBots).records;
+    let firstIntervalOrder: IBot[];
+
+    if (dataWaiting?.length === 1) {
+      firstIntervalOrder = dataWaiting;
+    } else {
+      const firstIntervalOrder =
+        dataWaiting?.length === 1
+          ? dataWaiting
+          : dataWaiting
+              .filter(
+                (bot) => !isNaN(new Date(bot.fields['StartTime']).getTime()),
+              )
+              .sort(
+                (a, b) =>
+                  new Date(a.fields['StartTime']).getTime() -
+                  new Date(b.fields['StartTime']).getTime(),
+              );
+
+      if (firstIntervalOrder.length === 0) {
+        return null;
+      }
+      return firstIntervalOrder[0];
+    }
+    return firstIntervalOrder[0];
+  }
+  /**
+   * все раздачи пользователей по артикулу для закрытия раздачи (но проверяем что у них есть ключевое слово)
    */
   async getWaitingsForClose(offerId: string): Promise<IBot[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "" , OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
         {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
     );
 

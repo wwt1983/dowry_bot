@@ -31,6 +31,7 @@ import {
   IGNORED_STATUSES,
   WEB_APP,
   ERROR_DATE_MESSAGE,
+  ADMIN_CHAT_ID,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -1460,6 +1461,9 @@ export class TelegramService {
     close: boolean,
     filter: string,
     video: boolean,
+    offerId: string,
+    key: string,
+    interval: string,
   ): Promise<void> {
     try {
       console.log(
@@ -1524,6 +1528,7 @@ export class TelegramService {
       }
 
       if (value.status === 'Время истекло') {
+        //снимаем с раздачи
         await this.airtableService.updateStatusInBotTableAirtable(
           sessionId,
           value.status,
@@ -1543,6 +1548,29 @@ export class TelegramService {
           value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
         );
         await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
+
+        //ищем тех кто стоит без ключевого слова (отправляем письмо и обновляем поле ключевое слово)
+        const sessionWithNoKey =
+          await this.airtableService.findFirstUserWithEmptyKey(offerId);
+        if (!sessionWithNoKey) return;
+        const lastIntervalTime = await this.airtableService.getLastIntervalTime(
+          offerId,
+          interval,
+        );
+        await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
+          sessionWithNoKey.fields.SessionId,
+          key,
+          lastIntervalTime,
+        );
+        await this.bot.api.sendMessage(
+          process.env.NODE_ENV === 'development'
+            ? ADMIN_CHAT_ID
+            : sessionWithNoKey.fields.chat_id,
+          `📌 Здравствуйте! У нас появилось свободное время (<b>${lastIntervalTime}</b>) в раздаче ${offerName},ключевое слово для поиска <b>${key.toUpperCase()}</b>`,
+          {
+            parse_mode: 'HTML',
+          },
+        );
         return;
       }
       if (
@@ -2480,7 +2508,7 @@ export class TelegramService {
     } else {
       //const dataTest = [1841828301, 193250152, 268815178];
       await this.bot.api.sendMessage(
-        193250152,
+        ADMIN_CHAT_ID,
         message + '\n' + offersMessage,
         {
           parse_mode: 'HTML',
@@ -2507,7 +2535,7 @@ export class TelegramService {
       try {
         await this.bot.api.sendMessage(
           process.env.NODE_ENV === 'development'
-            ? 193250152
+            ? ADMIN_CHAT_ID
             : item.fields.chat_id,
           `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, на сегодня все 🙁\n Следите за нашими раздачами.😉`,
         );
