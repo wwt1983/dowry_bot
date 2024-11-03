@@ -55,7 +55,7 @@ import {
   createCommentForDb,
   getUserName,
   getErrorTextByStep,
-  createMediaForArticul,
+  getPhotoForArticulLink,
   getLastSession,
   getLinkForOffer,
   getUserOfferIdsIsFinsih,
@@ -254,21 +254,10 @@ export class TelegramService {
           getTextForFirstStep(sessionData) as any[],
         );
 
-        await this.bot.api.sendMediaGroup(
+        await this.getGiveawayDetails(
           ctx.message.from.id,
-          createMediaForArticul() as any,
-        );
-
-        await ctx.reply(
-          getTextForIntervalTime(lastInterval) +
-            getTextForQueue(
-              sessionData.offerCount,
-              sessionData.offerOrderToday,
-              sessionData.queueLength,
-            ),
-          {
-            parse_mode: 'HTML',
-          },
+          sessionData.keys,
+          lastInterval,
         );
 
         ctx.session.lastCommand = null;
@@ -759,13 +748,17 @@ export class TelegramService {
           ctx.session.chat_id,
           getTextForFirstStep(ctx.session.data) as any[],
         );
-        await ctx.reply(getTextForIntervalTime(ctx.session.startTime), {
-          parse_mode: 'HTML',
-        });
+
+        if (ctx.session.data.keys) {
+          await ctx.reply(getTextForIntervalTime(ctx.session.startTime), {
+            parse_mode: 'HTML',
+          });
+        }
+
         await this.sendMediaByStep(ctx.session.status, ctx);
         response = await this.bot.api.sendMediaGroup(
           ctx.from.id,
-          createMediaForArticul() as any,
+          getPhotoForArticulLink() as any,
         );
       } else {
         if (
@@ -1069,21 +1062,10 @@ export class TelegramService {
             getTextForFirstStep(data) as any[],
           );
 
-          await ctx.reply(
-            getTextForIntervalTime(lastInterval) +
-              getTextForQueue(
-                data.offerCount,
-                data.offerOrderToday,
-                data.queueLength,
-              ),
-            {
-              parse_mode: 'HTML',
-            },
-          );
-
-          response = await this.bot.api.sendMediaGroup(
+          response = await this.getGiveawayDetails(
             ctx.message.from.id,
-            createMediaForArticul() as any,
+            data.keys,
+            lastInterval,
           );
 
           ctx.session.lastMessage = response[response.length - 1].message_id;
@@ -1515,7 +1497,7 @@ export class TelegramService {
           (x) => x.fields.Название === 'Видеопереход',
         )?.fields.Сообщение;
         await this.bot.api.sendMessage(
-          process.env.NODE_ENV === 'development' ? 193250152 : chat_id,
+          process.env.NODE_ENV === 'development' ? ADMIN_CHAT_ID : chat_id,
           '📌' +
             message +
             ` для раздачи 👉 ${offerName}.\n<a href="${WEB_APP}images/file_1730145280794.mp4">Образец ⤵️</a>\nДля отправки сообщения зайдите в Меню 'Написать оператору'👩‍💻`,
@@ -1543,7 +1525,7 @@ export class TelegramService {
         );
 
         await this.bot.api.sendMessage(
-          chat_id,
+          process.env.NODE_ENV === 'development' ? ADMIN_CHAT_ID : chat_id,
           value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
         );
         await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
@@ -1551,24 +1533,27 @@ export class TelegramService {
         //ищем тех кто стоит без ключевого слова (отправляем письмо и обновляем поле ключевое слово)
         const sessionWithNoKey =
           await this.airtableService.findFirstUserWithEmptyKey(offerId);
+
+        console.log('sessionWithNoKey', sessionWithNoKey, offerId);
+
         if (!sessionWithNoKey) return;
         const lastIntervalTime = await this.airtableService.getLastIntervalTime(
           offerId,
           interval,
         );
+        console.log('lastIntervalTime', lastIntervalTime, offerId);
+
         await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
           sessionWithNoKey.fields.SessionId,
           key,
           lastIntervalTime,
         );
-        await this.bot.api.sendMessage(
+        await this.getGiveawayDetails(
           process.env.NODE_ENV === 'development'
             ? ADMIN_CHAT_ID
             : sessionWithNoKey.fields.chat_id,
-          `📌 Здравствуйте! У нас появилось свободное время (<b>${lastIntervalTime}</b>) в раздаче ${offerName},ключевое слово для поиска <b>${key.toUpperCase()}</b>`,
-          {
-            parse_mode: 'HTML',
-          },
+          key.toUpperCase(),
+          lastIntervalTime,
         );
         return;
       }
@@ -1615,7 +1600,7 @@ export class TelegramService {
       );
       //await this.getKeyboardHistoryWithWeb(chat_id);
     } catch (error: any) {
-      console.log(error);
+      //console.log(error);
 
       if (error instanceof Error) {
         if (error.message.includes('403')) {
@@ -1667,7 +1652,9 @@ export class TelegramService {
     const countWorkLabels = createLabelHistory(dataBuyer)?.length;
 
     return await this.bot.api.sendMessage(
-      chatId.toString(),
+      process.env.NODE_ENV === 'development'
+        ? ADMIN_CHAT_ID
+        : chatId.toString(),
       countWorkLabels > 1
         ? `Выбор новой или продолжение старой раздачи👇`
         : 'Выбор новой раздачи👇',
@@ -2610,5 +2597,27 @@ export class TelegramService {
         );
       }
     });
+  }
+  /**
+   * Выбор раздачи - отправляем инфо об интервале , ключу. Если есть ключ, то и скрин шага
+   */
+  async getGiveawayDetails(
+    chat_id: number,
+    keys: string,
+    lastInterval: string,
+  ) {
+    if (keys && keys !== '') {
+      await this.bot.api.sendMessage(
+        chat_id,
+        getTextForIntervalTime(lastInterval),
+        {
+          parse_mode: 'HTML',
+        },
+      );
+      return await this.bot.api.sendMediaGroup(
+        chat_id,
+        getPhotoForArticulLink() as any,
+      );
+    }
   }
 }

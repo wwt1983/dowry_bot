@@ -273,10 +273,15 @@ export class AirtableService {
       const keyIds = offer.fields.Ключи;
 
       if (keyIds && keyIds.length > 0) {
+        console.log('keyIds=', keyIds);
+
         const keys = (await this.airtableHttpService.get(
           TablesName.KeyWords,
           getFilterById(keyIds),
         )) as IKeyWords;
+
+        offer.fields['Ключевые слова'] = '';
+
         if (keyIds.length === 1) {
           offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
         } else {
@@ -284,16 +289,25 @@ export class AirtableService {
             (sum, kw) => sum + kw.fields.Количество,
             0,
           );
+          console.log(
+            'totalKeysOffers=',
+            totalKeysOffers,
+            countOrder + countWaiting,
+          );
+
           if (totalKeysOffers < countOrder + countWaiting) {
             console.log('Не хватает предложений для заказа');
             offer.fields['Ключевые слова'] = '';
           } else {
-            keys.records.forEach((kw) => {
-              if (kw.fields.Количество <= countOrder + countWaiting) {
-                offer.fields['Ключевые слова'] = kw.fields.Название;
-                return;
+            let cumulativeCount = 0;
+
+            for (const item of keys.records) {
+              cumulativeCount += item.fields.Количество;
+              if (countOrder + countWaiting < cumulativeCount) {
+                offer.fields['Ключевые слова'] = item.fields.Название;
+                break;
               }
-            });
+            }
           }
         }
         // const nextKeyIndex = (countOrder + 1) % keys.records.length;
@@ -706,7 +720,7 @@ export class AirtableService {
   async findFirstUserWithEmptyKey(offerId: string): Promise<IBot | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", {Ключевое слово} = '', ))`,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", {Ключевое слово} = ''))`,
     );
 
     if (!data?.records?.length || data?.records?.length === 0) return null;

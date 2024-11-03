@@ -372,7 +372,9 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     : '';
 
   function getText(keys: string) {
-    if (keys && keys !== '') {
+    console.log('keys = ', keys);
+
+    if (keys && keys !== '' && keys !== 'undefined') {
       return (
         FIRST_STEP_KEY_VALUE +
         `\n🔎 ${keys.toUpperCase()}\n` +
@@ -384,7 +386,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
         (location ? `❗️Раздача только для региона: ${location}❗️\n` : '')
       );
     } else {
-      return '‼️Ключевое слово для поиска и точное время вам придет отдельным сообщением, если кто-то перед вами не успеет оформить или добавят новые предложения‼️';
+      return `‼️${MESSAGE_WAITING}\nКлючевое слово для поиска и время начала раздачи вам придет отдельным сообщением, если кто-то перед вами не успеет оформить или добавят новые предложения‼️`;
     }
   }
 
@@ -410,8 +412,10 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     },
   ];
 }
-
-export const createMediaForArticul = (url?: string, caption?: string) => {
+/**
+ * скрин как поделиться ссылкой с вайлдбериз
+ */
+export const getPhotoForArticulLink = (url?: string, caption?: string) => {
   return [
     {
       type: 'photo',
@@ -1074,7 +1078,7 @@ export const checkOnStopStatus = (status: BotStatus) => {
 };
 
 /**
- * возвращает текст для переполненной раздачи
+ * текст для переполненной раздачи
  */
 export const getTextForQueue = (
   count: number,
