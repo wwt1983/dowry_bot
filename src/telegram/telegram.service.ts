@@ -77,7 +77,6 @@ import {
   sleep,
   getTextForIntervalTime,
   checkOnStopStatus,
-  getTextForQueue,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
