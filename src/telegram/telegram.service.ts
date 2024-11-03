@@ -118,7 +118,6 @@ import {
 import { NotificationName } from 'src/airtable/types/INotification.interface';
 import { IOCRResponse } from 'src/common/parsing/image.interface';
 import { checkParseImage } from 'src/common/parsing/image.parser';
-//import { getParseWbInfo } from './puppeteer';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
