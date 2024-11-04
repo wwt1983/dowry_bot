@@ -2,11 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
-import {
-  FILTER_BY_FORMULA,
-  TablesName,
-  AIRTABLE_URL,
-} from './airtable.constants';
+import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
 
 import { IOffer, IOffers } from './types/IOffer.interface';
 import { INotification, INotifications } from './types/INotification.interface';
@@ -14,7 +10,6 @@ import { INotificationStatistics } from './types/INotificationStatistic.interfac
 import { BotStatus, IBot, IBots } from './types/IBot.interface';
 import {
   getTimeWithTz,
-  getOfferTime,
   getLastIntervalData,
   convertDateFromString,
 } from 'src/common/date/date.methods';
@@ -22,6 +17,7 @@ import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import {
+  convertToKeyObjects,
   getNumberStepByStatus,
   getUserName,
 } from 'src/telegram/telegram.custom.functions';
@@ -66,27 +62,33 @@ export class AirtableService {
         console.log('empty session= ', session);
         return null;
       }
-      const correctTime = getOfferTime(session);
+      //const correctTime = getOfferTime(session);
+
+      if (
+        session.status !== 'В боте' &&
+        session.status !== 'Выбор раздачи' &&
+        (!session?.data?.keys || session?.data?.keys === '')
+      ) {
+        const sessionDetails = await this.getBotBySession(session.sessionId);
+        session.data.keys = sessionDetails.fields['Ключевое слово'];
+        session.startTime = sessionDetails.fields.StartTime;
+      }
 
       const data = {
         SessionId: session.sessionId,
-        Артикул: session.data?.articul,
-        StartTime: correctTime?.itsFutureTime
-          ? correctTime.time
-          : session.startTime,
+        Артикул: session?.data?.articul,
+        StartTime: session.startTime,
         ['Время выкупа']: session.stopBuyTime,
         OfferId: session.offerId,
         Статус: session.status,
-        Location: session.location,
+        Location: session?.location || '',
         Раздача: session.data?.title,
         Images: session.images,
         StopTime: getTimeWithTz(),
         ['Дата получения']: convertDateFromString(session.deliveryDate),
         Финиш: session.isFinish,
         CommentsLink: session.chat_id,
-        'Ключевые слова':
-          session?.data?.keys +
-          (correctTime?.itsTimeOrder ? ` (${correctTime.time})` : ''),
+        'Ключевые слова': session?.data?.keys,
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': convertDateFromString(session.recivingDate),
         'Данные для кешбека': session.dataForCash || '',
@@ -135,7 +137,9 @@ export class AirtableService {
     console.log('postWebhook ===>', response, sessionId);
     return response;
   }
-
+  /**
+   * обновляем ключевое слово и и интервал у пользователя который был без ключа
+   */
   async updateUserWithEmptyKeyInBotTableAirtable(
     sessionId: string,
     key: string,
@@ -153,7 +157,7 @@ export class AirtableService {
       'Ключевое слово': key,
       StartTime: newStartTime,
     });
-    console.log('postWebhook ===>', response, sessionId);
+    console.log('postWebhook update keyword===>', response, sessionId);
     return response;
   }
   /**
@@ -216,9 +220,41 @@ export class AirtableService {
     if (!data || (data.records && data.records.length === 0)) return null;
     return (data.records[0] as IBot).fields['Статус'];
   }
+  async getBotBySession(sessionId: string): Promise<IBot | null> {
+    const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records[0] as IBot;
+  }
   async getCommetByChatId(chat_id: string | number): Promise<IBotComments> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${chat_id}",{chat_id})`;
     return await this.airtableHttpService.get(TablesName.UserComments, filter);
+  }
+
+  /**
+   * получаем список ключевых слов конкретной раздачи
+   */
+  async getOfferKeys(id: string) {
+    const offer = (await this.airtableHttpService.getById(
+      TablesName.Offers,
+      id,
+    )) as IOffer;
+    if (!offer) return null;
+
+    const query = offer.fields.Ключи.map((id) => `{Id}="${id}"`).join(',');
+
+    const keysData = await this.airtableHttpService.get(
+      TablesName.KeyWords,
+      `&${FILTER_BY_FORMULA}=OR(${query})`,
+    );
+
+    if (!keysData || !keysData.records || keysData.records.length === 0)
+      return null;
+
+    return (keysData as IKeyWords).records.map((x) => ({
+      name: x.fields.Название,
+      count: x.fields.Количество,
+    }));
   }
   /**
    * список раздач
@@ -273,8 +309,6 @@ export class AirtableService {
       const keyIds = offer.fields.Ключи;
 
       if (keyIds && keyIds.length > 0) {
-        console.log('keyIds=', keyIds);
-
         const keys = (await this.airtableHttpService.get(
           TablesName.KeyWords,
           getFilterById(keyIds),
@@ -407,14 +441,6 @@ export class AirtableService {
     const data = await this.airtableHttpService.get(TablesName.Bot, filter);
     if (!data || (data.records && data.records.length === 0)) return null;
     return data.records;
-  }
-
-  async getArticleById(id: string): Promise<IArticle | null> {
-    const data = await this.airtableHttpService.get(
-      `${AIRTABLE_URL}/${TablesName.Articuls}/${id}`,
-    );
-    if (!data) return null;
-    return data as IArticle;
   }
 
   async getArticlesInWork(): Promise<IArticle[] | null> {
@@ -715,41 +741,42 @@ export class AirtableService {
     return getLastIntervalData((data as IBots).records, interval);
   }
   /**
-   *  находим кто первый встал в ожидание на получение ключевого слова раздачи
+   *  находим кто встал в ожидание на получение ключевого слова раздачи
    */
-  async findFirstUserWithEmptyKey(offerId: string): Promise<IBot | null> {
+  async findUserWithEmptyKey(): Promise<IBot[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)}= "${offerId}", {Ключевое слово} = "")`,
+      `&${FILTER_BY_FORMULA}=AND({Статус} = "Выбор раздачи", {Ключевое слово} = "")`,
     );
 
     if (!data?.records?.length || data?.records?.length === 0) return null;
 
-    const dataWaiting: IBot[] = (data as IBots).records;
-    let firstIntervalOrder: IBot[];
+    return (data as IBots).records;
+    // const dataWaiting: IBot[] = (data as IBots).records;
+    // let firstIntervalOrder: IBot[];
 
-    if (dataWaiting?.length === 1) {
-      firstIntervalOrder = dataWaiting;
-    } else {
-      const firstIntervalOrder =
-        dataWaiting?.length === 1
-          ? dataWaiting
-          : dataWaiting
-              .filter(
-                (bot) => !isNaN(new Date(bot.fields['StartTime']).getTime()),
-              )
-              .sort(
-                (a, b) =>
-                  new Date(a.fields['StartTime']).getTime() -
-                  new Date(b.fields['StartTime']).getTime(),
-              );
+    // if (dataWaiting?.length === 1) {
+    //   firstIntervalOrder = dataWaiting;
+    // } else {
+    //   const firstIntervalOrder =
+    //     dataWaiting?.length === 1
+    //       ? dataWaiting
+    //       : dataWaiting
+    //           .filter(
+    //             (bot) => !isNaN(new Date(bot.fields['StartTime']).getTime()),
+    //           )
+    //           .sort(
+    //             (a, b) =>
+    //               new Date(a.fields['StartTime']).getTime() -
+    //               new Date(b.fields['StartTime']).getTime(),
+    //           );
 
-      if (firstIntervalOrder.length === 0) {
-        return null;
-      }
-      return firstIntervalOrder[0];
-    }
-    return firstIntervalOrder[0];
+    //   if (firstIntervalOrder.length === 0) {
+    //     return null;
+    //   }
+    //   return firstIntervalOrder[0];
+    // }
+    // return firstIntervalOrder[0];
   }
   /**
    * все раздачи пользователей по артикулу для закрытия раздачи (но проверяем что у них есть ключевое слово)
@@ -757,7 +784,7 @@ export class AirtableService {
   async getWaitingsForClose(offerId: string): Promise<IBot[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "" , OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "") , OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
         {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
     );
 
@@ -767,7 +794,26 @@ export class AirtableService {
 
     return (data as IBots).records;
   }
+  /**
+   * все раздачи пользователей по артикулу для для получения списка ключевых слов
+   */
+  async getUsesKeys(
+    offerId: string,
+  ): Promise<{ name: string; count: number }[] | null> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = ""), OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
+    );
 
+    //console.log('count filter', articul, data?.records.length);
+
+    if (!data?.records?.length || data?.records?.length === 0) return null;
+
+    return convertToKeyObjects(
+      (data as IBots).records.map((x) => x.fields['Ключевое слово']),
+    );
+  }
   /**
    * выбираем все раздачи пользователей по артикулу со статусом Отмена для приглашения в открытую раздачу
    */

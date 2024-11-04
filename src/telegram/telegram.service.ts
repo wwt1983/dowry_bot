@@ -77,6 +77,8 @@ import {
   sleep,
   getTextForIntervalTime,
   checkOnStopStatus,
+  groupByOfferId,
+  findFreeKeywords,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -172,7 +174,7 @@ export class TelegramService {
         userValue.userName || userValue.fio,
       );
       ctx.session.lastCommand = COMMAND_NAMES.start;
-      ctx.session.itsSubscriber = userHistory.itsSubscriber;
+      //ctx.session.itsSubscriber = userHistory.itsSubscriber;
       ctx.session.userOffers = userHistory?.userOffers;
 
       await ctx.reply(sayHi(first_name, userValue.userName, id), {
@@ -192,6 +194,7 @@ export class TelegramService {
         },
       );
 
+      //console.log('start session', ctx.session.sessionId);
       await this.saveToAirtable(ctx.session);
 
       let checkOnLimitUserOffer: boolean = false;
@@ -243,6 +246,12 @@ export class TelegramService {
           'startTime',
           lastInterval,
         );
+
+        // console.log(
+        //   'update session',
+        //   ctx.session.sessionId,
+        //   ctx.session.status,
+        // );
 
         await this.updateToAirtable(ctx.session);
 
@@ -1250,7 +1259,7 @@ export class TelegramService {
     };
   }
   /**
-   *отправляем заполненные данные пользователя в airtable
+   *сохраняем начало сессии в базе
    */
   async saveToAirtable(session: ISessionData): Promise<any> {
     return await this.airtableService.saveToAirtable(session);
@@ -1428,6 +1437,74 @@ export class TelegramService {
       Шаблон: PatternId,
     });
   }
+
+  async sendDetailsForNoKeyUsers() {
+    try {
+      const sessionsWithNoKey =
+        await this.airtableService.findUserWithEmptyKey();
+
+      if (!sessionsWithNoKey || sessionsWithNoKey.length === 0) {
+        return;
+      }
+      console.log('sendDetailsForNoKeyUsers', sessionsWithNoKey.length);
+
+      const groupedBotsWithNoKey = groupByOfferId(sessionsWithNoKey);
+      // Проход по сгруппированному массиву
+      Object.keys(groupedBotsWithNoKey).forEach(async (offerId) => {
+        console.log(`OfferId= ${offerId}`);
+        const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
+        const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
+        console.log('usesKeys', usesKeys);
+        console.log('allOfferKeys', allOfferKeys);
+        const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
+
+        if (!freeKeys || freeKeys.length === 0) {
+          console.log('freeKeys=', freeKeys);
+          return;
+        }
+        const interval =
+          groupedBotsWithNoKey[offerId][0].fields['Интервал (from OfferId)'];
+
+        if (freeKeys) {
+          const users = groupedBotsWithNoKey[offerId].slice(
+            0,
+            freeKeys.length === 1
+              ? groupedBotsWithNoKey[offerId].length
+              : freeKeys.length,
+          );
+
+          for (let index = 0; index < users.length; index++) {
+            const x = users[index];
+            // Добавляем задержку перед получением актуального интервала
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // Задержка в 1 секунду
+
+            const lastIntervalTime =
+              await this.airtableService.getLastIntervalTime(offerId, interval);
+
+            await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
+              x.fields.SessionId,
+              freeKeys.length === 1 ? freeKeys[0] : freeKeys[index],
+              lastIntervalTime,
+            );
+            await this.getGiveawayDetails(
+              process.env.NODE_ENV === 'development'
+                ? ADMIN_CHAT_ID
+                : x.fields.chat_id,
+              freeKeys.length === 1
+                ? freeKeys[0].toUpperCase()
+                : freeKeys[index].toUpperCase(),
+              lastIntervalTime,
+              true,
+            );
+            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
+          }
+        }
+      });
+    } catch (error) {
+      console.log('sendDetailsForNoKeyUsers', error);
+    }
+  }
+
   /*NOTIFICATION*/
   async sendNotificationToUser(
     chat_id: number | string,
@@ -1441,9 +1518,6 @@ export class TelegramService {
     close: boolean,
     filter: string,
     video: boolean,
-    offerId: string,
-    key: string,
-    interval: string,
   ): Promise<void> {
     try {
       console.log(
@@ -1489,8 +1563,6 @@ export class TelegramService {
         filter,
       );
 
-      console.log('value=', value);
-
       if (!value) return;
 
       if (video) {
@@ -1516,6 +1588,7 @@ export class TelegramService {
             sessionId,
             value.status,
           );
+
           await this.updateNotificationStatistic(
             sessionId,
             'Остановлено',
@@ -1533,35 +1606,11 @@ export class TelegramService {
             );
             await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
           }
-
-          //ищем тех кто стоит без ключевого слова (отправляем письмо и обновляем поле ключевое слово)
-
-          const sessionWithNoKey =
-            await this.airtableService.findFirstUserWithEmptyKey(offerId);
-
-          console.log('sessionWithNoKey', sessionWithNoKey, offerId);
-
-          if (!sessionWithNoKey) return;
-          const lastIntervalTime =
-            await this.airtableService.getLastIntervalTime(offerId, interval);
-          console.log('lastIntervalTime', lastIntervalTime, offerId);
-
-          await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
-            sessionWithNoKey.fields.SessionId,
-            key,
-            lastIntervalTime,
-          );
-          await this.getGiveawayDetails(
-            process.env.NODE_ENV === 'development'
-              ? ADMIN_CHAT_ID
-              : sessionWithNoKey.fields.chat_id,
-            key.toUpperCase(),
-            lastIntervalTime,
-            true,
-          );
           return;
         } catch (error) {
           console.log(error);
+          return;
+        } finally {
           return;
         }
       }
@@ -1609,7 +1658,6 @@ export class TelegramService {
       //await this.getKeyboardHistoryWithWeb(chat_id);
     } catch (error: any) {
       //console.log(error);
-
       if (error instanceof Error) {
         if (error.message.includes('403')) {
           await this.airtableService.updateStatusInBotTableAirtable(
@@ -2618,10 +2666,9 @@ export class TelegramService {
     if (keys && keys !== '') {
       await this.bot.api.sendMessage(
         chat_id,
-        getTextForIntervalTime(lastInterval) +
-          (itsWaitingText
-            ? `Ваше ключево слово для поиска <b>${keys}</b>`
-            : ''),
+        (itsWaitingText
+          ? `🕵️ Ваше ключево слово для поиска 👉 <b>${keys}</b>\n`
+          : '') + getTextForIntervalTime(lastInterval),
         {
           parse_mode: 'HTML',
         },

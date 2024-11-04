@@ -43,6 +43,7 @@ export interface IBot {
     'Время входа': string;
     'Запросить видеопереход': boolean;
     'Фото проверка': ['Поиск', 'Корзина', 'Заказ', 'Покупка'];
+    'Интервал (from OfferId)': string;
   };
 }
 interface IPhoto {

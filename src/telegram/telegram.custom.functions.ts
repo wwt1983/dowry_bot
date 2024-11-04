@@ -372,8 +372,6 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     : '';
 
   function getText(keys: string) {
-    console.log('keys = ', keys);
-
     if (keys && keys !== '' && keys !== 'undefined') {
       return (
         FIRST_STEP_KEY_VALUE +
@@ -1090,3 +1088,72 @@ export const getTextForQueue = (
   }
   return '';
 };
+
+/**
+ * поиск свободных ключевых слов
+ */
+export function findFreeKeywords(
+  arr1: { name: string; count: number }[],
+  arr2: { name: string; count: number }[],
+): string[] {
+  const keywordMap1 = new Map<string, number>();
+  const keywordMap2 = new Map<string, number>();
+
+  // Заполняем первую карту ключевыми словами и их количеством
+  arr1.forEach((keyword) => {
+    keywordMap1.set(keyword.name, keyword.count);
+  });
+
+  // Заполняем вторую карту ключевыми словами и их количеством
+  arr2?.forEach((keyword) => {
+    keywordMap2.set(
+      keyword.name,
+      (keywordMap2.get(keyword.name) || 0) + keyword.count,
+    );
+  });
+
+  // Ищем все свободные ключевые слова
+  const freeKeywords: string[] = [];
+  for (const [name, count1] of keywordMap1.entries()) {
+    const count2 = keywordMap2.get(name) || 0;
+    if (count1 > count2) {
+      freeKeywords.push(name);
+    }
+  }
+
+  // Возвращаем массив свободных ключевых слов
+  return freeKeywords;
+}
+
+export function groupByOfferId(bots: IBot[]): Record<string, IBot[]> {
+  if (!bots) return null;
+  return bots.reduce(
+    (acc, bot) => {
+      bot.fields.OfferId.forEach((offerId) => {
+        if (!acc[offerId]) {
+          acc[offerId] = [];
+        }
+        acc[offerId].push(bot);
+      });
+      return acc;
+    },
+    {} as Record<string, IBot[]>,
+  );
+}
+
+export function convertToKeyObjects(
+  array: string[],
+): { name: string; count: number }[] {
+  const countMap = array.reduce(
+    (acc, name) => {
+      acc[name] = (acc[name] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  return Object.keys(countMap).map((name) => ({
+    name,
+    count: countMap[name],
+  }));
+}
