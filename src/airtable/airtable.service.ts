@@ -705,8 +705,8 @@ export class AirtableService {
   ): Promise<string | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "", OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки")))`,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = ""), OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
     );
 
     if (!data?.records?.length || data?.records?.length === 0)
@@ -720,7 +720,7 @@ export class AirtableService {
   async findFirstUserWithEmptyKey(offerId: string): Promise<IBot | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", {Ключевое слово} = ''))`,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)}= "${offerId}", {Ключевое слово} = "")`,
     );
 
     if (!data?.records?.length || data?.records?.length === 0) return null;

@@ -1489,7 +1489,9 @@ export class TelegramService {
         filter,
       );
 
-      if (!value || value?.statistic?.fields?.Статус === 'Остановлено') return;
+      console.log('value=', value);
+
+      if (!value) return;
 
       if (video) {
         const message = notifications.records.find(
@@ -1507,54 +1509,61 @@ export class TelegramService {
         return;
       }
 
+      //снимаем с раздачи
       if (value.status === 'Время истекло') {
-        //снимаем с раздачи
-        await this.airtableService.updateStatusInBotTableAirtable(
-          sessionId,
-          value.status,
-        );
-        await this.updateNotificationStatistic(
-          sessionId,
-          'Остановлено',
-          value?.statistic?.fields
-            ? value.statistic?.fields['Количество отправок']
-            : 1,
-          botId,
-          value.notification.fields.Id,
-        );
+        try {
+          await this.airtableService.updateStatusInBotTableAirtable(
+            sessionId,
+            value.status,
+          );
+          await this.updateNotificationStatistic(
+            sessionId,
+            'Остановлено',
+            value?.statistic?.fields
+              ? value?.statistic?.fields['Количество отправок']
+              : 1,
+            botId,
+            value.notification.fields.Id,
+          );
 
-        await this.bot.api.sendMessage(
-          process.env.NODE_ENV === 'development' ? ADMIN_CHAT_ID : chat_id,
-          value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
-        );
-        await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
+          if (value?.statistic?.fields?.Статус !== 'Остановлено') {
+            await this.bot.api.sendMessage(
+              process.env.NODE_ENV === 'development' ? ADMIN_CHAT_ID : chat_id,
+              value.notification.fields.Сообщение + `\n➡️Раздача: ${offerName}`,
+            );
+            await this.getKeyboardHistoryWithWeb(chat_id, sessionId);
+          }
 
-        //ищем тех кто стоит без ключевого слова (отправляем письмо и обновляем поле ключевое слово)
-        const sessionWithNoKey =
-          await this.airtableService.findFirstUserWithEmptyKey(offerId);
+          //ищем тех кто стоит без ключевого слова (отправляем письмо и обновляем поле ключевое слово)
 
-        console.log('sessionWithNoKey', sessionWithNoKey, offerId);
+          const sessionWithNoKey =
+            await this.airtableService.findFirstUserWithEmptyKey(offerId);
 
-        if (!sessionWithNoKey) return;
-        const lastIntervalTime = await this.airtableService.getLastIntervalTime(
-          offerId,
-          interval,
-        );
-        console.log('lastIntervalTime', lastIntervalTime, offerId);
+          console.log('sessionWithNoKey', sessionWithNoKey, offerId);
 
-        await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
-          sessionWithNoKey.fields.SessionId,
-          key,
-          lastIntervalTime,
-        );
-        await this.getGiveawayDetails(
-          process.env.NODE_ENV === 'development'
-            ? ADMIN_CHAT_ID
-            : sessionWithNoKey.fields.chat_id,
-          key.toUpperCase(),
-          lastIntervalTime,
-        );
-        return;
+          if (!sessionWithNoKey) return;
+          const lastIntervalTime =
+            await this.airtableService.getLastIntervalTime(offerId, interval);
+          console.log('lastIntervalTime', lastIntervalTime, offerId);
+
+          await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
+            sessionWithNoKey.fields.SessionId,
+            key,
+            lastIntervalTime,
+          );
+          await this.getGiveawayDetails(
+            process.env.NODE_ENV === 'development'
+              ? ADMIN_CHAT_ID
+              : sessionWithNoKey.fields.chat_id,
+            key.toUpperCase(),
+            lastIntervalTime,
+            true,
+          );
+          return;
+        } catch (error) {
+          console.log(error);
+          return;
+        }
       }
       if (
         !scheduleNotification(
@@ -2604,11 +2613,15 @@ export class TelegramService {
     chat_id: number,
     keys: string,
     lastInterval: string,
+    itsWaitingText?: boolean,
   ) {
     if (keys && keys !== '') {
       await this.bot.api.sendMessage(
         chat_id,
-        getTextForIntervalTime(lastInterval),
+        getTextForIntervalTime(lastInterval) +
+          (itsWaitingText
+            ? `Ваше ключево слово для поиска <b>${keys}</b>`
+            : ''),
         {
           parse_mode: 'HTML',
         },
