@@ -153,6 +153,7 @@ export class TelegramController {
       shtrihCodeScreen: string;
       checkScreen: string;
       goodScreen: string;
+      offerName: string;
     },
   ): Promise<void> {
     await this.telegramService.transferBotToDistributions(
@@ -174,6 +175,7 @@ export class TelegramController {
       data.shtrihCodeScreen,
       data.checkScreen,
       data.goodScreen,
+      data.offerName,
     );
   }
   /**

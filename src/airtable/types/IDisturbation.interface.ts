@@ -47,6 +47,7 @@ export interface IDistribution {
     'Дата выплаты'?: Date;
     'Ник ТГ': string[];
     'Выплаченный кешбек'?: string;
+    'Размер ': string;
     chat_id?: string;
   };
 }

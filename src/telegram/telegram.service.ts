@@ -1089,12 +1089,24 @@ export class TelegramService {
             ctx.session.sessionId,
             ctx.session.status,
           );
-          if (!ctx.session.data.keys) {
+
+          if (!ctx?.session?.data?.keys || ctx.session?.data?.keys === '') {
             const sessionDetails = await this.airtableService.getBotBySession(
               ctx.session.sessionId,
             );
-            if (sessionDetails.fields['Ключевое слово'] === '')
-              return '📌 Дождитесь пока вам придет ключ для поиска и продолжите заполнение';
+
+            if (
+              sessionDetails?.fields['Ключевое слово'] == 'undefined' ||
+              sessionDetails?.fields['Ключевое слово'] == '' ||
+              !sessionDetails?.fields['Ключевое слово']
+            ) {
+              await ctx.api.sendMessage(
+                ctx.session.chat_id,
+                '📌 Дождитесь пока вам придет ключ для поиска и продолжите заполнение',
+              );
+              return;
+            }
+
             ctx.session.data.keys = sessionDetails.fields['Ключевое слово'];
             ctx.session.startTime = sessionDetails.fields.StartTime;
           }
@@ -2152,6 +2164,7 @@ export class TelegramService {
     shtrihCodeScreen: string,
     checkScreen: string,
     goodScreen: string,
+    offerName: string,
   ) {
     try {
       console.log('transferBotToDistributions session=', sessionId, chat_id);
@@ -2174,7 +2187,6 @@ export class TelegramService {
       const distributions = await this.airtableService.getDistributionByIds(
         buyer.fields.Раздачи,
       );
-
       if (!distributions || distributions.length === 0) {
         const articules = distributions?.map((x) => x.fields['Артикул WB'][0]);
         if (!articules.includes(+articul.trim())) {
@@ -2186,16 +2198,33 @@ export class TelegramService {
         }
       }
 
-      const distribution = distributions.find(
+      let filterDistribution = distributions.filter(
         (x) => x.fields['Артикул WB'][0] === +articul.trim(),
       );
-      console.log(
-        'Дата выкупа =',
-        distribution?.fields['Дата выкупа'],
-        parsedDate(convertDateFromString(dateRecived)),
-      );
 
-      if (distribution) {
+      if (filterDistribution && filterDistribution.length > 1) {
+        filterDistribution = distributions.filter((x) => {
+          const articulWB = x.fields['Артикул WB'];
+          const size = x.fields?.['Размер '];
+          if (
+            Array.isArray(articulWB) &&
+            articulWB.length > 0 &&
+            articulWB[0] === +articul.trim() &&
+            size &&
+            offerName.toLowerCase().includes(size.toLowerCase())
+          ) {
+            return x;
+          }
+        });
+      }
+
+      if (filterDistribution) {
+        const distribution = filterDistribution[0];
+        console.log(
+          'Дата выкупа =',
+          distribution?.fields['Дата выкупа'],
+          parsedDate(convertDateFromString(dateRecived)),
+        );
         await this.airtableService.updateDistribution({
           id: distribution.id,
           searchScreen: searchScreen,
