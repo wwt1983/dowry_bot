@@ -109,6 +109,7 @@ import {
   getDifferenceInDays,
   convertDateFromString,
   parsedDate,
+  addMinutesToInterval,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
@@ -1482,13 +1483,17 @@ export class TelegramService {
               : freeKeys.length,
           );
 
+          let lastIntervalTime = await this.airtableService.getLastIntervalTime(
+            offerId,
+            interval,
+          );
           for (let index = 0; index < users.length; index++) {
             const x = users[index];
-            // Добавляем задержку перед получением актуального интервала
-            await sleep(1000);
 
-            const lastIntervalTime =
-              await this.airtableService.getLastIntervalTime(offerId, interval);
+            lastIntervalTime = addMinutesToInterval(
+              lastIntervalTime,
+              +interval,
+            );
 
             await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
               x.fields.SessionId,

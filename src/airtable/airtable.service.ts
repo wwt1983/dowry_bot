@@ -49,7 +49,7 @@ export class AirtableService {
       Статус: session.status,
       'Время входа': session?.timeOfEntry || '',
       Артикул: session?.data?.articul || '',
-      StartTime: session.startTime || '',
+      StartTime: session.status === 'В боте' ? '' : session.startTime,
       OfferId: session.offerId || '',
       Location: session?.location || '',
       Раздача: session.data?.title || '',
