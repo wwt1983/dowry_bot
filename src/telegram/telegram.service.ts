@@ -194,8 +194,10 @@ export class TelegramService {
         },
       );
 
-      //console.log('start session', ctx.session.sessionId);
-      await this.saveToAirtable(ctx.session);
+      console.log('start match', ctx.match);
+      if (!ctx.match) {
+        await this.saveToAirtable(ctx.session);
+      }
 
       let checkOnLimitUserOffer: boolean = false;
 
@@ -231,7 +233,7 @@ export class TelegramService {
         );
 
         if (checkOnLimitUserOffer) {
-          await this.updateToAirtable(ctx.session);
+          await this.saveToAirtable(ctx.session);
           await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
         }
@@ -253,7 +255,7 @@ export class TelegramService {
         //   ctx.session.status,
         // );
 
-        await this.updateToAirtable(ctx.session);
+        await this.saveToAirtable(ctx.session);
 
         ctx.session = nextStep(ctx.session, true);
         await this.sendMediaByStep(ctx.session.status, ctx);
@@ -967,8 +969,6 @@ export class TelegramService {
             lastInterval,
           );
 
-          await this.saveToAirtable(ctx.session);
-
           console.log('==== WEB API ====', data, ctx.session);
 
           const userHistory = await this.getUserHistory(ctx.from, true);
@@ -992,7 +992,7 @@ export class TelegramService {
           );
 
           if (checkOnLimitUserOffer) {
-            await this.updateToAirtable(ctx.session);
+            await this.saveToAirtable(ctx.session);
             await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           }
@@ -1054,7 +1054,7 @@ export class TelegramService {
         //первый шаг
         if ('Выбор раздачи' === status && data) {
           const loader = await ctx.reply('⏳');
-          await this.updateToAirtable(ctx.session);
+          await this.saveToAirtable(ctx.session);
 
           ctx.session = nextStep(ctx.session, true);
 
@@ -1088,6 +1088,15 @@ export class TelegramService {
             ctx.session.sessionId,
             ctx.session.status,
           );
+          if (!ctx.session.data.keys) {
+            const sessionDetails = await this.airtableService.getBotBySession(
+              ctx.session.sessionId,
+            );
+            if (sessionDetails.fields['Ключевое слово'] === '')
+              return '📌 Дождитесь пока вам придет ключ для поиска и продолжите заполнение';
+            ctx.session.data.keys = sessionDetails.fields['Ключевое слово'];
+            ctx.session.startTime = sessionDetails.fields.StartTime;
+          }
           if (!checkOnGoNext) {
             await ctx.reply(`❌${STOP_TEXT}❌`);
             return await this.getKeyboardHistoryWithWeb(ctx.from.id);
@@ -1476,7 +1485,7 @@ export class TelegramService {
           for (let index = 0; index < users.length; index++) {
             const x = users[index];
             // Добавляем задержку перед получением актуального интервала
-            await new Promise((resolve) => setTimeout(resolve, 1000)); // Задержка в 1 секунду
+            await sleep(1000);
 
             const lastIntervalTime =
               await this.airtableService.getLastIntervalTime(offerId, interval);
@@ -2571,25 +2580,30 @@ export class TelegramService {
   }
 
   async closeWaitings(offerId: string) {
+    console.log(`close waitings ${offerId}`);
+
     const data = await this.airtableService.getWaitingsForClose(offerId);
+
     if (!data || data.length === 0) return;
-    data.map(async (item) => {
+
+    data.forEach(async (item) => {
       try {
+        await this.airtableService.updateStatusInBotTableAirtable(
+          item.fields.SessionId,
+          'Отмена',
+        );
+        await sleep(600);
+
         await this.bot.api.sendMessage(
           process.env.NODE_ENV === 'development'
             ? ADMIN_CHAT_ID
             : item.fields.chat_id,
           `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, на сегодня все 🙁\n Следите за нашими раздачами.😉`,
         );
-        await this.airtableService.updateStatusInBotTableAirtable(
-          item.fields.SessionId,
-          'Отмена',
-        );
-        await sleep(600);
-        console.log(`close waitings ${offerId}`);
       } catch (error) {
         console.error(
-          `chat_id ${item.fields.chat_id} Ошибка при отправке сообщения: ${error}`,
+          `closeWaitings для chat_id ${item.fields.chat_id} Ошибка при отправке сообщения: ${error}`,
+          error,
         );
       }
     });
@@ -2667,7 +2681,7 @@ export class TelegramService {
       await this.bot.api.sendMessage(
         chat_id,
         (itsWaitingText
-          ? `🕵️ Ваше ключево слово для поиска 👉 <b>${keys}</b>\n`
+          ? `🕵️ Ваше ключевое слово для поиска 👉 <b>${keys}</b>\n`
           : '') + getTextForIntervalTime(lastInterval),
         {
           parse_mode: 'HTML',

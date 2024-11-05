@@ -22,14 +22,17 @@ export const getOffersLink = (offers: IOffers) => {
         )
         .map((x) => ({
           name: x.fields['Name'],
-          link: x.fields['Ссылка'],
+          link:
+            process.env.NODE_ENV === 'development'
+              ? x.fields['Ссылка'].replace('dowryworkbot', 'test_dowry_bot')
+              : x.fields['Ссылка'],
         }));
       return result.reduce((acc, currentValue, index) => {
         acc += `${++index}. <a href='${currentValue.link}'>${currentValue.name}</a>\n`;
         return acc;
       }, '');
     }
-    return 'Пока предложений нет😢';
+    return 'Ждем новых разадач 😉';
   } catch (e) {
     console.log(e);
     return 'Произошла ошибка в запросе. Попробуйте посмотреть предложения позже.';

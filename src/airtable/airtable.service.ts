@@ -47,13 +47,21 @@ export class AirtableService {
       User: session.user,
       chat_id: session.chat_id,
       Статус: session.status,
-      Подписка: session.itsSubscriber,
+      'Время входа': session?.timeOfEntry || '',
+      Артикул: session?.data?.articul || '',
+      StartTime: session.startTime || '',
+      OfferId: session.offerId || '',
+      Location: session?.location || '',
+      Раздача: session.data?.title || '',
+      StopTime: getTimeWithTz(),
+      CommentsLink: session.chat_id,
+      'Ключевые слова': session?.data?.keys,
     };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===> ', response);
+    console.log(`postWebhook save ===> ${data.SessionId}`, response);
     return response;
   }
   async updateToAirtable(session: ISessionData): Promise<any> {
@@ -64,18 +72,9 @@ export class AirtableService {
       }
       //const correctTime = getOfferTime(session);
 
-      if (
-        session.status !== 'В боте' &&
-        session.status !== 'Выбор раздачи' &&
-        (!session?.data?.keys || session?.data?.keys === '')
-      ) {
-        const sessionDetails = await this.getBotBySession(session.sessionId);
-        session.data.keys = sessionDetails.fields['Ключевое слово'];
-        session.startTime = sessionDetails.fields.StartTime;
-      }
-
       const data = {
         SessionId: session.sessionId,
+        'Время входа': session?.timeOfEntry || '',
         Артикул: session?.data?.articul,
         StartTime: session.startTime,
         ['Время выкупа']: session.stopBuyTime,
@@ -100,7 +99,6 @@ export class AirtableService {
         'Получен скрин': session?.imgRecieved || '',
         'Штрих-код скрин': session?.imgShtrihCode || '',
         'Товар скрин': session?.imgGood || '',
-        'Время входа': session?.timeOfEntry || '',
         'Фото проверка': session?.checkParseImages,
       };
 
@@ -298,111 +296,114 @@ export class AirtableService {
       TablesName.Offers,
       id,
     )) as IOffer;
+    try {
+      const count = offer.fields.Количество;
+      const countOrder = offer.fields['Количество заказов сегодня'];
+      const countWaiting = offer.fields['Длина очереди'];
 
-    const count = offer.fields.Количество;
-    const countOrder = offer.fields['Количество заказов сегодня'];
-    const countWaiting = offer.fields['Длина очереди'];
+      offer.fields['Время бронь'] = null;
 
-    offer.fields['Время бронь'] = null;
+      if (needKeys) {
+        const keyIds = offer.fields.Ключи;
 
-    if (needKeys) {
-      const keyIds = offer.fields.Ключи;
-
-      if (keyIds && keyIds.length > 0) {
-        const keys = (await this.airtableHttpService.get(
-          TablesName.KeyWords,
-          getFilterById(keyIds),
-        )) as IKeyWords;
-
-        offer.fields['Ключевые слова'] = '';
-
-        if (keyIds.length === 1) {
-          offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
-        } else {
-          const totalKeysOffers = keys.records.reduce(
-            (sum, kw) => sum + kw.fields.Количество,
-            0,
-          );
-          console.log(
-            'totalKeysOffers=',
-            totalKeysOffers,
-            countOrder + countWaiting,
-          );
-
-          if (totalKeysOffers < countOrder + countWaiting) {
-            console.log('Не хватает предложений для заказа');
-            offer.fields['Ключевые слова'] = '';
-          } else {
-            let cumulativeCount = 0;
-
-            for (const item of keys.records) {
-              cumulativeCount += item.fields.Количество;
-              if (countOrder + countWaiting < cumulativeCount) {
-                offer.fields['Ключевые слова'] = item.fields.Название;
-                break;
-              }
-            }
-          }
-        }
-        // const nextKeyIndex = (countOrder + 1) % keys.records.length;
-        // offer.fields['Ключевые слова'] = keys.records[nextKeyIndex].fields.Название;
-      }
-    }
-
-    if (needTimes) {
-      if (offer.fields.Время) {
-        const keyIds = offer.fields.Время;
         if (keyIds && keyIds.length > 0) {
-          const times = (await this.airtableHttpService.get(
-            TablesName.TimeOffer,
+          const keys = (await this.airtableHttpService.get(
+            TablesName.KeyWords,
             getFilterById(keyIds),
-          )) as ITimes;
+          )) as IKeyWords;
 
-          if (count >= countOrder && times.records.length > 0) {
-            let allCountTimes = 0;
-            for (let i = 0; i < times.records.length; i++) {
-              const countTime =
-                times.records[i].fields['Количество предложений'];
-              allCountTimes = allCountTimes + countTime;
-              const keyValue = (times.records[i] as ITime).fields;
-              if (allCountTimes > countOrder) {
-                offer.fields['Время бронь'] = {
-                  startTime: keyValue.Start,
-                  onlyTime: times.records[i].fields['Только время'],
-                };
-                break;
+          offer.fields['Ключевые слова'] = '';
+
+          if (keyIds.length === 1) {
+            offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
+          } else {
+            const totalKeysOffers = keys.records.reduce(
+              (sum, kw) => sum + kw.fields.Количество,
+              0,
+            );
+            console.log(
+              'totalKeysOffers=',
+              totalKeysOffers,
+              countOrder + countWaiting,
+            );
+
+            if (totalKeysOffers < countOrder + countWaiting) {
+              console.log('Не хватает предложений для заказа');
+              offer.fields['Ключевые слова'] = '';
+            } else {
+              let cumulativeCount = 0;
+
+              for (const item of keys.records) {
+                cumulativeCount += item.fields.Количество;
+                if (countOrder + countWaiting < cumulativeCount) {
+                  offer.fields['Ключевые слова'] = item.fields.Название;
+                  break;
+                }
+              }
+            }
+          }
+          // const nextKeyIndex = (countOrder + 1) % keys.records.length;
+          // offer.fields['Ключевые слова'] = keys.records[nextKeyIndex].fields.Название;
+        }
+      }
+
+      if (needTimes) {
+        if (offer.fields.Время) {
+          const keyIds = offer.fields.Время;
+          if (keyIds && keyIds.length > 0) {
+            const times = (await this.airtableHttpService.get(
+              TablesName.TimeOffer,
+              getFilterById(keyIds),
+            )) as ITimes;
+
+            if (count >= countOrder && times.records.length > 0) {
+              let allCountTimes = 0;
+              for (let i = 0; i < times.records.length; i++) {
+                const countTime =
+                  times.records[i].fields['Количество предложений'];
+                allCountTimes = allCountTimes + countTime;
+                const keyValue = (times.records[i] as ITime).fields;
+                if (allCountTimes > countOrder) {
+                  offer.fields['Время бронь'] = {
+                    startTime: keyValue.Start,
+                    onlyTime: times.records[i].fields['Только время'],
+                  };
+                  break;
+                }
               }
             }
           }
         }
       }
-    }
 
-    const needFilters = needKeys && offer.fields['Включить фильтры'];
-    if (needFilters) {
-      const filterIds = offer.fields.Фильтры;
-      if (filterIds && filterIds.length > 0) {
-        const filters = (await this.airtableHttpService.get(
-          TablesName.Filters,
-          getFilterById(filterIds),
-        )) as IFilters;
+      const needFilters = needKeys && offer.fields['Включить фильтры'];
+      if (needFilters) {
+        const filterIds = offer.fields.Фильтры;
+        if (filterIds && filterIds.length > 0) {
+          const filters = (await this.airtableHttpService.get(
+            TablesName.Filters,
+            getFilterById(filterIds),
+          )) as IFilters;
 
-        if (filters?.records?.length > 0) {
-          // const minUseFilter: IFilter = filters.records.reduce(
-          //   (minObj, currentObj) => {
-          //     return currentObj.fields.Использовано < minObj.fields.Использовано
-          //       ? currentObj
-          //       : minObj;
-          //   },
-          // );
-          const nextIndex = (countOrder + 1) % filters.records.length;
-          offer.fields.Фильтр = filters.records[nextIndex].fields.Название;
-          //offer.fields.Фильтр = filters.records.map((x) => x.fields.Название);
+          if (filters?.records?.length > 0) {
+            // const minUseFilter: IFilter = filters.records.reduce(
+            //   (minObj, currentObj) => {
+            //     return currentObj.fields.Использовано < minObj.fields.Использовано
+            //       ? currentObj
+            //       : minObj;
+            //   },
+            // );
+            const nextIndex = (countOrder + 1) % filters.records.length;
+            offer.fields.Фильтр = filters.records[nextIndex].fields.Название;
+            //offer.fields.Фильтр = filters.records.map((x) => x.fields.Название);
+          }
         }
       }
+      return offer as IOffer;
+    } catch (error) {
+      console.log('getOffer', error);
+      return offer as IOffer;
     }
-
-    return offer as IOffer;
   }
 
   /**
@@ -784,8 +785,7 @@ export class AirtableService {
   async getWaitingsForClose(offerId: string): Promise<IBot[] | null> {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = "") , OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-        {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом"))`,
+      `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = ''), OR({Статус} = 'Выбор раздачи', {Статус} = 'Корзина', {Статус} = 'Поиск', {Статус} = 'Артикул правильный', {Статус} = 'Проблема с артикулом'))`,
     );
 
     //console.log('count filter', articul, data?.records.length);
