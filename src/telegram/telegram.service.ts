@@ -33,6 +33,8 @@ import {
   ERROR_DATE_MESSAGE,
   ADMIN_CHAT_ID,
   MESSAGE_ANSWER_FOR_ASK,
+  LIMIT_TIME_IN_MINUTES_FOR_BUY,
+  LIMIT_TIME_IN_MINUTES_FOR_ORDER,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -196,7 +198,6 @@ export class TelegramService {
         },
       );
 
-      console.log('start match', ctx.match);
       if (!ctx.match) {
         await this.saveToAirtable(ctx.session);
       }
@@ -272,6 +273,19 @@ export class TelegramService {
           lastInterval,
         );
 
+        if (sessionData.keys) {
+          const message = await this.bot.api.sendMessage(
+            ctx.from.id,
+            `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
+          );
+
+          this.startTimer(
+            ctx.from.id,
+            message.message_id,
+            2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+            ctx.session.sessionId,
+          );
+        }
         ctx.session.lastCommand = null;
       }
     });
@@ -1470,12 +1484,12 @@ export class TelegramService {
         console.log(`OfferId= ${offerId}`);
         const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
         const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
-        console.log('usesKeys', usesKeys);
-        console.log('allOfferKeys', allOfferKeys);
+        //console.log('usesKeys', usesKeys);
+        //console.log('allOfferKeys', allOfferKeys);
         const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
 
         if (!freeKeys || freeKeys.length === 0) {
-          console.log('freeKeys=', freeKeys);
+          //console.log('freeKeys=', freeKeys);
           return;
         }
         const interval =
@@ -1552,10 +1566,7 @@ export class TelegramService {
       if (checkOnStopStatus(status)) return;
 
       if (close) {
-        await this.airtableService.updateStatusInBotTableAirtable(
-          sessionId,
-          'Отмена',
-        );
+        await this.airtableService.updateStatusInBot(sessionId, 'Отмена');
         await this.bot.api.sendMessage(
           chat_id,
           `\n❌ Раздача: ${offerName} закрыта для продолжения ❌`,
@@ -1604,10 +1615,7 @@ export class TelegramService {
       //снимаем с раздачи
       if (value.status === 'Время истекло') {
         try {
-          await this.airtableService.updateStatusInBotTableAirtable(
-            sessionId,
-            value.status,
-          );
+          await this.airtableService.updateStatusInBot(sessionId, value.status);
 
           await this.updateNotificationStatistic(
             sessionId,
@@ -1680,10 +1688,7 @@ export class TelegramService {
       //console.log(error);
       if (error instanceof Error) {
         if (error.message.includes('403')) {
-          await this.airtableService.updateStatusInBotTableAirtable(
-            sessionId,
-            'Бот удален',
-          );
+          await this.airtableService.updateStatusInBot(sessionId, 'Бот удален');
         }
       }
     }
@@ -1977,7 +1982,7 @@ export class TelegramService {
       );
     }
 
-    await this.airtableService.updateStatusInBotTableAirtable(
+    await this.airtableService.updateStatusInBot(
       sessionId,
       'Отмена пользователем',
     );
@@ -2602,7 +2607,7 @@ export class TelegramService {
 
     data.forEach(async (item) => {
       try {
-        await this.airtableService.updateStatusInBotTableAirtable(
+        await this.airtableService.updateStatusInBot(
           item.fields.SessionId,
           'Отмена',
         );
@@ -2711,26 +2716,54 @@ export class TelegramService {
   /**
    *  Функция для запуска таймера
    */
-  startTimer(chatId: string, messageId: number, duration: number) {
-    let remainingTime = duration;
+  startTimer(
+    chatId: number,
+    messageId: number,
+    duration: number,
+    sessionId: string,
+  ) {
+    let remainingTime = duration * 60 * 1000;
+    try {
+      // Отправляем сообщение с оставшимся временем каждую минуту
+      const interval = setInterval(async () => {
+        remainingTime -= 60 * 1000; // Уменьшаем время на 1 минуту
+        const status = await this.airtableService.getBotStatusByUser(sessionId);
 
-    // Отправляем сообщение с оставшимся временем каждую минуту
-    const interval = setInterval(async () => {
-      remainingTime -= 60 * 1000; // Уменьшаем время на 1 минуту
+        if (
+          remainingTime <= 0 ||
+          IGNORED_STATUSES.includes(status) ||
+          status === 'Заказ'
+        ) {
+          clearInterval(interval); // Останавливаем интервал
+          await this.bot.api.editMessageText(
+            chatId,
+            messageId,
+            status === 'Заказ'
+              ? ''
+              : '❗️Время на продолжение раздачи истекло❗️',
+          );
 
-      if (remainingTime <= 0) {
-        clearInterval(interval); // Останавливаем интервал
-        await this.bot.api.editMessageText(chatId, messageId, 'Время истекло!');
-
-        console.log('останавливаем раздачу');
-      } else {
-        const minutes = Math.floor(remainingTime / (60 * 1000));
-        await this.bot.api.editMessageText(
-          chatId,
-          messageId,
-          `Осталось ${minutes} минут.`,
-        );
-      }
-    }, 60 * 1000); // Каждую минуту
+          if (remainingTime <= 0) {
+            //отмена заказа
+            const response = await this.airtableService.updateStatusInBot(
+              sessionId,
+              'Время истекло',
+            );
+            if (response) {
+              await this.sendDetailsForNoKeyUsers();
+            }
+          }
+        } else {
+          const minutes = Math.floor(remainingTime / (60 * 1000));
+          await this.bot.api.editMessageText(
+            chatId,
+            messageId,
+            `⏳ До конца оформления осталось ${minutes} минут`,
+          );
+        }
+      }, 60 * 1000); // Каждую минуту
+    } catch (error) {
+      console.log('startTimer', error);
+    }
   }
 }

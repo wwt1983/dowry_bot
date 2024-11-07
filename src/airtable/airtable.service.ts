@@ -117,10 +117,7 @@ export class AirtableService {
       return null;
     }
   }
-  async updateStatusInBotTableAirtable(
-    sessionId: string,
-    status: BotStatus,
-  ): Promise<any> {
+  async updateStatusInBot(sessionId: string, status: BotStatus): Promise<any> {
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
     );
