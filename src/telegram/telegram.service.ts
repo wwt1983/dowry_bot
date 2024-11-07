@@ -880,7 +880,7 @@ export class TelegramService {
           );
           if (ctx.session.lastCommand === COMMAND_NAMES.call) {
             await ctx.reply(MESSAGE_ANSWER_FOR_ASK);
-            return await this.getKeyboardHistoryWithWeb(ctx.session.chat_id);
+            return await this.getKeyboardHistoryWithWeb(ctx.from.id);
           }
         }
 
@@ -1731,8 +1731,8 @@ export class TelegramService {
       process.env.NODE_ENV === 'development'
         ? ADMIN_CHAT_ID
         : chatId.toString(),
-      countWorkLabels > 1
-        ? `Выбор новой или продолжение старой раздачи👇`
+      countWorkLabels > 0
+        ? `Начать новую или продолжить существующие раздачи👇`
         : 'Выбор новой раздачи👇',
       {
         reply_markup: historyButtons,
