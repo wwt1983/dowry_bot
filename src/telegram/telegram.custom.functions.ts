@@ -155,6 +155,7 @@ export function createInitialSessionData(
     checkWb: null,
     timeOfEntry: getTimeWithTz(),
     checkParseImages: [],
+    messageId: null,
   };
 }
 
@@ -206,6 +207,7 @@ export function createContinueSessionData(
     imgShtrihCode: data.imgShtrihCode,
     timeOfEntry: data.timeOfEntry,
     checkParseImages: data.checkParseImages,
+    messageId: data?.messageId,
   };
 }
 export function updateSessionByField(
@@ -850,7 +852,9 @@ export const getTextForSubscriber = (info: ChatMember) => {
   }
   return defaultResult;
 };
-
+/**
+ * Завершенные раздачи
+ */
 export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
@@ -934,7 +938,7 @@ export const getFilterDistribution = (
 };
 
 /**
- * выбираем только заказы с положительным step
+ * выбираем только заказы с возможностью дальнейшего продолжения
  */
 export const getOffersByUser = (dataBuyer: IBot[]) => {
   try {
@@ -1016,16 +1020,16 @@ export const getCorrectStatus = (status: BotStatus | OldStatus) => {
 };
 
 /**
- * раздачи со статусом 'Время истекло'
+ * раздачи со статусом 'Время истекло' или Отмена и тд
  */
 export const getTimeoutArticles = (data: IBot[]) => {
   try {
     if (!data || !data?.length) return null;
     const result = data
-      .filter((x) => x.fields.Статус === 'Время истекло')
-      ?.map((x) => '😿' + x.fields.Раздача)
+      .filter((x) => IGNORED_STATUSES.includes(x.fields.Статус))
+      ?.map((x) => '👉 ' + x.fields.Раздача)
       ?.join('\n\n');
-    if (result) return '👉Ваши устаревшие раздачи.\n' + result;
+    if (result) return '👵🏻Ваши устаревшие раздачи\n' + result;
     return result;
   } catch (error) {
     return null;

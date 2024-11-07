@@ -66,7 +66,9 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       if (
         record.fields.Статус == 'Выбор раздачи' ||
         record.fields.Статус == 'Корзина' ||
-        record.fields.Статус == 'Поиск'
+        record.fields.Статус == 'Поиск' ||
+        record.fields.Статус == 'Артикул правильный' ||
+        record.fields.Статус == 'Проблема с артикулом'
       ) {
         newArr.push([
           removeEmojis(record.fields.Раздача),
@@ -116,7 +118,9 @@ export const createHistoryKeyboard = (
   }
   if (ordersLabel && ordersLabel.length > 0) {
     ordersLabel.forEach(([label, data]) =>
-      keyboard.add(InlineKeyboard.text('➡️ ' + label, data)).row(),
+      keyboard
+        .add(InlineKeyboard.text((isUserStop ? '❌' : '➡️') + label, data))
+        .row(),
     );
   }
   return (ordersLabel && ordersLabel.length > 0) || web ? keyboard : null;

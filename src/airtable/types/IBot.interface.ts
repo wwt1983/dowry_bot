@@ -44,6 +44,7 @@ export interface IBot {
     'Запросить видеопереход': boolean;
     'Фото проверка': ['Поиск', 'Корзина', 'Заказ', 'Покупка'];
     'Интервал (from OfferId)': string;
+    MessageId: string;
   };
 }
 interface IPhoto {

@@ -1,3 +1,4 @@
+import { removeEmojis } from 'src/telegram/telegram.custom.functions';
 import { FILTER_BY_FORMULA } from './airtable.constants';
 import { IOffers } from './types/IOffer.interface';
 
@@ -28,7 +29,7 @@ export const getOffersLink = (offers: IOffers) => {
               : x.fields['Ссылка'],
         }));
       return result.reduce((acc, currentValue, index) => {
-        acc += `${++index}. <a href='${currentValue.link}'>${currentValue.name}</a>\n`;
+        acc += `${++index}. <a href='${currentValue.link}'>${removeEmojis(currentValue.name)}</a>\n`;
         return acc;
       }, '');
     }

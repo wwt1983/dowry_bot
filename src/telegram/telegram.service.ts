@@ -32,6 +32,7 @@ import {
   WEB_APP,
   ERROR_DATE_MESSAGE,
   ADMIN_CHAT_ID,
+  MESSAGE_ANSWER_FOR_ASK,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -319,7 +320,7 @@ export class TelegramService {
         );
         await ctx.reply(
           userInfo.orderButtons
-            ? 'Продолжите ⤵️'
+            ? 'Активные раздачи 🫰'
             : getTextForHistoryOrders(
                 userInfo?.sum || 0,
                 userInfo?.timeoutArticles,
@@ -329,14 +330,10 @@ export class TelegramService {
             reply_markup: userInfo.orderButtons,
           },
         );
-        const buttonsForUserStop = await this.getBottonsForStopOfUserOrder(
-          ctx.from,
-          false,
-        );
 
-        if (buttonsForUserStop && buttonsForUserStop.orderButtons) {
-          return await ctx.reply('Доступны для отмены ❌', {
-            reply_markup: buttonsForUserStop.orderButtons,
+        if (userInfo.canStopArticles) {
+          return await ctx.reply('Можно отменить👇', {
+            reply_markup: userInfo.canStopArticles,
           });
         }
       } catch (e) {
@@ -490,9 +487,7 @@ export class TelegramService {
               msgToChat,
             );
           }
-          return await ctx.reply(
-            'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
-          );
+          return await ctx.reply(MESSAGE_ANSWER_FOR_ASK);
         }
 
         if (ctx?.session?.lastCommand === COMMAND_NAMES.messageSend) {
@@ -884,9 +879,8 @@ export class TelegramService {
             msgToChatMessage,
           );
           if (ctx.session.lastCommand === COMMAND_NAMES.call) {
-            return await ctx.reply(
-              'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
-            );
+            await ctx.reply(MESSAGE_ANSWER_FOR_ASK);
+            return await this.getKeyboardHistoryWithWeb(ctx.session.chat_id);
           }
         }
 
@@ -1853,6 +1847,7 @@ export class TelegramService {
         imgRecieved: data[0]?.fields['Получен скрин'] || '',
         imgShtrihCode: data[0]?.fields['Штрих-код скрин'] || '',
         checkParseImages: data[0]?.fields['Фото проверка'] || [],
+        messageId: data[0]?.fields['MessageId'] || '',
       };
 
       let session = createContinueSessionData(
@@ -1921,6 +1916,8 @@ export class TelegramService {
     const sum = 0;
     const offersFromDistributions = '';
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
+    const stopButtons = createHistoryKeyboard(dataBuyer, web, true);
+
     // let member: ChatMember;
     try {
       //member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
@@ -1940,6 +1937,7 @@ export class TelegramService {
         itsSubscriber: false,
         userOffers: getOffersByUser(dataBuyer),
         timeoutArticles: getTimeoutArticles(dataBuyer),
+        canStopArticles: stopButtons,
       };
     }
 
@@ -1948,7 +1946,7 @@ export class TelegramService {
       await this.airtableService.getUserOffers(offerIdsStatusCheck);
     const benefit = getUserBenefit(userOffers, sum);
     let offersReady = '';
-    if (userOffers && userOffers.records && userOffers.records.length > 0) {
+    if (userOffers?.records?.length > 0) {
       offersReady = getUserOffersReady(dataBuyer);
     }
 
@@ -1961,21 +1959,7 @@ export class TelegramService {
       itsSubscriber: false,
       userOffers: getOffersByUser(dataBuyer),
       timeoutArticles: getTimeoutArticles(dataBuyer),
-    };
-  }
-
-  /**
-   * кнопки для остановки раздачи пользователем
-   */
-  async getBottonsForStopOfUserOrder(from: User, web?: boolean) {
-    const { id } = from;
-    const dataBuyer = await this.airtableService.getBotForContinue(
-      id.toString(),
-    );
-
-    const orderButtons = createHistoryKeyboard(dataBuyer, web, true);
-    return {
-      orderButtons,
+      canStopArticles: stopButtons,
     };
   }
 
@@ -2485,7 +2469,6 @@ export class TelegramService {
   /**
    * Сообщение-заглушка для пользователей с вопросом о кеше
    */
-
   async sendMessageAboutCache(chat_id: number, message: string) {
     if (itRequestWithCachQuestion(message)) {
       const allOrders = await this.airtableService.getBotByFilter(
@@ -2512,10 +2495,7 @@ export class TelegramService {
           value.notification.fields.Сообщение,
         );
       } else {
-        await this.bot.api.sendMessage(
-          chat_id,
-          'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻',
-        );
+        await this.bot.api.sendMessage(chat_id, MESSAGE_ANSWER_FOR_ASK);
       }
     }
   }
@@ -2726,5 +2706,31 @@ export class TelegramService {
         getPhotoForArticulLink() as any,
       );
     }
+  }
+
+  /**
+   *  Функция для запуска таймера
+   */
+  startTimer(chatId: string, messageId: number, duration: number) {
+    let remainingTime = duration;
+
+    // Отправляем сообщение с оставшимся временем каждую минуту
+    const interval = setInterval(async () => {
+      remainingTime -= 60 * 1000; // Уменьшаем время на 1 минуту
+
+      if (remainingTime <= 0) {
+        clearInterval(interval); // Останавливаем интервал
+        await this.bot.api.editMessageText(chatId, messageId, 'Время истекло!');
+
+        console.log('останавливаем раздачу');
+      } else {
+        const minutes = Math.floor(remainingTime / (60 * 1000));
+        await this.bot.api.editMessageText(
+          chatId,
+          messageId,
+          `Осталось ${minutes} минут.`,
+        );
+      }
+    }, 60 * 1000); // Каждую минуту
   }
 }

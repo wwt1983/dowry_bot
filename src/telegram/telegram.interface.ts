@@ -59,6 +59,7 @@ export interface ISessionData {
   imgGood?: string; //товар
   timeOfEntry?: string; //время входа,
   checkParseImages: string[]; //результат парсинга текста из фото
+  messageId?: string; //номер сообщения для редактирования интервала
 }
 
 export type MyContext = HydrateFlavor<

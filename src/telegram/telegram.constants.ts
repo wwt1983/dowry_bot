@@ -30,7 +30,8 @@ export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
 export const INTERVAL_FOR_NEXT_CHOOSE = 30;
 export const ADMIN_CHAT_ID = 193250152;
 export const ERROR_DATE_MESSAGE = 'Дата должна быть в формате 12.11.2024';
-
+export const MESSAGE_ANSWER_FOR_ASK =
+  'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻';
 export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',
@@ -46,7 +47,7 @@ export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.offers, description: 'Раздачи' },
   { command: COMMAND_NAMES.help, description: 'Помощь' },
-  { command: COMMAND_NAMES.history, description: 'История покупок' },
+  { command: COMMAND_NAMES.history, description: 'История заказов' },
   { command: COMMAND_NAMES.call, description: 'Написать оператору' },
 ];
 
