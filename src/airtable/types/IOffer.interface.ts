@@ -8,6 +8,9 @@ export type OfferStatus =
   | 'Public in chat'
   | 'Test'
   | 'Архив';
+
+export type KeyType = 'Ограниченный ключ' | 'Ключ без ограничения';
+
 export interface IOffer {
   id: string;
   createdTime: Date;
@@ -43,6 +46,7 @@ export interface IOffer {
     'Включить фильтры': boolean;
     Интервал: string;
     'Id (from OfferId)': string;
+    'Тип ключей': KeyType;
   };
 }
 

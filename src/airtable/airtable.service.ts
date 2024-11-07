@@ -317,33 +317,40 @@ export class AirtableService {
           if (keyIds.length === 1) {
             offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
           } else {
-            const totalKeysOffers = keys.records.reduce(
-              (sum, kw) => sum + kw.fields.Количество,
-              0,
-            );
-            console.log(
-              'totalKeysOffers=',
-              totalKeysOffers,
-              countOrder + countWaiting,
-            );
+            const typeKey = needKeys && offer.fields['Тип ключей'];
 
-            if (totalKeysOffers < countOrder + countWaiting) {
-              console.log('Не хватает предложений для заказа');
-              offer.fields['Ключевые слова'] = '';
-            } else {
-              let cumulativeCount = 0;
+            if (!typeKey || typeKey === 'Ограниченный ключ') {
+              const totalKeysOffers = keys.records.reduce(
+                (sum, kw) => sum + kw.fields.Количество,
+                0,
+              );
+              // console.log(
+              //   'totalKeysOffers=',
+              //   totalKeysOffers,
+              //   countOrder + countWaiting,
+              // );
 
-              for (const item of keys.records) {
-                cumulativeCount += item.fields.Количество;
-                if (countOrder + countWaiting < cumulativeCount) {
-                  offer.fields['Ключевые слова'] = item.fields.Название;
-                  break;
+              if (totalKeysOffers < countOrder + countWaiting) {
+                console.log('Не хватает предложений для заказа');
+                offer.fields['Ключевые слова'] = '';
+              } else {
+                let cumulativeCount = 0;
+
+                for (const item of keys.records) {
+                  cumulativeCount += item.fields.Количество;
+                  if (countOrder + countWaiting < cumulativeCount) {
+                    offer.fields['Ключевые слова'] = item.fields.Название;
+                    break;
+                  }
                 }
               }
+            } else {
+              const nextKeyIndex =
+                (countOrder + countWaiting + 1) % keys.records.length;
+              offer.fields['Ключевые слова'] =
+                keys.records[nextKeyIndex].fields.Название;
             }
           }
-          // const nextKeyIndex = (countOrder + 1) % keys.records.length;
-          // offer.fields['Ключевые слова'] = keys.records[nextKeyIndex].fields.Название;
         }
       }
 
