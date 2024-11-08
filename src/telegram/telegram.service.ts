@@ -279,6 +279,8 @@ export class TelegramService {
         );
         ctx.session.messageId = messageId?.toString();
         ctx.session.lastCommand = null;
+
+        await this.sendDetailsForNoKeyUsers();
       }
     });
 
@@ -1082,6 +1084,9 @@ export class TelegramService {
           );
           ctx.session.messageId = messageId?.toString();
           ctx.session.lastMessage = response[response.length - 1].message_id;
+
+          await this.sendDetailsForNoKeyUsers();
+
           return;
         }
         //проверка артикула
@@ -2658,7 +2663,7 @@ export class TelegramService {
       return message.message_id;
     }
   }
-  async sendDetailsForNoKeyUsers(needDetails: boolean) {
+  async sendDetailsForNoKeyUsers() {
     try {
       const sessionsWithNoKey =
         await this.airtableService.findUserWithEmptyKey();
@@ -2676,9 +2681,9 @@ export class TelegramService {
         //console.log('usesKeys', usesKeys);
         //console.log('allOfferKeys', allOfferKeys);
         const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
+        console.log('freeKeys=', freeKeys?.length);
 
         if (!freeKeys || freeKeys.length === 0) {
-          //console.log('freeKeys=', freeKeys);
           return;
         }
         const interval =
@@ -2711,8 +2716,6 @@ export class TelegramService {
             );
 
             console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
-
-            if (!needDetails) return;
 
             await this.getGiveawayDetails(
               process.env.NODE_ENV === 'development'
@@ -2819,17 +2822,15 @@ export class TelegramService {
 
           if (remainingTime <= 0) {
             //отмена заказа
-            const response = await this.airtableService.updateStatusInBot(
+            await this.airtableService.updateStatusInBot(
               sessionId,
               'Время истекло',
             );
-            if (response) {
-              await this.sendDetailsForNoKeyUsers(false);
-            }
             await this.bot.api.sendMessage(
               chatId,
               '❗️Время на раздачу истекло❗️',
             );
+            await sleep(2000);
             await this.getKeyboardHistoryWithWeb(chatId);
           }
           if (offerStatus === 'Done' || offerStatus === 'Stop') {
@@ -2850,7 +2851,6 @@ export class TelegramService {
       }, 60 * 1000); // Каждую минуту
     } catch (error) {
       console.log('startTimer', error);
-      await this.sendDetailsForNoKeyUsers(false);
     }
   }
 }

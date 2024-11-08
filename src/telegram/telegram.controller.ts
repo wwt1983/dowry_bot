@@ -63,7 +63,7 @@ export class TelegramController {
 
   @Post('sendDetailsForNoKeyUsers')
   async sendDetailsForNoKeyUsers(): Promise<void> {
-    await this.telegramService.sendDetailsForNoKeyUsers(true);
+    await this.telegramService.sendDetailsForNoKeyUsers();
   }
 
   @Post('notification')
