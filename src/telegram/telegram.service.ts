@@ -2613,7 +2613,8 @@ export class TelegramService {
     });
   }
   /**
-   * Выбор раздачи - отправляем инфо об интервале , ключу. Если есть ключ, то и скрин шага
+   * Выбор раздачи - отправляем инфо об интервале , ключу. Если есть ключ, то и скрин шага +
+   * инфо о том через сколько раздача или цикл о том сколько осталось на раздачу
    */
   async getGiveawayDetails(
     chat_id: number,
@@ -2640,10 +2641,14 @@ export class TelegramService {
       );
       const message = await this.bot.api.sendMessage(
         chat_id,
-        `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
+        `⏳ До окончания оформления осталось ${
+          process.env.NODE_ENV === 'development'
+            ? 3
+            : LIMIT_TIME_IN_MINUTES_FOR_ORDER
+        } мин.`,
       );
 
-      this.startTimer(
+      await this.startTimer(
         chat_id,
         message.message_id,
         sessionId,
@@ -2653,7 +2658,7 @@ export class TelegramService {
       return message.message_id;
     }
   }
-  async sendDetailsForNoKeyUsers() {
+  async sendDetailsForNoKeyUsers(needDetails: boolean) {
     try {
       const sessionsWithNoKey =
         await this.airtableService.findUserWithEmptyKey();
@@ -2704,6 +2709,11 @@ export class TelegramService {
               freeKeys.length === 1 ? freeKeys[0] : freeKeys[index],
               lastIntervalTime,
             );
+
+            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
+
+            if (!needDetails) return;
+
             await this.getGiveawayDetails(
               process.env.NODE_ENV === 'development'
                 ? ADMIN_CHAT_ID
@@ -2717,7 +2727,6 @@ export class TelegramService {
               offerId,
               x.fields.StartTime,
             );
-            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
           }
         }
       });
@@ -2765,7 +2774,9 @@ export class TelegramService {
         await this.startTimerOrder(
           chatId,
           messageId,
-          LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+          process.env.NODE_ENV === 'development'
+            ? 3
+            : LIMIT_TIME_IN_MINUTES_FOR_ORDER,
           sessionId,
           offerId,
         );
@@ -2800,8 +2811,10 @@ export class TelegramService {
           offerStatus === 'Stop'
         ) {
           clearInterval(interval); // Останавливаем интервал
+
+          await this.bot.api.deleteMessage(chatId, messageId);
+
           if (status === 'Заказ') {
-            await this.bot.api.editMessageText(chatId, messageId, '');
           }
 
           if (remainingTime <= 0) {
@@ -2811,12 +2824,13 @@ export class TelegramService {
               'Время истекло',
             );
             if (response) {
-              await this.sendDetailsForNoKeyUsers();
+              await this.sendDetailsForNoKeyUsers(false);
             }
             await this.bot.api.sendMessage(
               chatId,
               '❗️Время на раздачу истекло❗️',
             );
+            await this.getKeyboardHistoryWithWeb(chatId);
           }
           if (offerStatus === 'Done' || offerStatus === 'Stop') {
             await this.airtableService.updateStatusInBot(sessionId, 'Отмена');
@@ -2830,12 +2844,13 @@ export class TelegramService {
           await this.bot.api.editMessageText(
             chatId,
             messageId,
-            `⏳ До конца оформления осталось ${minutes} минут`,
+            `⏳ До конца оформления осталось ${minutes} мин.`,
           );
         }
       }, 60 * 1000); // Каждую минуту
     } catch (error) {
       console.log('startTimer', error);
+      await this.sendDetailsForNoKeyUsers(false);
     }
   }
 }

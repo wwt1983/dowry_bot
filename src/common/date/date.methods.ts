@@ -185,7 +185,7 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
 };
 
 export const formatSimple = (date: string) =>
-  format(date, 'HH:mm d MMMM', { locale: ru });
+  format(date, 'd MMMM HH:mm', { locale: ru });
 
 export const convertDateFromString = (date: string) => {
   if (!date) return null;
@@ -232,6 +232,6 @@ export const formatMinutesToHoursAndMinutes = (totalMinutes: number) => {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
-  if (hours === 0) return `${minutes} минут(ы)`;
-  return `${hours} час${hours !== 1 ? 'а' : ''} ${minutes} минут(ы)`;
+  if (hours === 0) return `${minutes} мин.`;
+  return `${hours} час${hours !== 1 ? 'а' : ''} ${minutes} мин.`;
 };
