@@ -226,3 +226,12 @@ export const convertDateFromString = (date: string) => {
     return null;
   }
 };
+
+export const formatMinutesToHoursAndMinutes = (totalMinutes: number) => {
+  if (!totalMinutes) return null;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) return `${minutes} минут(ы)`;
+  return `${hours} час${hours !== 1 ? 'а' : ''} ${minutes} минут(ы)`;
+};

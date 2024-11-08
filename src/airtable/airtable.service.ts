@@ -18,6 +18,7 @@ import { IBotComments } from './types/IBotComment';
 import { User } from '@grammyjs/types';
 import {
   convertToKeyObjects,
+  findFreeKeywords,
   getNumberStepByStatus,
   getUserName,
 } from 'src/telegram/telegram.custom.functions';
@@ -56,6 +57,7 @@ export class AirtableService {
       StopTime: getTimeWithTz(),
       CommentsLink: session.chat_id,
       'Ключевые слова': session?.data?.keys,
+      MessageId: session?.messageId,
     };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
@@ -332,14 +334,14 @@ export class AirtableService {
                 console.log('Не хватает предложений для заказа');
                 offer.fields['Ключевые слова'] = '';
               } else {
-                let cumulativeCount = 0;
-
-                for (const item of keys.records) {
-                  cumulativeCount += item.fields.Количество;
-                  if (countOrder + countWaiting < cumulativeCount) {
-                    offer.fields['Ключевые слова'] = item.fields.Название;
-                    break;
-                  }
+                const usesKeys = await this.getUsesKeys(id); //список занятых слов
+                const allOfferKeys = (keys as IKeyWords).records.map((x) => ({
+                  name: x.fields.Название,
+                  count: x.fields.Количество,
+                }));
+                const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
+                if (freeKeys || freeKeys.length > 0) {
+                  offer.fields['Ключевые слова'] = freeKeys[0];
                 }
               }
             } else {

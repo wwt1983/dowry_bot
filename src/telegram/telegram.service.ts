@@ -33,7 +33,6 @@ import {
   ERROR_DATE_MESSAGE,
   ADMIN_CHAT_ID,
   MESSAGE_ANSWER_FOR_ASK,
-  LIMIT_TIME_IN_MINUTES_FOR_BUY,
   LIMIT_TIME_IN_MINUTES_FOR_ORDER,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
@@ -113,6 +112,8 @@ import {
   convertDateFromString,
   parsedDate,
   addMinutesToInterval,
+  getDifferenceInMinutes,
+  formatMinutesToHoursAndMinutes,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { User } from '@grammyjs/types';
@@ -267,14 +268,16 @@ export class TelegramService {
           getTextForFirstStep(sessionData) as any[],
         );
 
-        await this.getGiveawayDetails(
+        const messageId = await this.getGiveawayDetails(
           ctx.message.from.id,
           sessionData.keys,
           lastInterval,
           false,
           ctx.session.sessionId,
           ctx.session.offerId,
+          ctx.session.startTime,
         );
+        ctx.session.messageId = messageId?.toString();
         ctx.session.lastCommand = null;
       }
     });
@@ -1063,34 +1066,21 @@ export class TelegramService {
           // }
           setTimeout(() => loader.delete().catch(() => {}), 100);
 
-          let response = await this.bot.api.sendMediaGroup(
+          const response = await this.bot.api.sendMediaGroup(
             ctx.message.from.id,
             getTextForFirstStep(data) as any[],
           );
 
-          response = await this.getGiveawayDetails(
+          const messageId = await this.getGiveawayDetails(
             ctx.message.from.id,
             data.keys,
             lastInterval,
             false,
             ctx.session.sessionId,
             ctx.session.offerId,
+            ctx.session.startTime,
           );
-
-          if (ctx.session.data.keys) {
-            const message = await this.bot.api.sendMessage(
-              ctx.from.id,
-              `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
-            );
-
-            this.startTimer(
-              ctx.from.id,
-              message.message_id,
-              2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
-              ctx.session.sessionId,
-              ctx.session.offerId,
-            );
-          }
+          ctx.session.messageId = messageId?.toString();
           ctx.session.lastMessage = response[response.length - 1].message_id;
           return;
         }
@@ -1472,79 +1462,6 @@ export class TelegramService {
       Бот: BotId,
       Шаблон: PatternId,
     });
-  }
-
-  async sendDetailsForNoKeyUsers() {
-    try {
-      const sessionsWithNoKey =
-        await this.airtableService.findUserWithEmptyKey();
-
-      if (!sessionsWithNoKey || sessionsWithNoKey.length === 0) {
-        return;
-      }
-      console.log('sendDetailsForNoKeyUsers', sessionsWithNoKey.length);
-
-      const groupedBotsWithNoKey = groupByOfferId(sessionsWithNoKey);
-      // Проход по сгруппированному массиву
-      Object.keys(groupedBotsWithNoKey).forEach(async (offerId) => {
-        console.log(`OfferId= ${offerId}`);
-        const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
-        const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
-        //console.log('usesKeys', usesKeys);
-        //console.log('allOfferKeys', allOfferKeys);
-        const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
-
-        if (!freeKeys || freeKeys.length === 0) {
-          //console.log('freeKeys=', freeKeys);
-          return;
-        }
-        const interval =
-          groupedBotsWithNoKey[offerId][0].fields['Интервал (from OfferId)'];
-
-        if (freeKeys) {
-          const users = groupedBotsWithNoKey[offerId].slice(
-            0,
-            freeKeys.length === 1
-              ? groupedBotsWithNoKey[offerId].length
-              : freeKeys.length,
-          );
-
-          let lastIntervalTime = await this.airtableService.getLastIntervalTime(
-            offerId,
-            interval,
-          );
-          for (let index = 0; index < users.length; index++) {
-            const x = users[index];
-
-            lastIntervalTime = addMinutesToInterval(
-              lastIntervalTime,
-              +interval,
-            );
-
-            await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
-              x.fields.SessionId,
-              freeKeys.length === 1 ? freeKeys[0] : freeKeys[index],
-              lastIntervalTime,
-            );
-            await this.getGiveawayDetails(
-              process.env.NODE_ENV === 'development'
-                ? ADMIN_CHAT_ID
-                : x.fields.chat_id,
-              freeKeys.length === 1
-                ? freeKeys[0].toUpperCase()
-                : freeKeys[index].toUpperCase(),
-              lastIntervalTime,
-              true,
-              x.fields.SessionId,
-              offerId,
-            );
-            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
-          }
-        }
-      });
-    } catch (error) {
-      console.log('sendDetailsForNoKeyUsers', error);
-    }
   }
 
   /*NOTIFICATION*/
@@ -2679,7 +2596,7 @@ export class TelegramService {
 
         await this.bot.api.sendMessage(
           item.chatId,
-          `🙋‍♀️${value.notification.fields.Сообщение} <a href='${url}'>${name}</a>`,
+          `🙋‍♀️${value.notification.fields.Сообщение} 👉 <a href='${url}'>${name}</a>`,
           {
             parse_mode: 'HTML',
           },
@@ -2705,6 +2622,7 @@ export class TelegramService {
     itsWaitingText: boolean,
     sessionId: string,
     offerId: string,
+    startTime: string,
   ) {
     if (keys && keys !== '') {
       await this.bot.api.sendMessage(
@@ -2716,7 +2634,7 @@ export class TelegramService {
           parse_mode: 'HTML',
         },
       );
-      const response = await this.bot.api.sendMediaGroup(
+      await this.bot.api.sendMediaGroup(
         chat_id,
         getPhotoForArticulLink() as any,
       );
@@ -2728,18 +2646,139 @@ export class TelegramService {
       this.startTimer(
         chat_id,
         message.message_id,
-        2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
         sessionId,
         offerId,
+        startTime,
       );
-      return response;
+      return message.message_id;
+    }
+  }
+  async sendDetailsForNoKeyUsers() {
+    try {
+      const sessionsWithNoKey =
+        await this.airtableService.findUserWithEmptyKey();
+
+      if (!sessionsWithNoKey || sessionsWithNoKey.length === 0) {
+        return;
+      }
+      console.log('sendDetailsForNoKeyUsers', sessionsWithNoKey.length);
+
+      const groupedBotsWithNoKey = groupByOfferId(sessionsWithNoKey);
+      // Проход по сгруппированному массиву
+      Object.keys(groupedBotsWithNoKey).forEach(async (offerId) => {
+        const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
+        const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
+        //console.log('usesKeys', usesKeys);
+        //console.log('allOfferKeys', allOfferKeys);
+        const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
+
+        if (!freeKeys || freeKeys.length === 0) {
+          //console.log('freeKeys=', freeKeys);
+          return;
+        }
+        const interval =
+          groupedBotsWithNoKey[offerId][0].fields['Интервал (from OfferId)'];
+
+        if (freeKeys) {
+          const users = groupedBotsWithNoKey[offerId].slice(
+            0,
+            freeKeys.length === 1
+              ? groupedBotsWithNoKey[offerId].length
+              : freeKeys.length,
+          );
+
+          let lastIntervalTime = await this.airtableService.getLastIntervalTime(
+            offerId,
+            interval,
+          );
+          for (let index = 0; index < users.length; index++) {
+            const x = users[index];
+
+            lastIntervalTime = addMinutesToInterval(
+              lastIntervalTime,
+              +interval,
+            );
+
+            await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
+              x.fields.SessionId,
+              freeKeys.length === 1 ? freeKeys[0] : freeKeys[index],
+              lastIntervalTime,
+            );
+            await this.getGiveawayDetails(
+              process.env.NODE_ENV === 'development'
+                ? ADMIN_CHAT_ID
+                : x.fields.chat_id,
+              freeKeys.length === 1
+                ? freeKeys[0].toUpperCase()
+                : freeKeys[index].toUpperCase(),
+              lastIntervalTime,
+              true,
+              x.fields.SessionId,
+              offerId,
+              x.fields.StartTime,
+            );
+            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
+          }
+        }
+      });
+    } catch (error) {
+      console.log('sendDetailsForNoKeyUsers', error);
+    }
+  }
+
+  async startTimer(
+    chatId: number,
+    messageId: number,
+    sessionId: string,
+    offerId: string,
+    startTime: string,
+  ) {
+    const minutesForStart = getDifferenceInMinutes(startTime);
+    const minutes = +minutesForStart.toString().replace('-', '');
+    console.log('До начала осталось ' + minutes);
+    try {
+      if (minutesForStart < 0) {
+        // Отправляем сообщение с оставшимся временем до начала
+        await this.bot.api.editMessageText(
+          chatId,
+          messageId,
+          `⏳ До начала раздачи осталось ${formatMinutesToHoursAndMinutes(minutes)}`,
+        );
+
+        // Запускаем таймер для ожидания начала
+        setTimeout(
+          async () => {
+            await this.startTimerOrder(
+              chatId,
+              messageId,
+              process.env.NODE_ENV === 'development'
+                ? 3
+                : LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+              sessionId,
+              offerId,
+            );
+          },
+          minutes * 60 * 1000,
+        );
+      } else {
+        // Если startTime - настоящее или прошлое время
+        await this.startTimerOrder(
+          chatId,
+          messageId,
+          LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+          sessionId,
+          offerId,
+        );
+      }
+    } catch (error) {
+      console.log('startTimer', error);
     }
   }
 
   /**
-   *  Функция для запуска таймера
+   *  Функция для запуска таймера раздачи
    */
-  startTimer(
+  async startTimerOrder(
     chatId: number,
     messageId: number,
     duration: number,
@@ -2762,6 +2801,7 @@ export class TelegramService {
         ) {
           clearInterval(interval); // Останавливаем интервал
           if (status === 'Заказ') {
+            await this.bot.api.editMessageText(chatId, messageId, '');
           }
 
           if (remainingTime <= 0) {
