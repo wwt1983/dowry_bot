@@ -18,16 +18,16 @@ export const WEB_APP_TEST = 'https://dowrybot-front-test.vercel.app/';
 export const WAITING_IMAGE = WEB_APP + 'images/wait.jpg';
 export const STOP_TEXT = 'Раздачу продолжать нельзя';
 export const LIMIT_TIME_IN_MINUTES_FOR_ORDER = 30;
-export const LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER = 120;
-export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 90;
-export const LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER = 180;
+export const LIMIT_TIME_IN_MINUTES_FOR_ORDER_WITH_FILTER = 30;
+export const LIMIT_TIME_IN_MINUTES_FOR_BUY = 30;
+export const LIMIT_TIME_IN_MINUTES_FOR_BUY_WITH_FILTER = 30;
 export const SUBSCRIBE_CHAT_URL = 'https://t.me/dowry_wb';
 export const MESSAGE_LIMIT_ORDER = '❌Превышен лимит заказов одного артикула❌';
 export const MESSAGE_WAITING =
   'Это популярная раздача с ограниченным числом мест. Места могут периодически освобождаться😉';
 export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
 
-export const INTERVAL_FOR_NEXT_CHOOSE = 30;
+export const INTERVAL_FOR_NEXT_CHOOSE = 20;
 export const ADMIN_CHAT_ID = 193250152;
 export const ERROR_DATE_MESSAGE = 'Дата должна быть в формате 12.11.2024';
 export const MESSAGE_ANSWER_FOR_ASK =

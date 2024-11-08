@@ -2721,6 +2721,7 @@ export class TelegramService {
     messageId: number,
     duration: number,
     sessionId: string,
+    offerId: string,
   ) {
     let remainingTime = duration * 60 * 1000;
     try {
