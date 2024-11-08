@@ -2612,7 +2612,7 @@ export class TelegramService {
         );
       } catch (error) {
         console.error(
-          `chat_id ${item} Ошибка при отправке сообщения notificationToClosedOffersUsers: ${error}`,
+          `chat_id ${item.chatId} Ошибка при отправке сообщения notificationToClosedOffersUsers: ${error}`,
         );
       }
     });
