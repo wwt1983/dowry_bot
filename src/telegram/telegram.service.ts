@@ -271,22 +271,10 @@ export class TelegramService {
           ctx.message.from.id,
           sessionData.keys,
           lastInterval,
+          false,
+          ctx.session.sessionId,
+          ctx.session.offerId,
         );
-
-        if (sessionData.keys) {
-          const message = await this.bot.api.sendMessage(
-            ctx.from.id,
-            `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
-          );
-
-          this.startTimer(
-            ctx.from.id,
-            message.message_id,
-            2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
-            ctx.session.sessionId,
-            ctx.session.offerId,
-          );
-        }
         ctx.session.lastCommand = null;
       }
     });
@@ -1084,8 +1072,25 @@ export class TelegramService {
             ctx.message.from.id,
             data.keys,
             lastInterval,
+            false,
+            ctx.session.sessionId,
+            ctx.session.offerId,
           );
 
+          if (ctx.session.data.keys) {
+            const message = await this.bot.api.sendMessage(
+              ctx.from.id,
+              `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
+            );
+
+            this.startTimer(
+              ctx.from.id,
+              message.message_id,
+              2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+              ctx.session.sessionId,
+              ctx.session.offerId,
+            );
+          }
           ctx.session.lastMessage = response[response.length - 1].message_id;
           return;
         }
@@ -1530,6 +1535,8 @@ export class TelegramService {
                 : freeKeys[index].toUpperCase(),
               lastIntervalTime,
               true,
+              x.fields.SessionId,
+              offerId,
             );
             console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
           }
@@ -2695,7 +2702,9 @@ export class TelegramService {
     chat_id: number,
     keys: string,
     lastInterval: string,
-    itsWaitingText?: boolean,
+    itsWaitingText: boolean,
+    sessionId: string,
+    offerId: string,
   ) {
     if (keys && keys !== '') {
       await this.bot.api.sendMessage(
@@ -2707,10 +2716,23 @@ export class TelegramService {
           parse_mode: 'HTML',
         },
       );
-      return await this.bot.api.sendMediaGroup(
+      const response = await this.bot.api.sendMediaGroup(
         chat_id,
         getPhotoForArticulLink() as any,
       );
+      const message = await this.bot.api.sendMessage(
+        chat_id,
+        `⏳ До конца оформления осталось ${LIMIT_TIME_IN_MINUTES_FOR_ORDER} минут`,
+      );
+
+      this.startTimer(
+        chat_id,
+        message.message_id,
+        2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+        sessionId,
+        offerId,
+      );
+      return response;
     }
   }
 
@@ -2739,15 +2761,8 @@ export class TelegramService {
           offerStatus === 'Stop'
         ) {
           clearInterval(interval); // Останавливаем интервал
-          let messageForUser = '';
           if (status === 'Заказ') {
-            //
-          } else if (offerStatus === 'Done' || offerStatus === 'Stop') {
-            messageForUser = `📌 К сожалению, раздача закрылась 🙁\n Следите за нашими раздачами.😉`;
-          } else {
-            messageForUser = '❗️Время на раздачу истекло❗️';
           }
-          await this.bot.api.editMessageText(chatId, messageId, messageForUser);
 
           if (remainingTime <= 0) {
             //отмена заказа
@@ -2758,6 +2773,17 @@ export class TelegramService {
             if (response) {
               await this.sendDetailsForNoKeyUsers();
             }
+            await this.bot.api.sendMessage(
+              chatId,
+              '❗️Время на раздачу истекло❗️',
+            );
+          }
+          if (offerStatus === 'Done' || offerStatus === 'Stop') {
+            await this.airtableService.updateStatusInBot(sessionId, 'Отмена');
+            await this.bot.api.sendMessage(
+              chatId,
+              `📌 К сожалению, раздача закрылась 🙁\n Следите за нашими раздачами.😉`,
+            );
           }
         } else {
           const minutes = Math.floor(remainingTime / (60 * 1000));
