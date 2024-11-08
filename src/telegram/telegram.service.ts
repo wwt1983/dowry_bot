@@ -284,6 +284,7 @@ export class TelegramService {
             message.message_id,
             2, //LIMIT_TIME_IN_MINUTES_FOR_ORDER,
             ctx.session.sessionId,
+            ctx.session.offerId,
           );
         }
         ctx.session.lastCommand = null;
@@ -2617,7 +2618,7 @@ export class TelegramService {
           process.env.NODE_ENV === 'development'
             ? ADMIN_CHAT_ID
             : item.fields.chat_id,
-          `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, на сегодня все 🙁\n Следите за нашими раздачами.😉`,
+          `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, раздача закрылась🙁\n Следите за нашими раздачами.😉`,
         );
       } catch (error) {
         console.error(
@@ -2729,20 +2730,24 @@ export class TelegramService {
       const interval = setInterval(async () => {
         remainingTime -= 60 * 1000; // Уменьшаем время на 1 минуту
         const status = await this.airtableService.getBotStatusByUser(sessionId);
-
+        const offerStatus = await this.airtableService.getOfferStatus(offerId);
         if (
           remainingTime <= 0 ||
           IGNORED_STATUSES.includes(status) ||
-          status === 'Заказ'
+          status === 'Заказ' ||
+          offerStatus === 'Done' ||
+          offerStatus === 'Stop'
         ) {
           clearInterval(interval); // Останавливаем интервал
-          await this.bot.api.editMessageText(
-            chatId,
-            messageId,
-            status === 'Заказ'
-              ? ''
-              : '❗️Время на продолжение раздачи истекло❗️',
-          );
+          let messageForUser = '';
+          if (status === 'Заказ') {
+            //
+          } else if (offerStatus === 'Done' || offerStatus === 'Stop') {
+            messageForUser = `📌 К сожалению, раздача закрылась 🙁\n Следите за нашими раздачами.😉`;
+          } else {
+            messageForUser = '❗️Время на раздачу истекло❗️';
+          }
+          await this.bot.api.editMessageText(chatId, messageId, messageForUser);
 
           if (remainingTime <= 0) {
             //отмена заказа

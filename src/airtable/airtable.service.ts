@@ -4,7 +4,7 @@ import { AirtableHttpService } from './airtable.http.service';
 import { ConfigService } from '@nestjs/config';
 import { FILTER_BY_FORMULA, TablesName } from './airtable.constants';
 
-import { IOffer, IOffers } from './types/IOffer.interface';
+import { IOffer, IOffers, OfferStatus } from './types/IOffer.interface';
 import { INotification, INotifications } from './types/INotification.interface';
 import { INotificationStatistics } from './types/INotificationStatistic.interface';
 import { BotStatus, IBot, IBots } from './types/IBot.interface';
@@ -833,5 +833,14 @@ export class AirtableService {
     if (!data?.records?.length || data?.records?.length === 0) return null;
 
     return (data as IBots).records;
+  }
+  async getOfferStatus(offerId: string): Promise<OfferStatus> {
+    const data = (await this.airtableHttpService.getById(
+      TablesName.Offers,
+      offerId,
+    )) as IOffer;
+    if (!data) return null;
+
+    return data.fields.Status;
   }
 }
