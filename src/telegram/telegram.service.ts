@@ -2817,7 +2817,8 @@ export class TelegramService {
 
           await this.bot.api.deleteMessage(chatId, messageId);
 
-          if (status === 'Заказ') {
+          if (status === 'Заказ' || status === 'Дата доставки') {
+            return;
           }
 
           if (remainingTime <= 0) {
