@@ -852,7 +852,7 @@ export class AirtableService {
       `&${FILTER_BY_FORMULA}=Find("${chat_id}",{chat_id})`,
     );
     if (!data || data.records.length === 0) return false;
-    if ((data.records as IBan).fields.Статус === 'Блокировка') {
+    if ((data.records[0] as IBan).fields?.Статус === 'Блокировка') {
       return true;
     }
     return false;
