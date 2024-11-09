@@ -171,6 +171,9 @@ export class TelegramService {
     /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
+
+      if (await this.checkOnBan(id)) return;
+
       const userValue = getUserName(ctx.from);
 
       const userHistory = await this.getUserHistory(ctx.from, true);
@@ -295,6 +298,8 @@ export class TelegramService {
     });
 
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
+      if (await this.checkOnBan(ctx.from.id)) return;
+
       if (ctx?.session?.instructionMessages) {
         await this.clearInstruction(ctx.session, ctx.from.id);
         ctx.session.instructionMessages = null;
@@ -353,6 +358,8 @@ export class TelegramService {
     /*======== Раздачи =======*/
     this.bot.command(COMMAND_NAMES.offers, async (ctx) => {
       try {
+        if (await this.checkOnBan(ctx.from.id)) return;
+
         if (ctx?.session?.instructionMessages) {
           await this.clearInstruction(ctx.session, ctx.from.id);
           ctx.session.instructionMessages = null;
@@ -416,6 +423,8 @@ export class TelegramService {
     /*======== VIDEO =======*/
     this.bot.on('message:video', async (ctx) => {
       try {
+        if (await this.checkOnBan(ctx.from.id)) return;
+
         const path = await ctx.getFile();
         const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
         const firebaseUrl = await this.firebaseService.uploadVideoAsync(url);
@@ -455,6 +464,8 @@ export class TelegramService {
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       try {
+        if (await this.checkOnBan(ctx.from.id)) return;
+
         const path = await ctx.getFile();
         const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
         if (
@@ -806,6 +817,8 @@ export class TelegramService {
     /*======== Все текстовые сообщения =======*/
     this.bot.on('message', async (ctx) => {
       try {
+        if (await this.checkOnBan(ctx.from.id)) return;
+
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
 
@@ -2853,5 +2866,17 @@ export class TelegramService {
     } catch (error) {
       console.log('startTimer', error);
     }
+  }
+
+  async checkOnBan(chat_id: number) {
+    if (!chat_id) return false;
+    const itsBanUser = await this.airtableService.checkOnBan(chat_id);
+    if (itsBanUser) {
+      return this.bot.api.sendMessage(
+        chat_id,
+        'Спасибо за сотрудничество 🤝.\n К сожалению, ничего на данный момент вам предложить не можем 🙁',
+      );
+    }
+    return itsBanUser;
   }
 }

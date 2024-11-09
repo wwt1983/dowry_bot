@@ -34,6 +34,7 @@ import {
 import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 import { IGNORED_STATUSES, STEPS } from 'src/telegram/telegram.constants';
+import { IBan } from './types/IBan.interfaces';
 
 @Injectable()
 export class AirtableService {
@@ -584,7 +585,6 @@ export class AirtableService {
   }
   async findBuyerById(id: string): Promise<IBuyer> {
     const data = await this.airtableHttpService.getById(TablesName.Buyers, id);
-    console.log('buyer', data);
     if (!data) return null;
     return data as IBuyer;
   }
@@ -844,5 +844,17 @@ export class AirtableService {
     if (!data) return null;
 
     return data.fields.Status;
+  }
+
+  async checkOnBan(chat_id: number): Promise<boolean> {
+    const data = await this.airtableHttpService.get(
+      TablesName.Ban,
+      `&${FILTER_BY_FORMULA}=Find("${chat_id}",{chat_id})`,
+    );
+    if (!data || data.records.length === 0) return false;
+    if ((data.records as IBan).fields.Статус === 'Блокировка') {
+      return true;
+    }
+    return false;
   }
 }

@@ -22,6 +22,7 @@ export enum TablesName {
   KeyWords = 'Ключевые слова',
   TimeOffer = 'Время раздач',
   Filters = 'Фильтры раздачи',
+  Ban = 'Блокировка',
 }
 
 export const TablesDowray: IData[] = [
@@ -92,5 +93,10 @@ export const TablesDowray: IData[] = [
     title: TablesName.Filters,
     tableName: 'tblRaEKGIuvhsKp63',
     view: 'viwTU9UzSNuaJPESx',
+  },
+  {
+    title: TablesName.Ban,
+    tableName: 'tblSMPriSyMXNRd51',
+    view: 'viwTVTynfvxgd1SP8',
   },
 ];
