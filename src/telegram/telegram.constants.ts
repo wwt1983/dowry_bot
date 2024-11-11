@@ -240,25 +240,6 @@ export const STEPS: ISteps = {
     stop: false,
     textCheck: false,
   }, //дата получения фактическая
-  'Отзыв на проверке': {
-    step: 0,
-    value: 'Отзыв на проверке',
-    erroText: 'написать отзыв или ожидать ответа',
-    isActive: false,
-    typeStep: TYPE_STEP.text,
-    stop: false,
-    textCheck: false,
-  }, // отзыв на проверке (text)
-  Отзыв: {
-    step: 0,
-    value: 'Отзыв',
-    erroText: 'загрузить скриншот отзыва с 5 ⭐️',
-    image: '/images/4.jpeg',
-    typeStep: TYPE_STEP.text,
-    isActive: false,
-    stop: false,
-    textCheck: false,
-  }, //отзыв (photo)
   ['Штрих-код']: {
     step: 0,
     value: 'Штрих-код',
@@ -397,7 +378,30 @@ export const STEPS: ISteps = {
     textCheck: false,
   },
 };
-
+/**
+ * Дополнительные шаги для определенных групп пользователей
+ */
+export const STEPS_FOR_UNUSUAL_USER = {
+  'Отзыв на проверке': {
+    step: 0,
+    value: 'Отзыв на проверке',
+    erroText: 'написать отзыв или ожидать ответа',
+    isActive: false,
+    typeStep: TYPE_STEP.text,
+    stop: false,
+    textCheck: false,
+  }, // отзыв на проверке (text)
+  Отзыв: {
+    step: 0,
+    value: 'Отзыв',
+    erroText: 'загрузить скриншот отзыва с 5 ⭐️',
+    image: '/images/4.jpeg',
+    typeStep: TYPE_STEP.text,
+    isActive: false,
+    stop: false,
+    textCheck: false,
+  }, //отзыв (photo)
+};
 export const COUNT_STEPS = Object.values(STEPS).filter(
   (x) => x.step > 0 && x.isActive,
 ).length;
@@ -443,16 +447,6 @@ export const IMAGES_STEP_FOR_HELP = [
     url: WEB_APP + '/images/4.jpeg',
     text: FIVE_STEP,
   },
-  // {
-  //   type: STEPS.Отзыв.value,
-  //   url: WEB_APP + '/images/3.jpeg',
-  //   text: THREE_STEP + FOUR_STEP + FOUR_STEP_A + FOUR_STEP_B,
-  // },
-  // {
-  //   type: STEPS['Отзыв на проверке'].value,
-  //   url: WEB_APP + '/images/4.jpeg',
-  //   text: FIVE_STEP,
-  // },
   {
     type: STEPS['Штрих-код'].value,
     url: WEB_APP + '/images/shtrih_code.jpg',

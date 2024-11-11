@@ -1028,8 +1028,8 @@ export const getTimeoutArticles = (data: IBot[]) => {
     const result = data
       .filter((x) => IGNORED_STATUSES.includes(x.fields.Статус))
       ?.map((x) => '👉 ' + x.fields.Раздача)
-      ?.join('\n\n');
-    if (result) return '👵🏻Ваши устаревшие раздачи\n' + result;
+      ?.join('\n');
+    if (result) return '👵🏻Ваши устаревшие раздачи\n\n' + result;
     return result;
   } catch (error) {
     return null;
