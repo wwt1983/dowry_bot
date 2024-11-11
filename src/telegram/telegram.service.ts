@@ -370,19 +370,10 @@ export class TelegramService {
         const { id } = ctx.from;
         const offers = await this.airtableService.getOffers();
 
-        if (offers?.records?.length > 0) {
-          return await ctx.api.sendMessage(id, getOffersLink(offers), {
-            parse_mode: 'HTML',
-            link_preview_options: { is_disabled: true },
-          });
-        }
-        await this.bot.api.sendMediaGroup(id, [
-          {
-            type: 'photo',
-            media: WEB_APP + 'images/waiting.webp',
-            caption: 'Ждем новых раздач 😉',
-          },
-        ]);
+        return await this.bot.api.sendMediaGroup(
+          id,
+          getOffersLink(offers) as any[],
+        );
       } catch (e) {
         console.log('offers=', e);
         return await ctx.reply(

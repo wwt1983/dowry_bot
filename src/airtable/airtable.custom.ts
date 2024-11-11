@@ -1,6 +1,7 @@
 import { removeEmojis } from 'src/telegram/telegram.custom.functions';
 import { FILTER_BY_FORMULA } from './airtable.constants';
 import { IOffers } from './types/IOffer.interface';
+import { WEB_APP } from 'src/telegram/telegram.constants';
 
 export const getFilterById = (keyIds: string[]) => {
   return keyIds.length === 1
@@ -14,29 +15,42 @@ export const getFilterById = (keyIds: string[]) => {
 export const getOffersLink = (offers: IOffers) => {
   try {
     if (offers && offers.records && Array.isArray(offers.records)) {
-      const result = offers?.records
+      return offers?.records
         .filter(
           (x) =>
             x.fields['Name'] !== undefined &&
             x.fields['Name'] !== '' &&
-            x.fields?.Артикул,
+            x.fields?.Артикул &&
+            x.fields?.Фото &&
+            Array.isArray(x.fields.Фото) &&
+            x.fields.Фото.length > 0,
         )
         .map((x) => ({
-          name: x.fields['Name'],
-          link:
+          type: 'photo',
+          media: x.fields.Фото[0].url,
+          caption: `➡️ ${removeEmojis(x.fields.Name)}\n${
             process.env.NODE_ENV === 'development'
               ? x.fields['Ссылка'].replace('dowryworkbot', 'test_dowry_bot')
-              : x.fields['Ссылка'],
+              : x.fields['Ссылка']
+          }`,
         }));
-      return result.reduce((acc, currentValue, index) => {
-        acc += `${++index}. <a href='${currentValue.link}'>${removeEmojis(currentValue.name)}</a>\n`;
-        return acc;
-      }, '');
     }
-    return 'Ждем новых разадач 😉';
+    return [
+      {
+        type: 'photo',
+        media: WEB_APP + 'images/waiting.webp',
+        caption: 'Ждем новых раздач 😉',
+      },
+    ];
   } catch (e) {
     console.log(e);
-    return 'Произошла ошибка в запросе. Попробуйте посмотреть предложения позже.';
+    return [
+      {
+        type: 'photo',
+        media: WEB_APP + 'images/waiting.webp',
+        caption: 'Ждем новых раздач 😉',
+      },
+    ];
   }
 };
 /**
