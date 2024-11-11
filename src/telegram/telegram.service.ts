@@ -244,6 +244,11 @@ export class TelegramService {
           await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
         }
+        ctx.session = updateSessionByField(
+          ctx.session,
+          'detailsOffer',
+          `кеш: ${sessionData.cash || ''}, ваша цена: ${sessionData.priceForYou}`,
+        );
         //продолжаем двигаться только если не было заказов с таким артикулом
         const lastInterval = await this.airtableService.getLastIntervalTime(
           sessionData.offerId,
@@ -987,7 +992,11 @@ export class TelegramService {
             'offerId',
             data.offerId,
           );
-
+          ctx.session = updateSessionByField(
+            ctx.session,
+            'detailsOffer',
+            `кеш: ${data.cash || ''}, ваша цена: ${data.priceForYou}`,
+          );
           const checkOnLimitUserOffer = checkOnExistOfferByUserOrders(
             data.offerId,
             userHistory?.userOffers,
@@ -2858,7 +2867,9 @@ export class TelegramService {
       console.log('startTimer', error);
     }
   }
-
+  /**
+   * проверка на БАН пользователя
+   */
   async checkOnBan(chat_id: number) {
     if (!chat_id) return false;
     const itsBanUser = await this.airtableService.checkOnBan(chat_id);

@@ -47,6 +47,8 @@ export interface IOffer {
     Интервал: string;
     'Id (from OfferId)': string;
     'Тип ключей': KeyType;
+    'Короткое название': string;
+    'Правила раздачи': string;
   };
 }
 

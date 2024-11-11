@@ -60,6 +60,7 @@ export interface ISessionData {
   timeOfEntry?: string; //время входа,
   checkParseImages: string[]; //результат парсинга текста из фото
   messageId?: string; //номер сообщения для редактирования интервала
+  detailsOffer?: string; // хранится инфо о цене и кеше раздачи для конкретного пользователя
 }
 
 export type MyContext = HydrateFlavor<

@@ -156,6 +156,7 @@ export function createInitialSessionData(
     timeOfEntry: getTimeWithTz(),
     checkParseImages: [],
     messageId: null,
+    detailsOffer: null,
   };
 }
 
@@ -208,6 +209,7 @@ export function createContinueSessionData(
     timeOfEntry: data.timeOfEntry,
     checkParseImages: data.checkParseImages,
     messageId: data?.messageId,
+    detailsOffer: data?.detailsOffer,
   };
 }
 export function updateSessionByField(

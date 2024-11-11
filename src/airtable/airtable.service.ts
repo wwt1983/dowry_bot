@@ -59,6 +59,7 @@ export class AirtableService {
       CommentsLink: session.chat_id,
       'Ключевые слова': session?.data?.keys,
       MessageId: session?.messageId,
+      'Детали раздачи': session.detailsOffer,
     };
     const tableUrl = this.configService.get(
       'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',

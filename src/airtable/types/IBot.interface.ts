@@ -45,6 +45,7 @@ export interface IBot {
     'Фото проверка': ['Поиск', 'Корзина', 'Заказ', 'Покупка'];
     'Интервал (from OfferId)': string;
     MessageId: string;
+    'Детали раздачи': string;
   };
 }
 interface IPhoto {
