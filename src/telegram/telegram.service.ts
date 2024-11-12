@@ -34,6 +34,7 @@ import {
   ADMIN_CHAT_ID,
   MESSAGE_ANSWER_FOR_ASK,
   LIMIT_TIME_IN_MINUTES_FOR_ORDER,
+  TELEGRM_NOT_WORK,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -171,6 +172,8 @@ export class TelegramService {
     /*START*/
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
+
+      return await this.stopBotWork(id);
 
       if (await this.checkOnBan(id)) return;
 
@@ -461,7 +464,7 @@ export class TelegramService {
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       try {
-        if (await this.checkOnBan(ctx.from.id)) return;
+        return await this.stopBotWork(ctx.from.id);
 
         const path = await ctx.getFile();
         const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
@@ -815,6 +818,8 @@ export class TelegramService {
     this.bot.on('message', async (ctx) => {
       try {
         if (await this.checkOnBan(ctx.from.id)) return;
+
+        await this.stopBotWork(ctx.from.id);
 
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
@@ -2888,5 +2893,14 @@ export class TelegramService {
       );
     }
     return itsBanUser;
+  }
+
+  /**
+   * Ведутся технические работы
+   */
+  async stopBotWork(chat_id: number) {
+    if (!chat_id) return false;
+
+    return this.bot.api.sendMessage(chat_id, TELEGRM_NOT_WORK);
   }
 }

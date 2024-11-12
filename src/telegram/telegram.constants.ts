@@ -1,5 +1,8 @@
 import { ISteps } from './telegram.interface';
 
+export const TELEGRM_NOT_WORK =
+  'Здравствуйте, сейчас в боте проводятся обновления.👷‍♂️ Скоро заработаем 😉 По всем вопросам пишите оператору или в @dowry_wb';
+
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
 export const TELEGRAM_BOT_TEST_ID = '7145649314';
