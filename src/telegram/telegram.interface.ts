@@ -90,7 +90,7 @@ export interface ITelegramWebApp {
   interval?: string;
   offerCount?: number;
   offerOrderToday?: number;
-  queueLength?: number;
+  queueLength?: number; //очередь
 }
 export type FeedbackStatus =
   | 'С фото'

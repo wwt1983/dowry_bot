@@ -374,11 +374,12 @@ export class TelegramService {
 
         const { id } = ctx.from;
         const offers = await this.airtableService.getOffers();
-
-        return await this.bot.api.sendMediaGroup(
-          id,
-          getOffersLink(offers) as any[],
-        );
+        const links = getOffersLink(offers);
+        if (links) {
+          for (const link of links) {
+            await this.bot.api.sendMediaGroup(id, [link] as any[]);
+          }
+        }
       } catch (e) {
         console.log('offers=', e);
         return await ctx.reply(
@@ -2119,8 +2120,11 @@ export class TelegramService {
       const distributions = await this.airtableService.getDistributionByIds(
         buyer.fields.Раздачи,
       );
+
       if (!distributions || distributions.length === 0) {
         const articules = distributions?.map((x) => x.fields['Артикул WB'][0]);
+        console.log('articules', articules);
+
         if (!articules.includes(+articul.trim())) {
           await this.airtableService.updateStatusTransferInBot(
             'Артикул в раздаче не найден',
@@ -2133,6 +2137,7 @@ export class TelegramService {
       let filterDistribution = distributions.filter(
         (x) => x.fields['Артикул WB'][0] === +articul.trim(),
       );
+      console.log('filterDistribution ', articul, filterDistribution);
 
       if (filterDistribution && filterDistribution.length > 1) {
         filterDistribution = distributions.filter((x) => {
@@ -2150,6 +2155,7 @@ export class TelegramService {
         });
       }
 
+      console.log('filterDistribution', filterDistribution);
       if (filterDistribution) {
         const distribution = filterDistribution[0];
         console.log(
@@ -2676,6 +2682,9 @@ export class TelegramService {
       return message.message_id;
     }
   }
+  /**
+   * пытаемся найти свободные ключи для тех у кого нет ключей
+   */
   async sendDetailsForNoKeyUsers() {
     try {
       const sessionsWithNoKey =
@@ -2694,7 +2703,6 @@ export class TelegramService {
         //console.log('usesKeys', usesKeys);
         //console.log('allOfferKeys', allOfferKeys);
         const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
-        console.log('freeKeys=', freeKeys?.length);
 
         if (!freeKeys || freeKeys.length === 0) {
           return;
@@ -2728,7 +2736,7 @@ export class TelegramService {
               lastIntervalTime,
             );
 
-            console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
+            //console.log('lastIntervalTime', lastIntervalTime, freeKeys[index]);
 
             await this.getGiveawayDetails(
               process.env.NODE_ENV === 'development'

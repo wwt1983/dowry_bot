@@ -27,7 +27,7 @@ export const getOffersLink = (offers: IOffers) => {
         )
         .map((x) => ({
           type: 'photo',
-          media: x.fields.Фото[0].url,
+          media: x.fields.Фото[0].thumbnails.full.url,
           caption: `➡️ ${removeEmojis(x.fields.Name)}\n${
             process.env.NODE_ENV === 'development'
               ? x.fields['Ссылка'].replace('dowryworkbot', 'test_dowry_bot')
@@ -35,6 +35,7 @@ export const getOffersLink = (offers: IOffers) => {
           }`,
         }));
     }
+
     return [
       {
         type: 'photo',

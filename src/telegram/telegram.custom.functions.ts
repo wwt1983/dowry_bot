@@ -388,7 +388,8 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
         (location ? `❗️Раздача только для региона: ${location}❗️\n` : '')
       );
     } else {
-      return `‼️${MESSAGE_WAITING}\nКлючевое слово для поиска и время начала раздачи вам придет отдельным сообщением, если кто-то перед вами не успеет оформить или добавят новые предложения‼️`;
+      return `‼️${MESSAGE_WAITING}\nКлючевое слово для поиска и время начала раздачи вам придет отдельным сообщением, 
+      если кто-то перед вами не успеет оформить или добавят новые предложения‼️`;
     }
   }
 
@@ -401,11 +402,14 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     '\n' +
     (cash ? `❗️ Кешбэк ~ ${cash}❗️ \n` : '') +
     `⭐️ Ваша цена ~ ${priceForYou} ₽ 🫶 \n` +
-    '\n' +
+    getCountDetailsTextAboutOffer(
+      data.offerCount,
+      data.offerOrderToday,
+      data.queueLength,
+    ) +
     description +
     '\n' +
     getText(keys);
-
   return [
     {
       type: 'photo',
@@ -1094,7 +1098,20 @@ export const getTextForQueue = (
   }
   return '';
 };
-
+/**
+ * ифно текст о раздачи о количестве заказов и очереди
+ */
+export const getCountDetailsTextAboutOffer = (
+  count: number,
+  countOrderToday: number,
+  queueLength: number,
+) => {
+  const queInfo =
+    queueLength && queueLength > 0
+      ? `, ожидающих раздачу ${queueLength} чел.`
+      : '';
+  return `\n🔔 осталось ${count - countOrderToday} шт. ${queInfo}\n`;
+};
 /**
  * поиск свободных ключевых слов
  */
