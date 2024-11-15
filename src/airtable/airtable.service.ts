@@ -136,6 +136,9 @@ export class AirtableService {
       return null;
     }
     const result = await this.getBotBySession(sessionId);
+    if (!result || !result.id) {
+      console.log('updateStatusInBot error id', sessionId);
+    }
     const response = await this.airtableHttpService.update(
       TablesName.Bot,
       result.id,
