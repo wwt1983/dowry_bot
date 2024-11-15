@@ -52,21 +52,26 @@ export class AirtableService {
       'Время входа': session?.timeOfEntry || '',
       Артикул: session?.data?.articul || '',
       StartTime: session.status === 'В боте' ? '' : session.startTime,
-      OfferId: session.offerId || '',
+      OfferId: session.offerId ? [session.offerId] : null,
       Location: session?.location || '',
       Раздача: session.data?.title || '',
       StopTime: getTimeWithTz(),
-      CommentsLink: session.chat_id,
-      'Ключевые слова': session?.data?.keys,
-      MessageId: session?.messageId,
+      'Ключевое слово': session?.data?.keys || '',
+      MessageId: session?.messageId || '',
       'Детали раздачи': session.detailsOffer,
     };
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log(`postWebhook save ===> ${data.SessionId}`, response);
-    return response;
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
+    // );
+    try {
+      const response = await this.airtableHttpService.post(
+        TablesName.Bot,
+        data,
+      );
+      return response;
+    } catch (error) {
+      console.log(`saveToAirtable error= ${data.SessionId}`, error);
+    }
   }
   async updateToAirtable(session: ISessionData): Promise<any> {
     try {
@@ -75,23 +80,21 @@ export class AirtableService {
         return null;
       }
       //const correctTime = getOfferTime(session);
-
       const data = {
-        SessionId: session.sessionId,
-        'Время входа': session?.timeOfEntry || '',
+        //SessionId: session.sessionId,
+        'Время входа': session?.timeOfEntry || getTimeWithTz(),
         Артикул: session?.data?.articul,
         StartTime: session.startTime,
-        ['Время выкупа']: session.stopBuyTime,
-        OfferId: session.offerId,
+        'Время выкупа': session.stopBuyTime,
+        OfferId: [session.offerId],
         Статус: session.status,
         Location: session?.location || '',
         Раздача: session.data?.title,
-        Images: session.images,
+        Images: session.images?.map((url) => ({ url: url })),
         StopTime: getTimeWithTz(),
-        ['Дата получения']: convertDateFromString(session.deliveryDate),
+        'Дата получения': convertDateFromString(session.deliveryDate),
         Финиш: session.isFinish,
-        CommentsLink: session.chat_id,
-        'Ключевые слова': session?.data?.keys,
+        'Ключевое слово': session?.data?.keys,
         Фильтр: session?.data?.filter || '',
         'Факт дата получения': convertDateFromString(session.recivingDate),
         'Данные для кешбека': session.dataForCash || '',
@@ -107,14 +110,17 @@ export class AirtableService {
         MessageId: session?.messageId,
       };
 
-      const tableUrl = this.configService.get(
-        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
-      );
-      const response = await this.airtableHttpService.postWebhook(
-        tableUrl,
+      // const tableUrl = this.configService.get(
+      //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE',
+      // );
+      const result = await this.getBotBySession(session.sessionId);
+
+      const response = await this.airtableHttpService.update(
+        TablesName.Bot,
+        result.id,
         data,
       );
-      console.log('postWebhook update updateToAirtable ok===> ', response);
+      console.log('updateToAirtable' + session.sessionId);
       return response;
     } catch (e) {
       console.log('error updateToAirtable=', session, e);
@@ -122,19 +128,23 @@ export class AirtableService {
     }
   }
   async updateStatusInBot(sessionId: string, status: BotStatus): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
-    );
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
+    // );
     if (!sessionId) {
       console.log('empty session=', status);
       return null;
     }
-    const response = await this.airtableHttpService.postWebhook(tableUrl, {
-      SessionId: sessionId,
-      Статус: status,
-      StopTime: getTimeWithTz(),
-    });
-    console.log('postWebhook ===>', response, sessionId);
+    const result = await this.getBotBySession(sessionId);
+    const response = await this.airtableHttpService.update(
+      TablesName.Bot,
+      result.id,
+      {
+        Статус: status,
+        StopTime: getTimeWithTz(),
+      },
+    );
+    console.log('updateStatusInBot', sessionId);
     return response;
   }
   /**
@@ -145,19 +155,28 @@ export class AirtableService {
     key: string,
     newStartTime: string,
   ): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_FOR_UPDATE_FOR_USER_WITH_EMPTY_KEY',
-    );
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_FOR_UPDATE_FOR_USER_WITH_EMPTY_KEY',
+    // );
     if (!sessionId) {
       console.log('empty session=', sessionId);
       return null;
     }
-    const response = await this.airtableHttpService.postWebhook(tableUrl, {
-      SessionId: sessionId,
-      'Ключевое слово': key,
-      StartTime: newStartTime,
-    });
-    console.log('postWebhook update keyword===>', response, sessionId);
+
+    const result = await this.getBotBySession(sessionId);
+    const response = await this.airtableHttpService.update(
+      TablesName.Bot,
+      result.id,
+      {
+        'Ключевое слово': key,
+        StartTime: newStartTime,
+      },
+    );
+    console.log(
+      'updateUserWithEmptyKeyInBotTableAirtable',
+      response,
+      sessionId,
+    );
     return response;
   }
   /**
@@ -168,48 +187,125 @@ export class AirtableService {
     comment: string,
     isAnswer?: boolean,
   ): Promise<any> {
-    let tableUrl = '';
+    //let tableUrl = '';
     const comments = await this.getCommetByChatId(from.id);
     const userValue = getUserName(from);
     let data = null;
     if (comments && comments.records && comments.records.length > 0) {
-      tableUrl = this.configService.get(
-        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_COMMENTS',
-      );
+      // tableUrl = this.configService.get(
+      //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_COMMENTS',
+      // );
       comment = '\n' + comment + '\n' + comments.records[0].fields.Комментарии;
       data = {
-        id: comments.records[0].id,
+        //id: comments.records[0].id,
         Комментарии: comment.trim(),
         Status: isAnswer ? 'Ответ' : 'Вопрос',
       };
-    } else {
-      tableUrl = this.configService.get(
-        'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_ADD_COMMENTS',
+      await this.airtableHttpService.update(
+        TablesName.UserComments,
+        comments.records[0].id,
+        data,
       );
+      console.log('updateCommentInBotTableAirtable');
+    } else {
+      // tableUrl = this.configService.get(
+      //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_ADD_COMMENTS',
+      // );
       data = {
         chat_id: from.id,
         Комментарии: comment.trim(),
         Name: userValue.fio + ' ' + userValue.userName,
       };
+      await this.airtableHttpService.post(TablesName.UserComments, data);
+      console.log('addCommentInBotTableAirtable');
     }
-    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===>', response);
-    return response;
   }
 
   async addToAirtableNotificationStatistic(data: any): Promise<any> {
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_ADD',
+    // );
+    const response = await this.airtableHttpService.post(
+      TablesName.NotificationStatistics,
+      data,
+    );
+    console.log('addToAirtableNotificationStatistic');
+    return response;
+  }
+  async updateToAirtableNotificationStatistic(
+    data: any,
+    sessionId,
+  ): Promise<any> {
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_UPDATE',
+    // );
+    const result = await this.getBotBySession(sessionId);
+    const response = await this.airtableHttpService.update(
+      TablesName.NotificationStatistics,
+      result.id,
+      data,
+    );
+    console.log('updateToAirtableNotificationStatistic');
+    return response;
+  }
+  async updateDistribution(data: any): Promise<any> {
     const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_ADD',
+      'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
     console.log('postWebhook ===>', response);
     return response;
   }
-  async updateToAirtableNotificationStatistic(data: any): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_URL_FOR_TABlE_NOTIFICATION_STATISTIC_UPDATE',
+  async updateStatusTransferInBot(
+    status:
+      | 'Ошибка переноса'
+      | 'Успешно перенесены'
+      | 'Chat_id не найден'
+      | 'Артикул в раздаче не найден',
+    sessionId: string,
+  ): Promise<any> {
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION_STATUS_UPDATE',
+    // );
+    const result = await this.getBotBySession(sessionId);
+    const response = await this.airtableHttpService.update(
+      TablesName.Bot,
+      result.id,
+      {
+        'Перенести в Раздачу': status,
+      },
     );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
+    console.log('updateStatusTransferInBot', response);
+    return response;
+  }
+  async updateStatusCacheInBot(sessionId: string): Promise<any> {
+    // const tableUrl = this.configService.get(
+    //   'AIRTABLE_WEBHOOK_FOR_UPDATE_STATUS_CASHE',
+    // );
+    const result = await this.getBotBySession(sessionId);
+    const response = await this.airtableHttpService.update(
+      TablesName.Bot,
+      result.id,
+      {
+        'Статус кеша': 'Выплачен',
+      },
+    );
+    console.log('updateStatusCacheInBot');
+    return response;
+  }
+  async updateNotification(
+    name: string,
+    time: string,
+    status: string,
+  ): Promise<any> {
+    const tableUrl = this.configService.get(
+      'AIRTABLE_WEBHOOK_FOR_UPDATE_NOTIFICATION_TABLE',
+    );
+    const response = await this.airtableHttpService.postWebhook(tableUrl, {
+      name,
+      time,
+      status,
+    });
     console.log('postWebhook ===>', response);
     return response;
   }
@@ -314,10 +410,10 @@ export class AirtableService {
             getFilterById(keyIds),
           )) as IKeyWords;
 
-          offer.fields['Ключевые слова'] = '';
+          offer.fields['Ключевое слово'] = '';
 
           if (keyIds.length === 1) {
-            offer.fields['Ключевые слова'] = keys.records[0].fields.Название;
+            offer.fields['Ключевое слово'] = keys.records[0].fields.Название;
           } else {
             const typeKey = needKeys && offer.fields['Тип ключей'];
 
@@ -334,7 +430,7 @@ export class AirtableService {
 
               if (totalKeysOffers < countOrder + countWaiting) {
                 console.log('Не хватает предложений для заказа');
-                offer.fields['Ключевые слова'] = '';
+                offer.fields['Ключевое слово'] = '';
               } else {
                 const usesKeys = await this.getUsesKeys(id); //список занятых слов
                 const allOfferKeys = (keys as IKeyWords).records.map((x) => ({
@@ -343,13 +439,13 @@ export class AirtableService {
                 }));
                 const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
                 if (freeKeys || freeKeys.length > 0) {
-                  offer.fields['Ключевые слова'] = freeKeys[0];
+                  offer.fields['Ключевое слово'] = freeKeys[0];
                 }
               }
             } else {
               const nextKeyIndex =
                 (countOrder + countWaiting + 1) % keys.records.length;
-              offer.fields['Ключевые слова'] =
+              offer.fields['Ключевое слово'] =
                 keys.records[nextKeyIndex].fields.Название;
             }
           }
@@ -605,42 +701,7 @@ export class AirtableService {
     if (!data || data.records.length === 0) return false;
     return true;
   }
-  async updateDistribution(data: any): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===>', response);
-    return response;
-  }
-  async updateStatusTransferInBot(
-    status:
-      | 'Ошибка переноса'
-      | 'Успешно перенесены'
-      | 'Chat_id не найден'
-      | 'Артикул в раздаче не найден',
-    sessionId: string,
-  ): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION_STATUS_UPDATE',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, {
-      'Перенести в Раздачу': status,
-      SessionId: sessionId,
-    });
-    console.log('postWebhook ===>', response);
-    return response;
-  }
-  async updateStatusCacheInBot(sessionId: string): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_FOR_UPDATE_STATUS_CASHE',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, {
-      SessionId: sessionId,
-    });
-    console.log('postWebhook ===>', response);
-    return response;
-  }
+
   async getUsersWithStatus(
     status: 'new' | 'regular' | 'all',
   ): Promise<number[] | null> {
@@ -699,23 +760,6 @@ export class AirtableService {
     } catch (error) {
       console.log('getUsersWithStatus', error);
     }
-  }
-
-  async updateNotification(
-    name: string,
-    time: string,
-    status: string,
-  ): Promise<any> {
-    const tableUrl = this.configService.get(
-      'AIRTABLE_WEBHOOK_FOR_UPDATE_NOTIFICATION_TABLE',
-    );
-    const response = await this.airtableHttpService.postWebhook(tableUrl, {
-      name,
-      time,
-      status,
-    });
-    console.log('postWebhook ===>', response);
-    return response;
   }
 
   async getNotificationByField(

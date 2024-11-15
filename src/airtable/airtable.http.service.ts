@@ -43,16 +43,21 @@ export class AirtableHttpService {
         .pipe(map((response) => response.data)),
     );
   }
-  update(url: string, id: string) {
-    const table = TablesDowray.find((x) => x.title === url).tableName;
 
-    console.log(`${AIRTABLE_URL}/${table}/${id}`);
+  update(name: string, id: string, data: any) {
+    const table = TablesDowray.find((x) => x.title === name).tableName;
     return lastValueFrom(
       this.httpService
-        .patch(`${AIRTABLE_URL}/${table}/${id}`, {
-          headers: this.authHeader,
-          method: 'PUT',
-        })
+        .patch(
+          `${AIRTABLE_URL}/${table}/${id}`,
+          {
+            fields: data,
+          },
+          {
+            headers: this.authHeader,
+            method: 'PATCH',
+          },
+        )
         .pipe(map((response) => response.data)),
     );
   }
@@ -64,6 +69,24 @@ export class AirtableHttpService {
           headers: this.authHeader,
           method: 'POST',
         })
+        .pipe(map((response) => response.data)),
+    );
+  }
+
+  post(name: string, data: any): Promise<any> {
+    const table = TablesDowray.find((x) => x.title === name).tableName;
+    return lastValueFrom(
+      this.httpService
+        .post(
+          `${AIRTABLE_URL}/${table}`,
+          {
+            fields: data,
+          },
+          {
+            headers: this.authHeader,
+            method: 'POST',
+          },
+        )
         .pipe(map((response) => response.data)),
     );
   }

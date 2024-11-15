@@ -351,7 +351,8 @@ export function nextStep(
   session: ISessionData,
   onlyActive: boolean,
 ): ISessionData {
-  if (session.status === 'Проблема с артикулом') return session;
+  if (session.status === 'Проблема с артикулом' || session.isFinish)
+    return session;
   session.status = getNextStepStatusByNumber(session.step, onlyActive);
   session.step = session.step + 1;
 

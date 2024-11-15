@@ -173,7 +173,7 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.start, async (ctx) => {
       const { id, first_name } = ctx.from;
 
-      return await this.stopBotWork(id);
+      //return await this.stopBotWork(id);
 
       if (await this.checkOnBan(id)) return;
 
@@ -464,7 +464,7 @@ export class TelegramService {
     /*======== PHOTO =======*/
     this.bot.on('message:photo', async (ctx) => {
       try {
-        return await this.stopBotWork(ctx.from.id);
+        //return await this.stopBotWork(ctx.from.id);
 
         const path = await ctx.getFile();
         const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
@@ -819,7 +819,7 @@ export class TelegramService {
       try {
         if (await this.checkOnBan(ctx.from.id)) return;
 
-        await this.stopBotWork(ctx.from.id);
+        //await this.stopBotWork(ctx.from.id);
 
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
@@ -1289,7 +1289,7 @@ export class TelegramService {
       priceForYou: offerAirtable.fields['Ваша цена'],
       priceWb: offerAirtable.fields['Цена WB'],
       image: offerAirtable.fields['Фото'][0].thumbnails.full.url,
-      keys: offerAirtable.fields['Ключевые слова'],
+      keys: offerAirtable.fields['Ключевое слово'],
       description: offerAirtable.fields['Описание'],
       location: offerAirtable.fields['Региональность'],
       positionOnWB: offerAirtable.fields['Позиция в WB'],
@@ -1461,13 +1461,15 @@ export class TelegramService {
     BotId: string,
     PatternId: string,
   ): Promise<void> {
-    await this.airtableService.updateToAirtableNotificationStatistic({
-      SessionId: sessionId,
-      ['Количество отправок']: count,
-      Статус: status,
-      Бот: BotId,
-      Шаблон: PatternId,
-    });
+    await this.airtableService.updateToAirtableNotificationStatistic(
+      {
+        ['Количество отправок']: count,
+        Статус: status,
+        Бот: BotId,
+        Шаблон: PatternId,
+      },
+      sessionId,
+    );
   }
   /*
 добавляем данные в airtable from notification user таблица "Оповещения статистика"
@@ -2773,7 +2775,7 @@ export class TelegramService {
   ) {
     const minutesForStart = getDifferenceInMinutes(startTime);
     const minutes = +minutesForStart.toString().replace('-', '');
-    console.log('До начала осталось ' + minutes);
+    //console.log('До начала осталось ' + minutes);
     try {
       if (minutesForStart < 0) {
         // Отправляем сообщение с оставшимся временем до начала

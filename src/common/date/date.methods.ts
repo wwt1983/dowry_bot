@@ -188,7 +188,7 @@ export const formatSimple = (date: string) =>
   format(date, 'd MMMM HH:mm', { locale: ru });
 
 export const convertDateFromString = (date: string) => {
-  if (!date) return null;
+  if (!date || date.length < 5) return null;
   const regex = /[,\-\s\/]/g;
   date = date.replace(regex, '.');
 

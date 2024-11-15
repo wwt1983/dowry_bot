@@ -33,7 +33,7 @@ export interface IOffer {
     Ключи?: string[];
     'Количество заказов сегодня': number;
     'Длина очереди': number;
-    'Ключевые слова'?: string;
+    'Ключевое слово'?: string;
     Время?: string[];
     'Время бронь'?: {
       startTime: string;

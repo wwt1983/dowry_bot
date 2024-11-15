@@ -1,5 +1,5 @@
 import { ISteps } from './telegram.interface';
-
+//https://api.airtable.com/v0/meta/enterpriseAccounts/usrkZH2gnYRYReD06/auditLogs
 export const TELEGRM_NOT_WORK =
   'Здравствуйте, сейчас в боте проводятся обновления.👷‍♂️ Скоро заработаем 😉 По всем вопросам пишите оператору или в @dowry_wb';
 
