@@ -14,7 +14,12 @@ export const getFilterById = (keyIds: string[]) => {
  */
 export const getOffersLink = (offers: IOffers) => {
   try {
-    if (offers && offers.records && Array.isArray(offers.records)) {
+    if (
+      offers &&
+      offers.records &&
+      Array.isArray(offers.records) &&
+      offers.records.length > 0
+    ) {
       return offers?.records
         .filter(
           (x) =>

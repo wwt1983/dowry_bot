@@ -378,6 +378,7 @@ export class TelegramService {
         const { id } = ctx.from;
         const offers = await this.airtableService.getOffers();
         const links = getOffersLink(offers);
+
         if (links) {
           for (const link of links) {
             await this.bot.api.sendMediaGroup(id, [link] as any[]);
