@@ -44,6 +44,7 @@ export enum COMMAND_NAMES {
   saveMessage = 'saveMessage',
   admin = 'admin',
   offers = 'offers',
+  return = 'return',
 }
 
 export const COMMANDS_TELEGRAM = [
@@ -72,6 +73,7 @@ export enum STEP_COMMANDS {
   no_delivery_date = 'Пропустить',
   check_articul = 'Проверка артикула',
   help = 'Пошаговая инструкция',
+  returnOfGood = 'Возврат товара',
 }
 export const STEP_ERROR_TEXT = 'На этом шаге нужно ';
 export const STEP_EXAMPLE_TEXT_DOWN = ' (образец ⤵️)';
@@ -500,4 +502,5 @@ export const IGNORED_STATUSES = [
   'Лимит заказов',
   'Отмена пользователем',
   'Отмена',
+  'Возврат',
 ];

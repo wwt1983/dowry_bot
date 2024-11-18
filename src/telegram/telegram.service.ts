@@ -357,6 +357,11 @@ export class TelegramService {
             reply_markup: userInfo.canStopArticles,
           });
         }
+        if (userInfo.returnArticles) {
+          return await ctx.reply('Если вы вернули товар сообщите нам 👇', {
+            reply_markup: userInfo.returnArticles,
+          });
+        }
       } catch (e) {
         console.log('history=', e);
         return await ctx.reply('Раздел обновляется');
@@ -758,7 +763,17 @@ export class TelegramService {
           .trim();
         return await this.cancelUserStop(sessionId, ctx.from.id);
       }
+      //запрос пользователя на возврат заказа
+      if (ctx.callbackQuery.data.includes('return')) {
+        sessionId = ctx.callbackQuery.data
+          .replace('_return', '')
+          .replace('sessionId_', '')
+          .trim();
 
+        ctx.session.lastCommand = COMMAND_NAMES.return;
+
+        return await this.returnUserStop(sessionId, ctx.from.id);
+      }
       ctx.session = await this.restoreSession(ctx, sessionId);
 
       if (!ctx?.session?.status) {
@@ -825,11 +840,25 @@ export class TelegramService {
         if (ctx.session.errorStatus === 'locationError')
           return ctx.reply(`❌${STOP_TEXT}❌`);
 
-        //REPLAY сообщения из служебного чата
+        if (ctx.session.lastCommand === COMMAND_NAMES.return) {
+          ctx.session.lastCommand = null;
+          const msgToChat = await this.saveComment(
+            ctx.from,
+            '❌ Причина возврата товара ❌ ' + ctx.message.text,
+            ctx.session?.data?.articul || '',
+            ctx.session?.data?.title || '',
+            ctx.session.status,
+          );
+
+          await ctx.api.sendMessage(getAdminChatId(), msgToChat);
+          return;
+        }
+
         if (
           ctx.message.reply_to_message &&
           !ctx.message?.text?.includes('query_id')
         ) {
+          //REPLAY сообщения из служебного чата
           const replayResult = await this.replayMessage(ctx);
           if (replayResult && replayResult.chat_id) {
             await this.airtableService.updateCommentInBotTableAirtable(
@@ -1874,6 +1903,7 @@ export class TelegramService {
     const offersFromDistributions = '';
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
     const stopButtons = createHistoryKeyboard(dataBuyer, web, true);
+    const returnButtons = createHistoryKeyboard(dataBuyer, web, false, true);
 
     // let member: ChatMember;
     try {
@@ -1895,6 +1925,7 @@ export class TelegramService {
         userOffers: getOffersByUser(dataBuyer),
         timeoutArticles: getTimeoutArticles(dataBuyer),
         canStopArticles: stopButtons,
+        returnArticles: returnButtons,
       };
     }
 
@@ -1917,6 +1948,7 @@ export class TelegramService {
       userOffers: getOffersByUser(dataBuyer),
       timeoutArticles: getTimeoutArticles(dataBuyer),
       canStopArticles: stopButtons,
+      returnArticles: returnButtons,
     };
   }
 
@@ -1946,6 +1978,27 @@ export class TelegramService {
       },
     );
   }
+
+  /**
+   * возврат товара на ПВЗ
+   */
+  async returnUserStop(sessionId: string, chat_id: number) {
+    if (!sessionId) {
+      return await this.bot.api.sendMessage(
+        chat_id,
+        `Что-то пошло не так 😟. Напишите нам о проблеме, мы ее обязательно решим.`,
+        {
+          parse_mode: 'HTML',
+        },
+      );
+    }
+    await this.airtableService.updateStatusInBot(sessionId, 'Возврат');
+    return await this.bot.api.sendMessage(
+      chat_id,
+      `Напишите причину возврата 🙁`,
+    );
+  }
+
   /**
    *сообщение пользователю о публикации отзыва
    */

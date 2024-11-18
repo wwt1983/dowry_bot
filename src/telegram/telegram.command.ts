@@ -58,9 +58,12 @@ export const shareKeyboard = new Keyboard()
 
 export const userMenu = new InlineKeyboard().text('История раздач', 'history');
 
-export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
+export const createLabelHistory = (
+  data: IBot[],
+  isUserStop?: boolean,
+  isReturn?: boolean,
+) => {
   if (!data || data.length === 0) return [];
-  const txtForDel = isUserStop ? '_del' : '';
   if (isUserStop) {
     return data?.reduce(function (newArr, record) {
       if (
@@ -72,13 +75,29 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
       ) {
         newArr.push([
           removeEmojis(record.fields.Раздача),
-          'sessionId_' + record.fields.SessionId + txtForDel,
+          'sessionId_' + record.fields.SessionId + '_del',
         ]);
       }
       return newArr;
     }, []);
   }
 
+  if (isReturn) {
+    return data?.reduce(function (newArr, record) {
+      if (
+        !record.fields.Финиш &&
+        !IGNORED_STATUSES.includes(record.fields.Статус) &&
+        record.fields.Статус !== 'В боте' &&
+        !record.fields['Снять с раздачи']
+      ) {
+        newArr.push([
+          removeEmojis(record.fields.Раздача),
+          'sessionId_' + record.fields.SessionId + '_return',
+        ]);
+      }
+      return newArr;
+    }, []);
+  }
   return data?.reduce(function (newArr, record) {
     if (
       !record.fields.Финиш &&
@@ -88,7 +107,7 @@ export const createLabelHistory = (data: IBot[], isUserStop?: boolean) => {
     ) {
       newArr.push([
         removeEmojis(record.fields.Раздача),
-        'sessionId_' + record.fields.SessionId + txtForDel,
+        'sessionId_' + record.fields.SessionId,
       ]);
     }
     return newArr;
@@ -102,8 +121,9 @@ export const createHistoryKeyboard = (
   data: IBot[],
   web?: boolean,
   isUserStop?: boolean,
+  isReturn?: boolean,
 ) => {
-  const ordersLabel = createLabelHistory(data, isUserStop);
+  const ordersLabel = createLabelHistory(data, isUserStop, isReturn);
 
   const keyboard = new InlineKeyboard().row();
   if (web) {
@@ -119,7 +139,12 @@ export const createHistoryKeyboard = (
   if (ordersLabel && ordersLabel.length > 0) {
     ordersLabel.forEach(([label, data]) =>
       keyboard
-        .add(InlineKeyboard.text((isUserStop ? '❌' : '➡️') + label, data))
+        .add(
+          InlineKeyboard.text(
+            (isUserStop || isReturn ? '❌ ' : '➡️ ') + label,
+            data,
+          ),
+        )
         .row(),
     );
   }

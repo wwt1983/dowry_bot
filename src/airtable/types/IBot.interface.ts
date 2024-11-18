@@ -90,7 +90,8 @@ export type BotStatus =
   | 'Чек неверный'
   | 'ЧекWb'
   | 'Кэш задержка'
-  | 'Отмена';
+  | 'Отмена'
+  | 'Возврат';
 
 export type OldStatus = 'Вызов';
 
