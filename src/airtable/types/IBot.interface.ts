@@ -46,6 +46,7 @@ export interface IBot {
     'Интервал (from OfferId)': string;
     MessageId: string;
     'Детали раздачи': string;
+    'Причина отказа': string;
   };
 }
 interface IPhoto {

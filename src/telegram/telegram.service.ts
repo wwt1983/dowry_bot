@@ -852,8 +852,12 @@ export class TelegramService {
             ctx.session?.data?.title || '',
             ctx.session.status,
           );
-
+          await this.airtableService.updateReasonReturnBot(
+            ctx.from.id,
+            ctx.message.text,
+          );
           await ctx.api.sendMessage(getAdminChatId(), msgToChat);
+          await ctx.reply(`Ваше сообщение отправлено!`);
           return;
         }
 

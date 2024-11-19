@@ -128,9 +128,6 @@ export class AirtableService {
     }
   }
   async updateStatusInBot(sessionId: string, status: BotStatus): Promise<any> {
-    // const tableUrl = this.configService.get(
-    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_UPDATE_STATUS',
-    // );
     if (!sessionId) {
       console.log('empty session=', status);
       return null;
@@ -296,6 +293,21 @@ export class AirtableService {
     console.log('updateStatusCacheInBot');
     return response;
   }
+  /**
+   * Причина возврата
+   */
+  async updateReasonReturnBot(chatId: number, reason: string): Promise<any> {
+    const result = await this.getBotByReturn(chatId);
+    const response = await this.airtableHttpService.update(
+      TablesName.Bot,
+      result.id,
+      {
+        'Причина отказа': reason,
+      },
+    );
+    console.log('updateStatusCacheInBot');
+    return response;
+  }
   async updateNotification(
     name: string,
     time: string,
@@ -321,6 +333,12 @@ export class AirtableService {
   }
   async getBotBySession(sessionId: string): Promise<IBot | null> {
     const filter = `&${FILTER_BY_FORMULA}=FIND("${sessionId}",{SessionId})`;
+    const data = await this.airtableHttpService.get(TablesName.Bot, filter);
+    if (!data || (data.records && data.records.length === 0)) return null;
+    return data.records[0] as IBot;
+  }
+  async getBotByReturn(chat_id: number): Promise<IBot | null> {
+    const filter = `&${FILTER_BY_FORMULA}=AND({chat_id}="${chat_id}" , {Причина отказа} = "")`;
     const data = await this.airtableHttpService.get(TablesName.Bot, filter);
     if (!data || (data.records && data.records.length === 0)) return null;
     return data.records[0] as IBot;
@@ -367,7 +385,7 @@ export class AirtableService {
     } else {
       filter =
         type === 'schedule'
-          ? `&${FILTER_BY_FORMULA}=AND(AND({Артикул} !='' , {Status} = "Scheduled")`
+          ? `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , {Status} = "Scheduled")`
           : `&${FILTER_BY_FORMULA}=AND({Артикул} != '', OR({Status} = "Архив", {Status} = "Stop"))`;
     }
     const response = await this.airtableHttpService.get(
