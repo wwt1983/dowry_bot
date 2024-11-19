@@ -10,7 +10,7 @@ export type OfferStatus =
   | 'Архив';
 
 export type KeyType = 'Ограниченный ключ' | 'Ключ без ограничения';
-
+export type OfferType = 'Открытая' | 'Закрытая';
 export interface IOffer {
   id: string;
   createdTime: Date;
@@ -49,6 +49,8 @@ export interface IOffer {
     'Тип ключей': KeyType;
     'Короткое название': string;
     'Правила раздачи': string;
+    Тип: OfferType;
+    Расширенная: boolean;
   };
 }
 

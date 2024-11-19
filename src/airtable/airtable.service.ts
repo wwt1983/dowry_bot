@@ -361,9 +361,9 @@ export class AirtableService {
   async getOffers(type?: 'stop' | 'schedule'): Promise<IOffers> {
     let filter;
     if (process.env.NODE_ENV === 'development' && !type) {
-      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Test"))`;
+      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Test"), {Тип} = "Открытая")`;
     } else if (process.env.NODE_ENV !== 'development' && !type) {
-      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Scheduled"))`;
+      filter = `&${FILTER_BY_FORMULA}=AND({Артикул} !='' , OR({Status}="In progress", {Status}="Scheduled"), {Тип} = "Открытая")`;
     } else {
       filter =
         type === 'schedule'
