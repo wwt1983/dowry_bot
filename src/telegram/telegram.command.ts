@@ -85,7 +85,6 @@ export const createLabelHistory = (
   if (isReturn) {
     return data?.reduce(function (newArr, record) {
       if (
-        !record.fields.Финиш &&
         !IGNORED_STATUSES.includes(record.fields.Статус) &&
         record.fields.Статус !== 'В боте' &&
         !record.fields['Снять с раздачи']
