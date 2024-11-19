@@ -1181,3 +1181,22 @@ export function convertToKeyObjects(
     count: countMap[name],
   }));
 }
+/**
+ * Ифнормация о цене кеше типе раздачи
+ **/
+export function getDetailsOfferInfo(data: ITelegramWebApp) {
+  return `кеш: ${data.cash || ''}, ваша цена: ${data.priceForYou}, тип-${data.offerType}, ${data.extendedOfferType ? 'расширенная' : ''}`;
+}
+
+export function isBuyStatus(status: BotStatus) {
+  const valuesBeforeOrder = [];
+
+  for (const key in STEPS) {
+    if (key === 'Заказ' || STEPS[key].step < 0) {
+      break;
+    }
+    valuesBeforeOrder.push(STEPS[key].value);
+  }
+  if (!valuesBeforeOrder.includes(status)) return true;
+  return false;
+}

@@ -120,7 +120,7 @@ export class AirtableService {
         result.id,
         data,
       );
-      console.log('updateToAirtable' + session.sessionId);
+      console.log('updateToAirtable=' + session.sessionId);
       return response;
     } catch (e) {
       console.log('error updateToAirtable=', session, e);

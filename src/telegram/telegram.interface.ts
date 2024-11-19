@@ -8,6 +8,7 @@ import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
 import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 import { COMMAND_NAMES } from './telegram.constants';
+import { OfferType } from 'src/airtable/types/IOffer.interface';
 
 export interface ITelegramOptions {
   token: string;
@@ -91,6 +92,8 @@ export interface ITelegramWebApp {
   offerCount?: number;
   offerOrderToday?: number;
   queueLength?: number; //очередь
+  offerType?: OfferType;
+  extendedOfferType?: boolean; //расширенность означает нужны ли доп шаги
 }
 export type FeedbackStatus =
   | 'С фото'
