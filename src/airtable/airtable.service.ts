@@ -303,6 +303,7 @@ export class AirtableService {
       result.id,
       {
         'Причина отказа': reason,
+        'Отказ на ПВЗ': true,
       },
     );
     console.log('updateStatusCacheInBot');
