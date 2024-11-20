@@ -19,6 +19,7 @@ import { User } from '@grammyjs/types';
 import {
   convertToKeyObjects,
   findFreeKeywords,
+  formatOfferDetails,
   getNumberStepByStatus,
   getUserName,
 } from 'src/telegram/telegram.custom.functions';
@@ -58,11 +59,8 @@ export class AirtableService {
       StopTime: getTimeWithTz(),
       'Ключевое слово': session?.data?.keys || '',
       MessageId: session?.messageId || '',
-      'Детали раздачи': session.detailsOffer,
+      'Детали раздачи': formatOfferDetails(session.detailsOffer),
     };
-    // const tableUrl = this.configService.get(
-    //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT',
-    // );
     try {
       const response = await this.airtableHttpService.post(
         TablesName.Bot,
@@ -120,7 +118,6 @@ export class AirtableService {
         result.id,
         data,
       );
-      console.log('updateToAirtable=' + session.sessionId);
       return response;
     } catch (e) {
       console.log('error updateToAirtable=', session, e);

@@ -41,7 +41,12 @@ import {
   MESSAGE_WAITING,
 } from './telegram.constants';
 import { ChatMember, User } from '@grammyjs/types';
-import { IOffer, IOffers } from 'src/airtable/types/IOffer.interface';
+import {
+  IOffer,
+  IOffers,
+  OfferDetails,
+  OfferType,
+} from 'src/airtable/types/IOffer.interface';
 import {
   BotStatus,
   BrokeBotStatus,
@@ -72,7 +77,7 @@ export function sayHi(
     `\n\n\n\n\️Привет, ${first_name || username || 'друг'}!✌️\n` +
     `\nВаш номер для 💰 ${id}\n\n` +
     '👉 раздачи только для жителей России\n' +
-    '👉 💰кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день на карты Сбербанк или Тинькофф😉\n' +
+    '👉 💰кешбэк будет выплачен только при соблюдении всех условий инструкции на 15-17 день или раньше (в зависимости от раздачи) на карты Сбербанк или Тинькофф😉\n' +
     '👉 ‼️ срок действия раздачи 1 месяц с момента заказа товара ‼️\n\n'
   );
 }
@@ -215,7 +220,7 @@ export function createContinueSessionData(
 export function updateSessionByField(
   session: ISessionData,
   field: string,
-  data: string | ITelegramWebApp,
+  data: any,
 ): ISessionData {
   session[field] = data;
   return session;
@@ -458,6 +463,7 @@ export function getTextByNextStep(
   status: BotStatus,
   startTime: string,
   name: string,
+  detailsOffer: OfferDetails,
 ): string {
   switch (status) {
     case 'Выбор раздачи':
@@ -496,6 +502,7 @@ export function getTextByNextStep(
       return 'Напишите цену 💰, которую вы заплатили на wildberries за этот товар 👇';
     case 'Финиш':
       return (
+        extractInfoAfterPaymentDate(detailsOffer.dayOfCash) +
         FOOTER +
         '💰Напишите данные для перевода вам кешбэка💰.\n' +
         'Банк, ФИО, телефон.\nНапример, Тинькофф, Балалайкина Лира Рояльевна, 89002716500)\nЖдите поступлений😉'
@@ -1181,14 +1188,53 @@ export function convertToKeyObjects(
     count: countMap[name],
   }));
 }
-/**
- * Ифнормация о цене кеше типе раздачи
- **/
-export function getDetailsOfferInfo(data: ITelegramWebApp) {
-  return `кеш: ${data.cash || ''}, ваша цена: ${data.priceForYou}, тип-${data.offerType}, ${data.extendedOfferType ? 'расширенная' : ''}`;
-}
 
+export function formatOfferDetails(offer: OfferDetails): string {
+  return `
+    кэш: ${offer?.cash}
+    ваша цена: ${offer?.priceForYou}
+    тип раздачи: ${offer?.offerType}
+    расширенность: ${offer?.extendedOfferType ? true : false}
+    день кеша: ${offer?.dayOfCash}
+  `;
+}
+export function parseOfferDetails(formattedString: string): OfferDetails {
+  const lines = formattedString.trim().split('\n');
+  const offer: Partial<OfferDetails> = {};
+
+  lines.forEach((line) => {
+    const [key, value] = line.split(':').map((part) => part.trim());
+    switch (key) {
+      case 'кэш':
+        offer.cash = value;
+        break;
+      case 'ваша цена':
+        offer.priceForYou = value;
+        break;
+      case 'тип раздачи':
+        offer.offerType = value as OfferType;
+        break;
+      case 'расширенность':
+        offer.extendedOfferType = !value ? false : true;
+        break;
+      case 'день кеша':
+        offer.dayOfCash = value;
+        break;
+    }
+  });
+  return offer as OfferDetails;
+}
+/**Функция для извлечения информации после "дата выплаты"
+ */
+export function extractInfoAfterPaymentDate(details: string) {
+  if (details && !details.includes('15')) {
+    return `👉 Получите кешбэк 💰 на карту Сбербанк или Тинькофф ${details.toLowerCase()}\n`;
+  }
+  return '👉 НА 15-17 ДЕНЬ ПОСЛЕ получения товара с ПВЗ получите кешбэк 💰 на карту Сбербанк или Тинькофф\n';
+}
 export function isBuyStatus(status: BotStatus) {
+  if (status === 'Заказ') return true;
+
   const valuesBeforeOrder = [];
 
   for (const key in STEPS) {

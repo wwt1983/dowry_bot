@@ -11,6 +11,13 @@ export type OfferStatus =
 
 export type KeyType = 'Ограниченный ключ' | 'Ключ без ограничения';
 export type OfferType = 'Открытая' | 'Закрытая';
+export type OfferDetails = {
+  cash: string;
+  priceForYou: string;
+  offerType: OfferType;
+  extendedOfferType: boolean;
+  dayOfCash: string;
+};
 export interface IOffer {
   id: string;
   createdTime: Date;
@@ -51,6 +58,7 @@ export interface IOffer {
     'Правила раздачи': string;
     Тип: OfferType;
     Расширенная: boolean;
+    'Выплата кеша': string;
   };
 }
 

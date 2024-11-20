@@ -83,8 +83,8 @@ import {
   checkOnStopStatus,
   groupByOfferId,
   findFreeKeywords,
-  getDetailsOfferInfo,
   isBuyStatus,
+  parseOfferDetails,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -250,11 +250,13 @@ export class TelegramService {
           await ctx.api.sendMessage(ctx.from.id, MESSAGE_LIMIT_ORDER);
           return await this.getKeyboardHistoryWithWeb(ctx.from.id);
         }
-        ctx.session = updateSessionByField(
-          ctx.session,
-          'detailsOffer',
-          getDetailsOfferInfo(sessionData),
-        );
+        ctx.session = updateSessionByField(ctx.session, 'detailsOffer', {
+          cash: sessionData.cash,
+          priceForYou: sessionData.priceForYou,
+          offerType: sessionData.offerType,
+          extendedOfferType: sessionData.extendedOfferType,
+          dayOfCash: sessionData.dayOfCash,
+        });
         //продолжаем двигаться только если не было заказов с таким артикулом
         const lastInterval = await this.airtableService.getLastIntervalTime(
           sessionData.offerId,
@@ -619,6 +621,7 @@ export class TelegramService {
           ctx.session.status,
           ctx.session.startTime,
           ctx.session.data.title,
+          ctx.session.detailsOffer,
         ),
       );
       await this.sendMediaByStep(ctx.session.status, ctx);
@@ -739,6 +742,7 @@ export class TelegramService {
           ctx.session.status,
           ctx.session.startTime,
           ctx.session.data.title,
+          ctx.session.detailsOffer,
         ),
         // ctx.session.step === getNumberStepByStatus('Дата доставки')
         //   ? { reply_markup: deliveryDateKeyboard }
@@ -820,6 +824,7 @@ export class TelegramService {
               ctx.session.status,
               ctx.session.startTime,
               ctx.session.data.title,
+              ctx.session.detailsOffer,
             ),
           );
           await this.sendMediaByStep(ctx.session.status, ctx);
@@ -919,6 +924,7 @@ export class TelegramService {
           (ctx.session.step === getNumberStepByStatus('Финиш') &&
             ctx.session.dataForCash)
         ) {
+          console.log('session=fgfgf', ctx.session)
           const msgToChatMessage = await this.saveComment(
             ctx.from,
             text,
@@ -952,9 +958,10 @@ export class TelegramService {
           ctx.session = updateSessionByStep(ctx.session, text);
           await this.updateToAirtable(ctx.session);
           await ctx.reply('Принято!✌️');
+
           if (
-            ctx.session.detailsOffer.includes('расширенная') ||
-            ctx.session.detailsOffer.includes('Закрытая')
+            ctx.session.detailsOffer.extendedOfferType ||
+            ctx.session.detailsOffer.offerType === 'Закрытая'
           ) {
             await ctx.reply(STEPS_FOR_UNUSUAL_USER.Отзыв.erroText);
           } else {
@@ -1043,11 +1050,13 @@ export class TelegramService {
             'offerId',
             data.offerId,
           );
-          ctx.session = updateSessionByField(
-            ctx.session,
-            'detailsOffer',
-            getDetailsOfferInfo(data),
-          );
+          ctx.session = updateSessionByField(ctx.session, 'detailsOffer', {
+            cash: data.cash,
+            priceForYou: data.priceForYou,
+            offerType: data.offerType,
+            extendedOfferType: data.extendedOfferType,
+            dayOfCash: data.dayOfCash,
+          });
           const checkOnLimitUserOffer = checkOnExistOfferByUserOrders(
             data.offerId,
             userHistory?.userOffers,
@@ -1353,6 +1362,7 @@ export class TelegramService {
       queueLength: offerAirtable.fields['Длина очереди'],
       offerType: offerAirtable.fields.Тип,
       extendedOfferType: offerAirtable.fields.Расширенная,
+      dayOfCash: offerAirtable.fields['Выплата кеша'],
     };
   }
   /**
@@ -1405,6 +1415,7 @@ export class TelegramService {
           ctx.session.status,
           ctx.session.startTime,
           ctx.session.data.title,
+          ctx.session.detailsOffer,
         ),
         {
           parse_mode: 'HTML',
@@ -1851,6 +1862,7 @@ export class TelegramService {
         imgShtrihCode: data[0]?.fields['Штрих-код скрин'] || '',
         checkParseImages: data[0]?.fields['Фото проверка'] || [],
         messageId: data[0]?.fields['MessageId'] || '',
+        detailsOffer: parseOfferDetails(data[0]?.fields['Детали раздачи']),
       };
 
       let session = createContinueSessionData(
@@ -2916,12 +2928,8 @@ export class TelegramService {
 
           await this.bot.api.deleteMessage(chatId, messageId);
 
-          if (isBuyStatus(status)) {
-            return;
-          }
-
-          if (remainingTime <= 0) {
-            //отмена заказа
+          //отмена заказа
+          if (remainingTime <= 0 && !isBuyStatus(status)) {
             await this.airtableService.updateStatusInBot(
               sessionId,
               'Время истекло',

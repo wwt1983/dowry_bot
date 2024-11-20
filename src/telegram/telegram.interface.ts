@@ -8,7 +8,7 @@ import { Api } from 'grammy';
 import { HydrateApiFlavor, HydrateFlavor } from '@grammyjs/hydrate';
 import { BotStatus, BrokeBotStatus } from 'src/airtable/types/IBot.interface';
 import { COMMAND_NAMES } from './telegram.constants';
-import { OfferType } from 'src/airtable/types/IOffer.interface';
+import { OfferDetails, OfferType } from 'src/airtable/types/IOffer.interface';
 
 export interface ITelegramOptions {
   token: string;
@@ -61,7 +61,7 @@ export interface ISessionData {
   timeOfEntry?: string; //время входа,
   checkParseImages: string[]; //результат парсинга текста из фото
   messageId?: string; //номер сообщения для редактирования интервала
-  detailsOffer?: string; // хранится инфо о цене и кеше раздачи для конкретного пользователя
+  detailsOffer?: OfferDetails; // хранится инфо о цене и кеше раздачи для конкретного пользователя
 }
 
 export type MyContext = HydrateFlavor<
@@ -94,6 +94,7 @@ export interface ITelegramWebApp {
   queueLength?: number; //очередь
   offerType?: OfferType;
   extendedOfferType?: boolean; //расширенность означает нужны ли доп шаги
+  dayOfCash?: string;
 }
 export type FeedbackStatus =
   | 'С фото'
