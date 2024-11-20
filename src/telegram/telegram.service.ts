@@ -395,7 +395,7 @@ export class TelegramService {
           }
         }
       } catch (e) {
-        console.log('offers=', e);
+        console.log('offers', e);
         return await ctx.reply(
           'Данные обновляются. Попробуйте обновить позже😿',
         );
@@ -960,8 +960,8 @@ export class TelegramService {
           await ctx.reply('Принято!✌️');
 
           if (
-            ctx.session.detailsOffer.extendedOfferType ||
-            ctx.session.detailsOffer.offerType === 'Закрытая'
+            ctx.session.detailsOffer?.extendedOfferType ||
+            ctx.session.detailsOffer?.offerType === 'Закрытая'
           ) {
             await ctx.reply(STEPS_FOR_UNUSUAL_USER.Отзыв.erroText);
           } else {

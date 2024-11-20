@@ -502,7 +502,7 @@ export function getTextByNextStep(
       return 'Напишите цену 💰, которую вы заплатили на wildberries за этот товар 👇';
     case 'Финиш':
       return (
-        extractInfoAfterPaymentDate(detailsOffer.dayOfCash) +
+        extractInfoAfterPaymentDate(detailsOffer?.dayOfCash) +
         FOOTER +
         '💰Напишите данные для перевода вам кешбэка💰.\n' +
         'Банк, ФИО, телефон.\nНапример, Тинькофф, Балалайкина Лира Рояльевна, 89002716500)\nЖдите поступлений😉'
@@ -1199,6 +1199,8 @@ export function formatOfferDetails(offer: OfferDetails): string {
   `;
 }
 export function parseOfferDetails(formattedString: string): OfferDetails {
+  if (!formattedString) return null;
+
   const lines = formattedString.trim().split('\n');
   const offer: Partial<OfferDetails> = {};
 
