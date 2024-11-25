@@ -924,7 +924,6 @@ export class TelegramService {
           (ctx.session.step === getNumberStepByStatus('Финиш') &&
             ctx.session.dataForCash)
         ) {
-          console.log('session=fgfgf', ctx.session);
           const msgToChatMessage = await this.saveComment(
             ctx.from,
             text,
