@@ -924,7 +924,7 @@ export class TelegramService {
           (ctx.session.step === getNumberStepByStatus('Финиш') &&
             ctx.session.dataForCash)
         ) {
-          console.log('session=fgfgf', ctx.session)
+          console.log('session=fgfgf', ctx.session);
           const msgToChatMessage = await this.saveComment(
             ctx.from,
             text,
@@ -2928,6 +2928,9 @@ export class TelegramService {
 
           await this.bot.api.deleteMessage(chatId, messageId);
 
+          // выкуп товара
+          if (isBuyStatus(status)) return true;
+
           //отмена заказа
           if (remainingTime <= 0 && !isBuyStatus(status)) {
             await this.airtableService.updateStatusInBot(
@@ -2939,7 +2942,7 @@ export class TelegramService {
               '❗️Время на раздачу истекло❗️',
             );
             await sleep(2000);
-            await this.getKeyboardHistoryWithWeb(chatId);
+            return await this.getKeyboardHistoryWithWeb(chatId);
           }
           if (offerStatus === 'Done' || offerStatus === 'Stop') {
             await this.airtableService.updateStatusInBot(sessionId, 'Отмена');
