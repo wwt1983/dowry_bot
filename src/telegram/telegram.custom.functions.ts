@@ -1063,7 +1063,7 @@ export const getTextForHistoryOrders = (
 };
 
 export const removeEmojis = (text: string) => {
-  if (!text) return '';
+  if (!text) return text;
   const regex = /[\u{1F525}]/gu;
 
   return text.replace(regex, '');
@@ -1191,7 +1191,7 @@ export function convertToKeyObjects(
 
 export function formatOfferDetails(offer: OfferDetails): string {
   return `
-    кэш: ${offer?.cash}
+    кэш: ${offer?.cash || ''}
     ваша цена: ${offer?.priceForYou}
     тип раздачи: ${offer?.offerType}
     расширенность: ${offer?.extendedOfferType ? true : false}

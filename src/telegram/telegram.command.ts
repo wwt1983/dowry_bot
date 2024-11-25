@@ -74,7 +74,13 @@ export const createLabelHistory = (
         record.fields.Статус == 'Проблема с артикулом'
       ) {
         newArr.push([
-          removeEmojis(record.fields.Раздача),
+          removeEmojis(
+            record.fields['Короткое название'] &&
+              Array.isArray(record.fields['Короткое название']) &&
+              record.fields['Короткое название'].length > 0
+              ? record.fields['Короткое название'][0]
+              : record.fields.Раздача,
+          ),
           'sessionId_' + record.fields.SessionId + '_del',
         ]);
       }
@@ -90,7 +96,13 @@ export const createLabelHistory = (
         !record.fields['Снять с раздачи']
       ) {
         newArr.push([
-          removeEmojis(record.fields.Раздача),
+          removeEmojis(
+            record.fields['Короткое название'] &&
+              Array.isArray(record.fields['Короткое название']) &&
+              record.fields['Короткое название'].length > 0
+              ? record.fields['Короткое название'][0]
+              : record.fields.Раздача,
+          ),
           'sessionId_' + record.fields.SessionId + '_return',
         ]);
       }
@@ -105,7 +117,13 @@ export const createLabelHistory = (
       !record.fields['Снять с раздачи']
     ) {
       newArr.push([
-        removeEmojis(record.fields.Раздача),
+        removeEmojis(
+           record.fields['Короткое название'] &&
+            Array.isArray(record.fields['Короткое название']) &&
+            record.fields['Короткое название'].length > 0
+            ? record.fields['Короткое название'][0]
+            : record.fields.Раздача,
+        ),
         'sessionId_' + record.fields.SessionId,
       ]);
     }

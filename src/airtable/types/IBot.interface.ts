@@ -48,6 +48,7 @@ export interface IBot {
     'Детали раздачи': string;
     'Причина отказа': string;
     'Отказ на ПВЗ': boolean;
+    'Короткое название': string[];
   };
 }
 interface IPhoto {

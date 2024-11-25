@@ -45,22 +45,35 @@ export class AirtableService {
   ) {}
 
   async saveToAirtable(session: ISessionData): Promise<any> {
-    const data = {
-      SessionId: session.sessionId,
-      User: session.user,
-      chat_id: session.chat_id,
-      Статус: session.status,
-      'Время входа': session?.timeOfEntry || '',
-      Артикул: session?.data?.articul || '',
-      StartTime: session.status === 'В боте' ? '' : session.startTime,
-      OfferId: session.offerId ? [session.offerId] : null,
-      Location: session?.location || '',
-      Раздача: session.data?.title || '',
-      StopTime: getTimeWithTz(),
-      'Ключевое слово': session?.data?.keys || '',
-      MessageId: session?.messageId || '',
-      'Детали раздачи': formatOfferDetails(session.detailsOffer),
-    };
+    let data = null;
+    if (!session.offerId) {
+      data = {
+        SessionId: session.sessionId,
+        User: session.user,
+        chat_id: session.chat_id,
+        Статус: session.status,
+        StopTime: getTimeWithTz(),
+        MessageId: session?.messageId || '',
+      };
+    } else {
+      data = {
+        SessionId: session.sessionId,
+        User: session.user,
+        chat_id: session.chat_id,
+        Статус: session.status,
+        'Время входа': session?.timeOfEntry || '',
+        Артикул: session?.data?.articul || '',
+        StartTime: session.status === 'В боте' ? '' : session.startTime,
+        OfferId: session.offerId ? [session.offerId] : null,
+        Location: session?.location || '',
+        Раздача: session.data?.title || '',
+        StopTime: getTimeWithTz(),
+        'Ключевое слово': session?.data?.keys || '',
+        MessageId: session?.messageId || '',
+        'Детали раздачи': formatOfferDetails(session.detailsOffer),
+      };
+    }
+
     try {
       const response = await this.airtableHttpService.post(
         TablesName.Bot,
