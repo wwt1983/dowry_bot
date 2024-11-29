@@ -12,6 +12,7 @@ import {
   getTimeWithTz,
   getLastIntervalData,
   convertDateFromString,
+  isTodayDate,
 } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
@@ -442,6 +443,8 @@ export class AirtableService {
             getFilterById(keyIds),
           )) as IKeyWords;
 
+          console.log('keys=', keys);
+
           offer.fields['Ключевое слово'] = '';
 
           if (keyIds.length === 1) {
@@ -449,16 +452,18 @@ export class AirtableService {
           } else {
             const typeKey = needKeys && offer.fields['Тип ключей'];
 
+            console.log('type key=', typeKey);
+
             if (!typeKey || typeKey === 'Ограниченный ключ') {
               const totalKeysOffers = keys.records.reduce(
                 (sum, kw) => sum + kw.fields.Количество,
                 0,
               );
-              // console.log(
-              //   'totalKeysOffers=',
-              //   totalKeysOffers,
-              //   countOrder + countWaiting,
-              // );
+              console.log(
+                'totalKeysOffers=',
+                totalKeysOffers,
+                countOrder + countWaiting,
+              );
 
               if (totalKeysOffers < countOrder + countWaiting) {
                 console.log('Не хватает предложений для заказа');
@@ -469,7 +474,13 @@ export class AirtableService {
                   name: x.fields.Название,
                   count: x.fields.Количество,
                 }));
+
+                console.log('usesKeys', usesKeys);
+                console.log('allOfferKeys', allOfferKeys);
+
                 const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
+                console.log('freeKeys', freeKeys);
+
                 if (freeKeys || freeKeys.length > 0) {
                   offer.fields['Ключевое слово'] = freeKeys[0];
                 }
@@ -910,15 +921,15 @@ export class AirtableService {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
       `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = ""), OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"),  DATESTR({StartTime}) = DATESTR(TODAY()))`,
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
     );
-
-    //console.log('count filter', articul, data?.records.length);
 
     if (!data?.records?.length || data?.records?.length === 0) return null;
 
     return convertToKeyObjects(
-      (data as IBots).records.map((x) => x.fields['Ключевое слово']),
+      (data as IBots).records
+        ?.filter((x) => isTodayDate(x.fields.StartTime))
+        ?.map((x) => x.fields['Ключевое слово']),
     );
   }
   /**

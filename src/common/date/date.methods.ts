@@ -9,6 +9,7 @@ import {
   addMinutes,
   compareAsc,
   formatISO,
+  isToday,
 } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -234,4 +235,13 @@ export const formatMinutesToHoursAndMinutes = (totalMinutes: number) => {
 
   if (hours === 0) return `${minutes} мин.`;
   return `${hours} час${hours !== 1 ? 'а' : ''} ${minutes} мин.`;
+};
+
+export const isTodayDate = (date: string) => {
+  if (!date) return false;
+  try {
+    return isToday(formatInTimeZone(date, TIME_ZONE, FORMAT_DATE));
+  } catch (error) {
+    return false;
+  }
 };
