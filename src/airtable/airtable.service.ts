@@ -725,6 +725,29 @@ export class AirtableService {
     if (!data || data.records.length === 0) return null;
     return data.records[0] as IBuyer;
   }
+  /**
+   * сохраняем оферту покупателя
+   */
+  async saveBuyerOferta(
+    chatId: string,
+    oferta: Buffer,
+  ): Promise<IBuyer | null> {
+    try {
+      if (!oferta) return null;
+
+      const result = await this.findBuyerByChatId(chatId);
+      if (!result) return null;
+
+      const response = await this.airtableHttpService.update(
+        TablesName.Buyers,
+        result.id,
+        { Оферта: oferta },
+      );
+      console.log('response=', response);
+    } catch (error) {
+      console.log('saveBuyerOferta error=', error);
+    }
+  }
   async checkPhone(phone: string): Promise<boolean> {
     const data = await this.airtableHttpService.get(
       TablesName.Buyers,

@@ -476,7 +476,20 @@ export class TelegramService {
     this.bot.on('message:photo', async (ctx) => {
       try {
         //return await this.stopBotWork(ctx.from.id);
-
+        if (
+          ctx.session.status === 'Дата доставки' ||
+          ctx.session.status === 'Получен'
+        ) {
+          if (
+            getDifferenceInMinutes(ctx.session.stopTime) <
+            (process.env.NODE_ENV === 'development' ? 1 : 180)
+          ) {
+            return await ctx.api.sendMessage(
+              ctx.session.chat_id,
+              '📌 Между покупкой и получением прошло слишком мало времени🕵️ Скорее всего вы ошиблись с загрузкой фото🥹 Попробуйте попозже.',
+            );
+          }
+        }
         const path = await ctx.getFile();
         const url = `${FILE_FROM_BOT_URL}${this.options.token}/${path.file_path}`;
         if (

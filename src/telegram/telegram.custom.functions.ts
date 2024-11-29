@@ -371,7 +371,6 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     cash,
     priceWb,
     priceForYou,
-    times,
     location,
     image,
     filter,

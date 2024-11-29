@@ -9,6 +9,7 @@ export interface IBuyer {
     'Идентификация ФИО': string;
     Раздачи?: string[];
     chat_id: string;
+    Оферта: string;
   };
 }
 

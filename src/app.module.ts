@@ -15,6 +15,7 @@ import { SmsModule } from './sms/sms.module';
 //import { TypeOrmModule } from '@nestjs/typeorm';
 //import { LogsController } from './logs/logs.controller';
 //import { Log } from './logs/log.entity';
+import { PdfModule } from './pdf/pdf.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +29,7 @@ import { SmsModule } from './sms/sms.module';
     }),
     FirebaseModule,
     SmsModule,
+    PdfModule,
     // TypeOrmModule.forRoot({
     //   type: 'postgres',
     //   host: 'localhost',
