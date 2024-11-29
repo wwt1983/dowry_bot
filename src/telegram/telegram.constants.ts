@@ -179,7 +179,7 @@ export const STEPS: ISteps = {
     value: 'Артикул правильный',
     erroText:
       'На этом шаге необходимо поделиться в бот ссылкой найденного товара',
-    image: '/images/11.jpg',
+    image: '/images/111.jpg',
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
@@ -190,7 +190,7 @@ export const STEPS: ISteps = {
     value: 'Поиск',
     erroText:
       'На этом шаге необходимо загрузить скриншот поиска нашего товара, где виден ключевой запрос ',
-    image: '/images/10.jpg',
+    image: '/images/101.jpg',
     isActive: true,
     typeStep: TYPE_STEP.image,
     stop: false,
@@ -420,12 +420,12 @@ export const IMAGES_STEP_FOR_HELP = [
   },
   {
     type: STEPS['Выбор раздачи'],
-    url: WEB_APP + '/images/11.jpg',
+    url: WEB_APP + '/images/111.jpg',
     text: FIRST_STEP_A,
   },
   {
     type: STEPS.Поиск,
-    url: WEB_APP + '/images/10.jpg',
+    url: WEB_APP + '/images/101.jpg',
     text: FIRST_STEP_CART,
   },
   {
