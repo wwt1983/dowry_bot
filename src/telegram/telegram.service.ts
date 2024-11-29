@@ -2795,16 +2795,16 @@ export class TelegramService {
       if (!sessionsWithNoKey || sessionsWithNoKey.length === 0) {
         return;
       }
-      console.log('sendDetailsForNoKeyUsers', sessionsWithNoKey.length);
+      // console.log('sendDetailsForNoKeyUsers', sessionsWithNoKey.length);
 
       const groupedBotsWithNoKey = groupByOfferId(sessionsWithNoKey);
-      console.log('groupedBotsWithNoKey', groupedBotsWithNoKey)
+      //console.log('groupedBotsWithNoKey', groupedBotsWithNoKey)
       // Проход по сгруппированному массиву
       Object.keys(groupedBotsWithNoKey).forEach(async (offerId) => {
         const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
         const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
-        console.log('usesKeys', usesKeys);
-        console.log('allOfferKeys', allOfferKeys);
+        //console.log('usesKeys', usesKeys);
+        //console.log('allOfferKeys', allOfferKeys);
         const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
 
         if (!freeKeys || freeKeys.length === 0) {

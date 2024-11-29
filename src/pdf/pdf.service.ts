@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AirtableService } from 'src/airtable/airtable.service';
 import { FirebaseService } from 'src/firebase/firebase.service';
-import PDFDocument from 'pdfkit';
+//import PDFDocument from 'pdfkit';
 import * as fs from 'fs';
 
 @Injectable()
@@ -11,18 +11,15 @@ export class PdfService {
     private readonly airtableService: AirtableService,
   ) {}
   createPDF(data: any[], filePath: string): void {
-    const doc = new PDFDocument();
-    const writeStream = fs.createWriteStream(filePath);
-
-    doc.pipe(writeStream);
-
-    doc.fontSize(12);
-    data.forEach((record) => {
-      doc.text(JSON.stringify(record, null, 2));
-      doc.moveDown();
-    });
-
-    doc.end();
+    // const doc = new PDFDocument();
+    // const writeStream = fs.createWriteStream(filePath);
+    // doc.pipe(writeStream);
+    // doc.fontSize(12);
+    // data.forEach((record) => {
+    //   doc.text(JSON.stringify(record, null, 2));
+    //   doc.moveDown();
+    // });
+    // doc.end();
   }
 
   async uploadFileToAirtable(
