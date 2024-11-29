@@ -910,7 +910,7 @@ export class AirtableService {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
       `&${FILTER_BY_FORMULA}=AND({Id (from OfferId)} = "${offerId}", NOT({Ключевое слово} = ""), OR({Статус} = "Выбор раздачи", {Статус} = "Корзина", {Статус} = "Поиск", 
-      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"))`,
+      {Статус} = "Артикул правильный", {Статус} = "Проблема с артикулом", {Статус} = "Заказ", {Статус} = "Дата доставки"),  DATESTR({StartTime}) = DATESTR(TODAY()))`,
     );
 
     //console.log('count filter', articul, data?.records.length);
