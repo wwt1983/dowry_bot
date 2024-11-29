@@ -2802,7 +2802,7 @@ export class TelegramService {
       // Проход по сгруппированному массиву
       Object.keys(groupedBotsWithNoKey).forEach(async (offerId) => {
         const usesKeys = await this.airtableService.getUsesKeys(offerId); //список занятых слов
-        const allOfferKeys = await this.airtableService.getOfferKeys(offerId);
+        const allOfferKeys = await this.airtableService.getOfferKeys(offerId); //общий список слов
         //console.log('usesKeys', usesKeys);
         //console.log('allOfferKeys', allOfferKeys);
         const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
@@ -2816,17 +2816,20 @@ export class TelegramService {
         if (freeKeys) {
           const users = groupedBotsWithNoKey[offerId].slice(
             0,
-            freeKeys.length === 1
-              ? groupedBotsWithNoKey[offerId].length
-              : freeKeys.length,
+            groupedBotsWithNoKey[offerId].length,
           );
+          if (!users || !users.length || users.length === 0) {
+            return;
+          }
 
           let lastIntervalTime = await this.airtableService.getLastIntervalTime(
             offerId,
             interval,
           );
-          for (let index = 0; index < users.length; index++) {
-            const x = users[index];
+          for (let index = 0; index < freeKeys.length; index++) {
+            const user = users[index];
+
+            if (!user) break;
 
             lastIntervalTime = addMinutesToInterval(
               lastIntervalTime,
@@ -2834,8 +2837,8 @@ export class TelegramService {
             );
 
             await this.airtableService.updateUserWithEmptyKeyInBotTableAirtable(
-              x.fields.SessionId,
-              freeKeys.length === 1 ? freeKeys[0] : freeKeys[index],
+              user.fields.SessionId,
+              freeKeys[index],
               lastIntervalTime,
             );
 
@@ -2844,15 +2847,13 @@ export class TelegramService {
             await this.getGiveawayDetails(
               process.env.NODE_ENV === 'development'
                 ? ADMIN_CHAT_ID
-                : x.fields.chat_id,
-              freeKeys.length === 1
-                ? freeKeys[0].toUpperCase()
-                : freeKeys[index].toUpperCase(),
+                : user.fields.chat_id,
+              freeKeys[index].toUpperCase(),
               lastIntervalTime,
               true,
-              x.fields.SessionId,
+              user.fields.SessionId,
               offerId,
-              x.fields.StartTime,
+              user.fields.StartTime,
             );
           }
         }
