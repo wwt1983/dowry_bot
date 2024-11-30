@@ -477,8 +477,8 @@ export class AirtableService {
                   count: x.fields.Количество,
                 }));
 
-                console.log('usesKeys', usesKeys);
-                console.log('allOfferKeys', allOfferKeys);
+                //console.log('usesKeys', usesKeys);
+                //console.log('allOfferKeys', allOfferKeys);
 
                 const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
                 console.log('freeKeys', freeKeys);
