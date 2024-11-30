@@ -382,7 +382,7 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     : '';
 
   const avgPos = mpstats
-    ? `\n👉Средняя позиция в wildberries (зависит от региона): ${mpstats}. Может помочь🕵️\n`
+    ? `\n👉Средняя позиция в wildberries (зависит от региона): от 1 до ${mpstats}. Может помочь🕵️\n`
     : '';
   function getText(keys: string) {
     if (keys && keys !== '' && keys !== 'undefined') {
