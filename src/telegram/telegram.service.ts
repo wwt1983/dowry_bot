@@ -310,6 +310,11 @@ export class TelegramService {
       ctx.session.lastMessage = response.message_id;
     });
 
+    this.bot.command(COMMAND_NAMES.question, async (ctx) => {
+      ctx.session.lastCommand = COMMAND_NAMES.question;
+      return await ctx.api.sendMessage(ctx.from.id, 'Скоро все напишем😉');
+    });
+
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
       if (await this.checkOnBan(ctx.from.id)) return;
 
