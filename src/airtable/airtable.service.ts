@@ -445,8 +445,6 @@ export class AirtableService {
             getFilterById(keyIds),
           )) as IKeyWords;
 
-          console.log('keys=', keys);
-
           offer.fields['Ключевое слово'] = '';
 
           if (keyIds.length === 1) {
@@ -454,21 +452,18 @@ export class AirtableService {
           } else {
             const typeKey = needKeys && offer.fields['Тип ключей'];
 
-            console.log('type key=', typeKey);
-
             if (!typeKey || typeKey === 'Ограниченный ключ') {
               const totalKeysOffers = keys.records.reduce(
                 (sum, kw) => sum + kw.fields.Количество,
                 0,
               );
-              console.log(
-                'totalKeysOffers=',
-                totalKeysOffers,
-                countOrder + countWaiting,
-              );
+              // console.log(
+              //   'totalKeysOffers=',
+              //   totalKeysOffers,
+              //   countOrder + countWaiting,
+              // );
 
               if (totalKeysOffers < countOrder + countWaiting) {
-                console.log('Не хватает предложений для заказа');
                 offer.fields['Ключевое слово'] = '';
               } else {
                 const usesKeys = await this.getUsesKeys(id); //список занятых слов
@@ -481,7 +476,6 @@ export class AirtableService {
                 //console.log('allOfferKeys', allOfferKeys);
 
                 const freeKeys = findFreeKeywords(allOfferKeys, usesKeys);
-                console.log('freeKeys', freeKeys);
 
                 if (freeKeys || freeKeys.length > 0) {
                   offer.fields['Ключевое слово'] = freeKeys[0];

@@ -29,6 +29,8 @@ export const MESSAGE_LIMIT_ORDER = '❌Превышен лимит заказо�
 export const MESSAGE_WAITING =
   'Это популярная раздача с ограниченным числом мест. Места могут периодически освобождаться😉';
 export const START_NAME = '👉 DOWRY РАЗДАЧИ 👈';
+export const OFERTA_URL =
+  'https://dowry.pro/%D0%BE%D1%84%D0%B5%D1%80%D1%82%D0%B0';
 
 export const INTERVAL_FOR_NEXT_CHOOSE = 20;
 export const ADMIN_CHAT_ID = 193250152;
