@@ -7,6 +7,7 @@ import {
   format,
   parse,
   addMinutes,
+  addDays,
   compareAsc,
   formatISO,
   isToday,
@@ -171,12 +172,12 @@ export const getLastIntervalData = (data: IBot[], interval: string) => {
     +interval || INTERVAL_FOR_NEXT_CHOOSE,
   );
 
-  console.log(
-    'next ===>  ',
-    lastInterval[0].fields.StartTime,
-    nextInterval,
-    getDifferenceInMinutes(nextInterval),
-  );
+  // console.log(
+  //   'next ===>  ',
+  //   lastInterval[0].fields.StartTime,
+  //   nextInterval,
+  //   getDifferenceInMinutes(nextInterval),
+  //);
 
   if (getDifferenceInMinutes(nextInterval) < 0) {
     return nextInterval;
@@ -244,4 +245,9 @@ export const isTodayDate = (date: string) => {
   } catch (error) {
     return false;
   }
+};
+
+export const addDaysToDate = (date: string, count: number) => {
+  if (!date) date = getDate();
+  return formatInTimeZone(addDays(date, count), TIME_ZONE, FORMAT_DATE_NO_TIME);
 };

@@ -13,6 +13,8 @@ import {
   getLastIntervalData,
   convertDateFromString,
   isTodayDate,
+  getDate,
+  addDaysToDate,
 } from 'src/common/date/date.methods';
 import { ISessionData } from 'src/telegram/telegram.interface';
 import { IBotComments } from './types/IBotComment';
@@ -967,5 +969,42 @@ export class AirtableService {
       return true;
     }
     return false;
+  }
+  async getMPSTATSPosition(articul: string) {
+    try {
+      const avgPosValues = [];
+      const startDate = getDate();
+      const data = await this.airtableHttpService.getMpstats(
+        `https://mpstats.io/api/wb/get/item/${articul}/by_keywords?d1=${addDaysToDate(startDate, -4)}&d2=${addDaysToDate(startDate, -2)}`,
+      );
+
+      //console.log('getMPSTATSPosition', data);
+
+      if (!data) return null;
+
+      for (const key in data?.words) {
+        if (data?.words.hasOwnProperty(key)) {
+          const wordData = data?.words[key];
+          if (wordData.avgPos !== undefined) {
+            avgPosValues.push(wordData.avgPos);
+          }
+        }
+      }
+      if (avgPosValues?.length > 1) {
+        const maxAvgPos = Math.max(...avgPosValues);
+        console.log('maxAvgPos', maxAvgPos);
+        return maxAvgPos;
+      }
+      return null;
+    } catch (error) {
+      console.log('getMPSTATSPosition', error);
+      return null;
+    }
+  }
+  async updateOfferByPosition(offerId: string, avgPos: number): Promise<void> {
+    console.log('pos', avgPos, offerId);
+    await this.airtableHttpService.update(TablesName.Offers, offerId, {
+      Mpstats: avgPos?.toString(),
+    });
   }
 }

@@ -31,6 +31,22 @@ export class AirtableHttpService {
         .pipe(map((response) => response.data)),
     );
   }
+  /**
+   * запрос к внешним апи
+   */
+  getMpstats(url: string) {
+    return lastValueFrom(
+      this.httpService
+        .get(url, {
+          headers: {
+            'X-Mpstats-TOKEN': this.configService.get('MPSTATS_TOKEN'),
+            'Content-Type': 'application/json',
+          },
+          method: 'GET',
+        })
+        .pipe(map((response) => response.data)),
+    );
+  }
   getById(url: string, id: string) {
     const table = TablesDowray.find((x) => x.title === url).tableName;
 

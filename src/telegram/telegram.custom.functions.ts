@@ -375,20 +375,23 @@ export function getTextForFirstStep(data: ITelegramWebApp) {
     image,
     filter,
     description,
+    mpstats,
   } = data;
   const useFilterForHelpSearch = filter
     ? `Попробуйте найти товар используя фильтр 👉: ${filter.toUpperCase()} \n`
     : '';
 
+  const avgPos = mpstats
+    ? `\n👉Средняя позиция в wildberries (зависит от региона): ${mpstats}. Может помочь🕵️\n`
+    : '';
   function getText(keys: string) {
     if (keys && keys !== '' && keys !== 'undefined') {
       return (
         FIRST_STEP_KEY_VALUE +
         `\n🔎 ${keys.toUpperCase()}\n` +
         useFilterForHelpSearch +
-        '\n' +
-        '👉 ' +
-        FIRST_STEP_LINK +
+        avgPos +
+        `\n👉${FIRST_STEP_LINK}` +
         //FIRST_STEP_A +
         (location ? `❗️Раздача только для региона: ${location}❗️\n` : '')
       );

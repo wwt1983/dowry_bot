@@ -972,7 +972,7 @@ export class TelegramService {
           await ctx.reply('Принято!✌️');
 
           if (
-            ctx.session.detailsOffer?.extendedOfferType ||
+            ctx.session.detailsOffer?.extendedOfferType == true ||
             ctx.session.detailsOffer?.offerType === 'Закрытая'
           ) {
             await ctx.reply(STEPS_FOR_UNUSUAL_USER.Отзыв.erroText);
@@ -1375,6 +1375,7 @@ export class TelegramService {
       offerType: offerAirtable.fields.Тип,
       extendedOfferType: offerAirtable.fields.Расширенная,
       dayOfCash: offerAirtable.fields['Выплата кеша'],
+      mpstats: offerAirtable.fields.Mpstats,
     };
   }
   /**

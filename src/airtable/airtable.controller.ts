@@ -37,4 +37,16 @@ export class AirtableController {
       return null;
     }
   }
+  @Post('mpstats')
+  async mpstats(
+    @Body() data: { articul: string; offerId: string },
+  ): Promise<number | string | null> {
+    if (!data.articul) return 'empty articul';
+    const avgPos = await this.airtableService.getMPSTATSPosition(
+      data.articul.trim(),
+    );
+    if (avgPos) {
+      await this.airtableService.updateOfferByPosition(data.offerId, avgPos);
+    }
+  }
 }

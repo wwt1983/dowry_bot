@@ -59,6 +59,7 @@ export interface IOffer {
     Тип: OfferType;
     Расширенная: boolean;
     'Выплата кеша': string;
+    Mpstats: string;
   };
 }
 

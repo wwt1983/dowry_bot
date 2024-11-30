@@ -95,6 +95,7 @@ export interface ITelegramWebApp {
   offerType?: OfferType;
   extendedOfferType?: boolean; //расширенность означает нужны ли доп шаги
   dayOfCash?: string;
+  mpstats?: string;
 }
 export type FeedbackStatus =
   | 'С фото'
