@@ -2,6 +2,7 @@ import { InlineKeyboard, Keyboard } from 'grammy';
 import {
   COUNT_TRY_ERROR,
   IGNORED_STATUSES,
+  OFERTA_URL,
   START_NAME,
   STEP_COMMANDS,
   WEB_APP,
@@ -118,7 +119,7 @@ export const createLabelHistory = (
     ) {
       newArr.push([
         removeEmojis(
-           record.fields['Короткое название'] &&
+          record.fields['Короткое название'] &&
             Array.isArray(record.fields['Короткое название']) &&
             record.fields['Короткое название'].length > 0
             ? record.fields['Короткое название'][0]
@@ -166,6 +167,19 @@ export const createHistoryKeyboard = (
     );
   }
   return (ordersLabel && ordersLabel.length > 0) || web ? keyboard : null;
+};
+
+export const ofertaButton = (chat_id: number, name: string) => {
+  return new InlineKeyboard()
+    .add(
+      InlineKeyboard.webApp(
+        'Пользовательский договор',
+        `${OFERTA_URL}?chat_id=${chat_id}&name=${name}&source=telegram`,
+      ),
+    )
+    .row();
+  // .text('Согласен', 'agree')
+  // .text('Не согласен', 'disagree');
 };
 
 export const getArticulCommand = (

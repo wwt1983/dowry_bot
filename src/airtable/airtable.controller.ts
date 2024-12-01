@@ -49,4 +49,11 @@ export class AirtableController {
       await this.airtableService.updateOfferByPosition(data.offerId, avgPos);
     }
   }
+  @Post('saveOferta')
+  async saveOferta(
+    @Body() data: { chat_id: string; userId?: string },
+  ): Promise<number | string | null> {
+    if (!data.chat_id) return 'empty chat_id';
+    await this.airtableService.updateOferta(data.chat_id, data.userId);
+  }
 }

@@ -101,6 +101,7 @@ import {
   createLabelHistory,
   operatorKeyboard,
   helpKeyboard,
+  ofertaButton,
 } from './telegram.command';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
@@ -183,12 +184,12 @@ export class TelegramService {
       const userValue = getUserName(ctx.from);
 
       const userHistory = await this.getUserHistory(ctx.from, true);
+
       ctx.session = createInitialSessionData(
         id?.toString(),
         userValue.userName || userValue.fio,
       );
       ctx.session.lastCommand = COMMAND_NAMES.start;
-      //ctx.session.itsSubscriber = userHistory.itsSubscriber;
       ctx.session.userOffers = userHistory?.userOffers;
 
       await ctx.reply(sayHi(first_name, userValue.userName, id), {
@@ -198,6 +199,15 @@ export class TelegramService {
       await ctx.reply('Пример раздачи ⤵️', {
         reply_markup: helpKeyboard,
       });
+
+      if (process.env.NODE_ENV === 'development') {
+        await ctx.reply('Договор оферты ⤵️', {
+          reply_markup: ofertaButton(
+            ctx.from.id,
+            userValue.fio || userValue.userName,
+          ),
+        });
+      }
 
       await this.bot.api.sendMessage(
         id,
@@ -268,12 +278,6 @@ export class TelegramService {
           'startTime',
           lastInterval,
         );
-
-        // console.log(
-        //   'update session',
-        //   ctx.session.sessionId,
-        //   ctx.session.status,
-        // );
 
         await this.saveToAirtable(ctx.session);
 

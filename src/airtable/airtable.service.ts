@@ -996,9 +996,19 @@ export class AirtableService {
     }
   }
   async updateOfferByPosition(offerId: string, avgPos: number): Promise<void> {
-    console.log('pos', avgPos, offerId);
     await this.airtableHttpService.update(TablesName.Offers, offerId, {
       Mpstats: avgPos?.toString(),
+    });
+  }
+  async updateOferta(chat_id: string, data: string): Promise<void> {
+    const buyer = await this.findBuyerByChatId(chat_id);
+    if (!buyer) {
+      //создать клиента
+      return;
+    }
+    await this.airtableHttpService.update(TablesName.Buyers, buyer.id, {
+      Оферта: true,
+      'Данные по оферте': data,
     });
   }
 }
