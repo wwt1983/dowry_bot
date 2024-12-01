@@ -1008,7 +1008,7 @@ export class AirtableService {
     }
     await this.airtableHttpService.update(TablesName.Buyers, buyer.id, {
       Оферта: true,
-      'Данные по оферте': data,
+      'Данные по оферте': decodeURIComponent(data),
     });
   }
 }
