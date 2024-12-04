@@ -980,6 +980,8 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
           await ctx.reply('Принято!✌️');
 
+          console.log('extendedOfferType', ctx.session.detailsOffer);
+
           if (
             ctx.session.detailsOffer?.extendedOfferType == true ||
             ctx.session.detailsOffer?.offerType === 'Закрытая'
@@ -2251,7 +2253,7 @@ export class TelegramService {
           x.fields['Артикул WB'][0] === +articul.trim() &&
           !x.fields['Кэш выплачен'],
       );
-      console.log('filterDistribution ', articul, filterDistribution);
+      //console.log('filterDistribution ', articul, filterDistribution);
 
       if (filterDistribution && filterDistribution.length > 1) {
         filterDistribution = distributions.filter((x) => {

@@ -38,6 +38,8 @@ export const checkParseImage = (
           text.ParsedResults[0].ParsedText,
           step.textCheck as string[],
         );
+      case 'Получен':
+        return checkBuy(text.ParsedResults[0].ParsedText, 'Покупки');
       default:
         return false;
     }
@@ -60,7 +62,7 @@ function checkSearch(text: string, keyword: string): boolean {
 }
 
 /**
- * проверка заказа
+ * проверка корзины
  **/
 function checkCart(text: string, keywords: string[]): boolean {
   try {
@@ -80,6 +82,17 @@ function checkOrder(text: string, keywords: string[]): boolean {
     return regex.test(text.toLowerCase());
   } catch (error) {
     console.log('checkOrder=', error);
+    return false;
+  }
+}
+/**
+ * проверка покупки
+ **/
+function checkBuy(text: string, keyword: string): boolean {
+  try {
+    return text.toLowerCase().includes(keyword);
+  } catch (error) {
+    console.log('checkBuy=', error);
     return false;
   }
 }
