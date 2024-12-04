@@ -2247,7 +2247,9 @@ export class TelegramService {
       }
 
       let filterDistribution = distributions.filter(
-        (x) => x.fields['Артикул WB'][0] === +articul.trim(),
+        (x) =>
+          x.fields['Артикул WB'][0] === +articul.trim() &&
+          !x.fields['Кэш выплачен'],
       );
       console.log('filterDistribution ', articul, filterDistribution);
 
