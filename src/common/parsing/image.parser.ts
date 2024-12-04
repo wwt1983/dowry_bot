@@ -39,7 +39,7 @@ export const checkParseImage = (
           step.textCheck as string[],
         );
       case 'Получен':
-        return checkBuy(text.ParsedResults[0].ParsedText, 'Покупки');
+        return checkBuy(text.ParsedResults[0].ParsedText);
       default:
         return false;
     }
@@ -88,9 +88,9 @@ function checkOrder(text: string, keywords: string[]): boolean {
 /**
  * проверка покупки
  **/
-function checkBuy(text: string, keyword: string): boolean {
+function checkBuy(text: string): boolean {
   try {
-    return text.toLowerCase().includes(keyword);
+    return text.toLowerCase().includes('покупки');
   } catch (error) {
     console.log('checkBuy=', error);
     return false;
