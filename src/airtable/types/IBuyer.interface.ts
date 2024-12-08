@@ -1,3 +1,4 @@
+//покупатель
 export interface IBuyer {
   id: string;
   createdTime: Date;
@@ -10,6 +11,8 @@ export interface IBuyer {
     Раздачи?: string[];
     chat_id: string;
     Оферта: string;
+    Подписка: boolean;
+    'Инфо по рассылкам': string;
   };
 }
 

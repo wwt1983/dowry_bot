@@ -36,6 +36,9 @@ import {
   LIMIT_TIME_IN_MINUTES_FOR_ORDER,
   TELEGRM_NOT_WORK,
   STEPS_FOR_UNUSUAL_USER,
+  TELEGRAM_CHAT_ID_OFFERS,
+  FORM_SURVEY,
+  SUBSCRIBE_CHAT_URL,
 } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import {
@@ -85,6 +88,7 @@ import {
   findFreeKeywords,
   isBuyStatus,
   parseOfferDetails,
+  itsSubscriber,
   //itsSubscriber,
   //getFilterDistribution,
 } from './telegram.custom.functions';
@@ -121,7 +125,7 @@ import {
   formatMinutesToHoursAndMinutes,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
-import { User } from '@grammyjs/types';
+import { ChatMember, User } from '@grammyjs/types';
 import {
   getOffersLink,
   getOffersLinkForNotification,
@@ -3014,5 +3018,74 @@ export class TelegramService {
     if (!chat_id) return false;
 
     return this.bot.api.sendMessage(chat_id, TELEGRM_NOT_WORK);
+  }
+  /**
+   * отправляем сообщение на подписку в нашу закрытую группу
+   */
+  async notificationSubscribeToChat(chat_id: string, userId: string) {
+    let member: ChatMember;
+    let subscriber: boolean;
+
+    const buyer = await this.airtableService.findBuyerById(userId);
+
+    if (process.env.NODE_ENV === 'development') {
+      subscriber = false;
+      //const buyer = await this.airtableService.findBuyerById(userId);
+      //console.log('byuer', buyer);
+    } else {
+      if (!chat_id) {
+        if (buyer && buyer.fields.chat_id) {
+          chat_id = buyer.fields.chat_id;
+        } else {
+          await this.airtableService.updateBuyer(
+            userId,
+            false,
+            'chat_id не установлен',
+          );
+          return;
+        }
+      }
+      try {
+        member = await this.bot.api.getChatMember(
+          TELEGRAM_CHAT_ID_OFFERS,
+          Number(chat_id),
+        );
+      } catch (error) {}
+    }
+
+    subscriber = itsSubscriber(member);
+
+    if (!subscriber) {
+      const offers = await this.airtableService.getOffersForChat();
+      const links = getOffersLink(offers, true);
+
+      const message = `✉️ Подпишитесь в группу DOWRY раздачи для получения скидок (до 100% кешбэка) и выгодных предложений (вход только по приглашению). <a href='${SUBSCRIBE_CHAT_URL}'>Для вступления напишите нам.</a>\n\n`;
+      const infoAboutOffers =
+        links && links.length > 0 ? '🕵️Раздачи в группе ⤵️' : '';
+
+      await this.bot.api.sendMessage(chat_id, message + infoAboutOffers, {
+        parse_mode: 'HTML',
+        link_preview_options: { is_disabled: true },
+      });
+      if (links) {
+        for (const link of links) {
+          await this.bot.api.sendMediaGroup(chat_id, [link] as any[]);
+        }
+      }
+      await this.bot.api.sendMessage(
+        chat_id,
+        '\n🙋‍♀️Если вас не затруднит, ответьте на пару вопросов ⤵️\n' +
+          FORM_SURVEY +
+          `?prefill_chat_id=${chat_id}`,
+        {
+          parse_mode: 'HTML',
+          link_preview_options: { is_disabled: true },
+        },
+      );
+    }
+    // if (buyer && buyer.fields.Подписка) {
+    //   return;
+    // }
+    await this.airtableService.updateBuyer(userId, subscriber, '');
   }
 }

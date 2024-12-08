@@ -12,7 +12,7 @@ export const getFilterById = (keyIds: string[]) => {
 /**
  * Получаем список раздач с полем ссылки и название
  */
-export const getOffersLink = (offers: IOffers) => {
+export const getOffersLink = (offers: IOffers, withoutUrl?: boolean) => {
   try {
     if (
       offers &&
@@ -33,11 +33,13 @@ export const getOffersLink = (offers: IOffers) => {
         .map((x) => ({
           type: 'photo',
           media: x.fields.Фото[0].thumbnails.full.url,
-          caption: `➡️ ${removeEmojis(x.fields.Name)}\n${
-            process.env.NODE_ENV === 'development'
-              ? x.fields['Ссылка'].replace('dowryworkbot', 'test_dowry_bot')
-              : x.fields['Ссылка']
-          }`,
+          caption: withoutUrl
+            ? x.fields.Описание
+            : `➡️ ${removeEmojis(x.fields.Name)}\n${
+                process.env.NODE_ENV === 'development'
+                  ? x.fields['Ссылка'].replace('dowryworkbot', 'test_dowry_bot')
+                  : x.fields['Ссылка']
+              }`,
         }));
     }
 

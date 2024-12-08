@@ -308,4 +308,22 @@ export class TelegramController {
     );
     console.log('notificationToClosedOffersUsers', data);
   }
+
+  /**
+   * отправляем сообщение на подписку в нашу закрытую группу
+   */
+  @Post('notificationSubscribeToChat')
+  async notificationSubscribeToChat(
+    @Body()
+    data: {
+      chat_id: string;
+      userId: string;
+    },
+  ) {
+    await this.telegramService.notificationSubscribeToChat(
+      data.chat_id,
+      data.userId,
+    );
+    console.log('notificationSubscribeToChat', data);
+  }
 }

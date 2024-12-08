@@ -418,6 +418,17 @@ export class AirtableService {
     return response;
   }
   /**
+   * список раздач для чата
+   */
+  async getOffersForChat(): Promise<IOffers> {
+    const response = await this.airtableHttpService.get(
+      TablesName.Offers,
+      `&${FILTER_BY_FORMULA}={Status}="Public in chat"`,
+    );
+
+    return response as IOffers;
+  }
+  /**
    * Получаем всю информацию о раздаче с ключевым словом, количеством заказов, временем и фильтрами
    */
   async getOffer(
@@ -1010,5 +1021,21 @@ export class AirtableService {
       Оферта: true,
       'Данные по оферте': decodeURIComponent(data),
     });
+  }
+  async updateBuyer(
+    id: string,
+    subscribe: boolean,
+    message?: string,
+  ): Promise<void> {
+    const data = subscribe
+      ? {
+          Подписка: subscribe,
+        }
+      : {
+          Подписка: subscribe,
+          'Инфо по рассылкам':
+            'Дата сообщения: ' + getDate() + ' ' + message || '',
+        };
+    await this.airtableHttpService.update(TablesName.Buyers, id, data);
   }
 }
