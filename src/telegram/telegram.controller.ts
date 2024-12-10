@@ -7,19 +7,19 @@ import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
 import { NotificationName } from 'src/airtable/types/INotification.interface';
-import { BotLoggerService } from '../logs/botlogger.service';
+//import { BotLoggerService } from '../logs/botlogger.service';
 import { formatError } from 'src/common/error/error';
 
 @Controller('telegram')
 export class TelegramController {
   constructor(
     private readonly telegramService: TelegramService,
-    private readonly logger: BotLoggerService,
+    //private readonly logger: BotLoggerService,
   ) {}
 
   @Post('bot')
   bot(@Body() data: any): void {
-    this.logger.log(
+    console.log(
       `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)} ${data}`,
     );
 
@@ -34,12 +34,12 @@ export class TelegramController {
           },
         });
       } else {
-        this.logger.log(
+        console.log(
           `empty${data.query_id} query_id time=${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
         );
       }
     } catch (e) {
-      this.logger.error('response from web=', formatError(e));
+      console.error('response from web=', formatError(e));
     }
   }
 
@@ -204,7 +204,7 @@ export class TelegramController {
       data.dateRecieved,
       data.userId,
     );
-    this.logger.log(`signalToTransferBotToDistributions ${data}`);
+    console.log(`signalToTransferBotToDistributions ${data}`);
   }
 
   /**
@@ -222,7 +222,7 @@ export class TelegramController {
       data.chat_id,
       data.articul[0],
     );
-    this.logger.log(`updateStatusByCache ${data}`);
+    console.log(`updateStatusByCache ${data}`);
   }
 
   @Post('noCached')
@@ -239,7 +239,7 @@ export class TelegramController {
         data.chat_id,
       );
     } catch (error) {
-      this.logger.error('noCached', formatError(error));
+      console.error('noCached', formatError(error));
     }
   }
 
@@ -270,7 +270,7 @@ export class TelegramController {
         data.time,
       );
     } catch (error) {
-      this.logger.error('alerts', formatError(error));
+      console.error('alerts', formatError(error));
     }
   }
 
@@ -285,10 +285,10 @@ export class TelegramController {
     },
   ): Promise<void> {
     try {
-      this.logger.log(`cloaseWaitings ${data.offerId}`);
+      console.log(`cloaseWaitings ${data.offerId}`);
       await this.telegramService.closeWaitings(data.offerId);
     } catch (error) {
-      this.logger.error('cloaseWaitings', formatError(error));
+      console.error('cloaseWaitings', formatError(error));
     }
   }
   /**
@@ -308,7 +308,7 @@ export class TelegramController {
       data.name,
       data.url,
     );
-    this.logger.log(`notificationToClosedOffersUsers ${data}`);
+    console.log(`notificationToClosedOffersUsers ${data}`);
   }
 
   /**
@@ -326,6 +326,6 @@ export class TelegramController {
       data.chat_id,
       data.userId,
     );
-    this.logger.log(`notificationSubscribeToChat ${data}`);
+    console.log(`notificationSubscribeToChat ${data}`);
   }
 }
