@@ -1474,7 +1474,7 @@ export class TelegramService {
       );
       const offerLink = getLinkForOffer(offerAirtable);
       if (offerLink) {
-        await this.bot.api.sendMessage(TELEGRAM_CHAT_ID, offerLink, {
+        await this.bot.api.sendMessage(TELEGRAM_CHAT_ID_OFFERS, offerLink, {
           parse_mode: 'HTML',
         });
       }
