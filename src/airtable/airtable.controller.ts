@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AirtableService } from './airtable.service';
-import { BotLoggerService } from '../logs/bot-logger.service';
+import { BotLoggerService } from '../logging/bot-logger.service';
 import { formatError } from 'src/common/error/error';
 
 @Controller('airtable')

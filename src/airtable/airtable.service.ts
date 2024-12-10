@@ -39,7 +39,7 @@ import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 import { IGNORED_STATUSES, STEPS } from 'src/telegram/telegram.constants';
 import { IBan } from './types/IBan.interfaces';
-import { BotLoggerService } from '../logs/bot-logger.service';
+import { BotLoggerService } from '../logging/bot-logger.service';
 import { formatError } from 'src/common/error/error';
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
-import { BotLoggerService } from './logs/bot-logger.service';
+import { BotLoggerService } from './logging/bot-logger.service';
 
 //import * as fs from 'fs';
 
@@ -15,7 +15,7 @@ import { BotLoggerService } from './logs/bot-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: false,
+    //logger: false,
   });
 
   app.enableCors({
