@@ -7,7 +7,7 @@ import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
 import { NotificationName } from 'src/airtable/types/INotification.interface';
-import { BotLoggerService } from 'src/logs/botlogger.service';
+import { BotLoggerService } from '../logs/botlogger.service';
 import { formatError } from 'src/common/error/error';
 
 @Controller('telegram')
