@@ -15,7 +15,7 @@ import { BotLoggerService } from './logs/botlogger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'debug'], // Убираем 'log'
+    logger: false,
   });
 
   app.enableCors({
