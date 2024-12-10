@@ -4,6 +4,7 @@ import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import { TelegramController } from './telegram.controller';
+import { BotLoggerService } from 'src/logs/botlogger.service';
 
 @Global()
 @Module({
@@ -15,8 +16,18 @@ export class TelegramModule {
     return {
       module: TelegramModule,
       imports: options.imports,
-      providers: [TelegramService, providerAsyncOptions, TelegramHttpService],
-      exports: [TelegramService, providerAsyncOptions, TelegramHttpService],
+      providers: [
+        TelegramService,
+        providerAsyncOptions,
+        TelegramHttpService,
+        BotLoggerService,
+      ],
+      exports: [
+        TelegramService,
+        providerAsyncOptions,
+        TelegramHttpService,
+        BotLoggerService,
+      ],
     };
   }
 

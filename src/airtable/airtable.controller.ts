@@ -1,9 +1,14 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AirtableService } from './airtable.service';
+import { BotLoggerService } from '../logs/botlogger.service';
+import { formatError } from 'src/common/error/error';
 
 @Controller('airtable')
 export class AirtableController {
-  constructor(private readonly airtableService: AirtableService) {}
+  constructor(
+    private readonly airtableService: AirtableService,
+    private readonly logger: BotLoggerService,
+  ) {}
 
   @Post('signal')
   signal(@Body() data: any): string {
@@ -16,14 +21,14 @@ export class AirtableController {
       const result = await this.airtableService.getOffers(type);
       return result;
     } catch (error) {
-      console.log('offers', error);
+      this.logger.error('offers', formatError(error));
       return null;
     }
   }
 
   @Post('checkPhone')
   async checkPhone(@Body() data: { phone: string }): Promise<boolean> {
-    console.log('data ===', data);
+    this.logger.log(`data === ${data}`);
     return await this.airtableService.checkPhone(data.phone);
   }
 

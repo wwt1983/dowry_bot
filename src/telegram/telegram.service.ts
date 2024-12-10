@@ -133,6 +133,8 @@ import {
 import { NotificationName } from 'src/airtable/types/INotification.interface';
 import { IOCRResponse } from 'src/common/parsing/image.interface';
 import { checkParseImage } from 'src/common/parsing/image.parser';
+import { BotLoggerService } from '../logs/botlogger.service';
+import { formatError } from 'src/common/error/error';
 
 @Injectable({ scope: Scope.DEFAULT })
 export class TelegramService {
@@ -144,10 +146,11 @@ export class TelegramService {
     private readonly commandService: TelegramHttpService,
     private readonly firebaseService: FirebaseService,
     private readonly airtableService: AirtableService,
+    private readonly logger: BotLoggerService,
   ) {
     this.options = options;
 
-    console.log('------- START BOT --------', process.env.NODE_ENV);
+    this.logger.log('------- START BOT --------' + process.env.NODE_ENV);
 
     this.bot = new Bot<MyContext, MyApi>(this.options.token);
     this.bot.use(hydrateContext());
@@ -381,7 +384,7 @@ export class TelegramService {
           });
         }
       } catch (e) {
-        console.log('history=', e);
+        this.logger.log('history=' + e);
         return await ctx.reply('Раздел обновляется');
       }
     });
@@ -408,7 +411,7 @@ export class TelegramService {
           }
         }
       } catch (e) {
-        console.log('offers', e);
+        this.logger.log('offers=' + e);
         return await ctx.reply(
           'Данные обновляются. Попробуйте обновить позже😿',
         );
@@ -481,7 +484,6 @@ export class TelegramService {
           }
         }
       }
-
       return;
     });
 
@@ -580,7 +582,7 @@ export class TelegramService {
 
         ctx.session.lastMessage = responseMsg.message_id;
       } catch (e) {
-        console.log('message:photo', e, ctx.from.id, ctx.session);
+        this.logger.log(`message:photo ${e} ${ctx.from.id} ${ctx.session}`);
       }
     });
 
@@ -716,7 +718,7 @@ export class TelegramService {
             ];
           }
         } catch (error) {
-          console.log('parseImageData error= ', error);
+          this.logger.log('parseImageData error= ' + error);
         }
         await ctx.api.editMessageText(
           ctx.session.chat_id,
@@ -984,7 +986,7 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
           await ctx.reply('Принято!✌️');
 
-          console.log('extendedOfferType', ctx.session.detailsOffer);
+          this.logger.log('extendedOfferType' + ctx.session.detailsOffer);
 
           if (
             ctx.session.detailsOffer?.extendedOfferType == true ||
@@ -1066,7 +1068,7 @@ export class TelegramService {
             lastInterval,
           );
 
-          console.log('==== WEB API ====', data, ctx.session);
+          this.logger.log(`==== WEB API ==== ${data} ${ctx.session}`);
 
           const userHistory = await this.getUserHistory(ctx.from, true);
           ctx.session.userOffers = userHistory?.userOffers;
@@ -1327,21 +1329,21 @@ export class TelegramService {
           }
         } //конец проверки ссылки чека
       } catch (e) {
-        console.log('message=', e);
+        this.logger.log('message=' + e);
       }
     });
     this.bot.catch((err) => {
       const ctx = err.ctx;
-      console.log(`Error while handling update ${ctx.update.update_id}`);
+      this.logger.log(`Error while handling update ${ctx.update.update_id}`);
 
       const e = err.error;
 
       if (e instanceof GrammyError) {
-        console.error('Error in request: ', e.description);
+        this.logger.error('Error in request: ', e.description);
       } else if (e instanceof HttpError) {
-        console.error('Could not contact Telegram', e);
+        this.logger.error('Could not contact Telegram', e.message);
       } else {
-        console.error('Unknow error: ', e);
+        this.logger.error('Unknow error: ', '');
       }
     });
 
@@ -1455,7 +1457,7 @@ export class TelegramService {
         await this.getKeyboardHistory(ctx.from.id, ctx.session.sessionId);
       }
     } catch (error) {
-      console.log('nextStepHandler', error);
+      this.logger.log('nextStepHandler' + error);
     }
   }
   /**
@@ -1479,7 +1481,9 @@ export class TelegramService {
 
       return result.at(-1).message_id;
     } catch (e) {
-      console.log('sendOfferToChat= возможно не опубликован в чате или ', e);
+      this.logger.log(
+        'sendOfferToChat= возможно не опубликован в чате или ' + e,
+      );
     }
   }
 
@@ -1509,7 +1513,9 @@ export class TelegramService {
 
       return result?.message_id;
     } catch (e) {
-      console.log('sendOrderToChat= возможно не опубликован в чате или ', e);
+      this.logger.log(
+        'sendOrderToChat= возможно не опубликован в чате или ' + e,
+      );
       return -1;
     }
   }
@@ -1533,7 +1539,7 @@ export class TelegramService {
         caption: text,
       });
     } catch (e) {
-      console.log('sendOfferToChat', e);
+      this.logger.log('sendOfferToChat=' + e);
     }
   }
 
@@ -1591,14 +1597,8 @@ export class TelegramService {
     video: boolean,
   ): Promise<void> {
     try {
-      console.log(
-        'sendNotificationToUser',
-        chat_id,
-        sessionId,
-        botId,
-        status,
-        getDateWithTz(startTime),
-        startTime,
+      this.logger.log(
+        `sendNotificationToUser ${chat_id} ${sessionId} ${botId} ${status} ${getDateWithTz(startTime)} ${startTime}`,
       );
       if (checkOnStopStatus(status)) return;
 
@@ -1673,7 +1673,7 @@ export class TelegramService {
           }
           return;
         } catch (error) {
-          console.log(error);
+          this.logger.error('sendNotificationToUser error', formatError(error));
           return;
         } finally {
           return;
@@ -1836,7 +1836,7 @@ export class TelegramService {
         ]);
       }
     } catch (e) {
-      console.log('sendMediaByStep=', statusName, e);
+      this.logger.error(`sendMediaByStep=${statusName}`, formatError(e));
     }
   }
 
@@ -1851,7 +1851,7 @@ export class TelegramService {
         'SessionId',
       );
 
-      console.log('restore ', sessionId, data);
+      this.logger.log(`restore ${sessionId} ${JSON.stringify(data)}`);
 
       const { id } = ctx.from;
 
@@ -1926,7 +1926,7 @@ export class TelegramService {
       }
       return session;
     } catch (error) {
-      console.log('restoreSession= ', error, sessionId);
+      this.logger.error(`restoreSession=${sessionId}`, formatError(error));
       return null;
     }
   }
@@ -1945,7 +1945,7 @@ export class TelegramService {
         }
       }
     } catch (error) {
-      console.error('Error sending media group:', error);
+      this.logger.error('Error sending media group:', formatError(error));
       // Обработка ошибки (например, можно вернуть пустой массив или выбросить ошибку)
     }
     return ids;
@@ -2124,7 +2124,7 @@ export class TelegramService {
         }
         return true;
       }
-      console.log("sendFedbackToUser do'not send");
+      this.logger.log("sendFedbackToUser do'not send");
       return false;
     } catch (e) {
       await this.bot.api.sendMessage(
@@ -2138,7 +2138,7 @@ export class TelegramService {
           parse_mode: 'HTML',
         },
       );
-      console.log('sendFedbackToUser= ', e);
+      this.logger.error('sendFedbackToUser= ', formatError(e));
     }
   }
   /**
@@ -2189,7 +2189,7 @@ export class TelegramService {
       );
       return true;
     } catch (e) {
-      console.log('checkMessageInChatMessage', e);
+      this.logger.error('checkMessageInChatMessage', formatError(e));
       return false;
     }
   }
@@ -2218,15 +2218,15 @@ export class TelegramService {
     offerName: string,
   ) {
     try {
-      console.log('transferBotToDistributions session=', sessionId, chat_id);
+      this.logger.log(
+        `transferBotToDistributions session=${sessionId} ${chat_id}`,
+      );
 
       if (!sessionId) {
-        console.log('transferBotToDistributions no session=', sessionId);
+        this.logger.log(`transferBotToDistributions no session=${sessionId}`);
         return;
       }
       const buyer = await this.airtableService.findBuyerByChatId(chat_id);
-
-      //console.log('buyerId=', buyer);
 
       if (!buyer) {
         return await this.airtableService.updateStatusTransferInBot(
@@ -2241,7 +2241,7 @@ export class TelegramService {
 
       if (!distributions || distributions.length === 0) {
         const articules = distributions?.map((x) => x.fields['Артикул WB'][0]);
-        console.log('articules', articules);
+        //console.log('articules', articules);
 
         if (!articules.includes(+articul.trim())) {
           await this.airtableService.updateStatusTransferInBot(
@@ -2257,7 +2257,6 @@ export class TelegramService {
           x.fields['Артикул WB'][0] === +articul.trim() &&
           !x.fields['Кэш выплачен'],
       );
-      //console.log('filterDistribution ', articul, filterDistribution);
 
       if (filterDistribution && filterDistribution.length > 1) {
         filterDistribution = distributions.filter((x) => {
@@ -2275,13 +2274,12 @@ export class TelegramService {
         });
       }
 
-      console.log('filterDistribution', filterDistribution);
+      this.logger.log(`filterDistribution ${filterDistribution}`);
+
       if (filterDistribution) {
         const distribution = filterDistribution[0];
-        console.log(
-          'Дата выкупа =',
-          distribution?.fields['Дата выкупа'],
-          parsedDate(convertDateFromString(dateRecived)),
+        this.logger.log(
+          `Дата выкупа =${distribution?.fields['Дата выкупа']} ${parsedDate(convertDateFromString(dateRecived))}`,
         );
         await this.airtableService.updateDistribution({
           id: distribution.id,
@@ -2320,7 +2318,10 @@ export class TelegramService {
         return false;
       }
     } catch (error) {
-      console.log('transferBotToDistributions error=', error);
+      this.logger.error(
+        'transferBotToDistributions error=',
+        formatError(error),
+      );
       await this.airtableService.updateStatusTransferInBot(
         'Ошибка переноса',
         sessionId,
@@ -2345,7 +2346,6 @@ export class TelegramService {
       if (!chat_id) {
         chat_id = (await this.airtableService.findBuyerById(userId))?.fields
           .chat_id;
-        console.log('chat_id', chat_id);
       }
       const userBotData =
         await this.airtableService.getBotByFilterArticulAndChatId(
@@ -2355,12 +2355,6 @@ export class TelegramService {
 
       if (userBotData?.fields['SessionId']) {
         sessionId = userBotData?.fields['SessionId'];
-
-        console.log(
-          'Факт дата получения',
-          userBotData.fields['Факт дата получения'],
-          convertDateFromString(userBotData.fields['Факт дата получения']),
-        );
 
         await this.airtableService.updateDistribution({
           id,
@@ -2395,7 +2389,6 @@ export class TelegramService {
           'Успешно перенесены',
           sessionId,
         );
-        console.log('Данные перенесены');
       } else {
         await this.airtableService.updateStatusTransferInBot(
           'Ошибка переноса',
@@ -2403,7 +2396,10 @@ export class TelegramService {
         );
       }
     } catch (error) {
-      console.log('transferBotToDistributions', sessionId, error);
+      this.logger.error(
+        `transferBotToDistributions ${sessionId}`,
+        formatError(error),
+      );
       if (sessionId) {
         await this.airtableService.updateStatusTransferInBot(
           'Ошибка переноса',
@@ -2436,7 +2432,7 @@ export class TelegramService {
       if (session.instructionMessages.length > 0) {
         const deletePromises = session.instructionMessages.map((messageId) =>
           this.bot.api.deleteMessage(chat_id, messageId).catch((error) => {
-            console.error(`Failed to delete message ${messageId}:`, error);
+            this.logger.error(`Failed to delete message ${messageId}:`, error);
           }),
         );
 
@@ -2444,7 +2440,7 @@ export class TelegramService {
       }
       return true;
     } catch (error) {
-      console.log('clearInstruction', error);
+      this.logger.error('clearInstruction', formatError(error));
     }
   }
   /**
@@ -2490,7 +2486,7 @@ export class TelegramService {
         );
       }
     } catch (error) {
-      console.log('updateStatusByCache', sessionId, error);
+      this.logger.error(`updateStatusByCache ${sessionId}`, formatError(error));
     }
   }
   /**
@@ -2531,10 +2527,12 @@ export class TelegramService {
           chat_id,
           value.notification.fields.Сообщение,
         );
-        console.log('send message ', chat_id);
       }
     } catch (error) {
-      console.log('sendMessageToNoCachedDistributions', error);
+      this.logger.error(
+        'sendMessageToNoCachedDistributions',
+        formatError(error),
+      );
     }
 
     //
@@ -2579,7 +2577,7 @@ export class TelegramService {
    */
   async alerts(name: NotificationName, activity: string, message: string) {
     if (!activity) return false;
-    console.log('natification name = ', name, activity, message);
+    this.logger.log(`natification name= ${name} ${activity} ${message}`);
 
     const notification = await this.airtableService.getNotificationByField(
       name,
@@ -2626,8 +2624,6 @@ export class TelegramService {
     }
 
     if (process.env.NODE_ENV !== 'development') {
-      console.log('боевая рассылка', data.length);
-
       data.map(async (item) => {
         try {
           await this.bot.api.sendMessage(item, message + '\n' + offersMessage, {
@@ -2635,10 +2631,11 @@ export class TelegramService {
             link_preview_options: { is_disabled: true },
           });
           await sleep(1000);
-          console.log(`рассылка прошла для ${item}`);
+          this.logger.log(`рассылка прошла для ${item}`);
         } catch (error) {
-          console.error(
-            `chat_id ${item} Ошибка при отправке сообщения: ${error}`,
+          this.logger.error(
+            `chat_id ${item} Ошибка при отправке сообщения:`,
+            formatError(error),
           );
         }
       });
@@ -2668,7 +2665,7 @@ export class TelegramService {
   }
 
   async closeWaitings(offerId: string) {
-    console.log(`close waitings ${offerId}`);
+    this.logger.log(`close waitings ${offerId}`);
 
     const data = await this.airtableService.getWaitingsForClose(offerId);
 
@@ -2689,9 +2686,9 @@ export class TelegramService {
           `📌 Здравствуйте! Вы были в очереди на раздачу ${item.fields.Раздача}. К сожалению, раздача закрылась🙁\n Следите за нашими раздачами.😉`,
         );
       } catch (error) {
-        console.error(
-          `closeWaitings для chat_id ${item.fields.chat_id} Ошибка при отправке сообщения: ${error}`,
-          error,
+        this.logger.error(
+          `closeWaitings для chat_id ${item.fields.chat_id} Ошибка при отправке сообщения:`,
+          formatError(error),
         );
       }
     });
@@ -2710,7 +2707,6 @@ export class TelegramService {
       botId: x.fields.Id,
     }));
 
-    //console.log(data);
     const notifications = await this.airtableService.getNotifications();
 
     data.map(async (item) => {
@@ -2746,12 +2742,13 @@ export class TelegramService {
           },
         );
         await sleep(1000);
-        console.log(
+        this.logger.log(
           `рассылка notificationToClosedOffersUsers прошла для ${item.chatId}`,
         );
       } catch (error) {
-        console.error(
-          `chat_id ${item.chatId} Ошибка при отправке сообщения notificationToClosedOffersUsers: ${error}`,
+        this.logger.error(
+          `chat_id ${item.chatId} Ошибка при отправке сообщения notificationToClosedOffersUsers:`,
+          formatError(error),
         );
       }
     });
@@ -2877,7 +2874,7 @@ export class TelegramService {
         }
       });
     } catch (error) {
-      console.log('sendDetailsForNoKeyUsers', error);
+      this.logger.error('sendDetailsForNoKeyUsers', formatError(error));
     }
   }
 
@@ -2890,7 +2887,7 @@ export class TelegramService {
   ) {
     const minutesForStart = getDifferenceInMinutes(startTime);
     const minutes = +minutesForStart.toString().replace('-', '');
-    //console.log('До начала осталось ' + minutes);
+
     try {
       if (minutesForStart < 0) {
         // Отправляем сообщение с оставшимся временем до начала
@@ -2928,7 +2925,7 @@ export class TelegramService {
         );
       }
     } catch (error) {
-      console.log('startTimer', error);
+      this.logger.error('startTimer', formatError(error));
     }
   }
 
@@ -2993,7 +2990,7 @@ export class TelegramService {
         }
       }, 60 * 1000); // Каждую минуту
     } catch (error) {
-      console.log('startTimer', error);
+      this.logger.error('startTimer', formatError(error));
     }
   }
   /**
@@ -3031,7 +3028,6 @@ export class TelegramService {
     if (process.env.NODE_ENV === 'development') {
       subscriber = false;
       //const buyer = await this.airtableService.findBuyerById(userId);
-      //console.log('byuer', buyer);
     } else {
       if (!chat_id) {
         if (buyer && buyer.fields.chat_id) {

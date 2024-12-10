@@ -39,12 +39,15 @@ import { IHelpers } from 'src/airtable/types/IHelper.interface';
 import { IArticle } from 'src/airtable/types/IArticle.interface';
 import { IGNORED_STATUSES, STEPS } from 'src/telegram/telegram.constants';
 import { IBan } from './types/IBan.interfaces';
+import { BotLoggerService } from 'src/logs/botlogger.service';
+import { formatError } from 'src/common/error/error';
 
 @Injectable()
 export class AirtableService {
   constructor(
     private readonly airtableHttpService: AirtableHttpService,
     private readonly configService: ConfigService,
+    private readonly logger: BotLoggerService,
   ) {}
 
   async saveToAirtable(session: ISessionData): Promise<any> {
@@ -84,13 +87,16 @@ export class AirtableService {
       );
       return response;
     } catch (error) {
-      console.log(`saveToAirtable error= ${data.SessionId}`, error);
+      this.logger.error(
+        `saveToAirtable error= ${data.SessionId}`,
+        formatError(error),
+      );
     }
   }
   async updateToAirtable(session: ISessionData): Promise<any> {
     try {
       if (!session.sessionId) {
-        console.log('empty session= ', session);
+        this.logger.log(`empty session= ${JSON.stringify(session)}`);
         return null;
       }
       //const correctTime = getOfferTime(session);
@@ -136,18 +142,18 @@ export class AirtableService {
       );
       return response;
     } catch (e) {
-      console.log('error updateToAirtable=', session, e);
+      this.logger.error(`error updateToAirtable=${session}`, formatError(e));
       return null;
     }
   }
   async updateStatusInBot(sessionId: string, status: BotStatus): Promise<any> {
     if (!sessionId) {
-      console.log('empty session=', status);
+      this.logger.log(`empty session=${status}`);
       return null;
     }
     const result = await this.getBotBySession(sessionId);
     if (!result || !result.id) {
-      console.log('updateStatusInBot error id', sessionId);
+      this.logger.log(`updateStatusInBot error id ${sessionId}`);
     }
     const response = await this.airtableHttpService.update(
       TablesName.Bot,
@@ -157,7 +163,7 @@ export class AirtableService {
         StopTime: getTimeWithTz(),
       },
     );
-    console.log('updateStatusInBot', sessionId);
+    this.logger.log(`updateStatusInBot ${sessionId}`);
     return response;
   }
   /**
@@ -172,7 +178,7 @@ export class AirtableService {
     //   'AIRTABLE_WEBHOOK_FOR_UPDATE_FOR_USER_WITH_EMPTY_KEY',
     // );
     if (!sessionId) {
-      console.log('empty session=', sessionId);
+      this.logger.log(`empty session=${sessionId}`);
       return null;
     }
 
@@ -185,10 +191,8 @@ export class AirtableService {
         StartTime: newStartTime,
       },
     );
-    console.log(
-      'updateUserWithEmptyKeyInBotTableAirtable',
-      response,
-      sessionId,
+    this.logger.log(
+      `updateUserWithEmptyKeyInBotTableAirtable ${sessionId} ${response}`,
     );
     return response;
   }
@@ -219,7 +223,6 @@ export class AirtableService {
         comments.records[0].id,
         data,
       );
-      console.log('updateCommentInBotTableAirtable');
     } else {
       // tableUrl = this.configService.get(
       //   'AIRTABLE_WEBHOOK_URL_FOR_TABlE_BOT_ADD_COMMENTS',
@@ -230,7 +233,6 @@ export class AirtableService {
         Name: userValue.fio + ' ' + userValue.userName,
       };
       await this.airtableHttpService.post(TablesName.UserComments, data);
-      console.log('addCommentInBotTableAirtable');
     }
   }
 
@@ -242,7 +244,6 @@ export class AirtableService {
       TablesName.NotificationStatistics,
       data,
     );
-    console.log('addToAirtableNotificationStatistic');
     return response;
   }
   async updateToAirtableNotificationStatistic(
@@ -258,7 +259,6 @@ export class AirtableService {
       result.id,
       data,
     );
-    console.log('updateToAirtableNotificationStatistic');
     return response;
   }
   async updateDistribution(data: any): Promise<any> {
@@ -266,7 +266,6 @@ export class AirtableService {
       'AIRTABLE_WEBHOOK_FOR_TRANSFER_DATA_FROM_BOT_TO_DISTRIBUTION',
     );
     const response = await this.airtableHttpService.postWebhook(tableUrl, data);
-    console.log('postWebhook ===>', response);
     return response;
   }
   async updateStatusTransferInBot(
@@ -288,7 +287,6 @@ export class AirtableService {
         'Перенести в Раздачу': status,
       },
     );
-    console.log('updateStatusTransferInBot', response);
     return response;
   }
   async updateStatusCacheInBot(sessionId: string): Promise<any> {
@@ -303,7 +301,6 @@ export class AirtableService {
         'Статус кеша': 'Выплачен',
       },
     );
-    console.log('updateStatusCacheInBot');
     return response;
   }
   /**
@@ -319,7 +316,6 @@ export class AirtableService {
         'Отказ на ПВЗ': true,
       },
     );
-    console.log('updateStatusCacheInBot');
     return response;
   }
   async updateNotification(
@@ -335,7 +331,6 @@ export class AirtableService {
       time,
       status,
     });
-    console.log('postWebhook ===>', response);
     return response;
   }
 
@@ -556,7 +551,7 @@ export class AirtableService {
       }
       return offer as IOffer;
     } catch (error) {
-      console.log('getOffer', error);
+      this.logger.error('getOffer', formatError(error));
       return offer as IOffer;
     }
   }
@@ -628,7 +623,6 @@ export class AirtableService {
       TablesName.Distributions,
       filter,
     );
-    console.log('data=', data, buyerId);
     if (!data || !data.records || data?.records?.length === 0) return null;
     return data as IDistributions;
   }
@@ -660,8 +654,6 @@ export class AirtableService {
       }
       return acc;
     }, []);
-
-    console.log('length=', uniqChatIds.length);
 
     return uniqChatIds;
   }
@@ -756,14 +748,11 @@ export class AirtableService {
       const result = await this.findBuyerByChatId(chatId);
       if (!result) return null;
 
-      const response = await this.airtableHttpService.update(
-        TablesName.Buyers,
-        result.id,
-        { Оферта: oferta },
-      );
-      console.log('response=', response);
+      await this.airtableHttpService.update(TablesName.Buyers, result.id, {
+        Оферта: oferta,
+      });
     } catch (error) {
-      console.log('saveBuyerOferta error=', error);
+      this.logger.error('saveBuyerOferta error=', formatError(error));
     }
   }
   async checkPhone(phone: string): Promise<boolean> {
@@ -827,11 +816,9 @@ export class AirtableService {
         return acc;
       }, []);
 
-      console.log('notifications length=', uniqChatIds.length);
-
       return uniqChatIds;
     } catch (error) {
-      console.log('getUsersWithStatus', error);
+      this.logger.error('getUsersWithStatus', formatError(error));
     }
   }
 
@@ -983,8 +970,6 @@ export class AirtableService {
         `https://mpstats.io/api/wb/get/item/${articul}/by_keywords?d1=${addDaysToDate(startDate, -4)}&d2=${addDaysToDate(startDate, -2)}`,
       );
 
-      //console.log('getMPSTATSPosition', data);
-
       if (!data) return null;
 
       for (const key in data?.words) {
@@ -997,12 +982,11 @@ export class AirtableService {
       }
       if (avgPosValues?.length > 1) {
         const maxAvgPos = Math.max(...avgPosValues);
-        console.log('maxAvgPos', maxAvgPos);
         return maxAvgPos;
       }
       return null;
     } catch (error) {
-      console.log('getMPSTATSPosition', error);
+      this.logger.error('getMPSTATSPosition', formatError(error));
       return null;
     }
   }

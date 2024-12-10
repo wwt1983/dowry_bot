@@ -7,16 +7,20 @@ import { FORMAT_DATE } from 'src/common/date/date.methods';
 import { formatInTimeZone } from 'date-fns-tz';
 import { FeedbackStatus } from './telegram.interface';
 import { NotificationName } from 'src/airtable/types/INotification.interface';
+import { BotLoggerService } from 'src/logs/botlogger.service';
+import { formatError } from 'src/common/error/error';
 
 @Controller('telegram')
 export class TelegramController {
-  constructor(private readonly telegramService: TelegramService) {}
+  constructor(
+    private readonly telegramService: TelegramService,
+    private readonly logger: BotLoggerService,
+  ) {}
 
   @Post('bot')
   bot(@Body() data: any): void {
-    console.log(
-      `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
-      data,
+    this.logger.log(
+      `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)} ${data}`,
     );
 
     try {
@@ -30,12 +34,12 @@ export class TelegramController {
           },
         });
       } else {
-        console.log(
+        this.logger.log(
           `empty${data.query_id} query_id time=${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)}`,
         );
       }
     } catch (e) {
-      console.log('response from web=', e);
+      this.logger.error('response from web=', formatError(e));
     }
   }
 
@@ -102,7 +106,6 @@ export class TelegramController {
   async orderFromSite(
     @Body() data: { phone: string; name: string; articul: string },
   ): Promise<number> {
-    console.log(data);
     return await this.telegramService.sendOrderToChat(
       data.phone,
       data.name,
@@ -201,7 +204,7 @@ export class TelegramController {
       data.dateRecieved,
       data.userId,
     );
-    console.log('signalToTransferBotToDistributions', data);
+    this.logger.log(`signalToTransferBotToDistributions ${data}`);
   }
 
   /**
@@ -219,7 +222,7 @@ export class TelegramController {
       data.chat_id,
       data.articul[0],
     );
-    console.log('updateStatusByCache', data);
+    this.logger.log(`updateStatusByCache ${data}`);
   }
 
   @Post('noCached')
@@ -231,13 +234,12 @@ export class TelegramController {
     },
   ): Promise<void> {
     try {
-      console.log(data.articul);
       await this.telegramService.sendMessageToNoCachedDistributions(
         data.articul[0],
         data.chat_id,
       );
     } catch (error) {
-      console.log('noCached', error);
+      this.logger.error('noCached', formatError(error));
     }
   }
 
@@ -268,7 +270,7 @@ export class TelegramController {
         data.time,
       );
     } catch (error) {
-      console.log('alerts', error);
+      this.logger.error('alerts', formatError(error));
     }
   }
 
@@ -283,10 +285,10 @@ export class TelegramController {
     },
   ): Promise<void> {
     try {
-      console.log('cloaseWaitings', data.offerId);
+      this.logger.log(`cloaseWaitings ${data.offerId}`);
       await this.telegramService.closeWaitings(data.offerId);
     } catch (error) {
-      console.log('cloaseWaitings', error);
+      this.logger.error('cloaseWaitings', formatError(error));
     }
   }
   /**
@@ -306,7 +308,7 @@ export class TelegramController {
       data.name,
       data.url,
     );
-    console.log('notificationToClosedOffersUsers', data);
+    this.logger.log(`notificationToClosedOffersUsers ${data}`);
   }
 
   /**
@@ -324,6 +326,6 @@ export class TelegramController {
       data.chat_id,
       data.userId,
     );
-    console.log('notificationSubscribeToChat', data);
+    this.logger.log(`notificationSubscribeToChat ${data}`);
   }
 }

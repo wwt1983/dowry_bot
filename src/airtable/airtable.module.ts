@@ -5,11 +5,13 @@ import { AirtableHttpService } from './airtable.http.service';
 import { HttpModule } from '@nestjs/axios';
 import { AirtableController } from './airtable.controller';
 import { TelegramModule } from 'src/telegram/telegram.module';
+import { BotLoggerModule } from 'src/logs/botlogger.module';
 
 @Global()
 @Module({
   imports: [
     TelegramModule,
+    BotLoggerModule,
     ConfigModule,
     HttpModule.register({
       timeout: 30000,

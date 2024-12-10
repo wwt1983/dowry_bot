@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
+import { BotLoggerService } from './logs/botlogger.service';
+
 //import * as fs from 'fs';
 
 // const httpsOptions =
@@ -12,7 +14,10 @@ import { HttpExceptionFilter } from './common/filters/http-exception/http-except
 //       };
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'debug'], // Убираем 'log'
+  });
+
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST'],
@@ -27,6 +32,13 @@ async function bootstrap() {
   });
 
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  const botLogger = app.get(BotLoggerService);
+  if (botLogger) {
+    app.useLogger(botLogger);
+  } else {
+    console.error('BotLogger не найден');
+  }
 
   await app.listen(process.env.PORT || 5100);
 }
