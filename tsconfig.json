@@ -20,6 +20,8 @@
     "noFallthroughCasesInSwitch": false,
     "strictPropertyInitialization": false,
     "skipDefaultLibCheck": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
   }
 }
