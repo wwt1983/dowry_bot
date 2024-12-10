@@ -4,7 +4,7 @@ import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
 import { TelegramHttpService } from './telegram.http.service';
 import { TelegramController } from './telegram.controller';
-import { BotLoggerService } from '../logs/botlogger.service';
+import { BotLoggerService } from '../logs/bot-logger.service';
 
 @Global()
 @Module({

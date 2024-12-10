@@ -14,7 +14,7 @@ import { HttpModule } from '@nestjs/axios';
 import { SmsModule } from './sms/sms.module';
 import { PdfModule } from './pdf/pdf.module';
 //import { SupabaseService } from './supabase/supabase';
-import { BotLoggerModule } from './logs/botlogger.module';
+import { BotLoggerModule } from './logs/bot-logger.module';
 
 @Module({
   imports: [

@@ -5,7 +5,7 @@ import { AirtableHttpService } from './airtable.http.service';
 import { HttpModule } from '@nestjs/axios';
 import { AirtableController } from './airtable.controller';
 import { TelegramModule } from 'src/telegram/telegram.module';
-import { BotLoggerModule } from '../logs/botlogger.module';
+import { BotLoggerModule } from '../logs/bot-logger.module';
 
 @Global()
 @Module({

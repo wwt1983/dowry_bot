@@ -133,7 +133,7 @@ import {
 import { NotificationName } from 'src/airtable/types/INotification.interface';
 import { IOCRResponse } from 'src/common/parsing/image.interface';
 import { checkParseImage } from 'src/common/parsing/image.parser';
-import { BotLoggerService } from '../logs/botlogger.service';
+import { BotLoggerService } from '../logs/bot-logger.service';
 import { formatError } from 'src/common/error/error';
 
 @Injectable({ scope: Scope.DEFAULT })

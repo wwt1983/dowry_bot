@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
-import { BotLoggerService } from './logs/botlogger.service';
+import { BotLoggerService } from './logs/bot-logger.service';
 
 //import * as fs from 'fs';
 
