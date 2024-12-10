@@ -192,7 +192,7 @@ export class AirtableService {
       },
     );
     this.logger.log(
-      `updateUserWithEmptyKeyInBotTableAirtable ${sessionId} ${response}`,
+      `updateUserWithEmptyKeyInBotTableAirtable ${sessionId} ${JSON.stringify(response)}`,
     );
     return response;
   }

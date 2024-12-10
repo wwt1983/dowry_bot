@@ -20,7 +20,7 @@ export class TelegramController {
   @Post('bot')
   bot(@Body() data: any): void {
     this.logger.log(
-      `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)} ${data}`,
+      `WEB DATA time= ${formatInTimeZone(new Date(), 'Europe/Moscow', FORMAT_DATE)} ${JSON.stringify(data)}`,
     );
 
     try {
@@ -204,7 +204,9 @@ export class TelegramController {
       data.dateRecieved,
       data.userId,
     );
-    this.logger.log(`signalToTransferBotToDistributions ${data}`);
+    this.logger.log(
+      `signalToTransferBotToDistributions ${JSON.stringify(data)}`,
+    );
   }
 
   /**
@@ -222,7 +224,7 @@ export class TelegramController {
       data.chat_id,
       data.articul[0],
     );
-    this.logger.log(`updateStatusByCache ${data}`);
+    this.logger.log(`updateStatusByCache ${JSON.stringify(data)}`);
   }
 
   @Post('noCached')
@@ -308,7 +310,7 @@ export class TelegramController {
       data.name,
       data.url,
     );
-    this.logger.log(`notificationToClosedOffersUsers ${data}`);
+    this.logger.log(`notificationToClosedOffersUsers ${JSON.stringify(data)}`);
   }
 
   /**
@@ -326,6 +328,6 @@ export class TelegramController {
       data.chat_id,
       data.userId,
     );
-    this.logger.log(`notificationSubscribeToChat ${data}`);
+    this.logger.log(`notificationSubscribeToChat ${JSON.stringify(data)}`);
   }
 }
