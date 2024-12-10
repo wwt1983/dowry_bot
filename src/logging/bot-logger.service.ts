@@ -1,10 +1,10 @@
 import { LoggerService } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-//import { SupabaseService } from '../supabase/supabase';
+import { SupabaseService } from '../supabase/supabase';
 
 @Injectable()
 export class BotLoggerService implements LoggerService {
-  constructor() {
+  constructor(private readonly supabaseService: SupabaseService) {
     console.log('BotLogger ok ');
   }
 
@@ -13,18 +13,17 @@ export class BotLoggerService implements LoggerService {
     if (message.startsWith('Mapped') || message.includes('Controller')) {
       return;
     }
-    //this.saveToSupabase('log', message);
+    this.saveToSupabase('log', message);
     console.log(message);
   }
 
   error(message: string, trace: string) {
-    //this.saveToSupabase('error', message);
-
+    this.saveToSupabase('error', message);
     console.error(message, trace);
   }
 
   warn(message: string) {
-    // this.saveToSupabase('warn', message);
+    this.saveToSupabase('warn', message);
     console.warn(message);
   }
 
@@ -34,21 +33,21 @@ export class BotLoggerService implements LoggerService {
   }
 
   verbose(message: string) {
-    // this.saveToSupabase('verbose', message);
+    this.saveToSupabase('verbose', message);
     console.info(message);
   }
 
   private async saveToSupabase(level: string, message: string) {
-    //   try {
-    //     await this.supabaseService.supabase.from('logs').insert([
-    //       {
-    //         level,
-    //         message,
-    //         timestamp: new Date().toISOString(),
-    //       },
-    //     ]);
-    //   } catch (error) {
-    //     console.error('Failed to save log to Supabase:', error);
-    //   }
+    try {
+      await this.supabaseService.supabase.from('logs').insert([
+        {
+          level,
+          message,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } catch (error) {
+      console.error('Failed to save log to Supabase:', error);
+    }
   }
 }
