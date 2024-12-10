@@ -1469,7 +1469,7 @@ export class TelegramService {
       const medias = getOffer(offerAirtable);
 
       const result = await this.bot.api.sendMediaGroup(
-        TELEGRAM_CHAT_ID,
+        TELEGRAM_CHAT_ID_OFFERS,
         medias,
       );
       const offerLink = getLinkForOffer(offerAirtable);
@@ -1535,9 +1535,13 @@ export class TelegramService {
 
       if (!messageId) return;
 
-      await this.bot.api.editMessageCaption(TELEGRAM_CHAT_ID, messageId, {
-        caption: text,
-      });
+      await this.bot.api.editMessageCaption(
+        TELEGRAM_CHAT_ID_OFFERS,
+        messageId,
+        {
+          caption: text,
+        },
+      );
     } catch (e) {
       this.logger.log('sendOfferToChat=' + e);
     }
