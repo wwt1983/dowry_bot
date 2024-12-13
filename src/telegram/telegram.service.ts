@@ -986,7 +986,9 @@ export class TelegramService {
           await this.updateToAirtable(ctx.session);
           await ctx.reply('Принято!✌️');
 
-          this.logger.log('extendedOfferType' + ctx.session.detailsOffer);
+          this.logger.log(
+            'extendedOfferType' + JSON.stringify(ctx.session.detailsOffer),
+          );
 
           if (
             ctx.session.detailsOffer?.extendedOfferType == true ||
@@ -2278,7 +2280,9 @@ export class TelegramService {
         });
       }
 
-      this.logger.log(`filterDistribution ${filterDistribution}`);
+      this.logger.log(
+        `filterDistribution ${JSON.stringify(filterDistribution)}`,
+      );
 
       if (filterDistribution) {
         const distribution = filterDistribution[0];
