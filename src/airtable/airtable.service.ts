@@ -658,6 +658,16 @@ export class AirtableService {
     return uniqChatIds;
   }
 
+  async getLostUsers() {
+    const data = await this.airtableHttpService.get(
+      TablesName.Bot,
+      `&${FILTER_BY_FORMULA}=AND({Время выкупа} < DATEADD(TODAY(), -1, 'month'), NOT({Время выкупа} = ''), NOT(OR({Статус}='Отмена пользователем', {Статус}='Отмена', {Статус}='Возврат', {Статус}='Финиш')))`,
+    );
+
+    if (!data || !data.records) return null;
+    return data.records as IBot[];
+  }
+
   async getBotByFilterArticulAndChatId(
     articul: string,
     chat_id: string,

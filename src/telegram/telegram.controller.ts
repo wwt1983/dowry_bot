@@ -272,7 +272,7 @@ export class TelegramController {
         data.time,
       );
     } catch (error) {
-      this.logger.error('alerts', formatError(error));
+      this.logger.error('alerts=', formatError(error));
     }
   }
 

@@ -123,6 +123,7 @@ import {
   addMinutesToInterval,
   getDifferenceInMinutes,
   formatMinutesToHoursAndMinutes,
+  formatSimple,
 } from 'src/common/date/date.methods';
 //import { parseTextFromPhoto } from 'src/common/parsing/image.parser';
 import { ChatMember, User } from '@grammyjs/types';
@@ -2601,6 +2602,27 @@ export class TelegramService {
 
     let offersMessage = '';
 
+    if (name === 'Потеряшки') {
+      const data = await this.airtableService.getLostUsers();
+      data.map(async (item) => {
+        try {
+          await this.bot.api.sendMessage(
+            process.env.NODE_ENV == 'development'
+              ? ADMIN_CHAT_ID
+              : item.fields.chat_id,
+            `‼️ Здравствуйте! Со дня оформления вашей раздачи ${item.fields.Раздача} прошло больше месяца (${formatSimple(item.fields['Время выкупа'])}). Для получения кэшбэка необходимо прислать все данные, иначе мы не сможем вам его выплатить. Напишите оператору для уточнения всех подробностей.`,
+          );
+          await sleep(1000);
+          this.logger.log(`Потеряшки ${JSON.stringify(item)}`);
+        } catch (error) {
+          this.logger.error(
+            `chat_id ${item} Ошибка при отправке сообщения Потеряшки:`,
+            formatError(error),
+          );
+        }
+      });
+      return;
+    }
     if (
       name === 'Новые раздачи для новых клиентов' ||
       name === 'Новые раздачи для постоянных клиентов' ||
