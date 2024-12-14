@@ -2285,7 +2285,7 @@ export class TelegramService {
         `filterDistribution ${JSON.stringify(filterDistribution)}`,
       );
 
-      if (filterDistribution) {
+      if (filterDistribution && filterDistribution.length === 1) {
         const distribution = filterDistribution[0];
         this.logger.log(
           `Дата выкупа =${distribution?.fields['Дата выкупа']} ${parsedDate(convertDateFromString(dateRecived))}`,
