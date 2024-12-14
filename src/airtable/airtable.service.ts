@@ -77,6 +77,7 @@ export class AirtableService {
         'Ключевое слово': session?.data?.keys || '',
         MessageId: session?.messageId || '',
         'Детали раздачи': formatOfferDetails(session.detailsOffer),
+        'История статусов': session.status,
       };
     }
 

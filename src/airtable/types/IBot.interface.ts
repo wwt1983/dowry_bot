@@ -49,6 +49,7 @@ export interface IBot {
     'Причина отказа': string;
     'Отказ на ПВЗ': boolean;
     'Короткое название': string[];
+    'История статусов': string;
   };
 }
 interface IPhoto {
