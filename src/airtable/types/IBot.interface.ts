@@ -50,6 +50,7 @@ export interface IBot {
     'Отказ на ПВЗ': boolean;
     'Короткое название': string[];
     'История статусов': string;
+    'Статус кеша': string;
   };
 }
 interface IPhoto {

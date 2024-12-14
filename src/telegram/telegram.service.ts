@@ -11,7 +11,6 @@ import {
 } from './telegram.interface';
 import {
   TELEGRAM_MODULE_OPTIONS,
-  createHelpText,
   COMMANDS_TELEGRAM,
   COMMAND_NAMES,
   FILE_FROM_BOT_URL,
@@ -204,7 +203,7 @@ export class TelegramService {
         reply_markup: userHistory.orderButtons,
       });
 
-      await ctx.reply('Пример раздачи ⤵️', {
+      await ctx.reply('Пример прохождения раздачи 🏃‍♂️‍➡️', {
         reply_markup: helpKeyboard,
       });
 
@@ -315,8 +314,9 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.help, async (ctx) => {
       ctx.session.lastCommand = COMMAND_NAMES.help;
 
-      const messageIds = await this.getInstruction(ctx);
-      ctx.session.instructionMessages = messageIds;
+      await ctx.reply('Пример прохождения раздачи 🏃‍♂️‍➡️', {
+        reply_markup: helpKeyboard,
+      });
 
       const response = await this.getKeyboardHistoryWithWeb(ctx.from.id);
       ctx.session.lastMessage = response.message_id;
@@ -330,11 +330,6 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.call, async (ctx) => {
       if (await this.checkOnBan(ctx.from.id)) return;
 
-      if (ctx?.session?.instructionMessages) {
-        await this.clearInstruction(ctx.session, ctx.from.id);
-        ctx.session.instructionMessages = null;
-      }
-
       ctx.session.lastCommand = COMMAND_NAMES.call;
       return await ctx.reply('Опишите вашу проблему 😕');
     });
@@ -342,11 +337,6 @@ export class TelegramService {
     /*======== HISTORY =======*/
     this.bot.command(COMMAND_NAMES.history, async (ctx) => {
       try {
-        if (ctx?.session?.instructionMessages) {
-          await this.clearInstruction(ctx.session, ctx.from.id);
-          ctx.session.instructionMessages = null;
-        }
-
         ctx.session.lastCommand = COMMAND_NAMES.history;
 
         const { id } = ctx.from;
@@ -394,11 +384,6 @@ export class TelegramService {
     this.bot.command(COMMAND_NAMES.offers, async (ctx) => {
       try {
         if (await this.checkOnBan(ctx.from.id)) return;
-
-        if (ctx?.session?.instructionMessages) {
-          await this.clearInstruction(ctx.session, ctx.from.id);
-          ctx.session.instructionMessages = null;
-        }
 
         ctx.session.lastCommand = COMMAND_NAMES.offers;
 
@@ -625,11 +610,6 @@ export class TelegramService {
 
     /*======== дата доставки (когда нажали пропустить) =======*/
     this.bot.callbackQuery('no_delivery_date', async (ctx) => {
-      if (ctx?.session?.instructionMessages) {
-        await this.clearInstruction(ctx.session, ctx.from.id);
-        ctx.session.instructionMessages = null;
-      }
-
       if (!ctx.session?.chat_id) {
         const dataBuyer = await this.airtableService.getBotForContinue(
           ctx.from.id.toString(),
@@ -670,9 +650,6 @@ export class TelegramService {
 
     /*======== HELP =======*/
     this.bot.callbackQuery('help', async (ctx) => {
-      for (const value of createHelpText()) {
-        await this.bot.api.sendMediaGroup(ctx.from.id, [value]);
-      }
       const response = await this.getKeyboardHistoryWithWeb(ctx.from.id);
       ctx.session.lastMessage = response.message_id;
     });
@@ -1938,25 +1915,6 @@ export class TelegramService {
     }
   }
 
-  async getInstruction(ctx: MyContext) {
-    const ids: number[] = [];
-    try {
-      for (const value of createHelpText()) {
-        const response = await this.bot.api.sendMediaGroup(ctx.from.id, [
-          value,
-        ]);
-        if (Array.isArray(response)) {
-          ids.push(
-            ...response.map((x) => x.message_id).filter((x) => x !== undefined),
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.error('Error sending media group:', formatError(error));
-      // Обработка ошибки (например, можно вернуть пустой массив или выбросить ошибку)
-    }
-    return ids;
-  }
   //full - берем данные из таблицы Раздачи и Бот
   async getUserHistory(from: User, web?: boolean) {
     const { id } = from;
@@ -2436,22 +2394,6 @@ export class TelegramService {
     );
   }
 
-  async clearInstruction(session: ISessionData, chat_id: number) {
-    try {
-      if (session.instructionMessages.length > 0) {
-        const deletePromises = session.instructionMessages.map((messageId) =>
-          this.bot.api.deleteMessage(chat_id, messageId).catch((error) => {
-            this.logger.error(`Failed to delete message ${messageId}:`, error);
-          }),
-        );
-
-        await Promise.all(deletePromises);
-      }
-      return true;
-    } catch (error) {
-      this.logger.error('clearInstruction', formatError(error));
-    }
-  }
   /**
    * Проверяем можем ли мы двигаться дальше (проверяем статус из базы на время истекло или отмену, если статуст до Заказа)
    */

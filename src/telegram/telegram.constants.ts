@@ -54,7 +54,7 @@ export enum COMMAND_NAMES {
 export const COMMANDS_TELEGRAM = [
   { command: COMMAND_NAMES.start, description: 'Запуск бота' },
   { command: COMMAND_NAMES.offers, description: 'Раздачи' },
-  { command: COMMAND_NAMES.help, description: 'Помощь' },
+  { command: COMMAND_NAMES.help, description: 'Инструкция' },
   { command: COMMAND_NAMES.history, description: 'История заказов' },
   { command: COMMAND_NAMES.call, description: 'Написать оператору' },
   { command: COMMAND_NAMES.question, description: 'Вопрос-ответ' },
@@ -465,18 +465,6 @@ export const IMAGES_STEP_FOR_HELP = [
     text: FOOTER_DAY + FOOTER,
   },
 ];
-
-export const createHelpText = () => {
-  const medias = [];
-  for (let i = 0; i < IMAGES_STEP_FOR_HELP.length; i++) {
-    medias.push({
-      type: 'photo',
-      media: IMAGES_STEP_FOR_HELP[i].url,
-      caption: IMAGES_STEP_FOR_HELP[i].text,
-    });
-  }
-  return medias;
-};
 
 export const CASH_STOP_WORDS = [
   'кешбэк',

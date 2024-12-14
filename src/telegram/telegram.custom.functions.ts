@@ -874,7 +874,7 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
     if (record.fields.Финиш) {
-      return (data += `✔️ ${removeEmojis(record.fields.Раздача)}\n`);
+      return (data += `✔️ ${removeEmojis(record.fields.Раздача)} (кешбэк💰: ${record.fields['Статус кеша'].toLowerCase()})\n`);
     }
     return data;
   }, '');
@@ -1044,7 +1044,8 @@ export const getTimeoutArticles = (data: IBot[]) => {
       .filter((x) => IGNORED_STATUSES.includes(x.fields.Статус))
       ?.map((x) => '👉 ' + x.fields.Раздача)
       ?.join('\n');
-    if (result) return '👵🏻Ваши устаревшие раздачи\n' + result;
+    if (result && result != undefined)
+      return '👵🏻Ваши устаревшие раздачи\n' + result;
     return result;
   } catch (error) {
     return null;

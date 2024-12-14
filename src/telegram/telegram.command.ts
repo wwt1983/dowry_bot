@@ -14,7 +14,7 @@ import { removeEmojis } from './telegram.custom.functions';
 export const webKeyboard = {
   text: START_NAME,
   web_app: {
-    url: process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
+    url: WEB_APP,
   },
 };
 
@@ -37,10 +37,9 @@ export const articulKeyboard = new InlineKeyboard().text(
   'check_articul',
 );
 
-export const helpKeyboard = new InlineKeyboard().text(
-  STEP_COMMANDS.help,
-  'help',
-);
+export const helpKeyboard = new InlineKeyboard()
+  .row()
+  .webApp(STEP_COMMANDS.help, WEB_APP + '/help');
 
 export const deliveryDateKeyboard = new InlineKeyboard().text(
   STEP_COMMANDS.no_delivery_date,
@@ -145,14 +144,7 @@ export const createHistoryKeyboard = (
 
   const keyboard = new InlineKeyboard().row();
   if (web) {
-    keyboard
-      .add(
-        InlineKeyboard.webApp(
-          START_NAME,
-          process.env.NODE_ENV === 'development' ? WEB_APP_TEST : WEB_APP,
-        ),
-      )
-      .row();
+    keyboard.add(InlineKeyboard.webApp(START_NAME, WEB_APP)).row();
   }
   if (ordersLabel && ordersLabel.length > 0) {
     ordersLabel.forEach(([label, data]) =>
