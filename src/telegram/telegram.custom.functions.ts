@@ -868,7 +868,8 @@ export const getUserOffersReady = (dataBuyer: IBot[]) => {
   if (!dataBuyer) return null;
   return dataBuyer.reduce(function (data, record) {
     if (record.fields.Финиш) {
-      return (data += `✔️ ${removeEmojis(record.fields.Раздача)} (кешбэк💰: ${record.fields['Статус кеша'].toLowerCase()})\n`);
+      return (data += `✔️ ${removeEmojis(record.fields.Раздача)} 
+      (кешбэк💰: ${record.fields['Статус кеша'].toLowerCase()})\n`);
     }
     return data;
   }, '');

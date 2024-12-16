@@ -38,6 +38,9 @@ export const ADMIN_CHAT_ID = 193250152;
 export const ERROR_DATE_MESSAGE = 'Дата должна быть в формате 12.11.2024';
 export const MESSAGE_ANSWER_FOR_ASK =
   'Ваше сообщение отправлено! Мы уже готовим вам ответ 🧑‍💻';
+export const POLL =
+  'https://airtable.com/appVMEtut0NWayq26/pagzETSWeImAbtKev/form?prefill_Id=';
+
 export enum COMMAND_NAMES {
   start = 'start',
   help = 'help',

@@ -3,6 +3,7 @@ import {
   COUNT_TRY_ERROR,
   IGNORED_STATUSES,
   OFERTA_URL,
+  POLL,
   START_NAME,
   STEP_COMMANDS,
   WEB_APP,
@@ -159,6 +160,22 @@ export const createHistoryKeyboard = (
     );
   }
   return (ordersLabel && ordersLabel.length > 0) || web ? keyboard : null;
+};
+
+/**
+ * кнопки для голосования
+ */
+export const createPollKeyboard = (data: IBot[]) => {
+  if (data && data.length > 0) {
+    const keyboard = new InlineKeyboard().row();
+    data.forEach((x) => {
+      keyboard
+        .add(InlineKeyboard.webApp(x.fields.Раздача, POLL + x.fields.SessionId))
+        .row();
+    });
+    return keyboard;
+  }
+  return null;
 };
 
 export const ofertaButton = (chat_id: number, name: string) => {

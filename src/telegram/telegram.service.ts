@@ -105,6 +105,7 @@ import {
   operatorKeyboard,
   helpKeyboard,
   ofertaButton,
+  createPollKeyboard,
 } from './telegram.command';
 import { BotStatus } from 'src/airtable/types/IBot.interface';
 import { NotificationStatisticStatuses } from 'src/airtable/types/INotificationStatistic.interface';
@@ -365,13 +366,19 @@ export class TelegramService {
         );
 
         if (userInfo.canStopArticles) {
-          return await ctx.reply('Можно отменить👇', {
+          await ctx.reply('Можно отменить👇', {
             reply_markup: userInfo.canStopArticles,
           });
         }
         if (userInfo.returnArticles) {
-          return await ctx.reply('Если вы вернули товар сообщите нам 👇', {
+          await ctx.reply('Если вы вернули товар сообщите нам 👇', {
             reply_markup: userInfo.returnArticles,
+          });
+        }
+
+        if (userInfo.pollArticles) {
+          await ctx.reply('Оцените, пожалуйста, ваши покупки 👇', {
+            reply_markup: userInfo.pollArticles,
           });
         }
       } catch (e) {
@@ -1926,7 +1933,9 @@ export class TelegramService {
     const orderButtons = createHistoryKeyboard(dataBuyer, web);
     const stopButtons = createHistoryKeyboard(dataBuyer, web, true);
     const returnButtons = createHistoryKeyboard(dataBuyer, web, false, true);
-
+    const pollArticles = createPollKeyboard(
+      dataBuyer.filter((x) => x.fields.Финиш && x.fields.Раздача !== undefined),
+    );
     // let member: ChatMember;
     try {
       //member = await this.bot.api.getChatMember(TELEGRAM_CHAT_ID_OFFERS, id);
@@ -1948,6 +1957,7 @@ export class TelegramService {
         timeoutArticles: getTimeoutArticles(dataBuyer),
         canStopArticles: stopButtons,
         returnArticles: returnButtons,
+        pollArticles: pollArticles,
       };
     }
 
@@ -1971,6 +1981,7 @@ export class TelegramService {
       timeoutArticles: getTimeoutArticles(dataBuyer),
       canStopArticles: stopButtons,
       returnArticles: returnButtons,
+      pollArticles: pollArticles,
     };
   }
 
