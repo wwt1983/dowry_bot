@@ -1041,11 +1041,15 @@ export const getTimeoutArticles = (data: IBot[]) => {
   try {
     if (!data || !data?.length) return null;
     const result = data
-      .filter((x) => IGNORED_STATUSES.includes(x.fields.Статус))
+      .filter(
+        (x) =>
+          IGNORED_STATUSES.includes(x.fields.Статус) &&
+          x.fields.Раздача !== undefined,
+      )
       ?.map((x) => '👉 ' + x.fields.Раздача)
       ?.join('\n');
-    if (result && result != undefined)
-      return '👵🏻Ваши устаревшие раздачи\n' + result;
+
+    if (result) return '👵🏻Ваши устаревшие раздачи\n' + result;
     return result;
   } catch (error) {
     return null;
