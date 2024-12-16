@@ -7,13 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   FIRST_STEP_A,
-  //FIRST_STEP_B,
   FIRST_STEP_C,
   SECOND_STEP,
-  //THREE_STEP,
-  //FOUR_STEP,
-  //FOUR_STEP_A,
-  //FOUR_STEP_B,
   FOOTER,
   FIRST_STEP_LINK,
   STEPS,
@@ -24,7 +19,6 @@ import {
   FIVE_STEP,
   SIX_STEP,
   LIMIT_TIME_IN_MINUTES_FOR_BUY,
-  //STEP_ERROR_TEXT,
   WEB_APP,
   STEP_EXAMPLE_TEXT_DOWN,
   STEP_EXAMPLE_TEXT_UP,
