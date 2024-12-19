@@ -662,8 +662,10 @@ export class AirtableService {
   async getLostUsers() {
     const data = await this.airtableHttpService.get(
       TablesName.Bot,
-      `&${FILTER_BY_FORMULA}=AND({Время выкупа} < DATEADD(TODAY(), -1, 'month'), NOT({Время выкупа} = ''), NOT(OR({Статус}='Отмена пользователем', {Статус}='Отмена', {Статус}='Возврат', {Статус}='Финиш')))`,
+      `&${FILTER_BY_FORMULA}=AND({Время выкупа} < DATEADD(TODAY(), 10, 'days'),{Время выкупа} > DATEADD(TODAY(), -40, 'days'), NOT({Статус кеша}= 'Выплачен', {Время выкупа} = ''), NOT(OR({Статус}='Отмена пользователем', {Статус}='Отмена', {Статус}='Возврат', {Статус}='Время истекло', {Статус}='Финиш')))`,
     );
+
+    console.log(data?.records);
 
     if (!data || !data.records) return null;
     return data.records as IBot[];
