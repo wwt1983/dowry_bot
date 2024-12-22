@@ -524,7 +524,7 @@ function getNumberText(statusName: BotStatus, startTime: string, name: string) {
 
 export function getOffer(data: IOffer) {
   const defaultLink =
-    '✅ Для заказа присылайте скрин или ссылку на это объявление в @Dowry_wb !\n';
+    '✅ Для заказа присылайте скрин или ссылку на это объявление !\n';
   const offer =
     `🔥${data.fields['Name']}🔥` +
     '\n' +

@@ -1,7 +1,7 @@
 import { ISteps } from './telegram.interface';
 //https://api.airtable.com/v0/meta/enterpriseAccounts/usrkZH2gnYRYReD06/auditLogs
 export const TELEGRM_NOT_WORK =
-  'Здравствуйте, сейчас в боте проводятся обновления.👷‍♂️ Скоро заработаем 😉 По всем вопросам пишите оператору или в @dowry_wb';
+  'Здравствуйте, сейчас в боте проводятся обновления.👷‍♂️ Скоро заработаем 😉 По всем вопросам пишите оператору';
 
 export const TELEGRAM_MODULE_OPTIONS = Symbol('TELEGRAM_MODULE_OPTIONS');
 export const TELEGRAM_BOT_ID = '6486222045';
@@ -399,7 +399,7 @@ export const STEPS_FOR_UNUSUAL_USER = {
   Отзыв: {
     step: 0,
     value: 'Отзыв',
-    erroText: '👩‍💻 Напишите отзыв и отправьте его для согласования на @Dowry_wb',
+    erroText: '👩‍💻 Напишите отзыв и отправьте его для согласования',
     isActive: true,
     typeStep: TYPE_STEP.text,
     stop: false,
